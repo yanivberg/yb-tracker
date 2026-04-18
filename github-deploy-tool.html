@@ -47,8 +47,14 @@ a { color: #1565c0; }
   </div>
 
   <div class="row">
-    <label>Paste new index.html content</label>
-    <textarea id="content" placeholder="Paste the full HTML file content here…" oninput="detectVersion()"></textarea>
+    <label>Upload or paste index.html</label>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <label for="fileInput" style="flex:1;padding:11px;background:#f5f5f5;border:1.5px dashed #ccc;border-radius:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:700;color:#555;text-transform:none;letter-spacing:0;">
+        📁 Choose file
+      </label>
+      <input type="file" id="fileInput" accept=".html" style="display:none;" onchange="loadFile(this)">
+    </div>
+    <textarea id="content" placeholder="…or paste the full HTML content here" oninput="detectVersion()"></textarea>
     <div class="detected-version" id="detectedVersion"></div>
   </div>
 
@@ -63,6 +69,20 @@ a { color: #1565c0; }
 </div>
 
 <script>
+// ── Load file ─────────────────────────────────────────
+function loadFile(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('content').value = e.target.result;
+    detectVersion();
+    // Update label to show filename
+    document.querySelector('label[for="fileInput"]').textContent = '✅ ' + file.name;
+  };
+  reader.readAsText(file);
+}
+
 // ── Load saved token ──────────────────────────────────
 var tokenInput = document.getElementById('token');
 var saved = localStorage.getItem('yb_gh_token');
