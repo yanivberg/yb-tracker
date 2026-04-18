@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YB Deploy Tool</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, Heebo, sans-serif; background: #f0f0f0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.card { background: #fff; border-radius: 16px; padding: 28px 24px; width: 100%; max-width: 480px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+.logo { font-size: 22px; font-weight: 900; color: #1a1a2e; margin-bottom: 4px; }
+.sub { font-size: 12px; color: #aaa; margin-bottom: 24px; }
+label { font-size: 12px; font-weight: 700; color: #555; letter-spacing: 0.05em; text-transform: uppercase; display: block; margin-bottom: 6px; }
+input, textarea { width: 100%; border: 1.5px solid #e0e0e0; border-radius: 10px; padding: 11px 14px; font-size: 14px; font-family: inherit; outline: none; transition: border 0.2s; }
+input:focus, textarea:focus { border-color: #1a1a2e; }
+textarea { height: 160px; resize: vertical; font-size: 12px; font-family: monospace; }
+.row { margin-bottom: 18px; }
+.token-wrap { position: relative; }
+.token-wrap input { padding-right: 70px; }
+.show-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 700; color: #888; cursor: pointer; background: none; border: none; }
+.deploy-btn { width: 100%; padding: 15px; background: #1a1a2e; color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+.deploy-btn:hover { background: #0f3460; }
+.deploy-btn:disabled { background: #aaa; cursor: not-allowed; }
+.status { margin-top: 16px; padding: 12px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; display: none; }
+.status.success { background: #e8f5e9; color: #2e7d32; display: block; }
+.status.error   { background: #ffebee; color: #c62828; display: block; }
+.status.loading { background: #e3f2fd; color: #1565c0; display: block; }
+.version-tag { display: inline-block; background: #f0f0f0; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; color: #888; margin-left: 8px; }
+.hint { font-size: 11px; color: #bbb; margin-top: 5px; }
+a { color: #1565c0; }
+.divider { border: none; border-top: 1px solid #f0f0f0; margin: 20px 0; }
+.detected-version { font-size: 12px; color: #2e7d32; font-weight: 700; margin-top: 5px; display: none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🚀 YB Deploy Tool</div>
+  <div class="sub">yanivberg / yb-tracker → index.html</div>
+
+  <div class="row">
+    <label>GitHub Token</label>
+    <div class="token-wrap">
+      <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+      <button class="show-btn" onclick="toggleToken()">show</button>
+    </div>
+    <div class="hint">Saved in your browser — paste once, never again. <a href="https://github.com/settings/tokens/new?scopes=repo&description=YB+Deploy" target="_blank">Get token ↗</a></div>
+  </div>
+
+  <div class="row">
+    <label>Paste new index.html content</label>
+    <textarea id="content" placeholder="Paste the full HTML file content here…" oninput="detectVersion()"></textarea>
+    <div class="detected-version" id="detectedVersion"></div>
+  </div>
+
+  <button class="deploy-btn" id="deployBtn" onclick="deploy()">⬆ Deploy to GitHub</button>
+
+  <div class="status" id="status"></div>
+
+  <hr class="divider">
+  <div style="font-size:11px;color:#bbb;text-align:center;">
+    Deploys to <strong>yanivberg.github.io/yb-tracker</strong> · Live in ~60s
+  </div>
+</div>
+
+<script>
+// ── Load saved token ──────────────────────────────────
+var tokenInput = document.getElementById('token');
+var saved = localStorage.getItem('yb_gh_token');
+if (saved) tokenInput.value = saved;
+
+function toggleToken() {
+  var btn = document.querySelector('.show-btn');
+  if (tokenInput.type === 'password') {
+    tokenInput.type = 'text'; btn.textContent = 'hide';
+  } else {
+    tokenInput.type = 'password'; btn.textContent = 'show';
+  }
+}
+
+// ── Detect version from pasted content ───────────────
+function detectVersion() {
+  var content = document.getElementById('content').value;
+  var el = document.getElementById('detectedVersion');
+  var match = content.match(/v(\d+)/);
+  if (match) {
+    el.textContent = '✓ Detected: v' + match[1];
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+// ── Deploy ────────────────────────────────────────────
+async function deploy() {
+  var token   = tokenInput.value.trim();
+  var content = document.getElementById('content').value;
+  var btn     = document.getElementById('deployBtn');
+  var status  = document.getElementById('status');
+
+  if (!token)   { showStatus('error', '⚠️ Paste your GitHub token first'); return; }
+  if (!content) { showStatus('error', '⚠️ Paste the file content first'); return; }
+
+  // Save token
+  localStorage.setItem('yb_gh_token', token);
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Deploying…';
+  showStatus('loading', '🔄 Connecting to GitHub…');
+
+  var owner = 'Yanivberg';
+  var repo  = 'yb-tracker';
+  var path  = 'index.html';
+  var api   = 'https://api.github.com/repos/' + owner + '/' + repo + '/contents/' + path;
+
+  try {
+    // Step 1: Get current file SHA
+    showStatus('loading', '🔄 Getting current file info…');
+    var getRes = await fetch(api, {
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Accept': 'application/vnd.github+json'
+      }
+    });
+
+    if (!getRes.ok) {
+      var err = await getRes.json();
+      throw new Error(err.message || 'Failed to get file SHA');
+    }
+
+    var fileData = await getRes.json();
+    var sha = fileData.sha;
+
+    // Step 2: Detect version for commit message
+    var vMatch = content.match(/v(\d+)/);
+    var vLabel = vMatch ? 'v' + vMatch[1] : 'update';
+
+    // Step 3: Push new content
+    showStatus('loading', '🔄 Uploading ' + vLabel + '…');
+    var encoded = btoa(unescape(encodeURIComponent(content)));
+
+    var putRes = await fetch(api, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Deploy ' + vLabel + ' — ' + new Date().toLocaleString('he-IL'),
+        content: encoded,
+        sha: sha
+      })
+    });
+
+    if (!putRes.ok) {
+      var putErr = await putRes.json();
+      throw new Error(putErr.message || 'Upload failed');
+    }
+
+    btn.disabled = false;
+    btn.textContent = '⬆ Deploy to GitHub';
+    showStatus('success', '✅ ' + vLabel + ' deployed! Live at yanivberg.github.io/yb-tracker in ~60s');
+    document.getElementById('content').value = '';
+    document.getElementById('detectedVersion').style.display = 'none';
+
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = '⬆ Deploy to GitHub';
+    showStatus('error', '❌ ' + err.message);
+  }
+}
+
+function showStatus(type, msg) {
+  var el = document.getElementById('status');
+  el.className = 'status ' + type;
+  el.textContent = msg;
+}
+</script>
+</body>
+</html>
