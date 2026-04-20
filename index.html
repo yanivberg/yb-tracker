@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v279</title>
+<title>י.ב אחזקות — v280</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -439,7 +439,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       <div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:0.5px;">י.ב אחזקות</div>
       <div style="text-align:right;">
         <div style="font-size:12px;font-weight:700;color:#fff;letter-spacing:1px;" id="clock">--:--:--</div>
-        <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.05em;margin-top:2px;">v279</div>
+        <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.05em;margin-top:2px;">v280</div>
       </div>
     </div>
   </div>
@@ -476,557 +476,253 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v279
-Deployed: 15/4/2026
-URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxLc71...exec (v38)
-Gmail PO: gmail-po-import-v2.gs
-Recovery save: 15/4/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">═════════════════════════════════
+י.ב אחזקות — Time Tracker
+═════════════════════════════════
+A field maintenance business time tracking PWA built for hands-free use. Designed for a single operator working across multiple clients and job sites, using AirPods + Siri for voice control. Tracks work sessions per project, accumulates hours, syncs to Google Sheets in real time, detects driving automatically, logs location changes, and generates a daily timeline summary.
 
 ─────────────────
-CHANGELOG
+DEPLOYMENT
 ─────────────────
-v279 · 15/4/2026
-• New: Offline Queue — self-contained script, safe to remove
-• Online: live sync works exactly as before
-• Offline: failed sheet calls queued in localStorage
-  Red banner: "📡 Offline — changes will sync when connected"
-• Reconnect: queue retries automatically every 30 seconds
-  Orange banner: "🔄 Syncing N pending updates…"
-  Banner disappears when all synced
-• App restart: leftover queue retries after 3 seconds
-• Safety: item dropped after 20 failed attempts (~10 min)
+Version:      v280
+Deployed:     17/4/2026
+App URL:      https://yanivberg.github.io/yb-tracker
+Deploy Tool:  https://yanivberg.github.io/yb-tracker/github-deploy-tool.html
+Apps Script:  AKfycbwFDXsVqdrbv6I2r6PA6R63OmccZeIPNcz3tL2smgRCXHpeKBsnVfbmK9TiAMx29TrGYA (v45)
+Gmail PO:     gmail-po-import-v2.gs
+Spreadsheet:  1Wn2-Yzx08H2NKmJLsMs2xrYIBPLzJJqvRo-Su8jWlgA
+GCP Project:  99200476359
 
-v246 · 15/4/2026
-• Loading: Add/Browse button icon swaps to spinner during network call
-• Loading: small spinning ring in bottom-right corner
-• All toasts display for exactly 3 seconds
+─────────────────
+CHANGELOG (recent)
+─────────────────
+v280 · 17/4/2026
+• Version badge visible on app header (top right)
+• GitHub Pages deployment — yanivberg.github.io/yb-tracker
+• Offline queue discards stale items from old deployments
 
-v245 · 15/4/2026
-• Loading indicator: small spinning ring in bottom-right corner (option 3)
+v278 · 17/4/2026
+• Location change tracking via Haversine distance formula
+• Moved >200m → overwrites מיקום נוכחי sheet tab
+• Note overlay header updates live when location changes
 
-v244 · 15/4/2026
-• New: global loading indicator on every network call
-• Patches window.fetch — automatically shows/hides for ALL requests
+v277 · 17/4/2026
+• 💰 רווח גולמי להוציא חש — total + per-client breakdown, copyable
 
-v243 · 15/4/2026
-• Recovery save — full working version
-• PO Import: writes to correct empty row (desc+dateStart+PO all blank)
-• PO Import: REST API via Sheets v4 bypasses Apps Script cache
-• PO Import: in-memory dedup prevents duplicate rows from multiple emails
-• PO Import: duplicate PO detection uses REST API for fresh data
+v276 · 17/4/2026
+• 📝 הערת יום — global day note saved to יומן sheet (date/time/note/location)
+• Siri trigger: ?quicknote=1 URL param
+• 📋 הערות יום קודמות — view past notes overlay
 
-v242 · 14/4/2026
-• Updated Apps Script URL — new deployment with Sheets API + script.external_request scope
-• PO Import now uses Sheets REST API for fresh data — finds correct empty row
+v274 · 17/4/2026
+• Timeline summary screen replaces old summary
+• Vertical blocks per session, overlapping sessions side by side
 
-v241 · 14/4/2026
-• Fix: Setup Time now survives page refresh
-• yb_arrangementStart saved to localStorage — restored on reload instead of resetting to Date.now()
+v271 · 17/4/2026
+• 🚗 Driving tracker — auto-starts at 15 km/h, stops at 9 km/h
+• Manual ⏸/▶ override, shown in day screen + summary + WhatsApp copy
 
-v240 · 14/4/2026
-• Critical fix: CLIENT_COLORS and _clientColorMap moved before init() IIFE
-• Was causing TypeError on refresh — _clientColorMap was undefined when renderProjectBtns ran
+v265 · 16/4/2026
+• PO Import: per line item choice — New Row / Attach to Existing
+• Radio buttons per card, pending quote jobs in picker
 
-v239 · 14/4/2026
-• Critical fix: localStorage.clear() wiped all state on refresh
-• Now filters invalid projects individually, patches missing fields
-
-v238 · 14/4/2026
-• Fix: corrected Netlify URL to sage-babka-62ba74.netlify.app
-
-v237 · 14/4/2026
-• Updated Apps Script URL to v37
-
-v236 · 14/4/2026
-• Fix: addJob empty row rule: desc blank + startDate blank + PO blank
-• Apps Script uses openById(SPREADSHEET_ID) — no more stale cache
-
-v235 · 13/4/2026
-• Audit fixes: duplicate findColumns, cols.poNumber→cols.po, locationSaved reset, hardReset interval
-
-v234 · 13/4/2026
-• New: 📧 Import PO Emails button in drawer
-• PO Import popup with copy-to-clipboard
-
-v233 · 13/4/2026
-• Updated Apps Script URL to v35
-
-v232 · 13/4/2026
-• Fix: addJob sends &desc= (was &de=), &client= (was &cl=)
-
-v231 · 13/4/2026
-• Fix: addJob empty row rule: desc blank only (status no longer required)
-
-v230 · 13/4/2026
-• Delete note: also removes from sheet (deleteNote action)
-• Active project: full gradient; paused: grey+18% fade
-• Location: saved to sheet on first tap only, no notes added
-
-v229 · 13/4/2026
-• Fix: all shortcuts:// calls removed from automatic flows
-• silentSaveProjectsShortcut() now only writes to localStorage
+v262 · 16/4/2026
+• scanPOEmails + attachPOToJob actions
+• PO attach writes PO number + price to existing project row
 
 ─────────────────
 FEATURES
 ─────────────────
 SCREEN 1 — SETUP
-• Pick from open tasks, pending quote, completed projects
-• Add project to sheet (fills first empty row: no desc+date+PO)
-• Create new client from GOLMAT template
-• 📧 Import PO Emails from Gmail
+• Pick from open tasks, pending quote, or completed projects
+• Add new project to sheet (fills first empty row: no desc+date+PO)
+• Create new client from GOLMAT sheet template
+• 📧 Import PO Emails — per line item: New Row or Attach to Existing
+• 💰 רווח גולמי להוציא חש — sum of gross profit for להוציא חש status
+• 📝 הערת יום — global day note with timestamp + location → יומן sheet
+• 📋 הערות יום קודמות — browse all past notes
 
 SCREEN 2 — DAY
-• Tap project to start/pause — multiple simultaneous
-• Active = full color, paused = grey/faded
-• Notes with timestamp, synced to sheet
+• Tap project card to start/pause — multiple simultaneous projects
+• Active = full client color, paused = grey/faded
+• Notes with timestamp, synced to sheet in real time
 • Delete note removes from sheet too
-• Location saved to sheet on first tap only
-• Setup time survives refresh
+• Location saved to sheet on first project tap
+• Setup Time counter — runs when no project active, survives refresh
+• 🚗 Driving tracker — auto-detect speed via GPS + manual override
+• Driving time shown alongside Setup Time
 
-SCREEN 3 — SUMMARY
-• Total time + per-project breakdown
-• Copy work summary to clipboard
+SCREEN 3 — SUMMARY (Timeline)
+• Vertical timeline top-to-bottom, one block per session
+• Block content: client name (top), time range, project name
+• Overlapping sessions → side by side (50/50 width)
+• 🚗 Driving as diagonal stripe block with location
+• ⏳ Setup as dashed block
+• Total day time at bottom
+• Save + Copy Work Log buttons
 
 SHEET SYNC
-• Hours cumulative — never overwritten
-• Status updates: In Progress → Done
-• Invoice status set on Done
-• Notes synced bidirectionally
+• Hours: cumulative — Math.max(new, existing), never overwritten
+• Status: auto-set to In Progress on first tap, Done on complete
+• Notes: synced bidirectionally (add + delete)
+• מיקום נוכחי tab: auto-updated when moved >200m (row 2 overwrite)
+• יומן tab: day notes — date / time / note / location columns
 
 PO IMPORT (Gmail)
-• Reads Gmail for הדפסת הזמנת רכש emails
-• Parses PDF attachments via Drive API
-• Writes to first empty row (desc+date+PO blank)
-• Deduplication: in-memory + sheet check via REST API
-• Labels processed emails with PO_Processed
-
-• Updated Apps Script URL — new deployment with Sheets API + script.external_request scope
-• PO Import now uses Sheets REST API for fresh data — finds correct empty row
-
-v241 · 14/4/2026
-• Fix: Setup Time now survives page refresh
-• yb_arrangementStart saved to localStorage — restored on reload instead of resetting to Date.now()
-
-v240 · 14/4/2026
-• Critical fix: CLIENT_COLORS and _clientColorMap moved before init() IIFE
-• Was causing TypeError on refresh — _clientColorMap was undefined when renderProjectBtns ran
-
-v239 · 14/4/2026
-• Critical fix: localStorage.clear() on invalid projects wiped dayStart + entire state on refresh
-• Now filters invalid projects individually instead of nuking localStorage
-• Auto-patches missing totalMs/active/notes fields instead of rejecting the project
-
-v238 · 14/4/2026
-• Fix: corrected Netlify URL to cheerful-moxie-b8bc43.netlify.app
-
-v237 · 14/4/2026
-• Updated Apps Script URL to v37
-
-v236 · 14/4/2026
-• Updated Apps Script URL to v35
-
-v235 · 13/4/2026
-• Fix: newDay() now resets locationSaved + jobStarted on all projects
-• Fix: cross-midnight new-day detection also resets locationSaved + jobStarted
-• Fix: hardReset() now clears mainInterval — prevents NaN:NaN:NaN during active day
-• Fix (Apps Script gmail-po-import.js): removed duplicate findColumns — was conflicting with v35
-• Fix (Apps Script gmail-po-import.js): cols.poNumber → cols.po — duplicate PO detection and PO# writing now work
-
-v234 · 13/4/2026
-• New: 📧 Import PO Emails button in drawer menu
-• New: PO Import popup — shows all rows added, grouped by client
-• New: Copy to clipboard button in PO Import popup
-• Apps Script v35 required — adds runPOImport action + Gmail PO file
-
-v233 · 13/4/2026
-• Updated Apps Script URL to v34
-
-v232 · 13/4/2026
-• Fix: addJob sends &desc= instead of &de= for description field
-• Apps Script fix needed: empty row = first row where status is empty (not requiring desc empty too)
-
-v231 · 13/4/2026
-• Fix: addJob sends &client= instead of &cl= — matches Apps Script v33 parameter name
-• Root cause: all other actions use &client= but addJob used &cl= causing undefined sheet name
-
-v230 · 13/4/2026
-• Delete note: also removes note line from sheet (new Apps Script action: deleteNote)
-• Active project card: full color gradient header + strong background
-• Paused project card: grey header + 18% background (faded)
-• Location: saved to sheet column only on first activation of each project per day
-• Location: no longer adds note to app or sheet on GPS movement
-
-v229 · 13/4/2026
-• Fix: silentSaveProjectsShortcut() now only writes to localStorage — zero shortcuts:// calls
-• Removed: 🎤 Save List to Siri button from day screen
-• App never auto-triggers Shortcuts — no more tab switching, fog, or broken state
-• Siri reads project list via ?getlist=1 on demand
-
-v228 · 13/4/2026
-• Fix: startDay(), toggleDone(), addProjectDuringDay() now use silentSaveProjectsShortcut()
-• Only the 🎤 Save List to Siri button uses callSaveProjectsShortcut() (redirect)
-• Prevents app from leaving page automatically, no new tab, no broken state
-
-v227 · 13/4/2026 02:15
-• Restored from v214 (last working version)
-• Updated Apps Script URL to v33 (GCP linked, no Gmail scopes)
-
-v214 · 12/4/2026 10:29
-• Fix: ☰ icon color on Add/Browse buttons — no longer blue
-
-v214 · 12/4/2026 15:00
-• Open Tasks: 2px solid black dividers between rows and client headers
-• Open Tasks: all text black (rows, sub-text, client header label)
-
-v213 · 12/4/2026 00:08
-• Day screen: 2px solid black dividers between all elements
-
-v212 · 11/4/2026 23:48
-• Open Tasks picker: all text black (rows + sub-text + header label)
-• Day screen: 3 add buttons replaced with single centered square dashed button
-• Square button opens ☰ drawer (same as main page)
-
-v211 · 11/4/2026 23:34
-• Today's Projects: gradient client header + 50% tint + dark text, color by client
-• Day screen: gradient header per card + 50% tint + dark text, color by client
-• Summary screen: gradient header per row + dark text, color by client
-• All screens now use clientColor() — consistent color per client everywhere
-
-v210 · 11/4/2026 23:16
-• All 4 pickers: gradient client header + 50% opacity tint rows + white text
-• clientColor() helper assigns consistent color per client across all pickers
-• Open Tasks, Pending Quote, Completed, Invoices all updated
-
-v209 · 11/4/2026 22:44
-• Layout: TODAY'S PROJECTS left-aligned
-• Layout: Location on same line as day name (left) — day name right
-• Layout: Add/Browse Projects as centered square dashed button
-• Location removed from header — now in day/location strip below header
-
-v208 · 11/4/2026 22:34
-• Fix: Start Work Day button now visible above Safari browser bar
-• Uses 100dvh (dynamic viewport) + safe-area-inset-bottom padding
-
-v207 · 11/4/2026 16:00
-• Fix: tab duplication — 8s beat window, CLAIM_KEY instant detection, clean rewrite
-• Main tab answers duplicate claim immediately with fresh beat
-
-v206 · 11/4/2026 15:54
-• Updated Apps Script URL — v19
-
-v205 · 11/4/2026 15:52
-• Clipboard: \u202B (RTL Embedding) + \u200F (RTL mark) on every content line — forces right-align even for English text
-
-v204 · 11/4/2026 15:49
-• Clipboard: note timestamp+content on single line — Hebrew drives RTL alignment
-• All notes right-aligned in WhatsApp
-
-v203 · 11/4/2026 15:32
-• Location column: appends with → separator, never overwrites
-• Location change while project active: auto-appends to אתר/מיקום column
-• Location change while project active: adds 📍 note to הערות with timestamp
-• Project start: saves initial location as note + column entry
-
-v202 · 11/4/2026 15:24
-• Location moved to header — visible on all screens (setup, day, summary)
-
-v201 · 11/4/2026 15:08
-• Updated Apps Script URL — v18 with setLocation
-
-v200 · 11/4/2026 15:04
-• Location column renamed to אתר/מיקום
-
-v199 · 11/4/2026 14:50
-• New: GPS location — city + street shown in header strip
-• Auto-saves location to מיקום column when project is activated
-• createClient now adds מיקום column to new sheets
-• New Apps Script action: setLocation
-• findColumns detects מיקום column
-
-v198 · 11/4/2026 14:16
-• Updated Apps Script URL — v17 deployment
-
-v197 · 11/4/2026 13:55
-• Apps Script copy button updated to v17 · 11/4/2026
-
-v196 · 11/4/2026 13:51
-• setInvoiceStatus: added toast feedback — shows OK or error message
-• This will confirm if Apps Script needs redeployment
-
-v195 · 11/4/2026 01:27
-• Fix: removed clockDate reference — was causing TypeError crash on load
-• Clock now uses safe padded time format, no locale dependency
-
-v194 · 11/4/2026 01:25
-• Day name and date: hardcoded fallback in HTML, JS overwrites on load
-
-v193 · 11/4/2026 01:25
-• Diagnostic: heroDay/heroDate hardcoded in HTML to confirm visibility
-
-v192 · 11/4/2026 01:23
-• Fix: day name uses hardcoded Hebrew arrays — no he-IL locale (broken on some iPhones)
-
-v191 · 11/4/2026 01:18
-• Fix: heroDay/heroDate now set in renderSetup() — guaranteed to show
-
-v190 · 11/4/2026 01:16
-• Fix: day name + date now correctly inside setup screen — visible after header
-
-v167 · 10/4/2026 13:34
-• Clipboard: הערה N | timestamp format — starts with Hebrew, forces RTL in WhatsApp
-
-v166 · 10/4/2026 12:08
-• Clipboard: tested Option C format (timestamp .N)
-
-v165 · 10/4/2026 12:00
-• Clipboard: double RTL mark on every line
-
-v164 · 10/4/2026 11:55
-• Clipboard: handles all note formats — new (date-time), old [bracket], no-timestamp
-
-v163 · 10/4/2026 11:51
-• Fix: summary and clipboard show totalMs + prevMs (accumulated + today)
-• Fix: percentages include prevMs
-
-v162 · 10/4/2026 11:45
-• Fix: note timestamp included when syncing to Google Sheet
-
-v161 · 10/4/2026 11:13
-• Clipboard: timestamp on its own line above content
-
-v160 · 10/4/2026 11:08
-• Clipboard: blank line after each note, tabs removed — clean for WhatsApp
-• Old bracket-style notes auto-reformatted on copy
-
-v159 · 10/4/2026 10:28
-• Note format: N. (date - time) text — number, then timestamp in parens, then note
-• Notes included in clipboard output
-
-v158 · 9/4/2026 19:16
-• Fix: Add Project to Sheet — creates new row with copied format when no empty row exists
-• Fix: findColumns uses indexOf for all keys — fixes SONIC BEAT LTD variant column names
-• Fix: all fields written even when empty
-
-v157 · 9/4/2026 18:56
-• Pending Quote: ⏳ Loading… feedback immediately on click
-• Pending Quote: opens instantly — details load in background
-
-v156 · 8/4/2026 21:23
-• Removed Switch 🎤 mic button and voice command from day screen
-
-v155 · 8/4/2026 21:21
-• Fix: setup time resets to 0 on startDay — was carrying over from previous day
-
-v154 · 8/4/2026 20:54
-• Summary total time frozen at end-of-day moment — no longer grows after endDay
-
-v153 · 8/4/2026 20:42
-• Fix: summary percentages based on actual work time, not wall-clock time
-
-v152 · 8/4/2026 20:34
-• Session number shown on each project card (1. 2. 3.) — matches Siri number
-
-v151 · 8/4/2026 20:14
-• Fix: Siri Switch Project — relay hash checked in visibilitychange + pageshow
-
-v150 · 8/4/2026 19:31
-• Fix: Siri Switch Project — relay hash checked immediately on page load
-
-v149 · 8/4/2026 19:17
-• Updated Apps Script URL — v14
-
-v148 · 8/4/2026 19:09
-• Fix: invoice column detected as יצאה חש (shortened name in BILLINSKY sheet)
-
-v147 · 8/4/2026 18:53
-• Fix: invoice filter uses indexOf — handles column name variations
-
-v146 · 8/4/2026 18:29
-• Fix: releaseCheck requires 15s stale heartbeat — prevents fog lifting during Siri redirect
-
-v145 · 7/4/2026 17:58
-• Fix: fog lifting during Siri redirect — heartbeat window raised to 15s
-• sessBackup timestamped — new tabs cannot steal it
-
-v144 · 7/4/2026 17:33
-• Critical fix: saveState() function was missing — caused endDay, removeProject, deleteNote to silently fail
-
-v143 · 7/4/2026 17:29
-• Fix: Start Work Day — removed pointer-events:none from CSS
-• startDay() guards against running with no active projects
-
-v142 · 7/4/2026 17:20
-• Fix: Start Work Day button enables after adding project
-• Fix: ✕ remove button works — renderSetup called after job saved
-
-v141 · 7/4/2026 17:00
-• Updated Apps Script URL — v13
-
-v140 · 7/4/2026 15:42
-• New: Invoices button on setup screen
-• Fetches rows where יצאה חשבונית = להוציא חש, sorted by client
-• Checkbox picker, per-client row numbering, copy to clipboard
-
-v139 · 7/4/2026 15:03
-• Hours sync: Math.max(calculated, existing) — never overwrites
-
-v138 · 7/4/2026 14:46
-• Duplicate tab releases after 3s when main tab closed
-
-v137 · 7/4/2026 14:38
-• Fix: init/startMainLoop/saveState blocked on duplicate tab
-
-v136 · 7/4/2026 13:51
-• Fix: duplicate detection works on all screens
-
-v135 · 7/4/2026 13:43
-• Loading notes toast feedback
-
-v134 · 7/4/2026 13:42
-• Simplified single-tab: sessionStorage presence = same tab
-
-v133 · 7/4/2026 13:31
-• Fix: beatFresh requires lastBeat > 0 — prevents false block on first open
-
-v132 · 7/4/2026 13:29
-• Fix: rewrote single-tab logic for Safari sessionStorage behavior
-
-v131 · 7/4/2026 13:18
-• Fix: Pick from Open Tasks opens immediately, hours load in background
-
-v130 · 7/4/2026 13:16
-• Fix: duplicate detection after Siri redirect
-
-v129 · 7/4/2026 12:45
-• Fix: duplicate tab fog was lifting — __ybIsDuplicate blocks heartbeat
-
-v128 · 7/4/2026 12:38
-• Full UI translation to English
-
-v127 · 7/4/2026 12:20
-• Single-tab: heartbeat 1s / window 3s
-
-v126 · 7/4/2026
-• Single-tab: auto-releases duplicate tab within 8s of main tab closing
-
-v125 · 7/4/2026
-• Duplicate tab: frosted glass overlay — frozen and unresponsive
-
-v124 · 7/4/2026
-• Duplicate tab: phone vibration + toast on main tab
-
-v123 · 7/4/2026
-• Duplicate tab: completely blank and frozen
-
-v122 · 7/4/2026
-• Heartbeat window 30s, pageshow event for bfcache restore
-
-v121 · 7/4/2026
-• sessionStorage ID + heartbeat — 6/6 scenarios passed in simulation
-
-v120 · 7/4/2026
-• Fresh ID on every page load
-
-v119 · 7/4/2026
-• Removed __ybPageLoaded guard — caused false positives on iPhone
-
-v118 · 7/4/2026
-• Tab ID in localStorage for iPhone background survival
-
-v117 · 7/4/2026
-• Fixed warning box position
-
-v116 · 7/4/2026
-• Fixed refresh false positive
-
-v115 · 6/4/2026
-• Duplicate tab: banner — "Go back to active tab"
-
-v114 · 6/4/2026
-• Duplicate tab: banner with 5s countdown
-
-v113 · 6/4/2026 20:20
-• Single-tab enforcement — heartbeat via localStorage
-• Siri tab relays command to main tab then closes
-
-v112 · 6/4/2026 20:20
-• Notes loaded from sheet when picking a project
-• Continuation numbering based on highest number in sheet
-
-v111 · 6/4/2026
-• Added "Copy Apps Script" button
-
-v110 · 6/4/2026
-• Siri: matches by sessionNum, not array index
-• sessionNum assigned at day start
-
-v109 · 6/4/2026
-• ℹ icon beside version number
-• Per-version changelog in info panel
-
-v108 · 6/4/2026
-• Fixed "Add from open tasks" in day screen
-• Version + date + URL in header
-
-v107 · 6/4/2026
-• Status options locked until all 5 fields filled
-
-v106 · 6/4/2026
-• Cumulative hours — never overwritten
-
-v105 · 6/4/2026
-• iOS Safari fix — pending quote buttons
-
-v104 · 6/4/2026
-• Complete/incomplete job status logic
-
-v103 · 6/4/2026
-• 13 fixes: client select, HH:MM format, pending quote redesign, multi-project, status management
+• Scans Gmail for subject: הדפסת הזמנת רכש with PDF attachment
+• Parses PDF via Drive API (upload→export as text→delete)
+• Per line item choice: new sheet row OR attach to existing pending project
+• Multiple line items from same PO each get own independent picker
+• Dedup: in-memory per run (blocks duplicate emails), no sheet dedup
+• Labels processed emails: PO_Processed
+• POG prefix = GOLMAT sheet, POR prefix = ROLLMAT sheet
+
+SIRI SHORTCUTS
+• ?quicknote=1 → opens day note overlay immediately on load
+• Create iPhone Shortcut: Open URL → [app]/?quicknote=1
+• Name: "הערת יום" → trigger with "Hey Siri, הערת יום"
+
+LOCATION
+• GPS tracked via navigator.geolocation.watchPosition (high accuracy)
+• Header shows current street + city (Nominatim reverse geocode)
+• Haversine check: if moved >200m → update מיקום נוכחי sheet
+• Day notes automatically include location as separate column
+• Driving detection: speed ≥ 4.17 m/s start, < 2.5 m/s stop
+
+OFFLINE QUEUE
+• Failed SHEETS_URL fetches queued in localStorage
+• Retries every 30 seconds when online
+• Orange banner: "🔄 Syncing N pending updates…"
+• Stale items (wrong URL) auto-discarded on app load
+• Items dropped after 20 failed attempts
 
 ─────────────────
-SCREEN 1 — SETUP
+SPREADSHEET STRUCTURE
 ─────────────────
-• Add project to sheet — status locked until all 5 fields filled
-• Pick from open tasks — estimated + actual hours in HH:MM
-• Pending quote projects — complete: status buttons; incomplete: Complete only
-• Create new client — new sheet from GOLMAT template
-• Start work day — saves Siri list
+One sheet tab per client (GOLMAT, ROLLMAT, BILLINSKY, etc.)
+Each tab has the same column structure (detected dynamically via findColumns):
+
+  Col A  — Job_ID (auto-incremented: G001, G002…)
+  Col B  — Status (ממתין לביצוע / בתהליך ביצוע / הושלם / ממתין להצעה)
+  Col C  — Description (project name)
+  Col D  — Notes (הערות — free text, timestamped)
+  Col E  — Price (₪)
+  Col F  — Quantity
+  Col G  — Actual Hours (HH:MM — cumulative, never overwritten)
+  Col H  — Gross Profit (₪ — auto-calculated in sheet)
+  Col I  — Invoice Quote (הצעת מחיר)
+  Col J  — PO Number (הזמנת רכש)
+  Col K  — Category
+  Col L  — Estimated Hours
+  Col P  — Date Start
+  Col Q  — Date End
+  Col O  — Invoice Status (יצאה חשבונית / להוציא חש)
+  Col W  — Income (הכנסה)
+  Col V  — Costs (עלויות)
+  Col Z  — Location (אתר/מיקום)
+
+Special sheet tabs:
+  יומן          — Day notes: date / time / note / location
+  מיקום נוכחי  — Current location: date / time / address / lat / lng (row 2 only)
+  GOLMAT הצעות — Pending quotes
+  בקשות הצעה   — Quote requests
+
+findColumns() uses indexOf() (not ===) to handle variant Hebrew column names.
+SPREADSHEET_ID = 1Wn2-Yzx08H2NKmJLsMs2xrYIBPLzJJqvRo-Su8jWlgA
 
 ─────────────────
-SCREEN 2 — DAY
+GITHUB & DEPLOY
 ─────────────────
-• Tap project — start/pause (multiple simultaneous supported)
-• First tap → status set to In Progress in sheet
-• Done → syncs hours + sets Completed, removes from Siri
-• Cancel → restores project + adds back to Siri
-• Notes with timestamp, edit name
-• Setup time — runs when no project is active
+Repo:         github.com/Yanivberg/yb-tracker
+Branch:       main
+File:         index.html (single file — entire app)
+Pages URL:    https://yanivberg.github.io/yb-tracker
+Deploy Tool:  github-deploy-tool.html (in same repo)
+  — Paste/upload new index.html → one-tap push via GitHub API
+  — Token saved in localStorage (never re-enter)
+  — Auto-detects version from file content for commit message
 
 ─────────────────
-SCREEN 3 — SUMMARY
+AI REBUILD PROMPT
 ─────────────────
-• Total time + per-project breakdown with sessions and percentages
-• Auto-copies to clipboard on end of day
-• Full work log history
+You are rebuilding a Hebrew-language field maintenance business time tracker PWA for י.ב אחזקות (Y.B. Maintenance), operated by Yaniv Berg. The app is a single HTML file with no framework, no build step, and no dependencies. It uses localStorage for all client-side persistence and communicates with a Google Apps Script backend (doGet handler) for Google Sheets integration.
 
-─────────────────
-SIRI / VOICE
-─────────────────
-• Switch Project shortcut — toggles project, closes tab
-• Format: 1. ClientName Description
-• Word-to-number conversion (one→1, two→2 etc.)
+ARCHITECTURE:
+- Single HTML file (index.html), deployed to GitHub Pages at yanivberg.github.io/yb-tracker
+- No npm, no React, no bundler — pure vanilla JS + CSS
+- Google Apps Script URL stored in SHEETS_URL variable at top of file
+- All sheet operations via fetch(SHEETS_URL + '?action=X&param=Y')
+- Apps Script: Code.gs (main) + gmail-po-import.gs (PO importer), deployed as Web App (Anyone, even anonymous)
 
-─────────────────
-SHEET SYNC
-─────────────────
-• Pick job → loads previous hours + existing notes
-• Hours are cumulative — never overwritten
-• End day → syncs all hours to sheet
+3 SCREENS:
+1. Setup — pick/add projects, access tools
+2. Day — active timer per project, driving tracker, notes
+3. Summary — vertical timeline of the day
+
+KEY STATE (localStorage keys):
+  yb_projects       — JSON array of project objects
+  yb_dayStart       — timestamp of day start
+  yb_dayEnded       — boolean
+  yb_dayEndTime     — timestamp of day end
+  yb_arrangement    — setup time in ms
+  yb_arrangementStart — timestamp if currently counting
+  yb_drivingMs      — total driving time in ms
+  yb_drivingStart   — timestamp if currently driving
+  yb_lastSavedCoords — {lat, lng} of last location saved to sheet
+  yb_offlineQueue   — array of failed fetch URLs to retry
+  yb_dayNotes       — array of {date, time, text, loc, ts}
+  yb_history        — array of end-of-day summaries
+
+PROJECT OBJECT STRUCTURE:
+  { id, name, client, jobId, totalMs, prevMs, active, activeStart,
+    done, notes[], sessions[], locationSaved, jobStarted }
+
+SESSION OBJECT:
+  { start, end, startStr, endStr, dateStr, ms }
+
+APPS SCRIPT ACTIONS (Code.gs):
+  getJobs, getPendingQuote, getInvoices, getCompletedJobs,
+  getFullJobInfo, getClients, getJobHours, getJobNotes,
+  getJobDetails, appendLocation, setInvoiceStatus, setStatus,
+  updateJob, updateJobFields, addNote, deleteNote, addJob,
+  runPOImport, scanPOEmails, labelPOEmails, attachPOToJob,
+  addPONewRow, createClient, save, read, addDayNote,
+  getGrossProfitSummary, updateCurrentLocation
+
+APPS SCRIPT ACTIONS (gmail-po-import.gs):
+  runPOImportAndReturn, scanPOEmailsOnly, parsePOEmailOnly,
+  labelPOThreads, parsePOLineItems, addPORowAndReturn,
+  poAlreadyExistsPO, getSheetDataFresh
+
+DESIGN RULES:
+- Font: Heebo (Google Fonts) throughout
+- RTL support for Hebrew text
+- Client colors: auto-assigned from fixed palette, consistent per client via clientColor(name)
+- Toasts: English, 3 seconds, bottom of screen
+- Minimum block height: 55px (timeline)
+- No modals with <form> tags — use divs + onclick handlers
+- Offline queue wraps window.fetch — transparent to all callers
+- Always provide FULL file on any change — never partial snippets
+- Bump version number (v280, v281...) on every change
+- Version badge visible in app header top-right at all times
+
+SPREADSHEET:
+- ID: 1Wn2-Yzx08H2NKmJLsMs2xrYIBPLzJJqvRo-Su8jWlgA
+- One tab per client + יומן + מיקום נוכחי special tabs
+- findColumns() uses indexOf() for resilient Hebrew column detection
+- Hours: Math.max(calculated, existing) — cumulative, never overwrite
+- Use openById(SPREADSHEET_ID) always — never getActiveSpreadsheet()
+- Use Sheets REST API v4 for fresh reads (bypasses Apps Script cache)
+
+CURRENT DEPLOYMENT:
+- Apps Script: AKfycbwFDXsVqdrbv6I2r6PA6R63OmccZeIPNcz3tL2smgRCXHpeKBsnVfbmK9TiAMx29TrGYA
+- GitHub: github.com/Yanivberg/yb-tracker / index.html
+- GCP Project: 99200476359 (Drive API v2 + Sheets API v4 enabled)
 </div>
       <div style="padding:14px 16px;border-top:1px solid #eee;flex-shrink:0;display:flex;flex-direction:column;gap:8px;">
         <button onclick="copyAppInfo()" id="copyInfoBtn" style="width:100%;padding:13px;background:#111;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">📋 Copy Summary to Clipboard</button>
-        <button onclick="copyAppScript()" id="copyScriptBtn" style="width:100%;padding:13px;background:transparent;color:#111;border:1.5px solid #111;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">📄 Copy Apps Script — v14 · 8/4/2026</button>
+        <button onclick="copyRebuildPrompt()" style="width:100%;padding:13px;background:#1a1a2e;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">🤖 Copy AI Rebuild Prompt</button>
+        <button onclick="copyAppScript()" id="copyScriptBtn" style="width:100%;padding:13px;background:transparent;color:#111;border:1.5px solid #111;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">📄 Copy Apps Script — v45 · 17/4/2026</button>
       </div>
     </div>
   </div>
@@ -2501,6 +2197,17 @@ function copyInvoices() {
 }
 
 function copyAppInfo() { var text = document.getElementById('appInfoText').textContent; var btn = document.getElementById('copyInfoBtn'); function onCopied() { btn.textContent = '✓ Copied!'; setTimeout(function() { btn.textContent = '📋 Copy to Clipboard'; }, 2000); } if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(onCopied).catch(function() { fallbackCopy(text, onCopied); }); } else { fallbackCopy(text, onCopied); } }
+
+function copyRebuildPrompt() {
+  var full = document.getElementById('appInfoText').textContent;
+  var marker = 'AI REBUILD PROMPT';
+  var idx = full.indexOf(marker);
+  var prompt = idx !== -1 ? full.substring(idx + marker.length + 10).trim() : full;
+  function onCopied() { showToast('✓ AI Rebuild Prompt copied'); }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(prompt).then(onCopied).catch(function() { fallbackCopy(prompt, onCopied); });
+  } else { fallbackCopy(prompt, onCopied); }
+}
 
 function copyAppScript() {
   var btn = document.getElementById('copyScriptBtn');
