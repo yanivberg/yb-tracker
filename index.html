@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v279</title>
+<title>י.ב אחזקות — v280</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -464,6 +464,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       <div onclick="closeSetupDrawer();fetchGrossProfitSummary();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#2e7d32;">💰 רווח גולמי להוציא חש</div>
       <div onclick="closeSetupDrawer();openDayNote();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#1a1a2e;">📝 הערת יום</div>
       <div onclick="closeSetupDrawer();openDayNotesList();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#555;">📋 הערות יום קודמות</div>
+      <div onclick="closeSetupDrawer();openWorkLog();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#1a1a2e;">📓 יומן עבודה</div>
       <div onclick="closeSetupDrawer();runPOImportScan();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#6a1b9a;">📧 Import PO Emails</div>
       <div onclick="closeSetupDrawer();hardReset();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;color:#ccc;">🗑 Reset All</div>
     </div>
@@ -475,18 +476,22 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v279
-Deployed: 15/4/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v280
+Deployed: 21/4/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxLc71...exec (v38)
+Apps Script: AKfycbzIjN...exec (v47)
 Gmail PO: gmail-po-import-v2.gs
-Recovery save: 15/4/2026
 
 ─────────────────
 CHANGELOG
 ─────────────────
-v279 · 15/4/2026
-• New: Offline Queue — self-contained script, safe to remove
+v280 · 21/4/2026
+• New: 📓 יומן עבודה — cumulative work log
+• Auto-saves on End Work Day (was already saving locally, now also syncs to sheet)
+• Drawer item: opens overlay with all past days
+• Search by date, project name, client, job ID
+• Per-entry copy button + Copy All
+• Apps Script: new action saveWorkLog → appends to Work Log sheet tab
 • Online: live sync works exactly as before
 • Offline: failed sheet calls queued in localStorage
   Red banner: "📡 Offline — changes will sync when connected"
@@ -1167,6 +1172,26 @@ SHEET SYNC
     </div>
   </div>
 </div>
+<!-- Work Log Overlay -->
+<div id="workLogOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10011;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+    <div style="padding:16px 20px 12px;border-bottom:1px solid #eee;flex-shrink:0;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-weight:900;font-size:17px;color:#1a1a2e;">📓 יומן עבודה</div>
+        <button onclick="document.getElementById('workLogOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;line-height:1;">✕</button>
+      </div>
+      <input id="workLogSearch" type="search" placeholder="חפש לפי תאריך, פרוייקט, לקוח, מספר עבודה…" oninput="renderWorkLog(this.value)"
+        style="width:100%;padding:10px 13px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;outline:none;direction:rtl;box-sizing:border-box;"
+        onfocus="this.style.borderColor='#1a1a2e'" onblur="this.style.borderColor='#ddd'">
+      <div id="workLogCount" style="font-size:11px;color:#aaa;margin-top:6px;text-align:right;"></div>
+    </div>
+    <div id="workLogList" style="overflow-y:auto;flex:1;padding:0 16px 8px;"></div>
+    <div style="padding:12px 16px;border-top:1px solid #eee;flex-shrink:0;">
+      <button onclick="copyWorkLogAll()" style="width:100%;padding:12px;background:#1a1a2e;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">📋 Copy All to Clipboard</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Pending Quote Picker Overlay -->
@@ -1685,7 +1710,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwFDXsVqdrbv6I2r6PA6R63OmccZeIPNcz3tL2smgRCXHpeKBsnVfbmK9TiAMx29TrGYA/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzIjNPJUCH82moh-wQW_6JpL600sol2lpaeEyeJCm9EZZuzEd9I6sTCYeXreCNWjR18Sw/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2185,6 +2210,17 @@ function autoSaveSummary() {
   history.unshift({ date: date, time: time, text: text });
   if (history.length > 30) history = history.slice(0, 30);
   try { localStorage.setItem('yb_history', JSON.stringify(history)); } catch(e) {}
+  // Sync to sheet
+  if (SHEETS_URL) {
+    var startTime = dayStartTime ? (function(){ var d=new Date(dayStartTime); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); })() : '';
+    fetch(SHEETS_URL + '?action=saveWorkLog' +
+      '&date='     + encodeURIComponent(date) +
+      '&dayStart=' + encodeURIComponent(startTime) +
+      '&dayEnd='   + encodeURIComponent(time) +
+      '&total='    + encodeURIComponent(formatMs(totalMs)) +
+      '&summary='  + encodeURIComponent(text)
+    ).catch(function() {});
+  }
   if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).catch(function() { fallbackCopy(text, null); }); } else { fallbackCopy(text, null); }
 }
 
@@ -2853,6 +2889,82 @@ function copyPOImportResults() {
     });
 }
 
+
+// ── Work Log ──────────────────────────────────────────
+function openWorkLog() {
+  document.getElementById('workLogSearch').value = '';
+  document.getElementById('workLogOverlay').style.display = 'flex';
+  renderWorkLog('');
+}
+
+function renderWorkLog(filter) {
+  var history = JSON.parse(localStorage.getItem('yb_history') || '[]');
+  var q = (filter || '').trim().toLowerCase();
+  var filtered = q
+    ? history.filter(function(e) {
+        return (e.text + ' ' + e.date + ' ' + e.time).toLowerCase().indexOf(q) !== -1;
+      })
+    : history;
+
+  var countEl = document.getElementById('workLogCount');
+  if (countEl) countEl.textContent = filtered.length + ' מתוך ' + history.length + ' יומים';
+
+  var list = document.getElementById('workLogList');
+  if (!list) return;
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;font-size:14px;">' + (q ? 'אין תוצאות עבור "' + filter + '"' : 'אין יומן עדיין') + '</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(function(entry, idx) {
+    var lines = entry.text.split('\n').filter(function(l) { return l.trim(); });
+    // Highlight matching line if searching
+    var bodyLines = lines.slice(1); // skip header line (Work Summary — date)
+    var preview = bodyLines.slice(0, 6).map(function(l) {
+      var escaped = l.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      if (q && escaped.toLowerCase().indexOf(q) !== -1) {
+        var re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+        escaped = escaped.replace(re, '<mark style="background:#fff176;border-radius:2px;padding:0 1px;">$1</mark>');
+      }
+      return '<div style="font-size:12px;color:#555;line-height:1.5;white-space:pre-wrap;">' + escaped + '</div>';
+    }).join('');
+    var more = bodyLines.length > 6 ? '<div style="font-size:11px;color:#aaa;margin-top:4px;">+ ' + (bodyLines.length - 6) + ' שורות נוספות</div>' : '';
+
+    return '<div style="padding:14px 0;border-bottom:1px solid #f0f0f0;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+        '<div style="font-size:14px;font-weight:900;color:#1a1a2e;">' + entry.date + '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<div style="font-size:12px;color:#aaa;">' + (entry.time || '') + '</div>' +
+          '<button onclick="copyWorkLogEntry(' + idx + ',\'' + (filter||'') + '\')" style="font-size:11px;padding:3px 9px;background:#f5f5f5;border:1px solid #ddd;border-radius:8px;cursor:pointer;font-family:Heebo,sans-serif;color:#555;">📋</button>' +
+        '</div>' +
+      '</div>' +
+      '<div style="background:#fafafa;border-radius:8px;padding:8px 10px;">' + preview + more + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function copyWorkLogEntry(filteredIdx, filter) {
+  var history = JSON.parse(localStorage.getItem('yb_history') || '[]');
+  var q = (filter || '').trim().toLowerCase();
+  var filtered = q
+    ? history.filter(function(e) { return (e.text + ' ' + e.date + ' ' + e.time).toLowerCase().indexOf(q) !== -1; })
+    : history;
+  var entry = filtered[filteredIdx];
+  if (!entry) return;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(entry.text).then(function() { showToast('📋 ' + entry.date + ' copied'); }).catch(function() { fallbackCopy(entry.text, function() { showToast('📋 ' + entry.date + ' copied'); }); });
+  } else { fallbackCopy(entry.text, function() { showToast('📋 ' + entry.date + ' copied'); }); }
+}
+
+function copyWorkLogAll() {
+  var history = JSON.parse(localStorage.getItem('yb_history') || '[]');
+  if (history.length === 0) { showToast('No work log yet'); return; }
+  var text = history.map(function(e) { return e.text; }).join('\n\n─────────────────\n\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() { showToast('✓ ' + history.length + ' days copied'); }).catch(function() { fallbackCopy(text, function() { showToast('✓ ' + history.length + ' days copied'); }); });
+  } else { fallbackCopy(text, function() { showToast('✓ ' + history.length + ' days copied'); }); }
+}
 
 var toastTimer = null;
 function showToast(msg) {
