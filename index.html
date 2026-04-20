@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v281</title>
+<title>י.ב אחזקות — v282</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -439,12 +439,12 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       <div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:0.5px;">י.ב אחזקות</div>
       <div style="text-align:right;">
         <div style="font-size:12px;font-weight:700;color:#fff;letter-spacing:1px;" id="clock">--:--:--</div>
-        <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.05em;margin-top:2px;">v281</div>
+        <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.05em;margin-top:2px;">v282</div>
       </div>
     </div>
   </div>
 
-  <div id="setupDrawerBackdrop" onclick="closeSetupDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:10000;"></div>
+  <div id="setupDrawerBackdrop" onclick="if(!_drawerJustOpened)closeSetupDrawer()" ontouchend="if(!_drawerJustOpened){closeSetupDrawer();}" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:10000;"></div>
   <div id="setupDrawer" style="display:none;position:fixed;top:0;left:0;bottom:0;width:82%;max-width:320px;z-index:10001;flex-direction:column;background:#fff;border-radius:0 0 0 0;overflow:hidden;">
     <div style="background:linear-gradient(135deg,#1a1a2e 0%,#0f3460 100%);padding:14px 16px 16px;flex-shrink:0;">
       <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
@@ -484,7 +484,7 @@ A field maintenance business time tracking PWA built for hands-free use. Designe
 ─────────────────
 DEPLOYMENT
 ─────────────────
-Version:      v281
+Version:      v282
 Deployed:     17/4/2026
 App URL:      https://yanivberg.github.io/yb-tracker
 Deploy Tool:  https://yanivberg.github.io/yb-tracker/github-deploy-tool.html
@@ -496,7 +496,7 @@ GCP Project:  99200476359
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v281 · 17/4/2026
+v282 · 17/4/2026
 • Version badge visible on app header (top right)
 • GitHub Pages deployment — yanivberg.github.io/yb-tracker
 • Offline queue discards stale items from old deployments
@@ -703,7 +703,7 @@ DESIGN RULES:
 - No modals with <form> tags — use divs + onclick handlers
 - Offline queue wraps window.fetch — transparent to all callers
 - Always provide FULL file on any change — never partial snippets
-- Bump version number (v281, v281...) on every change
+- Bump version number (v282, v282...) on every change
 - Version badge visible in app header top-right at all times
 
 SPREADSHEET:
@@ -739,7 +739,7 @@ CURRENT DEPLOYMENT:
     <div class="setup-label" style="text-align:left;">Today's Projects</div>
     <div class="project-list-setup" id="setupList"></div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center;">
-      <button id="btnAddBrowseSetup" onclick="openSetupDrawer()" style="width:180px;height:180px;border-radius:20px;border:2.5px dashed #999;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:Heebo,sans-serif;color:#666;">
+      <button id="btnAddBrowseSetup" onclick="openSetupDrawer()" style="width:180px;height:180px;border-radius:20px;border:2.5px dashed #999;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:Heebo,sans-serif;color:#666;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
         <span id="btnAddBrowseSetupIcon" style="font-size:38px;color:#666;">☰</span>
         <span id="btnAddBrowseSetupText" style="font-size:14px;font-weight:700;color:#666;text-align:center;line-height:1.3;">Add / Browse<br>Projects</span>
       </button>
@@ -767,7 +767,7 @@ CURRENT DEPLOYMENT:
     <div class="project-btns" id="projectBtns"></div>
     <div style="height:2px;background:#111;margin:2px 0;flex-shrink:0;"></div>
     <div style="display:flex;justify-content:center;margin:6px 0 10px;">
-      <button id="btnAddBrowseDay" onclick="openSetupDrawer()" style="width:120px;height:120px;border-radius:18px;border:2px dashed #aaa;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-family:Heebo,sans-serif;color:#777;">
+      <button id="btnAddBrowseDay" onclick="openSetupDrawer()" style="width:120px;height:120px;border-radius:18px;border:2px dashed #aaa;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-family:Heebo,sans-serif;color:#777;touch-action:manipulation;-webkit-tap-highlight-color:transparent;">
         <span id="btnAddBrowseDayIcon" style="font-size:30px;color:#777;">☰</span>
         <span id="btnAddBrowseDayText" style="font-size:11px;font-weight:700;color:#777;text-align:center;line-height:1.3;">Add / Browse<br>Projects</span>
       </button>
@@ -1583,16 +1583,19 @@ function silentSaveProjectsShortcut() {
 }
 function callSaveProjectsShortcut() { var active = projects.filter(function(p) { return !p.done; }); var list = active.length > 0 ? active.map(function(p) { var num = p.sessionNum || (projects.indexOf(p) + 1); var parts = [num + '.']; if (p.client) parts.push(p.client); parts.push(p.name); return parts.join(' '); }).join('. . . . . . ') : 'No active projects'; localStorage.setItem('yb_pendingToast', '✓ Siri list saved'); localStorage.setItem('yb_sessBackup', '1'); localStorage.setItem('yb_sessBackupTs', Date.now().toString()); var returnUrl = window.location.origin + window.location.pathname; var url = 'shortcuts://run-shortcut?name=Save%20Projects&input=text&text=' + encodeURIComponent(list) + '&x-success=' + encodeURIComponent(returnUrl); window.location.href = url; }
 
+var _drawerJustOpened = false;
 function openSetupDrawer() {
+  _drawerJustOpened = true;
+  setTimeout(function() { _drawerJustOpened = false; }, 600);
   var drawer = document.getElementById('setupDrawer');
   var backdrop = document.getElementById('setupDrawerBackdrop');
   drawer.style.display = 'flex';
   backdrop.style.display = 'block';
-  backdrop.style.pointerEvents = 'none'; // block clicks for 300ms
-  setTimeout(function() { backdrop.style.pointerEvents = 'auto'; }, 300);
+  backdrop.style.pointerEvents = 'none';
+  setTimeout(function() { backdrop.style.pointerEvents = 'auto'; }, 600);
   updateDrawerClock();
 }
-function closeSetupDrawer() { document.getElementById('setupDrawer').style.display = 'none'; document.getElementById('setupDrawerBackdrop').style.display = 'none'; }
+function closeSetupDrawer() { if (_drawerJustOpened) return; document.getElementById('setupDrawer').style.display = 'none'; document.getElementById('setupDrawerBackdrop').style.display = 'none'; }
 function updateDrawerClock() { var d = new Date(); var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; document.getElementById('drawerDate').textContent = days[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth()+1) + '.' + d.getFullYear(); document.getElementById('drawerClock').textContent = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0'); }
 setInterval(function() { if (document.getElementById('setupDrawer').style.display !== 'none') updateDrawerClock(); }, 1000);
 
