@@ -3217,6 +3217,7 @@ function _caspitSetDocType(type) { _caspitDocType = type; _renderCaspitInvoiceTa
 
 function createCaspitInvoice() {
   var checked = document.querySelectorAll('#caspitBody input[type=checkbox]:checked');
+  showToast('checkboxes found: ' + document.querySelectorAll('#caspitBody input[type=checkbox]').length + ' checked: ' + checked.length);
   if (!checked.length) { showToast('בחר לפחות עבודה אחת'); return; }
   var byClient = {};
   checked.forEach(function(cb) {
