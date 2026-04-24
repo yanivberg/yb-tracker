@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v301</title>
+<title>י.ב אחזקות — v302</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3265,7 +3265,14 @@ function createCaspitInvoice() {
       return { Number: li+1, ProductName: job.desc + (job.po ? ' | מ.רכש: ' + job.po : ''), UnitPrice: job.gp, Qty: 1, ChargeVAT: true };
     });
     btn.textContent = '⏳ ' + (i+1) + '/' + clients.length + ' ' + client + '…';
-    fetch(SHEETS_URL + '?action=createCaspitDocument&payload=' + encodeURIComponent(JSON.stringify({ TrxTypeId: _caspitDocType, Date: new Date().toISOString(), CustomerId: customerId, CustomerBusinessName: customerId ? '' : client, DocumentLines: lines }))).then(function(r){ return r.json(); }).then(function(result) {
+    fetch(SHEETS_URL + '?action=createCaspitDocument&payload=' + encodeURIComponent(JSON.stringify({ 
+      DocumentId: 'YB-' + Date.now(),
+      TrxTypeId: _caspitDocType, 
+      Date: new Date().toISOString(), 
+      CustomerId: customerId, 
+      CustomerBusinessName: customerId ? '' : client, 
+      DocumentLines: lines 
+    }))).then(function(r){ return r.json(); }).then(function(result) {
       if (result && (result.DocumentId || result.Number)) created++;
       else {
         var errMsg = result.error || result.Message || result.ExceptionMessage || result.raw || JSON.stringify(result).substring(0,150);
@@ -3321,7 +3328,7 @@ function createCaspitQuote() {
     if (!jobId || jobId.indexOf('Error')!==-1) throw new Error(jobId);
     btn.textContent = '⏳ שולח לכספית…';
     var customerId = _caspitMatchMap[client] || '';
-    var payload = { TrxTypeId: 4, Date: new Date().toISOString(), CustomerId: customerId, CustomerBusinessName: customerId?'':client,
+    var payload = { DocumentId: 'YB-' + Date.now(), TrxTypeId: 4, Date: new Date().toISOString(), CustomerId: customerId, CustomerBusinessName: customerId?'':client,
       DocumentLines: [{ Number:1, ProductName: desc, UnitPrice: price, Qty: 1, ChargeVAT: true }] };
     return fetch(SHEETS_URL + '?action=createCaspitDocument&payload=' + encodeURIComponent(JSON.stringify(payload))).then(function(r){ return r.json(); }).then(function(result) {
       fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(jobId) +
