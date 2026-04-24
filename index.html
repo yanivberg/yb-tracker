@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v286</title>
+<title>י.ב אחזקות — v287</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1889,31 +1889,55 @@ function showPendingQuotePicker(jobs) {
   if (!overlay || !list) return;
   _fRerenders['pending'] = function(){ showPendingQuotePicker(pendingQuoteJobs); };
   var filtered = _fApply(pendingQuoteJobs, 'pending');
-  list.innerHTML = _fBarHtml(pendingQuoteJobs, 'pending');
-  if (!filtered || filtered.length === 0) {
-    list.innerHTML += '<div style="padding:20px;text-align:center;color:#888;">' + (pendingQuoteJobs.length > 0 ? 'אין תוצאות לפילטר הנוכחי' : 'אין פרוייקטים ממתינים להצעה') + '</div>';
+  // Build original-index map so buttons still reference pendingQuoteJobs[origIdx]
+  var filteredWithIdx = pendingQuoteJobs.map(function(job, i){ return { job: job, idx: i }; })
+    .filter(function(item){ return filtered.some(function(fj){ return fj.id === item.job.id && fj.client === item.job.client; }); });
+  var html = _fBarHtml(pendingQuoteJobs, 'pending');
+  if (filteredWithIdx.length === 0) {
+    html += '<div style="padding:20px;text-align:center;color:#888;">' + (pendingQuoteJobs.length > 0 ? 'אין תוצאות לפילטר הנוכחי' : 'אין פרוייקטים ממתינים להצעה') + '</div>';
   } else {
-    var allWithIdx = pendingQuoteJobs.map(function(job, i){ return { job: job, idx: i }; });
-    var filteredWithIdx = allWithIdx.filter(function(item){ return filtered.indexOf(item.job) !== -1; });
     var groups = {}, order = [];
-    filteredWithIdx.forEach(function(item) { if (!groups[item.job.client]) { groups[item.job.client] = []; order.push(item.job.client); } groups[item.job.client].push(item); });
+    filteredWithIdx.forEach(function(item) {
+      var c = item.job.client;
+      if (!groups[c]) { groups[c] = []; order.push(c); }
+      groups[c].push(item);
+    });
     order.forEach(function(client) {
-      var headerDiv = document.createElement('div'); headerDiv.innerHTML = clientGroupHeader(client); list.appendChild(headerDiv.firstElementChild);
+      html += clientGroupHeader(client);
       groups[client].forEach(function(item) {
         var job = item.job, idx = item.idx;
         var d = job.details || {};
         var complete = !!(d.category && d.price && d.qty && d.hours && d.po);
-        var div = document.createElement('div');
-        div.style.cssText = 'padding:12px 16px;' + clientRowStyle(client);
+        var rowStyle = clientRowStyle(client);
         if (complete) {
-          div.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;"><div style="flex:1;"><div style="font-weight:700;font-size:14px;color:#111;">' + job.desc + '</div><div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">✓ כל הפרטים מולאו</div></div><div style="display:flex;gap:6px;"><button onclick="startPreTimerForJob(\'' + job.id + '\',\'' + job.client.replace(/'/g,"\\'") + '\',\'' + (job.desc||'').replace(/'/g,"\\'") + '\')" style="background:rgba(0,105,92,0.85);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;flex-shrink:0;">⏱</button><button onclick="pendingQuoteEdit(' + idx + ')" style="background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;flex-shrink:0;">✏️</button></div></div><div style="display:flex;gap:8px;"><button onclick="setJobStatusFromPicker(' + idx + ',\'ממתין לביצוע\')" style="flex:1;padding:9px 6px;background:rgba(0,0,0,0.25);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">Waiting</button><button onclick="setJobStatusFromPicker(' + idx + ',\'בתהליך ביצוע\')" style="flex:1;padding:9px 6px;background:rgba(0,0,0,0.25);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">In Progress</button></div>';
+          html += '<div style="padding:12px 16px;' + rowStyle + '">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">' +
+              '<div style="flex:1;"><div style="font-weight:700;font-size:14px;color:#111;">' + job.desc + '</div><div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">✓ כל הפרטים מולאו</div></div>' +
+              '<div style="display:flex;gap:6px;">' +
+                '<button onclick="startPreTimerForJob(\'' + job.id + '\',\'' + job.client.replace(/'/g,"\\'") + '\',\'' + (job.desc||'').replace(/'/g,"\\'") + '\')" style="background:rgba(0,105,92,0.85);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">⏱</button>' +
+                '<button onclick="pendingQuoteEdit(' + idx + ')" style="background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">✏️</button>' +
+              '</div>' +
+            '</div>' +
+            '<div style="display:flex;gap:8px;">' +
+              '<button onclick="setJobStatusFromPicker(' + idx + ',\'ממתין לביצוע\')" style="flex:1;padding:9px 6px;background:rgba(0,0,0,0.25);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">Waiting</button>' +
+              '<button onclick="setJobStatusFromPicker(' + idx + ',\'בתהליך ביצוע\')" style="flex:1;padding:9px 6px;background:rgba(0,0,0,0.25);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">In Progress</button>' +
+            '</div>' +
+          '</div>';
         } else {
-          div.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;"><div style="flex:1;"><div style="font-weight:700;font-size:14px;color:#111;">' + job.desc + '</div><div style="font-size:11px;color:rgba(255,255,200,0.8);margin-top:2px;">⚠️ חסרים פרטים</div></div><div style="display:flex;gap:6px;"><button onclick="startPreTimerForJob(\'' + job.id + '\',\'' + job.client.replace(/'/g,"\\'") + '\',\'' + (job.desc||'').replace(/'/g,"\\'") + '\')" style="background:rgba(0,105,92,0.85);color:#fff;border:none;border-radius:8px;padding:8px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">⏱</button><button onclick="pendingQuoteEdit(' + idx + ')" style="background:rgba(0,0,0,0.25);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;white-space:nowrap;">✏️ Complete</button></div></div>';
+          html += '<div style="padding:12px 16px;' + rowStyle + '">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
+              '<div style="flex:1;"><div style="font-weight:700;font-size:14px;color:#111;">' + job.desc + '</div><div style="font-size:11px;color:rgba(255,255,200,0.8);margin-top:2px;">⚠️ חסרים פרטים</div></div>' +
+              '<div style="display:flex;gap:6px;">' +
+                '<button onclick="startPreTimerForJob(\'' + job.id + '\',\'' + job.client.replace(/'/g,"\\'") + '\',\'' + (job.desc||'').replace(/'/g,"\\'") + '\')" style="background:rgba(0,105,92,0.85);color:#fff;border:none;border-radius:8px;padding:8px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">⏱</button>' +
+                '<button onclick="pendingQuoteEdit(' + idx + ')" style="background:rgba(0,0,0,0.25);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;white-space:nowrap;">✏️ Complete</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
         }
-        list.appendChild(div);
       });
     });
   }
+  list.innerHTML = html;
   overlay.style.display = 'flex';
 }
 
