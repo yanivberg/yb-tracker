@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v292</title>
+<title>י.ב אחזקות — v294</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,7 +481,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v288
 Deployed: 24/4/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbzIoo2...exec (v51)
+Apps Script: AKfycbw3wXB...exec (v52)
 Gmail PO: gmail-po-import-v2.gs
 
 ─────────────────
@@ -1794,7 +1794,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzIoo2ZYvKkGPWqSIyRxQqlI3YiuKJX75I_I8jyMGPIfq5gPoE2EKGjuowQwR0oq4PqEQ/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw3wXBG7aIW-ixUTTARKP86G7W9XephcYWWIX48tutJcWYrANpwW9TGP5i8EvhniDg/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -3157,7 +3157,7 @@ function _caspitLoadData() {
   }).catch(function() {
     _caspitInvoiceJobs = invoicesData || []; sheetDone = true; tryRender();
   });
-  fetch(CASPIT_PROXY_URL + '?action=getContacts').then(function(r){ return r.json(); }).then(function(data) {
+  fetch(SHEETS_URL + '?action=getCaspitContacts').then(function(r){ return r.json(); }).then(function(data) {
     _caspitContacts = (data && data.contacts) || [];
     if (data && data.resolved) {
       Object.keys(data.resolved).forEach(function(k) { if (data.resolved[k]) _caspitMatchMap[k] = data.resolved[k]; });
@@ -3240,14 +3240,14 @@ function createCaspitInvoice() {
       return { Number: li+1, ProductName: job.desc + (job.po ? ' | מ.רכש: ' + job.po : ''), UnitPrice: job.gp, Qty: 1, ChargeVAT: true };
     });
     btn.textContent = '⏳ ' + (i+1) + '/' + clients.length + ' ' + client + '…';
-    fetch(CASPIT_PROXY_URL + '?action=createDocument', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ TrxTypeId: _caspitDocType, Date: new Date().toISOString(), CustomerId: customerId, CustomerBusinessName: customerId ? '' : client, DocumentLines: lines })
-    }).then(function(r){ return r.json(); }).then(function(result) {
+    fetch(SHEETS_URL + '?action=createCaspitDocument&payload=' + encodeURIComponent(JSON.stringify({ TrxTypeId: _caspitDocType, Date: new Date().toISOString(), CustomerId: customerId, CustomerBusinessName: customerId ? '' : client, DocumentLines: lines }))).then(function(r){ return r.json(); }).then(function(result) {
       if (result && (result.DocumentId || result.Number)) created++;
-      else showToast('⚠️ ' + client + ': ' + (result.error || 'שגיאה'));
+      else {
+        var errMsg = result.error || result.Message || result.ExceptionMessage || JSON.stringify(result).substring(0,100);
+        showToast('⚠️ ' + client + ': ' + errMsg);
+      }
       processNext(i+1);
-    }).catch(function() { processNext(i+1); });
+    }).catch(function(err) { showToast('⚠️ fetch error: ' + (err.message||'')); processNext(i+1); });
   }
   processNext(0);
 }
@@ -3298,9 +3298,7 @@ function createCaspitQuote() {
     var customerId = _caspitMatchMap[client] || '';
     var payload = { TrxTypeId: 4, Date: new Date().toISOString(), CustomerId: customerId, CustomerBusinessName: customerId?'':client,
       DocumentLines: [{ Number:1, ProductName: desc, UnitPrice: price, Qty: 1, ChargeVAT: true }] };
-    return fetch(CASPIT_PROXY_URL + '?action=createDocument', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-    }).then(function(r){ return r.json(); }).then(function(result) {
+    return fetch(SHEETS_URL + '?action=createCaspitDocument&payload=' + encodeURIComponent(JSON.stringify(payload))).then(function(r){ return r.json(); }).then(function(result) {
       fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(jobId) +
         '&client=' + encodeURIComponent(client) + '&status=' + encodeURIComponent('ניתנה הצעה')).catch(function(){});
       btn.textContent = '💼 שמור ושלח לכספית'; btn.disabled = false;
