@@ -481,7 +481,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v288
 Deployed: 24/4/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxVn0j...exec (v51)
+Apps Script: AKfycbxgc_k...exec (v51)
 Gmail PO: gmail-po-import-v2.gs
 
 ─────────────────
@@ -1794,7 +1794,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxVn0jj5BkdbIPWhskUi755EnRJoylJsB1Gibag95P3tl6HHZXSQLFFGbjatU8D5tFRYQ/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxgc_kUyLbpZzWTs3JOMZZAwwMXObjbKFLnNNOgpEiFL77rOA3t4CiqiIurBtBzmteqeQ/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
