@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v287</title>
+<title>י.ב אחזקות — v288</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -477,95 +477,104 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v282
-Deployed: 23/4/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v288
+Deployed: 24/4/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbzJWyJ...exec (v49)
+Apps Script: AKfycbxNpcR...exec (v50)
+Gmail PO: gmail-po-import-v2.gs
 
 ─────────────────
-CHANGELOG
+CHANGELOG (recent)
 ─────────────────
+v288 · 24/4/2026
+• Fix: Time filters on Pending Quote now work
+• Fix: Jobs with no date excluded when time/waiting filter active
+• New: 📅 date badge on each pending quote card
+• Apps Script v50: addJob stamps today as תאריך התחלה on creation
+
+v287 · 24/4/2026
+• Fix: Pending Quote filter — rewritten to pure innerHTML
+
+v286 · 24/4/2026
+• Fix: Time chips — Apps Script now formats dateStart as dd/MM/yyyy
+• Fix: ✕ נקה on Open Tasks — master list bug fixed
+• New: Sort chips ↑ ישן→חדש / ↓ חדש→ישן
+
+v285 · 24/4/2026
+• New: Filter bar on all lists
+• Client chips, time chips, ⏰ >2 שבועות, sort, ✕ נקה
+• Filters persist in localStorage
+
+v284 · 23/4/2026
+• New: Pre-Project Timer drawer picker (New / Existing project)
+
+v283 · 23/4/2026
+• Fix: GPS every 5 min instead of continuous (less heat)
+
 v282 · 23/4/2026
-• New: ⏱ Pre-Project Timer
-  - ⏱ button on each Pending Quote row
-  - Stopwatch overlay: start/pause/reset/save/clear
-  - Day screen block shows running timer (tap to reopen)
-  - Drawer item shows active job name + state
-  - One timer at a time — switching asks confirmation
-  - Survives refresh (yb_preTimer in localStorage)
-  - Save adds hours to שעות בפועל (additive, not overwrite)
+• New: ⏱ Pre-Project Timer (from Pending Quote + Drawer + Day screen)
 
 v281 · 22/4/2026
-• Fix: PO import — sequential processing (was parallel → race condition dropped rows)
-• New: PO import — bulk default bar: "All → New Row" / "All → Existing"
-• Confirm button shows progress: "⏳ 3 / 8…"
+• Fix: PO import sequential processing (race condition)
+• New: PO import bulk default bar
 
 v280 · 21/4/2026
-• New: 📓 יומן עבודה — cumulative work log
-• Auto-saves on End Work Day (was already saving locally, now also syncs to sheet)
-• Drawer item: opens overlay with all past days
-• Search by date, project name, client, job ID
-• Per-entry copy button + Copy All
-• Apps Script: new action saveWorkLog → appends to Work Log sheet tab
-• Online: live sync works exactly as before
-• Offline: failed sheet calls queued in localStorage
-  Red banner: "📡 Offline — changes will sync when connected"
-• Reconnect: queue retries automatically every 30 seconds
-  Orange banner: "🔄 Syncing N pending updates…"
-  Banner disappears when all synced
-• App restart: leftover queue retries after 3 seconds
-• Safety: item dropped after 20 failed attempts (~10 min)
+• New: 📓 יומן עבודה — cumulative work log + sheet sync
 
-v246 · 15/4/2026
-• Loading: Add/Browse button icon swaps to spinner during network call
-• Loading: small spinning ring in bottom-right corner
-• All toasts display for exactly 3 seconds
+─────────────────
+FEATURES
+─────────────────
+SCREEN 1 — SETUP
+- Pick from open tasks, pending quote, completed, invoices
+- Filter bar on all lists: client / time / waiting / sort
+- Add project to sheet
+- Create new client from GOLMAT template
+- 📧 Import PO Emails — bulk default + sequential save
+- 💰 רווח גולמי להוציא חש
+- 📝 הערת יום + 📋 הערות יום קודמות
+- 📓 יומן עבודה — cumulative log with search
+- ⏱ Pre-Project Timer
 
-v245 · 15/4/2026
-• Loading indicator: small spinning ring in bottom-right corner (option 3)
+SCREEN 2 — DAY
+- Tap to start/pause — multiple simultaneous
+- Notes synced to sheet
+- Location saved on first tap
+- 🚗 Driving tracker (auto + manual)
+- ⏱ Pre-project timer block
 
-v244 · 15/4/2026
-• New: global loading indicator on every network call
-• Patches window.fetch — automatically shows/hides for ALL requests
+SCREEN 3 — SUMMARY (Timeline)
+- Vertical timeline per session
+- Driving / Setup blocks
+- Copy + Save
 
-v243 · 15/4/2026
-• Recovery save — full working version
-• PO Import: writes to correct empty row (desc+dateStart+PO all blank)
-• PO Import: REST API via Sheets v4 bypasses Apps Script cache
-• PO Import: in-memory dedup prevents duplicate rows from multiple emails
-• PO Import: duplicate PO detection uses REST API for fresh data
+SHEET SYNC
+- Hours cumulative
+- Status flow
+- Notes bidirectional
+- מיקום נוכחי, יומן, לוג עבודה tabs
 
-v242 · 14/4/2026
-• Updated Apps Script URL — new deployment with Sheets API + script.external_request scope
-• PO Import now uses Sheets REST API for fresh data — finds correct empty row
+PO IMPORT
+- Gmail scan → PDF parse → per line item
+- Bulk default + sequential processing
+- Labels processed emails PO_Processed
 
-v241 · 14/4/2026
-• Fix: Setup Time now survives page refresh
-• yb_arrangementStart saved to localStorage — restored on reload instead of resetting to Date.now()
+PRE-PROJECT TIMER
+- From Pending Quote ⏱ button or Drawer picker
+- New Project: creates job in sheet on Save
+- Existing: pick from pending quote
+- One at a time, survives refresh
 
-v240 · 14/4/2026
-• Critical fix: CLIENT_COLORS and _clientColorMap moved before init() IIFE
-• Was causing TypeError on refresh — _clientColorMap was undefined when renderProjectBtns ran
+FILTERS (all lists)
+- Client chips, time (היום/שבוע/חודש/טווח)
+- ⏰ >2 שבועות, ↑↓ sort
+- Persist until ✕ נקה
 
-v239 · 14/4/2026
-• Critical fix: localStorage.clear() wiped all state on refresh
-• Now filters invalid projects individually, patches missing fields
+LOCATION
+- GPS every 5 min
+- >200m → updates מיקום נוכחי sheet
 
-v238 · 14/4/2026
-• Fix: corrected Netlify URL to sage-babka-62ba74.netlify.app
-
-v237 · 14/4/2026
-• Updated Apps Script URL to v37
-
-v236 · 14/4/2026
-• Fix: addJob empty row rule: desc blank + startDate blank + PO blank
-• Apps Script uses openById(SPREADSHEET_ID) — no more stale cache
-
-v235 · 13/4/2026
-• Audit fixes: duplicate findColumns, cols.poNumber→cols.po, locationSaved reset, hardReset interval
-
-v234 · 13/4/2026
-• New: 📧 Import PO Emails button in drawer
+SIRI
+- ?quicknote=1 → day note overlay
 • PO Import popup with copy-to-clipboard
 
 v233 · 13/4/2026
@@ -1764,7 +1773,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzJWyJR2zk_MYU3lPhV0J-QR_u7AnhD5jkQLMinF0oMSfdLbWmncE2rVbmiSg-CtBfd7w/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxNpcR44GHEzzZlBmZST__4y3HmXB48wg3oSzgPhm6npru3XfoJ7xzirakCRgrEZOpKpQ/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -1909,10 +1918,11 @@ function showPendingQuotePicker(jobs) {
         var d = job.details || {};
         var complete = !!(d.category && d.price && d.qty && d.hours && d.po);
         var rowStyle = clientRowStyle(client);
+        var dateBadge = job.dateStart ? '<span style="font-size:10px;color:rgba(255,255,255,0.55);margin-right:6px;">📅 ' + job.dateStart + '</span>' : '';
         if (complete) {
           html += '<div style="padding:12px 16px;' + rowStyle + '">' +
             '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">' +
-              '<div style="flex:1;"><div style="font-weight:700;font-size:14px;color:#111;">' + job.desc + '</div><div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">✓ כל הפרטים מולאו</div></div>' +
+              '<div style="flex:1;"><div style="font-weight:700;font-size:14px;color:#111;">' + job.desc + '</div><div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">✓ כל הפרטים מולאו ' + dateBadge + '</div></div>' +
               '<div style="display:flex;gap:6px;">' +
                 '<button onclick="startPreTimerForJob(\'' + job.id + '\',\'' + job.client.replace(/'/g,"\\'") + '\',\'' + (job.desc||'').replace(/'/g,"\\'") + '\')" style="background:rgba(0,105,92,0.85);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">⏱</button>' +
                 '<button onclick="pendingQuoteEdit(' + idx + ')" style="background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">✏️</button>' +
@@ -1926,7 +1936,7 @@ function showPendingQuotePicker(jobs) {
         } else {
           html += '<div style="padding:12px 16px;' + rowStyle + '">' +
             '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
-              '<div style="flex:1;"><div style="font-weight:700;font-size:14px;color:#111;">' + job.desc + '</div><div style="font-size:11px;color:rgba(255,255,200,0.8);margin-top:2px;">⚠️ חסרים פרטים</div></div>' +
+              '<div style="flex:1;"><div style="font-weight:700;font-size:14px;color:#111;">' + job.desc + '</div><div style="font-size:11px;color:rgba(255,255,200,0.8);margin-top:2px;">⚠️ חסרים פרטים ' + dateBadge + '</div></div>' +
               '<div style="display:flex;gap:6px;">' +
                 '<button onclick="startPreTimerForJob(\'' + job.id + '\',\'' + job.client.replace(/'/g,"\\'") + '\',\'' + (job.desc||'').replace(/'/g,"\\'") + '\')" style="background:rgba(0,105,92,0.85);color:#fff;border:none;border-radius:8px;padding:8px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">⏱</button>' +
                 '<button onclick="pendingQuoteEdit(' + idx + ')" style="background:rgba(0,0,0,0.25);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;white-space:nowrap;">✏️ Complete</button>' +
@@ -3389,7 +3399,7 @@ function _fApply(jobs, key) {
     if (f.clients.length > 0 && f.clients.indexOf(job.client) === -1) return false;
     if (!f.time && !f.waiting) return true;
     var d = _fParseDate(job.dateStart);
-    if (!d) return true;
+    if (!d) return !(f.time || f.waiting); // no date: exclude if time/waiting filter active
     var age = Date.now() - d.getTime();
     if (f.waiting && age < 14*86400000) return false;
     if (f.time === 'today') { var today = new Date(); today.setHours(0,0,0,0); var jd = new Date(d); jd.setHours(0,0,0,0); if (jd.getTime() !== today.getTime()) return false; }
