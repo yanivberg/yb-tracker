@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v284</title>
+<title>י.ב אחזקות — v285</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -480,7 +480,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v282
 Deployed: 23/4/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbzIjN...exec (v47)
+Apps Script: AKfycbykwC4...exec (v48)
 
 ─────────────────
 CHANGELOG
@@ -1764,7 +1764,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzIjNPJUCH82moh-wQW_6JpL600sol2lpaeEyeJCm9EZZuzEd9I6sTCYeXreCNWjR18Sw/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbykwC4dGGaao_DRd4d8QLvPDJ1sqjqMc1aSKT_vGhKMH3mDvkiu4OjdCRiwmov2ojjWQA/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -1796,11 +1796,14 @@ function showJobPicker(jobs) {
   var overlay = document.getElementById('jobPickerOverlay');
   var list = document.getElementById('jobPickerList');
   if (!overlay || !list) return;
-  list.innerHTML = '';
-  if (!jobs || jobs.length === 0) { list.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">No open jobs found</div>'; }
-  else {
+  _fRerenders['jobs'] = function(){ showJobPicker(openJobsList); };
+  var filtered = _fApply(openJobsList, 'jobs');
+  list.innerHTML = _fBarHtml(openJobsList, 'jobs');
+  if (!filtered || filtered.length === 0) {
+    list.innerHTML += '<div style="padding:20px;text-align:center;color:#888;">' + (openJobsList.length > 0 ? 'אין תוצאות לפילטר הנוכחי' : 'No open jobs found') + '</div>';
+  } else {
     var groups = {}, order = [];
-    jobs.forEach(function(job) { if (!groups[job.client]) { groups[job.client] = []; order.push(job.client); } groups[job.client].push(job); });
+    filtered.forEach(function(job) { if (!groups[job.client]) { groups[job.client] = []; order.push(job.client); } groups[job.client].push(job); });
     var globalIdx = 0;
     order.forEach(function(client) {
       list.innerHTML += clientGroupHeader(client, true);
@@ -1882,11 +1885,16 @@ function showPendingQuotePicker(jobs) {
   var overlay = document.getElementById('pendingQuoteOverlay');
   var list = document.getElementById('pendingQuoteList');
   if (!overlay || !list) return;
-  list.innerHTML = '';
-  if (!jobs || jobs.length === 0) { list.innerHTML = '<div style="padding:20px;text-align:center;color:#888;">אין פרוייקטים ממתינים להצעה</div>'; }
-  else {
+  _fRerenders['pending'] = function(){ showPendingQuotePicker(pendingQuoteJobs); };
+  var filtered = _fApply(pendingQuoteJobs, 'pending');
+  list.innerHTML = _fBarHtml(pendingQuoteJobs, 'pending');
+  if (!filtered || filtered.length === 0) {
+    list.innerHTML += '<div style="padding:20px;text-align:center;color:#888;">' + (pendingQuoteJobs.length > 0 ? 'אין תוצאות לפילטר הנוכחי' : 'אין פרוייקטים ממתינים להצעה') + '</div>';
+  } else {
+    var allWithIdx = pendingQuoteJobs.map(function(job, i){ return { job: job, idx: i }; });
+    var filteredWithIdx = allWithIdx.filter(function(item){ return filtered.indexOf(item.job) !== -1; });
     var groups = {}, order = [];
-    jobs.forEach(function(job, globalIdx) { if (!groups[job.client]) { groups[job.client] = []; order.push(job.client); } groups[job.client].push({ job: job, idx: globalIdx }); });
+    filteredWithIdx.forEach(function(item) { if (!groups[item.job.client]) { groups[item.job.client] = []; order.push(item.job.client); } groups[item.job.client].push(item); });
     order.forEach(function(client) {
       var headerDiv = document.createElement('div'); headerDiv.innerHTML = clientGroupHeader(client); list.appendChild(headerDiv.firstElementChild);
       groups[client].forEach(function(item) {
@@ -2503,13 +2511,17 @@ function hardReset() {
 var currentDoneJobInfo = null;
 function fetchCompletedJobs() { if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; } var btn = document.querySelector('[onclick="fetchCompletedJobs()"]'); if (btn) { btn._orig = btn.textContent; btn.textContent = '⏳ Loading…'; btn.disabled = true; } fetch(SHEETS_URL + '?action=getCompletedJobs').then(function(r) { return r.json(); }).then(function(jobs) { if (btn) { btn.textContent = btn._orig || '✅ Recent Completed Projects'; btn.disabled = false; } showDoneJobsPicker(jobs || []); }).catch(function() { if (btn) { btn.textContent = btn._orig || '✅ Recent Completed Projects'; btn.disabled = false; } showToast('Failed to load completed jobs'); }); }
 
+var _doneJobsAll = [];
 function showDoneJobsPicker(jobs) {
+  _doneJobsAll = jobs || [];
   var overlay = document.getElementById('doneJobsOverlay'); var list = document.getElementById('doneJobsList');
   overlay.style.display = 'flex';
-  if (!jobs.length) { list.innerHTML = '<div style="padding:32px;text-align:center;color:#888;">No completed projects found</div>'; return; }
+  _fRerenders['done'] = function(){ showDoneJobsPicker(_doneJobsAll); };
+  var filtered = _fApply(_doneJobsAll, 'done');
+  var html = _fBarHtml(_doneJobsAll, 'done');
+  if (!filtered.length) { list.innerHTML = html + '<div style="padding:32px;text-align:center;color:#888;">' + (_doneJobsAll.length > 0 ? 'אין תוצאות לפילטר הנוכחי' : 'No completed projects found') + '</div>'; return; }
   var groups = {}, order = [];
-  jobs.forEach(function(j) { if (!groups[j.client]) { groups[j.client] = []; order.push(j.client); } groups[j.client].push(j); });
-  var html = '';
+  filtered.forEach(function(j) { if (!groups[j.client]) { groups[j.client] = []; order.push(j.client); } groups[j.client].push(j); });
   order.forEach(function(client) {
     html += clientGroupHeader(client);
     groups[client].forEach(function(j) {
@@ -2560,10 +2572,13 @@ function fetchInvoices() {
 function showInvoicePicker() {
   var overlay = document.getElementById('invoicesOverlay'); var list = document.getElementById('invoicesList');
   if (!overlay || !list) return; overlay.style.display = 'flex';
-  if (!invoicesData.length) { list.innerHTML = '<div style="padding:32px;text-align:center;color:#888;font-family:Heebo,sans-serif;">No invoices pending issue</div>'; updateInvoiceCopyBtn(); return; }
+  _fRerenders['invoices'] = function(){ showInvoicePicker(); };
+  var filtered = _fApply(invoicesData, 'invoices');
+  var barHtml = _fBarHtml(invoicesData, 'invoices');
+  if (!filtered.length) { list.innerHTML = barHtml + '<div style="padding:32px;text-align:center;color:#888;font-family:Heebo,sans-serif;">' + (invoicesData.length > 0 ? 'אין תוצאות לפילטר הנוכחי' : 'No invoices pending issue') + '</div>'; updateInvoiceCopyBtn(); return; }
   var groups = {}, order = [];
-  invoicesData.forEach(function(job) { if (!groups[job.client]) { groups[job.client] = []; order.push(job.client); } groups[job.client].push(job); });
-  var html = ''; var globalIdx = 0;
+  filtered.forEach(function(job) { if (!groups[job.client]) { groups[job.client] = []; order.push(job.client); } groups[job.client].push(job); });
+  var html = barHtml; var globalIdx = 0;
   order.forEach(function(client) {
     var jobs = groups[client]; html += clientGroupHeader(client);
     jobs.forEach(function(job, localIdx) {
@@ -3311,6 +3326,111 @@ function savePreTimerToSheet() {
     doSaveHours(_preTimer.jobId, _preTimer.client);
   }
 }
+
+// ── Filter System ─────────────────────────────────────
+var _fState = (function(){ try { return JSON.parse(localStorage.getItem('yb_fState')||'{}'); } catch(e){ return {}; } })();
+var _fRerenders = {};
+
+function _fGet(key) {
+  var s = _fState[key] || {};
+  return { clients: s.clients||[], time: s.time||null, cf: s.cf||'', ct: s.ct||'', waiting: !!s.waiting };
+}
+function _fSet(key, patch) {
+  var f = _fGet(key);
+  Object.keys(patch).forEach(function(k){ f[k] = patch[k]; });
+  _fState[key] = f;
+  try { localStorage.setItem('yb_fState', JSON.stringify(_fState)); } catch(e){}
+}
+function _fClear(key) {
+  _fState[key] = {};
+  try { localStorage.setItem('yb_fState', JSON.stringify(_fState)); } catch(e){}
+}
+function _fHasActive(key) {
+  var f = _fGet(key);
+  return f.clients.length > 0 || !!f.time || f.waiting;
+}
+function _fParseDate(str) {
+  if (!str) return null;
+  var m = str.match(/(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{2,4})/);
+  if (!m) return null;
+  var d = parseInt(m[1]), mo = parseInt(m[2])-1, y = parseInt(m[3]);
+  if (y < 100) y += 2000;
+  return new Date(y, mo, d);
+}
+function _fApply(jobs, key) {
+  var f = _fGet(key);
+  return jobs.filter(function(job) {
+    if (f.clients.length > 0 && f.clients.indexOf(job.client) === -1) return false;
+    if (!f.time && !f.waiting) return true;
+    var d = _fParseDate(job.dateStart);
+    if (!d) return true; // no date → pass through
+    var age = Date.now() - d.getTime();
+    if (f.waiting && age < 14*86400000) return false;
+    if (f.time === 'today') { var today = new Date(); today.setHours(0,0,0,0); var jd = new Date(d); jd.setHours(0,0,0,0); if (jd.getTime() !== today.getTime()) return false; }
+    if (f.time === 'week'  && age > 7*86400000) return false;
+    if (f.time === 'month' && age > 30*86400000) return false;
+    if (f.time === 'custom') {
+      var from = f.cf ? new Date(f.cf) : null;
+      var to   = f.ct ? new Date(f.ct) : null;
+      if (to) to.setHours(23,59,59,999);
+      if (from && d < from) return false;
+      if (to   && d > to)   return false;
+    }
+    return true;
+  });
+}
+function _fBarHtml(allJobs, key) {
+  var f = _fGet(key);
+  var clients = [];
+  allJobs.forEach(function(j){ if (clients.indexOf(j.client) === -1) clients.push(j.client); });
+  clients.sort();
+  var hasActive = _fHasActive(key);
+  var html = '<div id="fbar-' + key + '" style="background:#fff;border-bottom:1px solid #e8e8e8;padding:8px 12px 6px;position:sticky;top:0;z-index:5;">';
+  if (clients.length > 1) {
+    html += '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;">';
+    clients.forEach(function(c) {
+      var active = f.clients.indexOf(c) !== -1;
+      var cc = clientColor(c);
+      html += '<span onclick="_fToggleClient(\'' + key + '\',\'' + c.replace(/'/g,"\\'") + '\')" style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;user-select:none;' + (active ? 'background:' + cc.grad + ';color:#fff;' : 'background:#efefef;color:#555;') + '">' + c + '</span>';
+    });
+    html += '</div>';
+  }
+  html += '<div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center;">';
+  [{k:'today',l:'היום'},{k:'week',l:'שבוע'},{k:'month',l:'חודש'},{k:'custom',l:'📅 טווח'}].forEach(function(tc) {
+    var active = f.time === tc.k;
+    html += '<span onclick="_fSetTime(\'' + key + '\',\'' + tc.k + '\')" style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;user-select:none;' + (active ? 'background:#1a1a2e;color:#fff;' : 'background:#efefef;color:#555;') + '">' + tc.l + '</span>';
+  });
+  html += '<span onclick="_fToggleWaiting(\'' + key + '\')" style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;user-select:none;' + (f.waiting ? 'background:#c62828;color:#fff;' : 'background:#efefef;color:#555;') + '">⏰ &gt;2 שבועות</span>';
+  if (hasActive) html += '<span onclick="_fClearAndRender(\'' + key + '\')" style="padding:3px 10px;border-radius:20px;font-size:11px;cursor:pointer;user-select:none;background:#fff;color:#bbb;border:1px solid #ddd;">✕ נקה</span>';
+  html += '</div>';
+  if (f.time === 'custom') {
+    html += '<div style="display:flex;gap:8px;margin-top:7px;align-items:center;">' +
+      '<input type="date" value="' + (f.cf||'') + '" onchange="_fSetCustomFrom(\'' + key + '\',this.value)" style="flex:1;padding:5px 7px;border:1px solid #ddd;border-radius:8px;font-size:12px;">' +
+      '<span style="font-size:11px;color:#aaa;flex-shrink:0;">עד</span>' +
+      '<input type="date" value="' + (f.ct||'') + '" onchange="_fSetCustomTo(\'' + key + '\',this.value)" style="flex:1;padding:5px 7px;border:1px solid #ddd;border-radius:8px;font-size:12px;">' +
+    '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+function _fToggleClient(key, client) {
+  var f = _fGet(key); var idx = f.clients.indexOf(client);
+  if (idx === -1) f.clients = f.clients.concat([client]);
+  else f.clients = f.clients.filter(function(c){ return c !== client; });
+  _fSet(key, f); if (_fRerenders[key]) _fRerenders[key]();
+}
+function _fSetTime(key, t) {
+  var f = _fGet(key); _fSet(key, { time: f.time === t ? null : t });
+  if (_fRerenders[key]) _fRerenders[key]();
+}
+function _fToggleWaiting(key) {
+  var f = _fGet(key); _fSet(key, { waiting: !f.waiting });
+  if (_fRerenders[key]) _fRerenders[key]();
+}
+function _fSetCustomFrom(key, val) { _fSet(key, { cf: val, time: 'custom' }); if (_fRerenders[key]) _fRerenders[key](); }
+function _fSetCustomTo(key, val)   { _fSet(key, { ct: val, time: 'custom' }); if (_fRerenders[key]) _fRerenders[key](); }
+function _fClearAndRender(key) { _fClear(key); if (_fRerenders[key]) _fRerenders[key](); }
+// ── End Filter System ─────────────────────────────────
 
 var toastTimer = null;
 function showToast(msg) {
