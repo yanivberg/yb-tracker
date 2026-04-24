@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v296</title>
+<title>י.ב אחזקות — v297</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3150,7 +3150,10 @@ function _caspitLoadData() {
   var body = document.getElementById('caspitBody');
   body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ טוען…</div>';
   var sheetDone = false, caspitDone = false;
-  function tryRender() { if (sheetDone && caspitDone) _renderCaspitBody(); }
+  var rendered = false;
+  function tryRender() {
+    if (sheetDone && caspitDone && !rendered) { rendered = true; _renderCaspitBody(); }
+  }
   // Always fetch fresh invoices for Caspit
   fetch(SHEETS_URL + '?action=getInvoices').then(function(r){ return r.json(); }).then(function(data) {
     invoicesData = data || []; _caspitInvoiceJobs = invoicesData; sheetDone = true; tryRender();
@@ -3222,7 +3225,6 @@ function _caspitSetDocType(type) { _caspitDocType = type; _renderCaspitInvoiceTa
 
 function createCaspitInvoice() {
   var checked = document.querySelectorAll('#caspitBody input[type=checkbox]:checked');
-  showToast('checkboxes found: ' + document.querySelectorAll('#caspitBody input[type=checkbox]').length + ' checked: ' + checked.length);
   if (!checked.length) { showToast('בחר לפחות עבודה אחת'); return; }
   var byClient = {};
   checked.forEach(function(cb) {
