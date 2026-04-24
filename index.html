@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v295</title>
+<title>י.ב אחזקות — v296</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1219,7 +1219,7 @@ SHEET SYNC
     </div>
     <div id="caspitBody" style="overflow-y:auto;flex:1;padding:16px 20px 8px;direction:rtl;"></div>
     <div style="padding:12px 16px;border-top:1px solid #eee;flex-shrink:0;">
-      <button id="caspitCreateBtn" onclick="createCaspitDocument()" style="width:100%;padding:14px;background:#0d47a1;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">💼 צור מסמך</button>
+      <button id="caspitCreateBtn" onclick="caspitCreateDispatch()" style="width:100%;padding:14px;background:#0d47a1;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">💼 צור מסמך</button>
     </div>
   </div>
 </div>
@@ -3172,10 +3172,15 @@ function _renderCaspitBody() {
   else _renderCaspitQuoteTab();
 }
 
+function caspitCreateDispatch() {
+  if (_caspitTab === 'invoice') createCaspitInvoice();
+  else createCaspitQuote();
+}
+
 function _renderCaspitInvoiceTab() {
   var body = document.getElementById('caspitBody');
   var createBtn = document.getElementById('caspitCreateBtn');
-  if (createBtn) { createBtn.textContent = '💼 צור מסמך'; createBtn.onclick = createCaspitInvoice; }
+  if (createBtn) createBtn.textContent = '💼 צור מסמך';
   if (!_caspitInvoiceJobs.length) { body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">אין עבודות להוציא חש</div>'; return; }
 
   var html = '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
@@ -3256,7 +3261,7 @@ function createCaspitInvoice() {
 function _renderCaspitQuoteTab() {
   var body = document.getElementById('caspitBody');
   var createBtn = document.getElementById('caspitCreateBtn');
-  if (createBtn) { createBtn.textContent = '💼 שמור ושלח לכספית'; createBtn.onclick = createCaspitQuote; }
+  if (createBtn) createBtn.textContent = '💼 שמור ושלח לכספית';
   var allClients = [];
   _caspitInvoiceJobs.forEach(function(j) { if (allClients.indexOf(j.client)===-1) allClients.push(j.client); });
   var clientOpts = '<option value="">— בחר לקוח —</option>';
