@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v282</title>
+<title>י.ב אחזקות — v283</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1962,7 +1962,16 @@ setInterval(function() { if (document.getElementById('setupDrawer').style.displa
 // ── Location ──────────────────────────────────────────
 var currentLocation = null;
 var locationWatchId = null;
-function startLocationWatch() { if (!navigator.geolocation) return; navigator.geolocation.getCurrentPosition(onLocationUpdate, null, {enableHighAccuracy:true, timeout:10000}); locationWatchId = navigator.geolocation.watchPosition(onLocationUpdate, null, {enableHighAccuracy:true, maximumAge:10000}); }
+function startLocationWatch() {
+  if (!navigator.geolocation) return;
+  // One immediate fetch on start
+  navigator.geolocation.getCurrentPosition(onLocationUpdate, null, {enableHighAccuracy:true, timeout:10000});
+  // Then poll every 5 minutes instead of continuous watch
+  if (locationWatchId) clearInterval(locationWatchId);
+  locationWatchId = setInterval(function() {
+    navigator.geolocation.getCurrentPosition(onLocationUpdate, null, {enableHighAccuracy:true, timeout:10000});
+  }, 5 * 60 * 1000);
+}
 function onLocationUpdate(pos) {
   var lat = pos.coords.latitude; var lng = pos.coords.longitude;
   var speed = pos.coords.speed || 0;
