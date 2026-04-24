@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v297</title>
+<title>י.ב אחזקות — v299</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3131,7 +3131,7 @@ var _caspitMatchMap = {};
 var _caspitDocType = 1;
 
 function openCaspitOverlay() {
-  _caspitTab = 'invoice'; _caspitDocType = 1;
+  _caspitTab = 'invoice'; _caspitDocType = 1; _caspitSelected = {};
   document.getElementById('caspitOverlay').style.display = 'flex';
   switchCaspitTab('invoice');
   _caspitLoadData();
@@ -3180,6 +3180,8 @@ function caspitCreateDispatch() {
   else createCaspitQuote();
 }
 
+var _caspitSelected = {}; // jobId → job data
+
 function _renderCaspitInvoiceTab() {
   var body = document.getElementById('caspitBody');
   var createBtn = document.getElementById('caspitCreateBtn');
@@ -3196,7 +3198,7 @@ function _renderCaspitInvoiceTab() {
     if (!groups[j.client]) { groups[j.client] = []; order.push(j.client); }
     groups[j.client].push(j);
   });
-  var idx = 0;
+
   order.forEach(function(client) {
     var matched = !!_caspitMatchMap[client];
     var cc = clientColor(client);
@@ -3206,31 +3208,43 @@ function _renderCaspitInvoiceTab() {
       '</div>';
     groups[client].forEach(function(job) {
       var gp = parseFloat(job.grossProfit) || parseFloat(job.income) || 0;
-      var cbId = 'cinv-' + idx;
-      html += '<div onclick="var cb=document.getElementById(\'' + cbId + '\');cb.checked=!cb.checked;this.style.background=cb.checked?\'#e8f0fe\':\'\';" style="padding:10px 12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
-        '<input type="checkbox" id="' + cbId + '" data-jobid="' + job.id + '" data-client="' + client.replace(/"/g,"&quot;") + '" data-desc="' + (job.desc||"").replace(/"/g,"&quot;") + '" data-po="' + (job.po||"").replace(/"/g,"&quot;") + '" data-gp="' + gp + '" style="width:20px;height:20px;flex-shrink:0;pointer-events:none;">' +
-        '<div style="flex:1;">' +
-          '<div style="font-size:13px;font-weight:700;color:#111;">' + (job.desc||job.id) + '</div>' +
-          '<div style="font-size:11px;color:#888;margin-top:1px;">' + (job.po ? 'מ.רכש: ' + job.po + ' · ' : '') + '₪' + gp.toLocaleString() + '</div>' +
-        '</div>' +
+      var sel = !!_caspitSelected[job.id];
+      html += '<div class="cjob-row" data-jobid="' + job.id + '" data-client="' + client.replace(/"/g,'&quot;') + '" data-gp="' + gp + '" data-desc="' + (job.desc||'').replace(/"/g,'&quot;') + '" data-po="' + (job.po||'').replace(/"/g,'&quot;') + '" style="padding:10px 12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px;cursor:pointer;background:' + (sel?'#e8f0fe':'') + ';">' +
+        '<div class="cjob-dot" style="width:22px;height:22px;border-radius:50%;border:2px solid ' + (sel?'#0d47a1':'#ccc') + ';background:' + (sel?'#0d47a1':'transparent') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:#fff;">' + (sel?'✓':'') + '</div>' +
+        '<div style="flex:1;"><div style="font-size:13px;font-weight:700;color:#111;">' + (job.desc||job.id) + '</div>' +
+        '<div style="font-size:11px;color:#888;margin-top:1px;">' + (job.po?'מ.רכש: '+job.po+' · ':'') + '₪' + gp.toLocaleString() + '</div></div>' +
       '</div>';
-      idx++;
     });
     html += '</div>';
   });
   body.innerHTML = html;
+  // Event delegation — handles all job row taps
+  body.addEventListener('click', function(e) {
+    var row = e.target.closest('.cjob-row');
+    if (!row) return;
+    var id     = row.getAttribute('data-jobid');
+    var client = row.getAttribute('data-client');
+    var gp     = parseFloat(row.getAttribute('data-gp')) || 0;
+    var desc   = row.getAttribute('data-desc');
+    var po     = row.getAttribute('data-po');
+    if (_caspitSelected[id]) { delete _caspitSelected[id]; }
+    else { _caspitSelected[id] = { id: id, client: client, gp: gp, desc: desc, po: po }; }
+    var sel = !!_caspitSelected[id];
+    row.style.background = sel ? '#e8f0fe' : '';
+    var dot = row.querySelector('.cjob-dot');
+    if (dot) { dot.style.borderColor = sel?'#0d47a1':'#ccc'; dot.style.background = sel?'#0d47a1':'transparent'; dot.textContent = sel?'✓':''; }
+  });
 }
 
 function _caspitSetDocType(type) { _caspitDocType = type; _renderCaspitInvoiceTab(); }
 
 function createCaspitInvoice() {
-  var checked = document.querySelectorAll('#caspitBody input[type=checkbox]:checked');
-  if (!checked.length) { showToast('בחר לפחות עבודה אחת'); return; }
+  var selectedJobs = Object.values(_caspitSelected);
+  if (!selectedJobs.length) { showToast('בחר לפחות עבודה אחת'); return; }
   var byClient = {};
-  checked.forEach(function(cb) {
-    var client = cb.getAttribute('data-client');
-    if (!byClient[client]) byClient[client] = [];
-    byClient[client].push({ id: cb.getAttribute('data-jobid'), desc: cb.getAttribute('data-desc'), po: cb.getAttribute('data-po'), gp: parseFloat(cb.getAttribute('data-gp')) || 0 });
+  selectedJobs.forEach(function(job) {
+    if (!byClient[job.client]) byClient[job.client] = [];
+    byClient[job.client].push(job);
   });
   var btn = document.getElementById('caspitCreateBtn');
   btn.textContent = '⏳ יוצר…'; btn.disabled = true;
