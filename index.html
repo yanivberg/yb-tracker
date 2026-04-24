@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v300</title>
+<title>י.ב אחזקות — v301</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3268,11 +3268,11 @@ function createCaspitInvoice() {
     fetch(SHEETS_URL + '?action=createCaspitDocument&payload=' + encodeURIComponent(JSON.stringify({ TrxTypeId: _caspitDocType, Date: new Date().toISOString(), CustomerId: customerId, CustomerBusinessName: customerId ? '' : client, DocumentLines: lines }))).then(function(r){ return r.json(); }).then(function(result) {
       if (result && (result.DocumentId || result.Number)) created++;
       else {
-        var errMsg = result.error || result.Message || result.ExceptionMessage || JSON.stringify(result).substring(0,100);
-        showToast('⚠️ ' + client + ': ' + errMsg);
+        var errMsg = result.error || result.Message || result.ExceptionMessage || result.raw || JSON.stringify(result).substring(0,150);
+        alert('Caspit error:\n' + errMsg);
       }
       processNext(i+1);
-    }).catch(function(err) { showToast('⚠️ fetch error: ' + (err.message||'')); processNext(i+1); });
+    }).catch(function(err) { alert('fetch error:\n' + (err.message||err)); processNext(i+1); });
   }
   processNext(0);
 }
