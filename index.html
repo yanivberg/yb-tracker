@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v302</title>
+<title>י.ב אחזקות — v303</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3165,8 +3165,9 @@ function _caspitLoadData() {
     if (data && data.resolved) {
       Object.keys(data.resolved).forEach(function(k) { if (data.resolved[k]) _caspitMatchMap[k] = data.resolved[k]; });
     }
+    showToast('Caspit: ' + _caspitContacts.length + ' contacts, ' + Object.keys(_caspitMatchMap).length + ' matched');
     caspitDone = true; tryRender();
-  }).catch(function() { caspitDone = true; tryRender(); });
+  }).catch(function(err) { showToast('Contacts error: ' + err); caspitDone = true; tryRender(); });
   if (sheetDone) tryRender();
 }
 
@@ -3269,8 +3270,8 @@ function createCaspitInvoice() {
       DocumentId: 'YB-' + Date.now(),
       TrxTypeId: _caspitDocType, 
       Date: new Date().toISOString(), 
-      CustomerId: customerId, 
-      CustomerBusinessName: customerId ? '' : client, 
+      CustomerId: customerId || undefined,
+      CustomerBusinessName: customerId ? undefined : client, 
       DocumentLines: lines 
     }))).then(function(r){ return r.json(); }).then(function(result) {
       if (result && (result.DocumentId || result.Number)) created++;
