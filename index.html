@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v283</title>
+<title>י.ב אחזקות — v284</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -456,7 +456,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     <div style="flex:1;overflow-y:auto;">
       <div style="font-size:9px;font-weight:700;color:#bbb;letter-spacing:0.1em;padding:12px 16px 4px;">ACTIONS</div>
       <div onclick="closeSetupDrawer();openAddJobModal();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#111;">+ Add Project to Sheet</div>
-      <div id="drawerPreTimerItem" onclick="closeSetupDrawer();openPreTimerOverlay();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#00695c;">⏱ Pre-Project Timer</div>
+      <div id="drawerPreTimerItem" onclick="closeSetupDrawer();openPreTimerPicker();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#00695c;">⏱ Pre-Project Timer</div>
       <div onclick="closeSetupDrawer();fetchOpenJobs();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#1a56db;">📋 Pick from Open Tasks</div>
       <div onclick="closeSetupDrawer();fetchPendingQuote();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#b07d00;">📋 Pending Quote Projects</div>
       <div onclick="closeSetupDrawer();openNewClientModal();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#555;">➕ Create New Client</div>
@@ -1194,6 +1194,17 @@ SHEET SYNC
     </div>
   </div>
 </div>
+<!-- Pre-Project Timer Picker -->
+<div id="preTimerPickerOverlay" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10013;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:90vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+    <div style="padding:18px 20px 12px;border-bottom:1px solid #eee;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:17px;font-weight:900;color:#00695c;">⏱ Pre-Project Timer</div>
+      <button onclick="document.getElementById('preTimerPickerOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+    </div>
+    <div id="preTimerPickerContent" style="overflow-y:auto;flex:1;padding:16px 20px 32px;"></div>
+  </div>
+</div>
+
 <!-- Pre-Project Timer Overlay -->
 <div id="preTimerOverlay" onclick="if(event.target===this)closePreTimerOverlay()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10012;align-items:flex-end;justify-content:center;">
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;padding:24px 20px 36px;font-family:Heebo,sans-serif;">
@@ -3099,26 +3110,118 @@ function _startPreTimerTick() {
 _startPreTimerTick();
 _updatePreTimerUI();
 
-function startPreTimerForJob(jobId, client, desc) {
+function startPreTimerForJob(jobId, client, desc, isNew) {
   if (_preTimer.jobId && _preTimer.jobId !== jobId) {
     if (!confirm('A timer is already running for "' + (_preTimer.desc || _preTimer.jobId) + '".\nStop it and start a new one for "' + desc + '"?')) return;
     if (_preTimer.active) { _preTimer.ms += Date.now() - _preTimer.start; _preTimer.active = false; }
-    _savePreTimer();
   }
   _preTimer.jobId = jobId;
   _preTimer.client = client;
   _preTimer.desc = desc;
-  if (!_preTimer.active) {
-    _preTimer.active = true;
-    _preTimer.start = Date.now();
-    _savePreTimer();
-  }
+  _preTimer.isNew = isNew || false;
+  _preTimer.active = false;
+  _preTimer.start = null;
+  _savePreTimer();
   document.getElementById('pendingQuoteOverlay').style.display = 'none';
-  openPreTimerOverlay();
+  document.getElementById('preTimerPickerOverlay').style.display = 'none';
+  _updatePreTimerUI();
+  document.getElementById('preTimerOverlay').style.display = 'flex';
+}
+
+// ── Pre-Timer Picker ──────────────────────────────────
+var _preTimerClients = [];
+var _preTimerPendingJobs = [];
+
+function openPreTimerPicker() {
+  // If timer already running — go straight to overlay
+  if (_preTimer.jobId) {
+    _updatePreTimerUI();
+    document.getElementById('preTimerOverlay').style.display = 'flex';
+    return;
+  }
+  document.getElementById('preTimerPickerOverlay').style.display = 'flex';
+  _renderPreTimerPickerHome();
+  // Fetch data in background
+  if (SHEETS_URL) {
+    fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(c){ _preTimerClients = c || []; }).catch(function(){});
+    fetch(SHEETS_URL + '?action=getPendingQuote').then(function(r){ return r.json(); }).then(function(j){ _preTimerPendingJobs = j || []; }).catch(function(){});
+  }
+}
+
+function _renderPreTimerPickerHome() {
+  var el = document.getElementById('preTimerPickerContent');
+  el.innerHTML =
+    '<div style="display:flex;flex-direction:column;gap:14px;">' +
+      '<button onclick="_renderPreTimerNewProject()" style="padding:20px;background:#f0faf8;border:2px solid #00695c;border-radius:14px;font-size:16px;font-weight:700;color:#00695c;cursor:pointer;font-family:Heebo,sans-serif;text-align:right;">' +
+        '➕ New Project<div style="font-size:12px;font-weight:400;color:#777;margin-top:4px;">בחר לקוח + שם פרויקט</div>' +
+      '</button>' +
+      '<button onclick="_renderPreTimerExisting()" style="padding:20px;background:#f5f5f5;border:2px solid #ddd;border-radius:14px;font-size:16px;font-weight:700;color:#333;cursor:pointer;font-family:Heebo,sans-serif;text-align:right;">' +
+        '📋 Existing Project<div style="font-size:12px;font-weight:400;color:#777;margin-top:4px;">ממתין להצעה</div>' +
+      '</button>' +
+    '</div>';
+}
+
+function _renderPreTimerNewProject() {
+  var el = document.getElementById('preTimerPickerContent');
+  var clientOpts = '<option value="">— בחר לקוח —</option>';
+  _preTimerClients.forEach(function(c) { clientOpts += '<option value="' + c + '">' + c + '</option>'; });
+  el.innerHTML =
+    '<button onclick="_renderPreTimerPickerHome()" style="background:none;border:none;font-size:13px;color:#888;cursor:pointer;padding:0 0 14px;font-family:Heebo,sans-serif;">← Back</button>' +
+    '<div style="font-size:15px;font-weight:900;color:#1a1a2e;margin-bottom:16px;">➕ New Project</div>' +
+    '<div style="margin-bottom:12px;">' +
+      '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:6px;">לקוח</label>' +
+      '<select id="ptNewClient" style="width:100%;padding:11px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;background:#fff;">' +
+        clientOpts +
+      '</select>' +
+    '</div>' +
+    '<div style="margin-bottom:20px;">' +
+      '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:6px;">שם פרויקט</label>' +
+      '<input id="ptNewTitle" type="text" placeholder="תיאור הפרויקט…" style="width:100%;padding:11px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;" onfocus="this.style.borderColor=\'#00695c\'" onblur="this.style.borderColor=\'#ddd\'">' +
+    '</div>' +
+    '<button onclick="_confirmPreTimerNew()" style="width:100%;padding:14px;background:#00695c;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">▶ Start Timer</button>';
+  setTimeout(function(){ var i = document.getElementById('ptNewClient'); if (_preTimerClients.length === 0 && SHEETS_URL) { fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(c){ _preTimerClients = c || []; var opts = '<option value="">— בחר לקוח —</option>'; _preTimerClients.forEach(function(cl){ opts += '<option value="' + cl + '">' + cl + '</option>'; }); if(i) i.innerHTML = opts; }).catch(function(){}); }}, 300);
+}
+
+function _confirmPreTimerNew() {
+  var client = document.getElementById('ptNewClient').value.trim();
+  var title  = document.getElementById('ptNewTitle').value.trim();
+  if (!client) { showToast('בחר לקוח'); return; }
+  if (!title)  { showToast('הזן שם פרויקט'); return; }
+  // Use a temp ID — real ID assigned on save
+  var tempId = 'NEW_' + Date.now();
+  startPreTimerForJob(tempId, client, title, true);
+}
+
+function _renderPreTimerExisting() {
+  var el = document.getElementById('preTimerPickerContent');
+  var render = function(jobs) {
+    if (!jobs || jobs.length === 0) {
+      el.innerHTML = '<button onclick="_renderPreTimerPickerHome()" style="background:none;border:none;font-size:13px;color:#888;cursor:pointer;padding:0 0 14px;font-family:Heebo,sans-serif;">← Back</button><div style="padding:32px;text-align:center;color:#aaa;font-size:14px;">אין פרויקטים ממתינים להצעה</div>';
+      return;
+    }
+    var html = '<button onclick="_renderPreTimerPickerHome()" style="background:none;border:none;font-size:13px;color:#888;cursor:pointer;padding:0 0 14px;font-family:Heebo,sans-serif;">← Back</button>';
+    html += '<div style="font-size:15px;font-weight:900;color:#1a1a2e;margin-bottom:14px;">📋 בחר פרויקט</div>';
+    jobs.forEach(function(job) {
+      var cc = clientColor(job.client);
+      html += '<div onclick="startPreTimerForJob(\'' + job.id + '\',\'' + job.client.replace(/'/g,"\\'") + '\',\'' + (job.desc||'').replace(/'/g,"\\'") + '\',false)" style="padding:14px;border:1.5px solid #eee;border-radius:12px;margin-bottom:10px;cursor:pointer;background:#fafafa;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
+          '<span style="font-size:11px;font-weight:900;color:#fff;background:' + cc.grad + ';padding:2px 8px;border-radius:6px;">' + job.client + '</span>' +
+          '<span style="font-size:11px;color:#aaa;">' + job.id + '</span>' +
+        '</div>' +
+        '<div style="font-size:14px;font-weight:700;color:#111;">' + (job.desc || '—') + '</div>' +
+      '</div>';
+    });
+    el.innerHTML = html;
+  };
+  if (_preTimerPendingJobs.length > 0) { render(_preTimerPendingJobs); return; }
+  el.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ טוען…</div>';
+  if (SHEETS_URL) {
+    fetch(SHEETS_URL + '?action=getPendingQuote').then(function(r){ return r.json(); }).then(function(j){ _preTimerPendingJobs = j || []; render(_preTimerPendingJobs); }).catch(function(){ render([]); });
+  } else { render([]); }
 }
 
 function openPreTimerOverlay() {
-  if (!_preTimer.jobId) { showToast('No active timer — start one from Pending Quote'); return; }
+  if (!_preTimer.jobId) { openPreTimerPicker(); return; }
   _updatePreTimerUI();
   document.getElementById('preTimerOverlay').style.display = 'flex';
 }
@@ -3163,25 +3266,50 @@ function savePreTimerToSheet() {
   var hours = totalMs / 3600000;
   var btn = document.getElementById('preTimerSaveBtn');
   btn.textContent = '⏳ שומר…'; btn.disabled = true;
-  fetch(SHEETS_URL + '?action=getJobHours&jobId=' + encodeURIComponent(_preTimer.jobId) + '&client=' + encodeURIComponent(_preTimer.client))
-    .then(function(r) { return r.text(); })
-    .then(function(existing) {
-      var existingHours = parseFloat(existing) || 0;
-      var finalHours = existingHours + hours;
-      return fetch(SHEETS_URL + '?action=updateJob&jobId=' + encodeURIComponent(_preTimer.jobId) +
-        '&client=' + encodeURIComponent(_preTimer.client) +
-        '&hours=' + finalHours.toFixed(4));
-    })
-    .then(function(r) { return r.text(); })
-    .then(function() {
-      btn.textContent = '✓ Saved!'; btn.disabled = false;
-      showToast('✓ ' + _formatPreTimer(totalMs) + ' saved to ' + _preTimer.jobId);
-      setTimeout(function() { btn.textContent = '💾 Save to Sheet'; }, 2000);
-    })
-    .catch(function() {
-      btn.textContent = '💾 Save to Sheet'; btn.disabled = false;
-      showToast('⚠️ Save failed');
-    });
+
+  function doSaveHours(jobId, client) {
+    fetch(SHEETS_URL + '?action=getJobHours&jobId=' + encodeURIComponent(jobId) + '&client=' + encodeURIComponent(client))
+      .then(function(r) { return r.text(); })
+      .then(function(existing) {
+        var finalHours = (parseFloat(existing) || 0) + hours;
+        return fetch(SHEETS_URL + '?action=updateJob&jobId=' + encodeURIComponent(jobId) +
+          '&client=' + encodeURIComponent(client) +
+          '&hours=' + finalHours.toFixed(4));
+      })
+      .then(function(r) { return r.text(); })
+      .then(function() {
+        btn.textContent = '✓ Saved!'; btn.disabled = false;
+        showToast('✓ ' + _formatPreTimer(totalMs) + ' saved to ' + jobId);
+        setTimeout(function() { btn.textContent = '💾 Save to Sheet'; }, 2000);
+      })
+      .catch(function() {
+        btn.textContent = '💾 Save to Sheet'; btn.disabled = false;
+        showToast('⚠️ Save failed');
+      });
+  }
+
+  if (_preTimer.isNew) {
+    // Create the job first, then save hours
+    fetch(SHEETS_URL + '?action=addJob&client=' + encodeURIComponent(_preTimer.client) +
+      '&desc=' + encodeURIComponent(_preTimer.desc) +
+      '&st=' + encodeURIComponent('ממתין להצעה'))
+      .then(function(r) { return r.text(); })
+      .then(function(newId) {
+        newId = newId.trim();
+        if (!newId || newId.indexOf('Error') !== -1 || newId.indexOf('not found') !== -1) throw new Error(newId);
+        _preTimer.jobId = newId;
+        _preTimer.isNew = false;
+        _savePreTimer();
+        _updatePreTimerUI();
+        doSaveHours(newId, _preTimer.client);
+      })
+      .catch(function(err) {
+        btn.textContent = '💾 Save to Sheet'; btn.disabled = false;
+        showToast('⚠️ Could not create project: ' + (err.message || ''));
+      });
+  } else {
+    doSaveHours(_preTimer.jobId, _preTimer.client);
+  }
 }
 
 var toastTimer = null;
