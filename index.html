@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v294</title>
+<title>י.ב אחזקות — v295</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3199,8 +3199,8 @@ function _renderCaspitInvoiceTab() {
     groups[client].forEach(function(job) {
       var gp = parseFloat(job.grossProfit) || parseFloat(job.income) || 0;
       var cbId = 'cinv-' + idx;
-      html += '<div onclick="var cb=document.getElementById(\'' + cbId + '\');cb.checked=!cb.checked;" style="padding:10px 12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px;cursor:pointer;">' +
-        '<input type="checkbox" id="' + cbId + '" data-jobid="' + job.id + '" data-client="' + client.replace(/"/g,"&quot;") + '" data-desc="' + (job.desc||"").replace(/"/g,"&quot;") + '" data-po="' + (job.po||"").replace(/"/g,"&quot;") + '" data-gp="' + gp + '" onclick="event.stopPropagation();" style="width:18px;height:18px;flex-shrink:0;">' +
+      html += '<div onclick="var cb=document.getElementById(\'' + cbId + '\');cb.checked=!cb.checked;this.style.background=cb.checked?\'#e8f0fe\':\'\';" style="padding:10px 12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+        '<input type="checkbox" id="' + cbId + '" data-jobid="' + job.id + '" data-client="' + client.replace(/"/g,"&quot;") + '" data-desc="' + (job.desc||"").replace(/"/g,"&quot;") + '" data-po="' + (job.po||"").replace(/"/g,"&quot;") + '" data-gp="' + gp + '" style="width:20px;height:20px;flex-shrink:0;pointer-events:none;">' +
         '<div style="flex:1;">' +
           '<div style="font-size:13px;font-weight:700;color:#111;">' + (job.desc||job.id) + '</div>' +
           '<div style="font-size:11px;color:#888;margin-top:1px;">' + (job.po ? 'מ.רכש: ' + job.po + ' · ' : '') + '₪' + gp.toLocaleString() + '</div>' +
