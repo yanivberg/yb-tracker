@@ -1794,7 +1794,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwkX3Zc854wRGs1FGb-ZzJbnh8qqya0oCVzgv-kmCkFHsbE-_IOJONfTlhvEfEvzgQJRw/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbylh3Z01_775U9HkOODQzsWVI-s8kFOJhQC6DWLfXLqQbMA0KTHnbYenLWTSm-MB8iFZw/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
