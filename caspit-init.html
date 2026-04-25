@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caspit Init</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: monospace; background: #111; color: #eee; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 28px; width: 100%; max-width: 480px; }
+h2 { font-size: 18px; margin-bottom: 6px; color: #fff; }
+.sub { font-size: 12px; color: #666; margin-bottom: 24px; }
+label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+input { width: 100%; background: #111; border: 1px solid #333; border-radius: 8px; padding: 11px 13px; color: #fff; font-family: monospace; font-size: 13px; outline: none; margin-bottom: 16px; }
+input:focus { border-color: #555; }
+button { width: 100%; padding: 13px; background: #fff; color: #000; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; font-family: monospace; cursor: pointer; transition: background 0.15s; }
+button:hover { background: #ddd; }
+button:disabled { background: #333; color: #666; cursor: not-allowed; }
+.result { margin-top: 16px; padding: 13px; border-radius: 8px; font-size: 12px; white-space: pre-wrap; word-break: break-all; display: none; }
+.success { background: #0a1f0a; border: 1px solid #1a4d1a; color: #4caf50; display: block; }
+.error { background: #1f0a0a; border: 1px solid #4d1a1a; color: #f44336; display: block; }
+.info { background: #0a0f1f; border: 1px solid #1a2a4d; color: #64b5f6; display: block; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>🔑 Caspit Token Init</h2>
+  <div class="sub">Gets a fresh token and initializes OpenAPIToken in one click</div>
+
+  <label>Caspit Password</label>
+  <input type="password" id="pwd" placeholder="Your Caspit password" value="">
+
+  <label>Apps Script Deploy URL</label>
+  <input type="text" id="deployUrl" placeholder="https://script.google.com/macros/s/.../exec"
+    value="https://script.google.com/macros/s/AKfycbz5wQNfX4AZhhly3j-cUAMjnQdQqx5DNvTiPueqI8oGu1noRPdOspIglE5ZGqEWxbMFWg/exec">
+
+  <button onclick="init()" id="btn">⚡ Get Token + Init</button>
+  <div class="result" id="result"></div>
+</div>
+
+<script>
+var CASPIT_USER = 'yaniv%20berg';
+var CASPIT_OSEK = '060139755';
+
+function showResult(msg, type) {
+  var el = document.getElementById('result');
+  el.textContent = msg;
+  el.className = 'result ' + type;
+}
+
+function init() {
+  var pwd = document.getElementById('pwd').value.trim();
+  var deployUrl = document.getElementById('deployUrl').value.trim();
+  var btn = document.getElementById('btn');
+
+  if (!pwd) { showResult('Enter your Caspit password', 'error'); return; }
+  if (!deployUrl) { showResult('Enter the deploy URL', 'error'); return; }
+
+  btn.textContent = '⏳ Getting token...'; btn.disabled = true;
+  showResult('Step 1: Getting fresh Caspit token...', 'info');
+
+  // Step 1: Get fresh token via CORS proxy (Apps Script itself)
+  var tokenUrl = deployUrl + '?action=getCaspitTokenDirect&pwd=' + encodeURIComponent(pwd);
+  fetch(tokenUrl)
+    .then(function(r) { return r.text(); })
+    .then(function(token) {
+      token = token.trim();
+      if (!token || token.length < 10 || token.indexOf('error') !== -1 || token.indexOf('Error') !== -1) {
+        throw new Error('Bad token: ' + token.substring(0,100));
+      }
+      showResult('Step 1: Token received (' + token.substring(0,8) + '...)\nStep 2: Initializing OpenAPIToken...', 'info');
+      btn.textContent = '⏳ Initializing...';
+
+      // Step 2: Init OpenAPIToken
+      return fetch(deployUrl + '?action=initCaspitOpenToken&t=' + encodeURIComponent(token));
+    })
+    .then(function(r) { return r.text(); })
+    .then(function(result) {
+      btn.textContent = '⚡ Get Token + Init'; btn.disabled = false;
+      if (result.indexOf('initialized') !== -1 || result.indexOf('Access valid') !== -1) {
+        showResult('✓ Success!\n\n' + result, 'success');
+      } else {
+        showResult('⚠️ ' + result, 'error');
+      }
+    })
+    .catch(function(err) {
+      btn.textContent = '⚡ Get Token + Init'; btn.disabled = false;
+      showResult('✗ ' + err.message, 'error');
+    });
+}
+</script>
+</body>
+</html>
