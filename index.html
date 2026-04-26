@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v303</title>
+<title>י.ב אחזקות — v308</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1794,7 +1794,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbztJufQYCKAmtcrd89I-9ksqmA7KzT3HL8xgHc47_RwxfL5SnKTdvbV39z-DFzRE6ps/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw2xg9qV0IukPl23eqi495amxi0JsFu4lJPyVPQUo6EOF1aCVXxyMzr0rIliXK3YtcNqA/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -1983,6 +1983,20 @@ function savePartialJobFields() { if (!_currentCompleteJob) return; var job = _c
 
 function openNewClientModal() { document.getElementById('newClientName').value = ''; document.getElementById('clientPrefixPreview').textContent = ''; document.getElementById('newClientOverlay').style.display = 'flex'; setTimeout(function() { document.getElementById('newClientName').focus(); }, 100); }
 function previewClientPrefix() { var name = document.getElementById('newClientName').value.trim(); if (!name) { document.getElementById('clientPrefixPreview').textContent = ''; return; } var prefix = name.replace(/[^a-zA-Z\u0590-\u05FF]/g, '').substring(0, 2).toUpperCase(); if (prefix.length < 2) prefix = (name.replace(/\s/g,'').substring(0,2)).toUpperCase(); document.getElementById('clientPrefixPreview').textContent = 'Serial ID: ' + prefix + '0001, ' + prefix + '0002…'; }
+function createClientTab(clientName) {
+  if (!clientName) return;
+  if (!confirm('יצירת טאב חדש לכספית ולגיליון עבור: "' + clientName + '"?\n\nפעולה זו תיצור גיליון חדש ותוסיף ללקוחות.')) return;
+  if (!SHEETS_URL) { showToast('SHEETS_URL not set'); return; }
+  showToast('⏳ יוצר לקוח...');
+  fetch(SHEETS_URL + '?action=createClient&name=' + encodeURIComponent(clientName))
+    .then(function(r){ return r.text(); })
+    .then(function(res) {
+      if (res === 'OK') showToast('✓ לקוח "' + clientName + '" נוצר בהצלחה');
+      else showToast('⚠️ ' + res);
+    })
+    .catch(function() { showToast('⚠️ Failed to create client tab'); });
+}
+
 function submitNewClient() { var name = document.getElementById('newClientName').value.trim(); if (!name) { showToast('Please enter a client name'); return; } var btn = document.querySelector('#newClientOverlay button:last-child'); btn.textContent = '⏳ יוצר…'; btn.disabled = true; fetch(SHEETS_URL + '?action=createClient&name=' + encodeURIComponent(name)).then(function(r) { return r.text(); }).then(function() { btn.textContent = '✓ Create Client'; btn.disabled = false; document.getElementById('newClientOverlay').style.display = 'none'; showToast('✓ Client "' + name + '" created'); }).catch(function() { btn.textContent = '✓ Create Client'; btn.disabled = false; showToast('Failed to create client'); }); }
 
 function openAddJobModal() {
@@ -3122,16 +3136,19 @@ function copyWorkLogAll() {
   } else { fallbackCopy(text, function() { showToast('✓ ' + history.length + ' days copied'); }); }
 }
 
-// ── Caspit Integration ────────────────────────────────
-var CASPIT_PROXY_URL = 'https://script.google.com/macros/s/AKfycbxrYg9LZzt8iBHP_glWjimBO2AJ_KZP1HVFTTw7tX2cvFQeI-e3ssgRMqEHp3VxGzMUlg/exec';
-var _caspitTab = 'invoice';
-var _caspitInvoiceJobs = [];
+// ── Caspit Integration (Frontend Only) ──────────────────
+// All Caspit API calls go through CASPIT_PROXY_URL only.
+// No token/password in localStorage. No direct Caspit calls.
+var CASPIT_PROXY_URL = 'https://yb-caspit-proxy.sunroof-dictate-39.workers.dev';
+var _caspitTab      = 'invoice';
+var _caspitDocType  = 1;
+var _caspitSelected = {};
+var _caspitJobList  = [];
 var _caspitContacts = [];
 var _caspitMatchMap = {};
-var _caspitDocType = 1;
 
 function openCaspitOverlay() {
-  _caspitTab = 'invoice'; _caspitDocType = 1; _caspitSelected = {};
+  _caspitSelected = {}; _caspitDocType = 1; _caspitTab = 'invoice';
   document.getElementById('caspitOverlay').style.display = 'flex';
   switchCaspitTab('invoice');
   _caspitLoadData();
@@ -3149,26 +3166,53 @@ function switchCaspitTab(tab) {
 function _caspitLoadData() {
   var body = document.getElementById('caspitBody');
   body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ טוען…</div>';
-  var sheetDone = false, caspitDone = false;
-  var rendered = false;
-  function tryRender() {
-    if (sheetDone && caspitDone && !rendered) { rendered = true; _renderCaspitBody(); }
-  }
-  // Always fetch fresh invoices for Caspit
-  fetch(SHEETS_URL + '?action=getInvoices').then(function(r){ return r.json(); }).then(function(data) {
-    invoicesData = data || []; _caspitInvoiceJobs = invoicesData; sheetDone = true; tryRender();
-  }).catch(function() {
-    _caspitInvoiceJobs = invoicesData || []; sheetDone = true; tryRender();
+  var sheetDone = false, contactsDone = false, rendered = false;
+  function tryRender() { if (sheetDone && contactsDone && !rendered) { rendered = true; _buildMatchMap(); _renderCaspitBody(); } }
+
+  // Load sheet jobs (getInvoiceReadyJobs with fallback to getInvoices)
+  fetch(SHEETS_URL + '?action=getInvoiceReadyJobs')
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      invoicesData = (data || []).map(function(j) {
+        return { id: j.jobId||j.id||'', client: j.client||'', desc: j.description||j.desc||'',
+                 grossProfit: j.price||j.grossProfit||0, income: j.price||j.income||0,
+                 po: j.poNumber||j.po||'', hours: j.hours||0 };
+      });
+      _caspitInvoiceJobs = invoicesData; sheetDone = true; tryRender();
+    })
+    .catch(function() {
+      fetch(SHEETS_URL + '?action=getInvoices').then(function(r){ return r.json(); }).then(function(d) {
+        invoicesData = d || []; _caspitInvoiceJobs = invoicesData; sheetDone = true; tryRender();
+      }).catch(function() { sheetDone = true; tryRender(); });
+    });
+
+  // Load Caspit contacts from proxy only
+  fetch(CASPIT_PROXY_URL + '?action=getContacts')
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      _caspitContacts = data || [];
+      contactsDone = true; tryRender();
+    })
+    .catch(function() { contactsDone = true; tryRender(); });
+}
+
+var _caspitInvoiceJobs = [];
+
+function _buildMatchMap() {
+  _caspitMatchMap = {};
+  if (!_caspitContacts.length) return;
+  var map = {};
+  _caspitContacts.forEach(function(c) { map[c.Name ? c.Name.toLowerCase() : ''] = c.Id || c.ContactId || ''; });
+  _caspitInvoiceJobs.forEach(function(job) {
+    var name = (job.client || '').toLowerCase();
+    if (map[name]) { _caspitMatchMap[job.client] = map[name]; return; }
+    // Fuzzy match
+    Object.keys(map).forEach(function(k) {
+      if (!_caspitMatchMap[job.client] && (k.indexOf(name) !== -1 || name.indexOf(k) !== -1)) {
+        _caspitMatchMap[job.client] = map[k];
+      }
+    });
   });
-  fetch(SHEETS_URL + '?action=getCaspitContacts').then(function(r){ return r.json(); }).then(function(data) {
-    _caspitContacts = (data && data.contacts) || [];
-    if (data && data.resolved) {
-      Object.keys(data.resolved).forEach(function(k) { if (data.resolved[k]) _caspitMatchMap[k] = data.resolved[k]; });
-    }
-    showToast('Caspit: ' + _caspitContacts.length + ' contacts, ' + Object.keys(_caspitMatchMap).length + ' matched');
-    caspitDone = true; tryRender();
-  }).catch(function(err) { showToast('Contacts error: ' + err); caspitDone = true; tryRender(); });
-  if (sheetDone) tryRender();
 }
 
 function _renderCaspitBody() {
@@ -3181,19 +3225,15 @@ function caspitCreateDispatch() {
   else createCaspitQuote();
 }
 
-var _caspitSelected = {};
-var _caspitJobList = []; // global flat array for index-based onclick
-
+// ── Invoice / Receipt tab ─────────────────────────────
 function _renderCaspitInvoiceTab() {
   var body = document.getElementById('caspitBody');
   var createBtn = document.getElementById('caspitCreateBtn');
   if (createBtn) createBtn.textContent = '💼 צור מסמך';
   if (!_caspitInvoiceJobs.length) { body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">אין עבודות להוציא חש</div>'; return; }
 
-  // Build global job list for index-based onclick
-  _caspitJobList = [];
-  _caspitInvoiceJobs.forEach(function(j) {
-    _caspitJobList.push({ id: j.id, client: j.client, gp: parseFloat(j.grossProfit)||parseFloat(j.income)||0, desc: j.desc||'', po: j.po||'' });
+  _caspitJobList = _caspitInvoiceJobs.map(function(j) {
+    return { id: j.id, client: j.client, gp: parseFloat(j.grossProfit)||parseFloat(j.income)||0, desc: j.desc||'', po: j.po||'' };
   });
 
   var html = '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
@@ -3211,17 +3251,14 @@ function _renderCaspitInvoiceTab() {
   order.forEach(function(client) {
     var matched = !!_caspitMatchMap[client];
     var cc = clientColor(client);
-    html += '<div style="margin-bottom:4px;">' +
-      '<div style="padding:6px 10px;font-size:11px;font-weight:900;color:#fff;background:' + cc.grad + ';display:flex;justify-content:space-between;">' +
-        '<span>' + client + '</span><span style="font-size:10px;opacity:0.8;">' + (matched?'✓':'⚠️') + '</span>' +
-      '</div>';
+    html += '<div style="margin-bottom:4px;"><div style="padding:6px 10px;font-size:11px;font-weight:900;color:#fff;background:' + cc.grad + ';display:flex;justify-content:space-between;">' +
+      '<span>' + client + '</span><span style="font-size:10px;opacity:0.8;">' + (matched?'✓ Caspit':'⚠️ לא ממופה') + '</span></div>';
     groups[client].forEach(function(job) {
       var sel = !!_caspitSelected[job.id];
       html += '<div id="cjr' + job._idx + '" onclick="_caspitTap(' + job._idx + ')" style="padding:12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:12px;cursor:pointer;background:' + (sel?'#e8f0fe':'#fff') + ';">' +
         '<div id="cdot' + job._idx + '" style="width:24px;height:24px;border-radius:50%;border:2px solid ' + (sel?'#0d47a1':'#ccc') + ';background:' + (sel?'#0d47a1':'#fff') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:#fff;font-weight:700;">' + (sel?'✓':'') + '</div>' +
         '<div style="flex:1;"><div style="font-size:14px;font-weight:700;color:#111;">' + (job.desc||job.id) + '</div>' +
-        '<div style="font-size:12px;color:#888;">' + (job.po?'מ.רכש: '+job.po+' · ':'') + '₪' + job.gp.toLocaleString() + '</div></div>' +
-      '</div>';
+        '<div style="font-size:12px;color:#888;">' + (job.po?'מ.רכש: '+job.po+' · ':'') + '₪' + job.gp.toLocaleString() + '</div></div></div>';
     });
     html += '</div>';
   });
@@ -3229,13 +3266,12 @@ function _renderCaspitInvoiceTab() {
 }
 
 function _caspitTap(idx) {
-  var job = _caspitJobList[idx];
-  if (!job) return;
+  var job = _caspitJobList[idx]; if (!job) return;
   if (_caspitSelected[job.id]) delete _caspitSelected[job.id];
   else _caspitSelected[job.id] = job;
   var sel = !!_caspitSelected[job.id];
-  var row  = document.getElementById('cjr'  + idx);
-  var dot  = document.getElementById('cdot' + idx);
+  var row = document.getElementById('cjr'  + idx);
+  var dot = document.getElementById('cdot' + idx);
   if (row) row.style.background = sel ? '#e8f0fe' : '#fff';
   if (dot) { dot.style.borderColor = sel?'#0d47a1':'#ccc'; dot.style.background=sel?'#0d47a1':'#fff'; dot.textContent=sel?'✓':''; }
 }
@@ -3245,70 +3281,142 @@ function _caspitSetDocType(type) { _caspitDocType = type; _renderCaspitInvoiceTa
 function createCaspitInvoice() {
   var selectedJobs = Object.values(_caspitSelected);
   if (!selectedJobs.length) { showToast('בחר לפחות עבודה אחת'); return; }
+
+  // Group by client
   var byClient = {};
   selectedJobs.forEach(function(job) {
     if (!byClient[job.client]) byClient[job.client] = [];
     byClient[job.client].push(job);
   });
+
   var btn = document.getElementById('caspitCreateBtn');
   btn.textContent = '⏳ יוצר…'; btn.disabled = true;
-  var clients = Object.keys(byClient), created = 0;
+  var clients = Object.keys(byClient), created = 0, errors = [];
+
   function processNext(i) {
     if (i >= clients.length) {
       btn.textContent = '💼 צור מסמך'; btn.disabled = false;
-      showToast('✓ ' + created + ' מסמכים נוצרו בכספית');
-      document.getElementById('caspitOverlay').style.display = 'none';
+      if (created > 0) showToast('✓ ' + created + ' מסמכים נוצרו בכספית');
+      if (errors.length) showToast('⚠️ ' + errors.join(', '));
+      if (created > 0) document.getElementById('caspitOverlay').style.display = 'none';
       return;
     }
     var client = clients[i], jobs = byClient[client];
-    var customerId = _caspitMatchMap[client] || '';
-    var lines = jobs.map(function(job, li) {
-      return { Number: li+1, ProductName: job.desc + (job.po ? ' | מ.רכש: ' + job.po : ''), UnitPrice: job.gp, Qty: 1, ChargeVAT: true };
-    });
-    btn.textContent = '⏳ ' + (i+1) + '/' + clients.length + ' ' + client + '…';
-    fetch(SHEETS_URL + '?action=createCaspitDocument&payload=' + encodeURIComponent(JSON.stringify({ 
-      DocumentId: 'YB-' + Date.now(),
-      TrxTypeId: _caspitDocType, 
-      Date: new Date().toISOString(), 
-      CustomerId: customerId || undefined,
-      CustomerBusinessName: customerId ? undefined : client, 
-      DocumentLines: lines 
-    }))).then(function(r){ return r.json(); }).then(function(result) {
-      if (result && (result.DocumentId || result.Number)) created++;
-      else {
-        var errMsg = result.error || result.Message || result.ExceptionMessage || result.raw || JSON.stringify(result).substring(0,150);
-        alert('Caspit error:\n' + errMsg);
+    var contactId = _caspitMatchMap[client] || null;
+
+    btn.textContent = '⏳ ' + (i+1) + '/' + clients.length + '…';
+
+    var payload = {
+      TrxTypeId:            _caspitDocType,
+      DocumentId:           'YB-' + Date.now() + '-' + i,
+      DocumentSource:       2,
+      ChargeVAT:            true,
+      ContactId:            contactId,
+      CustomerBusinessName: contactId ? null : client,
+      DocumentLines: jobs.map(function(job, li) {
+        return {
+          Description: job.desc + (job.po ? ' | מ.רכש: ' + job.po : ''),
+          Quantity:    1,
+          Price:       job.gp,
+          VatRate:     17.0,
+          LineTotal:   job.gp
+        };
+      })
+    };
+
+    fetch(CASPIT_PROXY_URL + '?action=createDocument', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(result) {
+      if (result && result.CLIENT_NOT_MATCHED) {
+        // Ask user to pick manually
+        _caspitAskManualContact(client, payload, function(chosenContactId) {
+          payload.ContactId = chosenContactId;
+          payload.CustomerBusinessName = null;
+          fetch(CASPIT_PROXY_URL + '?action=createDocument', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+          }).then(function(r){ return r.json(); }).then(function(r2) {
+            if (r2 && (r2.DocumentNumber || r2.Id)) { created++; _caspitShowSuccess(r2); }
+            processNext(i+1);
+          }).catch(function(){ processNext(i+1); });
+        });
+        return;
+      }
+      if (result && (result.DocumentNumber || result.Id)) {
+        created++;
+        _caspitShowSuccess(result);
+      } else {
+        var errMsg = result.error || result.Message || JSON.stringify(result).substring(0,200);
+        alert('⚠️ ' + client + '\n\n' + errMsg);
+        errors.push(client);
       }
       processNext(i+1);
-    }).catch(function(err) { alert('fetch error:\n' + (err.message||err)); processNext(i+1); });
+    })
+    .catch(function(err) { errors.push(client + ': fetch error'); processNext(i+1); });
   }
   processNext(0);
 }
 
+function _caspitShowSuccess(result) {
+  var docNum = result.number || result.DocumentNumber || result.documentId || result.Id || '';
+  var status = result.status || 'created';
+  var msg = '✓ מסמך ' + docNum + ' | ' + status;
+  if (result.warnings && result.warnings.length) msg += ' | ⚠️ ' + result.warnings.join(', ');
+  alert('✓ Document Created\n\nNumber: ' + docNum + '\nStatus: ' + status + '\n\nRaw:\n' + JSON.stringify(result, null, 2).substring(0, 400));
+  showToast(msg, 5000);
+}
+
+function _caspitAskManualContact(clientName, payload, callback) {
+  var body = document.getElementById('caspitBody');
+  var opts = '<option value="">— בחר לקוח מכספית —</option>';
+  _caspitContacts.forEach(function(c) {
+    opts += '<option value="' + (c.Id||c.ContactId||'') + '">' + (c.Name||'') + '</option>';
+  });
+  body.innerHTML = '<div style="padding:20px;">' +
+    '<div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#c62828;">⚠️ הלקוח "' + clientName + '" לא נמצא בכספית</div>' +
+    '<div style="font-size:13px;color:#555;margin-bottom:12px;">בחר לקוח ידנית מרשימת כספית:</div>' +
+    '<select id="manualContactPicker" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;margin-bottom:14px;">' + opts + '</select>' +
+    '<button onclick="_caspitPickManual()" style="width:100%;padding:13px;background:#0d47a1;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">✓ המשך</button>' +
+  '</div>';
+  window._caspitManualCallback = callback;
+}
+
+function _caspitPickManual() {
+  var v = document.getElementById('manualContactPicker');
+  if (v && v.value && window._caspitManualCallback) window._caspitManualCallback(v.value);
+}
+
+// ── Quote tab ─────────────────────────────────────────
 function _renderCaspitQuoteTab() {
   var body = document.getElementById('caspitBody');
   var createBtn = document.getElementById('caspitCreateBtn');
   if (createBtn) createBtn.textContent = '💼 שמור ושלח לכספית';
   var allClients = [];
   _caspitInvoiceJobs.forEach(function(j) { if (allClients.indexOf(j.client)===-1) allClients.push(j.client); });
-  var clientOpts = '<option value="">— בחר לקוח —</option>';
-  allClients.sort().forEach(function(c) { clientOpts += '<option value="' + c + '">' + c + '</option>'; });
+  if (!allClients.length) {
+    fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(c) {
+      allClients = c || []; _renderCaspitQuoteForm(allClients);
+    }).catch(function(){ _renderCaspitQuoteForm([]); });
+  } else {
+    _renderCaspitQuoteForm(allClients);
+  }
+}
+
+function _renderCaspitQuoteForm(clients) {
+  var body = document.getElementById('caspitBody');
+  var opts = '<option value="">— בחר לקוח —</option>';
+  clients.sort().forEach(function(c) { opts += '<option value="' + c + '">' + c + '</option>'; });
   body.innerHTML =
     '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">לקוח</label>' +
-    '<select id="caspitQuoteClient" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;">' + clientOpts + '</select></div>' +
+    '<select id="caspitQuoteClient" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;">' + opts + '</select></div>' +
     '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">תיאור</label>' +
     '<input id="caspitQuoteDesc" type="text" placeholder="תיאור העבודה…" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
     '<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">מחיר (₪)</label>' +
     '<input id="caspitQuotePrice" type="number" placeholder="0" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
     '<div style="background:#e8f0fe;border-radius:8px;padding:10px 12px;font-size:12px;color:#0d47a1;">1. שומר עבודה בגיליון (ממתין להצעה)<br>2. שולח הצעת מחיר לכספית<br>3. מעדכן סטטוס: ניתנה הצעה</div>';
-  if (allClients.length === 0) {
-    fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(clients) {
-      var sel = document.getElementById('caspitQuoteClient'); if (!sel) return;
-      var opts = '<option value="">— בחר לקוח —</option>';
-      (clients||[]).sort().forEach(function(c) { opts += '<option value="' + c + '">' + c + '</option>'; });
-      sel.innerHTML = opts;
-    }).catch(function(){});
-  }
 }
 
 function createCaspitQuote() {
@@ -3320,6 +3428,8 @@ function createCaspitQuote() {
   if (!price)  { showToast('הזן מחיר'); return; }
   var btn = document.getElementById('caspitCreateBtn');
   btn.textContent = '⏳ שומר בגיליון…'; btn.disabled = true;
+
+  // Step 1: Save to sheet
   fetch(SHEETS_URL + '?action=addJob&client=' + encodeURIComponent(client) +
     '&desc=' + encodeURIComponent(desc) + '&st=' + encodeURIComponent('ממתין להצעה') +
     '&pr=' + encodeURIComponent(price))
@@ -3328,19 +3438,36 @@ function createCaspitQuote() {
     jobId = jobId.trim();
     if (!jobId || jobId.indexOf('Error')!==-1) throw new Error(jobId);
     btn.textContent = '⏳ שולח לכספית…';
-    var customerId = _caspitMatchMap[client] || '';
-    var payload = { DocumentId: 'YB-' + Date.now(), TrxTypeId: 4, Date: new Date().toISOString(), CustomerId: customerId, CustomerBusinessName: customerId?'':client,
-      DocumentLines: [{ Number:1, ProductName: desc, UnitPrice: price, Qty: 1, ChargeVAT: true }] };
-    return fetch(SHEETS_URL + '?action=createCaspitDocument&payload=' + encodeURIComponent(JSON.stringify(payload))).then(function(r){ return r.json(); }).then(function(result) {
+
+    // Step 2: Create in Caspit via proxy
+    var contactId = _caspitMatchMap[client] || null;
+    var payload = {
+      TrxTypeId:            4,
+      DocumentId:           'YB-Q-' + Date.now(),
+      DocumentSource:       2,
+      ChargeVAT:            true,
+      ContactId:            contactId,
+      CustomerBusinessName: contactId ? null : client,
+      DocumentLines: [{ Description: desc, Quantity: 1, Price: price, VatRate: 17.0, LineTotal: price }]
+    };
+
+    return fetch(CASPIT_PROXY_URL + '?action=createDocument', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+    }).then(function(r){ return r.json(); })
+    .then(function(result) {
+      // Step 3: Update status
       fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(jobId) +
         '&client=' + encodeURIComponent(client) + '&status=' + encodeURIComponent('ניתנה הצעה')).catch(function(){});
       btn.textContent = '💼 שמור ושלח לכספית'; btn.disabled = false;
-      if (result && (result.DocumentId || result.Number)) {
-        showToast('✓ הצעת מחיר נוצרה: ' + (result.Number || jobId));
+      if (result && (result.DocumentNumber || result.Id)) {
+        _caspitShowSuccess(result);
         document.getElementById('caspitOverlay').style.display = 'none';
-      } else { showToast('⚠️ נשמר בגיליון, שגיאה בכספית: ' + (result.error||'')); }
+      } else {
+        showToast('⚠️ נשמר בגיליון, שגיאה בכספית: ' + (result.error || result.Message || ''));
+      }
     });
-  }).catch(function(err) {
+  })
+  .catch(function(err) {
     btn.textContent = '💼 שמור ושלח לכספית'; btn.disabled = false;
     showToast('⚠️ שגיאה: ' + (err.message||''));
   });
