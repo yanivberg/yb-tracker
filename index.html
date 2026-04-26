@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v310</title>
+<title>י.ב אחזקות — v311</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1210,7 +1210,10 @@ SHEET SYNC
     <div style="padding:16px 20px 0;border-bottom:1px solid #eee;flex-shrink:0;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
         <div style="font-weight:900;font-size:17px;color:#0d47a1;">💼 כספית <span style="font-size:11px;font-weight:400;color:#aaa;">v300</span></div>
-        <button onclick="this.closest('#caspitOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button onclick="testCaspitProxy()" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;color:#666;">🔌 Test</button>
+          <button onclick="this.closest('#caspitOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+        </div>
       </div>
       <div style="display:flex;gap:0;border-bottom:2px solid #eee;">
         <button onclick="switchCaspitTab('invoice')" id="ctab-invoice" style="flex:1;padding:10px 4px;border:none;background:none;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;color:#0d47a1;border-bottom:3px solid #0d47a1;margin-bottom:-2px;">חשבונית / קבלה</button>
@@ -3192,7 +3195,7 @@ function _caspitLoadData() {
     });
 
   // Load Caspit contacts from proxy only
-  fetch(CASPIT_PROXY_URL + '?action=getContacts')
+  _caspitFetch(CASPIT_PROXY_URL + '?action=getContacts')
     .then(function(r){ return r.json(); })
     .then(function(data) {
       _caspitContacts = data || [];
@@ -3334,7 +3337,7 @@ function createCaspitInvoice() {
         return { Description: job.desc + (job.po ? ' | מ.רכש: ' + job.po : ''), Quantity: 1, Price: job.gp, VatRate: 17.0, LineTotal: job.gp };
       })
     };
-    fetch(CASPIT_PROXY_URL + '?action=createDocument', {
+    _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     })
     .then(function(r){ return r.json(); })
@@ -3342,7 +3345,7 @@ function createCaspitInvoice() {
       if (result && result.CLIENT_NOT_MATCHED) {
         _caspitAskManualContact(g.clientName, payload, function(chosenId) {
           payload.ContactId = chosenId; payload.CustomerBusinessName = null;
-          fetch(CASPIT_PROXY_URL + '?action=createDocument', {
+          _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
           }).then(function(r){ return r.json(); }).then(function(r2) {
             if (r2 && (r2.DocumentNumber || r2.number || r2.Id)) { created++; _caspitShowSuccess(r2); }
@@ -3389,6 +3392,23 @@ function _caspitAskManualContact(clientName, payload, callback) {
   window._caspitManualCallback = callback;
 }
 
+function testCaspitProxy() {
+  alert('Testing: ' + CASPIT_PROXY_URL);
+  _caspitFetch(CASPIT_PROXY_URL + '?action=getContacts')
+    .then(function(r){ return r.json(); })
+    .then(function(d){ alert('✓ Proxy OK — Contacts: ' + (d||[]).length); })
+    .catch(function(e){ alert('✗ FAILED: ' + e.message); });
+}
+
+function _caspitFetch(url, options) {
+  return new Promise(function(resolve, reject) {
+    var timeout = setTimeout(function() { reject(new Error('timeout after 10s')); }, 10000);
+    fetch(url, options).then(function(r) {
+      clearTimeout(timeout); resolve(r);
+    }).catch(function(e) { clearTimeout(timeout); reject(e); });
+  });
+}
+
 function _caspitPickManual() {
   var v = document.getElementById('manualContactPicker');
   if (v && v.value && window._caspitManualCallback) window._caspitManualCallback(v.value);
@@ -3402,7 +3422,7 @@ function _renderCaspitQuoteTab() {
 
   if (!_caspitContacts.length) {
     body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ טוען אנשי קשר מכספית…</div>';
-    fetch(CASPIT_PROXY_URL + '?action=getContacts')
+    _caspitFetch(CASPIT_PROXY_URL + '?action=getContacts')
       .then(function(r){ return r.json(); })
       .then(function(data) { _caspitContacts = data || []; _renderCaspitQuoteForm(); })
       .catch(function() { _renderCaspitQuoteForm(); });
@@ -3470,7 +3490,7 @@ function createCaspitQuote() {
       ChargeVAT: true, ContactId: contactId,
       DocumentLines: [{ Description: desc, Quantity: 1, Price: price, VatRate: 17.0, LineTotal: price }]
     };
-    return fetch(CASPIT_PROXY_URL + '?action=createDocument', {
+    return _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     }).then(function(r){ return r.json(); })
     .then(function(result) {
