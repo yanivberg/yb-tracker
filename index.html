@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v311</title>
+<title>י.ב אחזקות — v312</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3199,7 +3199,7 @@ function _caspitLoadData() {
     .then(function(r){ return r.json(); })
     .then(function(data) {
       _caspitContacts = data || [];
-      showToast('Contacts: ' + _caspitContacts.length);
+      showToast('✓ ' + _caspitContacts.length + ' אנשי קשר נטענו', 3000);
       contactsDone = true; tryRender();
     })
     .catch(function(err) {
@@ -3358,7 +3358,7 @@ function createCaspitInvoice() {
         created++; _caspitShowSuccess(result);
       } else {
         var errMsg = result.error || result.Message || JSON.stringify(result).substring(0,60);
-        alert('⚠️ ' + g.clientName + '\n\n' + errMsg);
+        showToast('⚠️ ' + g.clientName + ': ' + errMsg, 5000);
         errors.push(g.clientName);
       }
       processNext(i+1);
@@ -3369,12 +3369,9 @@ function createCaspitInvoice() {
 }
 
 function _caspitShowSuccess(result) {
-  var docNum = result.number || result.DocumentNumber || result.documentId || result.Id || '';
+  var docNum = result.number || result.DocumentNumber || result.documentId || result.Id || '?';
   var status = result.status || 'created';
-  var msg = '✓ מסמך ' + docNum + ' | ' + status;
-  if (result.warnings && result.warnings.length) msg += ' | ⚠️ ' + result.warnings.join(', ');
-  alert('✓ Document Created\n\nNumber: ' + docNum + '\nStatus: ' + status + '\n\nRaw:\n' + JSON.stringify(result, null, 2).substring(0, 400));
-  showToast(msg, 5000);
+  showToast('✓ מסמך ' + docNum + ' | ' + status, 5000);
 }
 
 function _caspitAskManualContact(clientName, payload, callback) {
@@ -3393,11 +3390,11 @@ function _caspitAskManualContact(clientName, payload, callback) {
 }
 
 function testCaspitProxy() {
-  alert('Testing: ' + CASPIT_PROXY_URL);
+  showToast('Testing proxy…');
   _caspitFetch(CASPIT_PROXY_URL + '?action=getContacts')
     .then(function(r){ return r.json(); })
-    .then(function(d){ alert('✓ Proxy OK — Contacts: ' + (d||[]).length); })
-    .catch(function(e){ alert('✗ FAILED: ' + e.message); });
+    .then(function(d){ showToast('✓ Proxy OK — ' + (d||[]).length + ' contacts', 4000); })
+    .catch(function(e){ showToast('✗ Proxy FAILED: ' + e.message, 5000); });
 }
 
 function _caspitFetch(url, options) {
