@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v314</title>
+<title>י.ב אחזקות — v317</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1467,6 +1467,21 @@ SHEET SYNC
   </div>
 </div>
 
+<!-- Edit Completed Job Overlay -->
+<div id="editDoneJobOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:10020;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:95vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+    <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+      <div style="font-weight:700;font-size:17px;">✏️ עריכת פרויקט</div>
+      <button onclick="document.getElementById('editDoneJobOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+    </div>
+    <div id="editDoneJobBody" style="overflow-y:auto;flex:1;padding:16px 20px;direction:rtl;"></div>
+    <div style="padding:12px 16px;border-top:1px solid #eee;flex-shrink:0;display:flex;gap:8px;">
+      <button onclick="document.getElementById('editDoneJobOverlay').style.display='none'" style="flex:1;padding:13px;background:#f5f5f5;color:#333;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">ביטול</button>
+      <button onclick="confirmSaveDoneJob()" style="flex:2;padding:13px;background:#0d47a1;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">💾 שמור</button>
+    </div>
+  </div>
+</div>
+
 <!-- Invoices Overlay -->
 <div id="invoicesOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10003;align-items:flex-end;justify-content:center;">
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:88vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
@@ -1797,7 +1812,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw2xg9qV0IukPl23eqi495amxi0JsFu4lJPyVPQUo6EOF1aCVXxyMzr0rIliXK3YtcNqA/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwKT7jW27Xd7evEN42U0MUU9M3nAYV05rqT_aIgjjPVvi_IAapA8ZpLe1x0ZOYoMZSVZQ/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -1848,7 +1863,21 @@ function showJobPicker(jobs) {
         var div = document.createElement('div');
         var rowStyle = clientRowStyle(client);
         div.style.cssText = 'padding:12px 16px;border-bottom:2px solid #111;' + rowStyle + (alreadyAdded ? 'opacity:0.5;' : 'cursor:pointer;');
-        div.innerHTML = '<div style="display:flex;align-items:center;gap:12px;"><input type="checkbox" id="jb-' + idx + '" ' + (alreadyAdded ? 'disabled' : '') + ' style="width:20px;height:20px;cursor:pointer;flex-shrink:0;"><label for="jb-' + idx + '" style="cursor:' + (alreadyAdded ? 'default' : 'pointer') + ';flex:1;"><div style="font-weight:700;font-size:14px;color:#111;">' + job.desc + (alreadyAdded ? ' ✓' : '') + '</div><div style="font-size:11px;color:#555;margin-top:2px;">' + hoursToHHMM(parseFloat(job.hours) || 0) + ' est. · <span style="color:#fff;font-weight:700;">' + hoursToHHMM(job.actualHours || 0) + ' בפועל</span>' + (alreadyAdded ? ' <span style="color:#333;">· Already added</span>' : '') + '</div></label></div>';
+        div.innerHTML = '<div style="display:flex;align-items:center;gap:12px;">' +
+          '<input type="checkbox" id="jb-' + idx + '" ' + (alreadyAdded ? 'disabled' : '') + ' style="width:20px;height:20px;cursor:pointer;flex-shrink:0;">' +
+          '<label for="jb-' + idx + '" style="cursor:' + (alreadyAdded ? 'default' : 'pointer') + ';flex:1;">' +
+            '<div style="font-weight:700;font-size:14px;color:#111;">' + job.desc + (alreadyAdded ? ' ✓' : '') + '</div>' +
+            '<div style="display:flex;align-items:center;gap:10px;margin-top:5px;flex-wrap:wrap;">' +
+              '<div style="display:flex;align-items:center;gap:4px;">' +
+                '<span style="font-size:11px;color:#888;">⏱</span>' +
+                '<span style="font-size:13px;font-weight:800;color:#0d47a1;">' + hoursToHHMM(parseFloat(job.hours) || 0) + '</span>' +
+                '<span style="font-size:11px;color:#aaa;">est</span>' +
+                (job.hoursActual > 0 ? '<span style="font-size:11px;color:#aaa;margin:0 2px;">·</span><span style="font-size:13px;font-weight:800;color:#2e7d32;">' + hoursToHHMM(job.hoursActual || 0) + '</span><span style="font-size:11px;color:#aaa;">actual</span>' : '') +
+              '</div>' +
+              (job.income > 0 ? '<div style="background:#e8f0fe;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;color:#0d47a1;">₪' + Math.round(job.income).toLocaleString() + '</div>' : '') +
+            '</div>' +
+          '</label>' +
+        '</div>';
         if (!alreadyAdded) { div.onclick = function(e) { if (e.target.tagName !== 'INPUT') { var cb = document.getElementById('jb-' + idx); cb.checked = !cb.checked; } }; }
         list.appendChild(div);
       });
@@ -2599,7 +2628,16 @@ function showDoneJobsPicker(jobs) {
   order.forEach(function(client) {
     html += clientGroupHeader(client);
     groups[client].forEach(function(j) {
-      html += '<div onclick="loadDoneJobInfo(\'' + j.id.replace(/'/g,"\'") + '\',\'' + j.client.replace(/'/g,"\'") + '\')" style="padding:12px 16px;' + clientRowStyle(client) + 'cursor:pointer;display:flex;justify-content:space-between;align-items:center;"><div><div style="font-size:13px;font-weight:700;color:#fff;">' + j.id + '</div><div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;">' + (j.desc || '') + '</div></div><span style="font-size:18px;color:rgba(255,255,255,0.6);">›</span></div>';
+      html += '<div style="padding:12px 16px;' + clientRowStyle(client) + 'display:flex;justify-content:space-between;align-items:center;">' +
+        '<div onclick="loadDoneJobInfo(\'' + j.id.replace(/'/g,"\\'") + '\',\'' + j.client.replace(/'/g,"\\'") + '\')" style="flex:1;cursor:pointer;">' +
+          '<div style="font-size:13px;font-weight:700;color:#fff;">' + j.id + '</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;">' + (j.desc || '') + '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;align-items:center;">' +
+          '<button onclick="event.stopPropagation();openEditDoneJob(\'' + j.id.replace(/'/g,"\\'") + '\',\'' + j.client.replace(/'/g,"\\'") + '\')" style="background:rgba(255,255,255,0.2);border:none;border-radius:8px;padding:6px 10px;color:#fff;font-size:14px;cursor:pointer;min-width:36px;min-height:36px;">✏️</button>' +
+          '<span onclick="loadDoneJobInfo(\'' + j.id.replace(/'/g,"\\'") + '\',\'' + j.client.replace(/'/g,"\\'") + '\')" style="font-size:18px;color:rgba(255,255,255,0.6);cursor:pointer;">›</span>' +
+        '</div>' +
+      '</div>';
     });
   });
   list.innerHTML = html;
@@ -2619,6 +2657,102 @@ function renderDoneJobInfo(info) {
   var notesHtml = '';
   if (notes.length) { notesHtml = '<div style="margin-top:12px;"><div style="font-size:12px;color:#888;margin-bottom:6px;">הערות</div>'; notes.forEach(function(n) { notesHtml += '<div style="font-size:13px;padding:6px 0;border-bottom:1px solid #f5f5f5;color:#333;">' + n + '</div>'; }); notesHtml += '</div>'; }
   body.innerHTML = row('Job ID', info.id) + row('לקוח', info.client) + row('תיאור', info.desc) + row('סטטוס', info.status) + row('קטגוריה', info.category) + row('מחיר ליחידה', info.price ? '₪' + info.price : '') + row('כמות', info.qty) + row('הכנסה מתוכננת', info.income ? '₪' + info.income : '') + row('עלויות', info.costs ? '₪' + info.costs : '') + row('רווח גולמי', info.grossProfit ? '₪' + info.grossProfit : '') + row('רווח לשעה', info.profitPerHour ? '₪' + info.profitPerHour : '') + row('הצעת מחיר', info.invoiceQuote) + row('מספר רכש', info.po) + row('שעות מוערכות', info.hours) + row('שעות בפועל', info.hoursActual) + row('תאריך התחלה', info.dateStart) + row('תאריך סיום', info.dateEnd) + notesHtml;
+}
+
+var _editDoneJob = null;
+
+function openEditDoneJob(jobId, client) {
+  _editDoneJob = { id: jobId, client: client };
+  var body = document.getElementById('editDoneJobBody');
+  body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ טוען…</div>';
+  document.getElementById('editDoneJobOverlay').style.display = 'flex';
+  fetch(SHEETS_URL + '?action=getFullJobInfo&jobId=' + encodeURIComponent(jobId) + '&client=' + encodeURIComponent(client))
+    .then(function(r){ return r.json(); })
+    .then(function(info) {
+      _editDoneJob = info;
+      function field(id, label, val, type) {
+        type = type || 'text';
+        return '<div style="margin-bottom:14px;">' +
+          '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">' + label + '</label>' +
+          '<input id="edit_' + id + '" type="' + type + '" value="' + (val||'').replace(/"/g,'&quot;') + '" ' +
+          'style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;">' +
+        '</div>';
+      }
+      function select(id, label, val, options) {
+        var opts = options.map(function(o) {
+          return '<option value="' + o + '"' + (o === val ? ' selected' : '') + '>' + o + '</option>';
+        }).join('');
+        return '<div style="margin-bottom:14px;">' +
+          '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">' + label + '</label>' +
+          '<select id="edit_' + id + '" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;">' + opts + '</select>' +
+        '</div>';
+      }
+      body.innerHTML =
+        '<div style="font-size:12px;color:#888;margin-bottom:16px;text-align:center;">' + info.id + ' — ' + info.client + '</div>' +
+        field('desc', 'תיאור', info.desc) +
+        select('status', 'סטטוס', info.status, ['בתהליך ביצוע','ממתין לביצוע','ממתין להצעה','ניתנה הצעה','בוצע','להוציא חש']) +
+        field('price', 'מחיר ליחידה (₪)', info.price, 'number') +
+        field('po', 'מספר הזמנת רכש', info.po) +
+        field('hours', 'שעות מוערכות', info.hours, 'number') +
+        field('hoursActual', 'שעות בפועל', info.hoursActual, 'number');
+    })
+    .catch(function() { showToast('⚠️ שגיאה בטעינת פרויקט'); document.getElementById('editDoneJobOverlay').style.display = 'none'; });
+}
+
+function confirmSaveDoneJob() {
+  if (!_editDoneJob) return;
+  var desc        = document.getElementById('edit_desc').value.trim();
+  var status      = document.getElementById('edit_status').value;
+  var price       = document.getElementById('edit_price').value.trim();
+  var po          = document.getElementById('edit_po').value.trim();
+  var hours       = document.getElementById('edit_hours').value.trim();
+  var hoursActual = document.getElementById('edit_hoursActual').value.trim();
+
+  var changes = [];
+  if (desc        !== (_editDoneJob.desc       ||'')) changes.push('תיאור: ' + desc);
+  if (status      !== (_editDoneJob.status     ||'')) changes.push('סטטוס: ' + status);
+  if (price       !== (_editDoneJob.price      ||'')) changes.push('מחיר: ₪' + price);
+  if (po          !== (_editDoneJob.po         ||'')) changes.push('מ.רכש: ' + po);
+  if (hours       !== (_editDoneJob.hours      ||'')) changes.push('שעות מוערכות: ' + hours);
+  if (hoursActual !== (_editDoneJob.hoursActual||'')) changes.push('שעות בפועל: ' + hoursActual);
+
+  if (!changes.length) { showToast('אין שינויים לשמור'); return; }
+
+  if (!confirm('שמור שינויים?\n\n' + changes.join('\n'))) return;
+
+  var btn = document.querySelector('#editDoneJobOverlay button[onclick="confirmSaveDoneJob()"]');
+  if (btn) { btn.textContent = '⏳ שומר…'; btn.disabled = true; }
+
+  var jobId = _editDoneJob.id, client = _editDoneJob.client;
+  var params = '?action=updateJobFields&jobId=' + encodeURIComponent(jobId) +
+    '&client=' + encodeURIComponent(client) +
+    '&desc=' + encodeURIComponent(desc) +
+    '&price=' + encodeURIComponent(price) +
+    '&hours=' + encodeURIComponent(hours) +
+    '&po=' + encodeURIComponent(po);
+
+  var promises = [fetch(SHEETS_URL + params)];
+  // Update status separately if changed
+  if (status !== (_editDoneJob.status||'')) {
+    promises.push(fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(jobId) + '&client=' + encodeURIComponent(client) + '&status=' + encodeURIComponent(status)));
+  }
+  // Update hours separately
+  if (hoursActual !== (_editDoneJob.hoursActual||'')) {
+    promises.push(fetch(SHEETS_URL + '?action=updateJob&jobId=' + encodeURIComponent(jobId) + '&client=' + encodeURIComponent(client) + '&hours=' + encodeURIComponent(hoursActual)));
+  }
+
+  Promise.all(promises)
+    .then(function() {
+      if (btn) { btn.textContent = '💾 שמור'; btn.disabled = false; }
+      showToast('✓ פרויקט עודכן');
+      document.getElementById('editDoneJobOverlay').style.display = 'none';
+      // Refresh the completed jobs list
+      fetchCompletedJobs();
+    })
+    .catch(function() {
+      if (btn) { btn.textContent = '💾 שמור'; btn.disabled = false; }
+      showToast('⚠️ שגיאה בשמירה');
+    });
 }
 
 function copyDoneJobInfo() {
