@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v320</title>
+<title>י.ב אחזקות — v322</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1694,7 +1694,8 @@ var _clientColorMap = {};
 var _clientColorIdx = 0;
 function clientColor(clientName) { if (!_clientColorMap[clientName]) { _clientColorMap[clientName] = CLIENT_COLORS[_clientColorIdx % CLIENT_COLORS.length]; _clientColorIdx++; } return _clientColorMap[clientName]; }
 function clientGroupHeader(clientName, darkText) { var c = clientColor(clientName); var textColor = darkText ? '#111' : '#fff'; var borderStyle = darkText ? 'border-bottom:2px solid #111;' : ''; return '<div style="padding:7px 16px 6px;background:' + c.grad + ';' + borderStyle + '"><span style="font-size:10px;font-weight:900;color:' + textColor + ';letter-spacing:0.05em;">' + clientName + '</span></div>'; }
-function clientRowStyle(clientName) { return 'background:' + clientColor(clientName).rgba + ';border-bottom:1px solid rgba(255,255,255,0.15);'; }
+function clientRowStyle(clientName) { return clientRowStyleLight(clientName); }
+function clientRowStyleLight(clientName) { var c = clientColor(clientName); return 'background:' + c.rgba.replace(/[\d.]+\)$/, '0.65)') + ';border-bottom:1px solid rgba(0,0,0,0.08);'; }
 
 // ── State ─────────────────────────────────────────────
 let projects = [];
@@ -1971,7 +1972,7 @@ function showPendingQuotePicker(jobs) {
         var d = job.details || {};
         var complete = !!(d.category && d.price && d.qty && d.hours && d.po);
         var rowStyle = clientRowStyle(client);
-        var dateBadge = job.dateStart ? '<span style="font-size:10px;color:rgba(255,255,255,0.55);margin-right:6px;">📅 ' + job.dateStart + '</span>' : '';
+        var dateBadge = job.dateStart ? '<span style="font-size:10px;color:#444;margin-right:6px;">📅 ' + job.dateStart + '</span>' : '';
         if (complete) {
           html += '<div style="padding:12px 16px;' + rowStyle + '">' +
             '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">' +
@@ -2638,21 +2639,21 @@ function showDoneJobsPicker(jobs) {
       } else {
         invBadge = '<span style="background:#fff;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:900;color:#000;border:2px solid #e65100;">⚠️ No invoice — clarify!</span>';
       }
-      var gpBadge = j.grossProfit > 0 ? '<span style="background:rgba(255,255,255,0.18);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;color:#fff;">Gross profit 💰 ₪' + Math.round(j.grossProfit).toLocaleString() + '</span>' : '';
-      html += '<div style="padding:12px 16px;' + clientRowStyle(client) + 'display:flex;justify-content:space-between;align-items:flex-start;">' +
+      var gpBadge = j.grossProfit > 0 ? '<span style="background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;color:#000;">Gross profit 💰 ₪' + Math.round(j.grossProfit).toLocaleString() + '</span>' : '';
+      html += '<div style="padding:12px 16px;' + clientRowStyleLight(client) + 'display:flex;justify-content:space-between;align-items:flex-start;">' +
         '<div onclick="loadDoneJobInfo(\'' + j.id.replace(/'/g,"\\'") + '\',\'' + j.client.replace(/'/g,"\\'") + '\')" style="flex:1;cursor:pointer;">' +
-          '<div style="font-size:13px;font-weight:700;color:#fff;">' + j.id + '</div>' +
-          '<div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:2px;">' + (j.desc || '') + '</div>' +
+          '<div style="font-size:13px;font-weight:700;color:#000;">' + j.id + '</div>' +
+          '<div style="font-size:12px;color:#000;margin-top:2px;">' + (j.desc || '') + '</div>' +
           '<div style="display:flex;align-items:center;gap:10px;margin-top:5px;flex-wrap:wrap;">' +
-            (j.dateEnd ? '<span style="font-size:11px;color:rgba(255,255,255,0.55);">Completed on <strong style="color:rgba(255,255,255,0.9);">' + j.dateEnd + '</strong></span>' : '') +
-            (j.hoursActual > 0 ? '<span style="font-size:11px;color:rgba(255,255,255,0.55);">Time spent <strong style="color:rgba(255,255,255,0.9);">' + j.hoursActual + 'h</strong></span>' : '') +
+            (j.dateEnd ? '<span style="font-size:11px;color:#333;">Completed on <strong style="color:#000;">' + j.dateEnd + '</strong></span>' : '') +
+            (j.hoursActual > 0 ? '<span style="font-size:11px;color:#333;">Time spent <strong style="color:#000;">' + j.hoursActual + 'h</strong></span>' : '') +
             gpBadge +
           '</div>' +
           '<div style="margin-top:5px;">' + invBadge + '</div>' +
         '</div>' +
         '<div style="display:flex;gap:8px;align-items:center;flex-shrink:0;margin-top:2px;">' +
-          '<button onclick="event.stopPropagation();openEditDoneJob(\'' + j.id.replace(/'/g,"\\'") + '\',\'' + j.client.replace(/'/g,"\\'") + '\')" style="background:rgba(255,255,255,0.2);border:none;border-radius:8px;padding:6px 10px;color:#fff;font-size:14px;cursor:pointer;min-width:36px;min-height:36px;">✏️</button>' +
-          '<span onclick="loadDoneJobInfo(\'' + j.id.replace(/'/g,"\\'") + '\',\'' + j.client.replace(/'/g,"\\'") + '\')" style="font-size:18px;color:rgba(255,255,255,0.6);cursor:pointer;">›</span>' +
+          '<button onclick="event.stopPropagation();openEditDoneJob(\'' + j.id.replace(/'/g,"\\'") + '\',\'' + j.client.replace(/'/g,"\\'") + '\')" style="background:rgba(0,0,0,0.1);border:none;border-radius:8px;padding:6px 10px;color:#000;font-size:14px;cursor:pointer;min-width:36px;min-height:36px;">✏️</button>' +
+          '<span onclick="loadDoneJobInfo(\'' + j.id.replace(/'/g,"\\'") + '\',\'' + j.client.replace(/'/g,"\\'") + '\')" style="font-size:18px;color:#333;cursor:pointer;">›</span>' +
         '</div>' +
       '</div>';
     });
@@ -2810,8 +2811,8 @@ function showInvoicePicker() {
       var num = localIdx + 1; var cbId = 'inv-' + globalIdx; globalIdx++;
       var po = job.po || '—'; var income = job.income ? '₪' + job.income : '—'; var quote = job.invoiceQuote || '—';
       var gp = job.grossProfit ? '<span style="background:rgba(255,255,255,0.2);border-radius:6px;padding:1px 6px;font-size:11px;font-weight:700;color:#fff;">💰 ₪' + Math.round(parseFloat(job.grossProfit)).toLocaleString() + '</span>' : '';
-      var notes = job.notes ? '<div style="font-size:11px;color:rgba(255,255,255,0.65);margin-top:2px;">' + job.notes.replace(/\n/g,' · ').substring(0,80) + '</div>' : '';
-      html += '<div style="padding:10px 16px;' + clientRowStyle(client) + 'display:flex;align-items:flex-start;gap:10px;"><input type="checkbox" id="' + cbId + '" onclick="event.stopPropagation();updateInvoiceCopyBtn();" style="margin-top:3px;flex-shrink:0;width:18px;height:18px;" onclick="updateInvoiceCopyBtn()"><div onclick="var cb=document.getElementById(\'' + cbId + '\');cb.checked=!cb.checked;updateInvoiceCopyBtn();" style="width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0;margin-top:1px;cursor:pointer;">' + num + '</div><div onclick="var cb=document.getElementById(\'' + cbId + '\');cb.checked=!cb.checked;updateInvoiceCopyBtn();" style="flex:1;min-width:0;cursor:pointer;"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;"><span style="font-size:13px;font-weight:700;color:#fff;">' + job.id + '</span><span style="font-size:12px;color:rgba(255,255,255,0.75);">' + (job.desc || '') + '</span>' + gp + '</div>' + (po && po !== '—' ? '<div style="font-size:11px;color:rgba(255,255,255,0.65);">מ.רכש: ' + po + '</div>' : '') + notes + '</div><button onclick="event.stopPropagation();openEditDoneJob(\'' + job.id.replace(/'/g,"\\'") + '\',\'' + job.client.replace(/'/g,"\\'") + '\')" style="background:rgba(255,255,255,0.15);border:none;border-radius:8px;padding:6px 8px;color:#fff;font-size:13px;cursor:pointer;flex-shrink:0;min-width:34px;min-height:34px;margin-top:1px;">✏️</button></div>';
+      var notes = job.notes ? '<div style="font-size:11px;color:#333;margin-top:2px;">' + job.notes.replace(/\n/g,' · ').substring(0,80) + '</div>' : '';
+      html += '<div style="padding:10px 16px;' + clientRowStyle(client) + 'display:flex;align-items:flex-start;gap:10px;"><input type="checkbox" id="' + cbId + '" onclick="event.stopPropagation();updateInvoiceCopyBtn();" style="margin-top:3px;flex-shrink:0;width:18px;height:18px;" onclick="updateInvoiceCopyBtn()"><div onclick="var cb=document.getElementById(\'' + cbId + '\');cb.checked=!cb.checked;updateInvoiceCopyBtn();" style="width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000;flex-shrink:0;margin-top:1px;cursor:pointer;">' + num + '</div><div onclick="var cb=document.getElementById(\'' + cbId + '\');cb.checked=!cb.checked;updateInvoiceCopyBtn();" style="flex:1;min-width:0;cursor:pointer;"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;"><span style="font-size:13px;font-weight:700;color:#000;">' + job.id + '</span><span style="font-size:12px;color:#000;">' + (job.desc || '') + '</span>' + gp + '</div>' + (po && po !== '—' ? '<div style="font-size:11px;color:#000;">מ.רכש: ' + po + '</div>' : '') + notes + '</div><button onclick="event.stopPropagation();openEditDoneJob(\'' + job.id.replace(/'/g,"\\'") + '\',\'' + job.client.replace(/'/g,"\\'") + '\')" style="background:rgba(0,0,0,0.08);border:none;border-radius:8px;padding:6px 8px;color:#000;font-size:13px;cursor:pointer;flex-shrink:0;min-width:34px;min-height:34px;margin-top:1px;">✏️</button></div>';
     });
   });
   list.innerHTML = html; updateInvoiceCopyBtn();
