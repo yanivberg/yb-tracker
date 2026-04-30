@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v319</title>
+<title>י.ב אחזקות — v320</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1812,7 +1812,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwKT7jW27Xd7evEN42U0MUU9M3nAYV05rqT_aIgjjPVvi_IAapA8ZpLe1x0ZOYoMZSVZQ/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbx94RlPa65X2I8phzpRo11c2h58KZePpJxRwRMu7fMl1mLdH7EG7oAOUXtvdb6nNYlBGg/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2628,12 +2628,29 @@ function showDoneJobsPicker(jobs) {
   order.forEach(function(client) {
     html += clientGroupHeader(client);
     groups[client].forEach(function(j) {
-      html += '<div style="padding:12px 16px;' + clientRowStyle(client) + 'display:flex;justify-content:space-between;align-items:center;">' +
+      // Invoice status badge
+      var inv = (j.invoiceQuote || '').trim();
+      var invBadge = '';
+      if (inv === 'להוציא חש' || inv === 'Ready to invoice') {
+        invBadge = '<span style="background:#c62828;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;color:#fff;">🔴 Ready to invoice</span>';
+      } else if (inv && inv !== '' && inv !== 'להוציא חש') {
+        invBadge = '<span style="background:#2e7d32;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;color:#fff;">✅ Billed</span>';
+      } else {
+        invBadge = '<span style="background:#fff;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:900;color:#000;border:2px solid #e65100;">⚠️ No invoice — clarify!</span>';
+      }
+      var gpBadge = j.grossProfit > 0 ? '<span style="background:rgba(255,255,255,0.18);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;color:#fff;">Gross profit 💰 ₪' + Math.round(j.grossProfit).toLocaleString() + '</span>' : '';
+      html += '<div style="padding:12px 16px;' + clientRowStyle(client) + 'display:flex;justify-content:space-between;align-items:flex-start;">' +
         '<div onclick="loadDoneJobInfo(\'' + j.id.replace(/'/g,"\\'") + '\',\'' + j.client.replace(/'/g,"\\'") + '\')" style="flex:1;cursor:pointer;">' +
           '<div style="font-size:13px;font-weight:700;color:#fff;">' + j.id + '</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:2px;">' + (j.desc || '') + '</div>' +
+          '<div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:2px;">' + (j.desc || '') + '</div>' +
+          '<div style="display:flex;align-items:center;gap:10px;margin-top:5px;flex-wrap:wrap;">' +
+            (j.dateEnd ? '<span style="font-size:11px;color:rgba(255,255,255,0.55);">Completed on <strong style="color:rgba(255,255,255,0.9);">' + j.dateEnd + '</strong></span>' : '') +
+            (j.hoursActual > 0 ? '<span style="font-size:11px;color:rgba(255,255,255,0.55);">Time spent <strong style="color:rgba(255,255,255,0.9);">' + j.hoursActual + 'h</strong></span>' : '') +
+            gpBadge +
+          '</div>' +
+          '<div style="margin-top:5px;">' + invBadge + '</div>' +
         '</div>' +
-        '<div style="display:flex;gap:8px;align-items:center;">' +
+        '<div style="display:flex;gap:8px;align-items:center;flex-shrink:0;margin-top:2px;">' +
           '<button onclick="event.stopPropagation();openEditDoneJob(\'' + j.id.replace(/'/g,"\\'") + '\',\'' + j.client.replace(/'/g,"\\'") + '\')" style="background:rgba(255,255,255,0.2);border:none;border-radius:8px;padding:6px 10px;color:#fff;font-size:14px;cursor:pointer;min-width:36px;min-height:36px;">✏️</button>' +
           '<span onclick="loadDoneJobInfo(\'' + j.id.replace(/'/g,"\\'") + '\',\'' + j.client.replace(/'/g,"\\'") + '\')" style="font-size:18px;color:rgba(255,255,255,0.6);cursor:pointer;">›</span>' +
         '</div>' +
