@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v323</title>
+<title>י.ב אחזקות — v324</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -2711,6 +2711,7 @@ function openEditDoneJob(jobId, client) {
         field('desc', 'תיאור', info.desc) +
         select('status', 'סטטוס', info.status, ['בתהליך ביצוע','ממתין לביצוע','ממתין להצעה','ניתנה הצעה','בוצע','להוציא חש']) +
         field('price', 'מחיר ליחידה (₪)', info.price, 'number') +
+        field('qty', 'יחידות', info.qty || '', 'number') +
         field('po', 'מספר הזמנת רכש', info.po) +
         field('hours', 'שעות מוערכות', info.hours, 'number') +
         field('hoursActual', 'שעות בפועל', info.hoursActual, 'number');
@@ -2723,6 +2724,7 @@ function confirmSaveDoneJob() {
   var desc        = document.getElementById('edit_desc').value.trim();
   var status      = document.getElementById('edit_status').value;
   var price       = document.getElementById('edit_price').value.trim();
+  var qty         = document.getElementById('edit_qty').value.trim();
   var po          = document.getElementById('edit_po').value.trim();
   var hours       = document.getElementById('edit_hours').value.trim();
   var hoursActual = document.getElementById('edit_hoursActual').value.trim();
@@ -2731,6 +2733,7 @@ function confirmSaveDoneJob() {
   if (desc        !== (_editDoneJob.desc       ||'')) changes.push('תיאור: ' + desc);
   if (status      !== (_editDoneJob.status     ||'')) changes.push('סטטוס: ' + status);
   if (price       !== (_editDoneJob.price      ||'')) changes.push('מחיר: ₪' + price);
+  if (qty         !== (_editDoneJob.qty        ||'')) changes.push('יחידות: ' + qty);
   if (po          !== (_editDoneJob.po         ||'')) changes.push('מ.רכש: ' + po);
   if (hours       !== (_editDoneJob.hours      ||'')) changes.push('שעות מוערכות: ' + hours);
   if (hoursActual !== (_editDoneJob.hoursActual||'')) changes.push('שעות בפועל: ' + hoursActual);
@@ -2747,6 +2750,7 @@ function confirmSaveDoneJob() {
     '&client=' + encodeURIComponent(client) +
     '&desc=' + encodeURIComponent(desc) +
     '&price=' + encodeURIComponent(price) +
+    '&qty=' + encodeURIComponent(qty) +
     '&hours=' + encodeURIComponent(hours) +
     '&po=' + encodeURIComponent(po);
 
