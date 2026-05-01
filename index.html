@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v335</title>
+<title>י.ב אחזקות — v337</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1234,13 +1234,13 @@ SHEET SYNC
         </div>
       </div>
       <div style="display:flex;gap:0;border-bottom:2px solid #eee;">
-        <button onclick="switchCaspitTab('invoice')" id="ctab-invoice" style="flex:1;padding:10px 4px;border:none;background:none;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;color:#0d47a1;border-bottom:3px solid #0d47a1;margin-bottom:-2px;">חשבונית / קבלה</button>
-        <button onclick="switchCaspitTab('quote')" id="ctab-quote" style="flex:1;padding:10px 4px;border:none;background:none;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;color:#aaa;border-bottom:3px solid transparent;margin-bottom:-2px;">הצעת מחיר חדשה</button>
+        <button onclick="switchCaspitTab('invoice')" id="ctab-invoice" style="flex:1;padding:10px 4px;border:none;background:none;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;color:#0d47a1;border-bottom:3px solid #0d47a1;margin-bottom:-2px;">Invoice / Receipt</button>
+        <button onclick="switchCaspitTab('quote')" id="ctab-quote" style="flex:1;padding:10px 4px;border:none;background:none;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;color:#aaa;border-bottom:3px solid transparent;margin-bottom:-2px;">New Quotation</button>
       </div>
     </div>
     <div id="caspitBody" style="overflow-y:auto;flex:1;padding:16px 20px 8px;direction:rtl;"></div>
     <div style="padding:12px 16px;border-top:1px solid #eee;flex-shrink:0;">
-      <button id="caspitCreateBtn" onclick="caspitCreateDispatch()" style="width:100%;padding:14px;background:#0d47a1;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">💼 צור מסמך</button>
+      <button id="caspitCreateBtn" onclick="caspitCreateDispatch()" style="width:100%;padding:14px;background:#0d47a1;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">💼 Create Document</button>
     </div>
   </div>
 </div>
@@ -2778,7 +2778,7 @@ function renderDoneJobInfo(info) {
   var notes = (info.notes || '').split('\n').filter(function(n){ return n.trim(); });
   var notesHtml = '';
   if (notes.length) { notesHtml = '<div style="margin-top:12px;"><div style="font-size:12px;color:#888;margin-bottom:6px;">הערות</div>'; notes.forEach(function(n) { notesHtml += '<div style="font-size:13px;padding:6px 0;border-bottom:1px solid #f5f5f5;color:#333;">' + n + '</div>'; }); notesHtml += '</div>'; }
-  body.innerHTML = row('Job ID', info.id) + row('לקוח', info.client) + row('תיאור', info.desc) + row('סטטוס', info.status) + row('קטגוריה', info.category) + row('מחיר ליחידה', info.price ? '₪' + info.price : '') + row('כמות', info.qty) + row('הכנסה מתוכננת', info.income ? '₪' + info.income : '') + row('עלויות', info.costs ? '₪' + info.costs : '') + row('רווח גולמי', info.grossProfit ? '₪' + info.grossProfit : '') + row('רווח לשעה', info.profitPerHour ? '₪' + info.profitPerHour : '') + row('הצעת מחיר', info.invoiceQuote) + row('מספר רכש', info.po) + row('שעות מוערכות', info.hours) + row('שעות בפועל', info.hoursActual) + row('תאריך התחלה', info.dateStart) + row('תאריך סיום', info.dateEnd) + notesHtml;
+  body.innerHTML = row('Job ID', info.id) + row('לקוח', info.client) + row('Description', info.desc) + row('סטטוס', info.status) + row('קטגוריה', info.category) + row('מחיר ליחידה', info.price ? '₪' + info.price : '') + row('כמות', info.qty) + row('הכנסה מתוכננת', info.income ? '₪' + info.income : '') + row('עלויות', info.costs ? '₪' + info.costs : '') + row('רווח גולמי', info.grossProfit ? '₪' + info.grossProfit : '') + row('רווח לשעה', info.profitPerHour ? '₪' + info.profitPerHour : '') + row('הצעת מחיר', info.invoiceQuote) + row('מספר רכש', info.po) + row('שעות מוערכות', info.hours) + row('שעות בפועל', info.hoursActual) + row('תאריך התחלה', info.dateStart) + row('תאריך סיום', info.dateEnd) + notesHtml;
 }
 
 var _editDoneJob = null;
@@ -2811,7 +2811,7 @@ function openEditDoneJob(jobId, client) {
       }
       body.innerHTML =
         '<div style="font-size:12px;color:#888;margin-bottom:16px;text-align:center;">' + info.id + ' — ' + info.client + '</div>' +
-        field('desc', 'תיאור', info.desc) +
+        field('desc', 'Description', info.desc) +
         select('status', 'סטטוס', info.status, ['בתהליך ביצוע','ממתין לביצוע','ממתין להצעה','ניתנה הצעה','בוצע','להוציא חש']) +
         field('price', 'מחיר ליחידה (₪)', info.price, 'number') +
         field('qty', 'יחידות', info.qty || '', 'number') +
@@ -2884,7 +2884,7 @@ function confirmSaveDoneJob() {
 function copyDoneJobInfo() {
   if (!currentDoneJobInfo) return; var info = currentDoneJobInfo; var lines = [];
   function add(label, val) { if (val) lines.push(label + ': ' + val); }
-  add('Job ID', info.id); add('לקוח', info.client); add('תיאור', info.desc); add('סטטוס', info.status); add('קטגוריה', info.category); add('מחיר ליחידה', info.price ? '₪' + info.price : ''); add('כמות', info.qty); add('הכנסה מתוכננת', info.income ? '₪' + info.income : ''); add('עלויות', info.costs ? '₪' + info.costs : ''); add('רווח גולמי', info.grossProfit ? '₪' + info.grossProfit : ''); add('רווח לשעה', info.profitPerHour ? '₪' + info.profitPerHour : ''); add('הצעת מחיר', info.invoiceQuote); add('מספר רכש', info.po); add('שעות מוערכות', info.hours); add('שעות בפועל', info.hoursActual); add('תאריך התחלה', info.dateStart); add('תאריך סיום', info.dateEnd);
+  add('Job ID', info.id); add('לקוח', info.client); add('Description', info.desc); add('סטטוס', info.status); add('קטגוריה', info.category); add('מחיר ליחידה', info.price ? '₪' + info.price : ''); add('כמות', info.qty); add('הכנסה מתוכננת', info.income ? '₪' + info.income : ''); add('עלויות', info.costs ? '₪' + info.costs : ''); add('רווח גולמי', info.grossProfit ? '₪' + info.grossProfit : ''); add('רווח לשעה', info.profitPerHour ? '₪' + info.profitPerHour : ''); add('הצעת מחיר', info.invoiceQuote); add('מספר רכש', info.po); add('שעות מוערכות', info.hours); add('שעות בפועל', info.hoursActual); add('תאריך התחלה', info.dateStart); add('תאריך סיום', info.dateEnd);
   if (info.notes) { lines.push(''); lines.push('הערות:'); info.notes.split('\n').forEach(function(n) { if (n.trim()) lines.push(n.trim()); }); }
   var text = lines.join('\n'); var btn = document.getElementById('doneJobCopyBtn');
   navigator.clipboard.writeText(text).then(function() { btn.textContent = '✓ Copied!'; setTimeout(function() { btn.textContent = '📋 Copy to clipboard'; }, 2000); }).catch(function() { var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); btn.textContent = '✓ Copied!'; setTimeout(function() { btn.textContent = '📋 Copy to clipboard'; }, 2000); });
@@ -3496,7 +3496,7 @@ function _caspitLoadData() {
     .then(function(r){ return r.json(); })
     .then(function(data) {
       _caspitContacts = data || [];
-      showToast('✓ ' + _caspitContacts.length + ' אנשי קשר נטענו', 3000);
+      showToast('✓ ' + _caspitContacts.length + ' contacts loaded', 3000);
       contactsDone = true; tryRender();
     })
     .catch(function(err) {
@@ -3538,7 +3538,7 @@ function caspitCreateDispatch() {
 function _renderCaspitInvoiceTab() {
   var body = document.getElementById('caspitBody');
   var createBtn = document.getElementById('caspitCreateBtn');
-  if (createBtn) createBtn.textContent = '💼 צור מסמך';
+  if (createBtn) createBtn.textContent = '💼 Create Document';
   if (!_caspitInvoiceJobs.length) { body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">אין עבודות להוציא חש</div>'; return; }
 
   _caspitJobList = _caspitInvoiceJobs.map(function(j) {
@@ -3619,7 +3619,7 @@ function createCaspitInvoice() {
 
   function processNext(i) {
     if (i >= groups.length) {
-      btn.textContent = '💼 צור מסמך'; btn.disabled = false;
+      btn.textContent = '💼 Create Document'; btn.disabled = false;
       if (created > 0) { showToast('✓ ' + created + ' מסמכים נוצרו'); document.getElementById('caspitOverlay').style.display = 'none'; }
       if (errors.length) showToast('⚠️ ' + errors.join(', '));
       return;
@@ -3680,7 +3680,7 @@ function _caspitAskManualContact(clientName, payload, callback) {
   });
   body.innerHTML = '<div style="padding:20px;">' +
     '<div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#c62828;">⚠️ הלקוח "' + clientName + '" לא נמצא בכספית</div>' +
-    '<div style="font-size:13px;color:#555;margin-bottom:12px;">בחר לקוח ידנית מרשימת כספית:</div>' +
+    '<div style="font-size:13px;color:#555;margin-bottom:12px;">Select contact manually from Caspit:</div>' +
     '<select id="manualContactPicker" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;margin-bottom:14px;">' + opts + '</select>' +
     '<button onclick="_caspitPickManual()" style="width:100%;padding:13px;background:#0d47a1;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">✓ המשך</button>' +
   '</div>';
@@ -3713,10 +3713,10 @@ function _caspitPickManual() {
 function _renderCaspitQuoteTab() {
   var body = document.getElementById('caspitBody');
   var createBtn = document.getElementById('caspitCreateBtn');
-  if (createBtn) createBtn.textContent = '💼 שמור ושלח לכספית';
+  if (createBtn) createBtn.textContent = '💼 Save & Send to Caspit';
 
   if (!_caspitContacts.length) {
-    body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ טוען אנשי קשר מכספית…</div>';
+    body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ Loading Caspit contacts…</div>';
     _caspitFetch(CASPIT_PROXY_URL + '?action=getContacts')
       .then(function(r){ return r.json(); })
       .then(function(data) { _caspitContacts = data || []; _renderCaspitQuoteForm(); })
@@ -3785,30 +3785,37 @@ function _renderCaspitQuoteForm() {
     opts += '<option value="' + (c.Id||'').replace(/"/g,'&quot;') + '" data-name="' + (c.Name||'').replace(/"/g,'&quot;') + '">' + (c.Name||c.Id) + '</option>';
   });
 
+  var clientOpts = '<option value="">— Select sheet client —</option>';
+  var sortedClients = savedClients.slice().sort(function(a,b){return a.localeCompare(b);});
+  sortedClients.forEach(function(c){
+    clientOpts += '<option value="' + c.replace(/"/g,'&quot;') + '">' + c + '</option>';
+  });
+
   body.innerHTML =
     '<div style="margin-bottom:10px;">' +
-      '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">לקוח בגיליון</label>' +
-      '<input id="caspitQuoteSheetClient" type="text" placeholder="שם כפי שמופיע בגיליון…" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;" oninput="_autoMatchCaspitClient()">' +
+      '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">Sheet Client</label>' +
+      '<select id="caspitQuoteSheetClient" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;box-sizing:border-box;" onchange="_autoMatchCaspitClient()">' + clientOpts + '</select>' +
     '</div>' +
     '<div id="caspitMatchResult" style="margin-bottom:10px;display:none;"></div>' +
     '<div style="margin-bottom:10px;">' +
-      '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">לקוח (מכספית)</label>' +
+      '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">Caspit Contact</label>' +
       '<select id="caspitQuoteContact" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;">' + opts + '</select>' +
-      '<div style="font-size:11px;color:#aaa;margin-top:3px;">' + _caspitContacts.length + ' אנשי קשר</div>' +
+      '<div style="font-size:11px;color:#aaa;margin-top:3px;">' + _caspitContacts.length + ' contacts</div>' +
     '</div>' +
     '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">תיאור</label>' +
-    '<input id="caspitQuoteDesc" type="text" placeholder="תיאור העבודה…" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
+    '<input id="caspitQuoteDesc" type="text" placeholder="Work description…" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
     '<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">מחיר (₪)</label>' +
     '<input id="caspitQuotePrice" type="number" placeholder="0" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
-    '<div style="background:#e8f0fe;border-radius:8px;padding:10px 12px;font-size:12px;color:#0d47a1;">1. שומר עבודה בגיליון (ממתין להצעה)<br>2. שולח הצעת מחיר לכספית<br>3. מעדכן סטטוס: ניתנה הצעה</div>';
+    '<div style="background:#e8f0fe;border-radius:8px;padding:10px 12px;font-size:12px;color:#0d47a1;">1. Saves job to sheet (Waiting for Quote)<br>2. Sends quote to Caspit<br>3. Updates status: Quote Given</div>';
 }
 
 function _autoMatchCaspitClient() {
-  var sheetName = (document.getElementById('caspitQuoteSheetClient')||{}).value||'';
+  var sheetSel  = document.getElementById('caspitQuoteSheetClient');
+  var sheetName = sheetSel ? sheetSel.value : '';
   var matchDiv  = document.getElementById('caspitMatchResult');
   var sel       = document.getElementById('caspitQuoteContact');
   if (!matchDiv || !sel) return;
-  if (!sheetName.trim()) { matchDiv.style.display='none'; sel.value=''; return; }
+  if (!sheetName) { matchDiv.style.display='none'; sel.value=''; return; }
 
   var result = _matchCaspitContact(sheetName, _caspitContacts);
   if (result) {
@@ -3825,7 +3832,6 @@ function _autoMatchCaspitClient() {
         '</div>' +
       '</div>';
     matchDiv.style.display = 'block';
-    // Auto-select in dropdown
     for (var i=0; i<sel.options.length; i++) {
       if (sel.options[i].value === (result.contact.Id||'')) { sel.selectedIndex = i; break; }
     }
@@ -3845,10 +3851,10 @@ function createCaspitQuote() {
   var sheetClient = (document.getElementById('caspitQuoteSheetClient')||{}).value||'';
   var desc        = (document.getElementById('caspitQuoteDesc')||{}).value||'';
   var price       = parseFloat((document.getElementById('caspitQuotePrice')||{}).value)||0;
-  if (!contactId)   { showToast('בחר לקוח מכספית'); return; }
-  if (!sheetClient) { showToast('הזן שם לקוח בגיליון'); return; }
-  if (!desc)        { showToast('הזן תיאור'); return; }
-  if (!price)       { showToast('הזן מחיר'); return; }
+  if (!contactId)   { showToast('Select a Caspit contact'); return; }
+  if (!sheetClient) { showToast('Enter sheet client name'); return; }
+  if (!desc)        { showToast('Enter a description'); return; }
+  if (!price)       { showToast('Enter a price'); return; }
   var btn = document.getElementById('caspitCreateBtn');
   btn.textContent = '⏳ שומר בגיליון…'; btn.disabled = true;
 
@@ -3874,7 +3880,7 @@ function createCaspitQuote() {
     .then(function(result) {
       fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(jobId) +
         '&client=' + encodeURIComponent(sheetClient) + '&status=' + encodeURIComponent('ניתנה הצעה')).catch(function(){});
-      btn.textContent = '💼 שמור ושלח לכספית'; btn.disabled = false;
+      btn.textContent = '💼 Save & Send to Caspit'; btn.disabled = false;
       console.log('Caspit response:', JSON.stringify(result));
       showCaspitLog(result);
       if (result && (result.DocumentNumber || result.number || result.Id || result.documentId)) {
@@ -3886,7 +3892,7 @@ function createCaspitQuote() {
     });
   })
   .catch(function(err) {
-    btn.textContent = '💼 שמור ושלח לכספית'; btn.disabled = false;
+    btn.textContent = '💼 Save & Send to Caspit'; btn.disabled = false;
     alert('Error: ' + (err.message || err.toString()));
     showToast('⚠️ שגיאה: ' + (err.message||''));
   });
