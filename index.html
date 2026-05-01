@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v325</title>
+<title>י.ב אחזקות — v327</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3539,10 +3539,10 @@ function createCaspitInvoice() {
     btn.textContent = '⏳ ' + (i+1) + '/' + groups.length + '…';
     var payload = {
       TrxTypeId: _caspitDocType, DocumentId: 'YB-' + Date.now() + '-' + i,
-      DocumentSource: 2, ChargeVAT: true, ContactId: g.contactId,
+      DocumentSource: 2, TrxCodeNumber: _caspitDocType === 1 ? 3 : undefined, ChargeVAT: true, ContactId: g.contactId,
       CustomerBusinessName: g.contactId ? null : g.clientName,
       DocumentLines: g.jobs.map(function(job, li) {
-        return { Description: job.desc + (job.po ? ' | מ.רכש: ' + job.po : ''), Quantity: 1, Price: job.gp, VatRate: 17.0, LineTotal: job.gp };
+        return { ProductName: job.desc + (job.po ? ' | מ.רכש: ' + job.po : ''), Details: job.desc, Qty: 1, UnitPrice: job.gp, ChargeVAT: true };
       })
     };
     _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
@@ -3691,19 +3691,22 @@ function createCaspitQuote() {
     btn.textContent = '⏳ שולח לכספית…';
     // Step 2: Create in Caspit via proxy using contactId from picker
     var payload = {
-      TrxTypeId: 4, DocumentId: 'YB-Q-' + Date.now(), DocumentSource: 2,
-      ChargeVAT: true, ContactId: contactId,
-      DocumentLines: [{ Description: desc, Quantity: 1, Price: price, VatRate: 17.0, LineTotal: price }]
+      TrxTypeId: 16, DocumentId: 'YB-Q-' + Date.now(), DocumentSource: 2,
+      TrxCodeNumber: 3, ChargeVAT: true, ContactId: contactId,
+      DocumentLines: [{ ProductName: desc, Details: desc, Qty: 1, UnitPrice: price, ChargeVAT: true }]
     };
+    console.log('Sending to Caspit:', JSON.stringify(payload));
+    showToast('Sending: ContactId=' + contactId.slice(0,12) + '...');
     return _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     }).then(function(r){ return r.json(); })
     .then(function(result) {
-      // Step 3: Update status
       fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(jobId) +
         '&client=' + encodeURIComponent(sheetClient) + '&status=' + encodeURIComponent('ניתנה הצעה')).catch(function(){});
       btn.textContent = '💼 שמור ושלח לכספית'; btn.disabled = false;
-      if (result && (result.DocumentNumber || result.number || result.Id)) {
+      console.log('Caspit raw response:', JSON.stringify(result));
+      showToast(JSON.stringify(result).slice(0,150), 8000);
+      if (result && (result.DocumentNumber || result.number || result.Id || result.documentId)) {
         _caspitShowSuccess(result);
         document.getElementById('caspitOverlay').style.display = 'none';
       } else {
