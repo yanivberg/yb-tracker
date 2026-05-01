@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v341</title>
+<title>י.ב אחזקות — v342</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3874,7 +3874,7 @@ function _matchCaspitContact(sheetName, contacts) {
 function _renderCaspitQuoteForm() {
   var body = document.getElementById('caspitBody');
   var sorted = _caspitContacts.slice().sort(function(a,b){ return (a.Name||'').localeCompare(b.Name||''); });
-  var opts = '<option value="">— בחר לקוח מכספית —</option>';
+  var opts = '<option value="">— Select Caspit contact —</option>';
   sorted.forEach(function(c) {
     opts += '<option value="' + (c.Id||'').replace(/"/g,'&quot;') + '" data-name="' + (c.Name||'').replace(/"/g,'&quot;') + '">' + (c.Name||c.Id) + '</option>';
   });
@@ -3892,109 +3892,146 @@ function _renderCaspitQuoteForm() {
     '</div>' +
     '<div id="caspitMatchResult" style="margin-bottom:10px;display:none;"></div>' +
     '<div style="margin-bottom:10px;">' +
-      '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">Caspit Contact</label>' +
+      '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">Caspit Contact <span style="font-size:10px;color:#aaa;font-weight:400;">(override if needed)</span></label>' +
       '<select id="caspitQuoteContact" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;">' + opts + '</select>' +
       '<div style="font-size:11px;color:#aaa;margin-top:3px;">' + _caspitContacts.length + ' contacts</div>' +
     '</div>' +
-    '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">תיאור</label>' +
-    '<input id="caspitQuoteDesc" type="text" placeholder="Work description…" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
-    '<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">מחיר (₪)</label>' +
-    '<input id="caspitQuotePrice" type="number" placeholder="0" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
-    '<div style="background:#e8f0fe;border-radius:8px;padding:10px 12px;font-size:12px;color:#0d47a1;">1. Saves job to sheet (Waiting for Quote)<br>2. Sends quote to Caspit<br>3. Updates status: Quote Given</div>';
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+      '<label style="font-size:12px;font-weight:700;color:#555;margin-bottom:0;">Line Items</label>' +
+      '<span id="caspitRowCount" style="font-size:11px;color:#aaa;">1 row</span>' +
+    '</div>' +
+    '<div id="caspitQuoteRows"></div>' +
+    '<button onclick="addCaspitQuoteRow()" type="button" style="width:100%;padding:10px;background:none;border:2px dashed #0d47a1;border-radius:10px;color:#0d47a1;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;margin-bottom:12px;">+ Add Row</button>' +
+    '<div id="caspitQuoteTotalBox" style="border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;background:#e8f5e9;">' +
+      '<div>' +
+        '<div id="caspitTotalLabel" style="font-size:12px;font-weight:600;color:#2e7d32;">Total (excl. VAT)</div>' +
+      '</div>' +
+      '<div id="caspitQuoteTotal" style="font-size:22px;font-weight:900;color:#1b5e20;">₪0</div>' +
+    '</div>' +
+    '<div id="caspitStatusHint" style="font-size:11px;color:#888;text-align:center;margin-bottom:10px;">Status after sending: <strong style="color:#e65100;">Waiting for Quote</strong></div>' +
+    '<div style="background:#e8f0fe;border-radius:8px;padding:10px 12px;font-size:12px;color:#0d47a1;margin-bottom:2px;">1. Saves job to sheet (Waiting for Quote)<br>2. Sends all line items to Caspit<br>3. Total &gt; 0 → status: Quote Given &nbsp;|&nbsp; Total = 0 → status: Waiting for Quote</div>';
+
+  addCaspitQuoteRow();
 }
 
-function _autoMatchCaspitClient() {
-  var sheetSel  = document.getElementById('caspitQuoteSheetClient');
-  var sheetName = sheetSel ? sheetSel.value : '';
-  var matchDiv  = document.getElementById('caspitMatchResult');
-  var sel       = document.getElementById('caspitQuoteContact');
-  if (!matchDiv || !sel) return;
-  if (!sheetName) { matchDiv.style.display='none'; sel.value=''; return; }
+function addCaspitQuoteRow() {
+  var container = document.getElementById('caspitQuoteRows');
+  if (!container) return;
+  var idx = container.children.length + 1;
+  var div = document.createElement('div');
+  div.style.cssText = 'background:#f8f9fa;border-radius:10px;padding:10px 12px;margin-bottom:8px;border:1px solid #eee;position:relative;';
+  div.innerHTML =
+    '<div style="font-size:10px;font-weight:700;color:#aaa;margin-bottom:5px;">Row ' + idx + '</div>' +
+    '<button onclick="delCaspitQuoteRow(this)" type="button" style="position:absolute;top:8px;right:8px;background:none;border:none;color:#ccc;font-size:15px;cursor:pointer;padding:2px 5px;">✕</button>' +
+    '<div style="display:grid;grid-template-columns:1fr 60px 80px;gap:6px;">' +
+      '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Description</div><input type="text" class="cq-desc" placeholder="…" oninput="calcCaspitTotal()" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
+      '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Qty</div><input type="number" class="cq-qty" value="1" oninput="calcCaspitTotal()" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
+      '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Price (₪)</div><input type="number" class="cq-price" value="0" oninput="calcCaspitTotal()" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
+    '</div>';
+  container.appendChild(div);
+  calcCaspitTotal();
+  div.querySelector('.cq-desc').focus();
+}
 
-  var result = _matchCaspitContact(sheetName, _caspitContacts);
-  if (result) {
-    var color   = result.score >= 90 ? '#1b5e20' : result.score >= 75 ? '#e65100' : '#555';
-    var bg      = result.score >= 90 ? '#e8f5e9' : result.score >= 75 ? '#fff3e0' : '#f5f5f5';
-    var border  = result.score >= 90 ? '#2e7d32' : result.score >= 75 ? '#e65100' : '#bbb';
-    var icon    = result.score >= 90 ? '✅' : '⚠️';
-    matchDiv.innerHTML =
-      '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:' + bg + ';border-radius:10px;border:1.5px solid ' + border + ';">' +
-        '<span style="font-size:16px;">' + icon + '</span>' +
-        '<div style="flex:1;">' +
-          '<div style="font-size:11px;font-weight:700;color:' + color + ';">' + result.method + ' — ' + result.score + '%</div>' +
-          '<div style="font-size:13px;font-weight:700;color:#111;">' + (result.contact.Name||result.contact.Id) + '</div>' +
-        '</div>' +
-      '</div>';
-    matchDiv.style.display = 'block';
-    for (var i=0; i<sel.options.length; i++) {
-      if (sel.options[i].value === (result.contact.Id||'')) { sel.selectedIndex = i; break; }
-    }
-  } else {
-    matchDiv.innerHTML =
-      '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fff3e0;border-radius:10px;border:1.5px solid #e65100;">' +
-        '<span style="font-size:16px;">⚠️</span>' +
-        '<div style="font-size:12px;color:#e65100;font-weight:700;">No match found — select manually</div>' +
-      '</div>';
-    matchDiv.style.display = 'block';
-    sel.value = '';
-  }
+function delCaspitQuoteRow(btn) {
+  var container = document.getElementById('caspitQuoteRows');
+  if (!container || container.children.length <= 1) return;
+  btn.closest('div[style]').remove();
+  var rows = container.querySelectorAll('div[style]');
+  rows.forEach(function(r, i) { var n = r.querySelector('div'); if(n) n.textContent = 'Row ' + (i+1); });
+  calcCaspitTotal();
+}
+
+function calcCaspitTotal() {
+  var container = document.getElementById('caspitQuoteRows');
+  if (!container) return;
+  var total = 0;
+  container.querySelectorAll('div[style]').forEach(function(row) {
+    var qty   = parseFloat((row.querySelector('.cq-qty')  ||{}).value) || 0;
+    var price = parseFloat((row.querySelector('.cq-price')||{}).value) || 0;
+    total += qty * price;
+  });
+  var isZero = total === 0;
+  var box   = document.getElementById('caspitQuoteTotalBox');
+  var lbl   = document.getElementById('caspitTotalLabel');
+  var val   = document.getElementById('caspitQuoteTotal');
+  var hint  = document.getElementById('caspitStatusHint');
+  var cnt   = document.getElementById('caspitRowCount');
+  if (box)  box.style.background  = isZero ? '#fff3e0' : '#e8f5e9';
+  if (lbl)  { lbl.style.color = isZero ? '#e65100' : '#2e7d32'; lbl.textContent = isZero ? 'Total = 0 — prices TBD' : 'Total (excl. VAT)'; }
+  if (val)  { val.style.color = isZero ? '#e65100' : '#1b5e20'; val.textContent = '₪' + total.toLocaleString(); }
+  if (hint) hint.innerHTML = 'Status after sending: <strong style="color:' + (isZero?'#e65100':'#0d47a1') + '">' + (isZero?'Waiting for Quote':'Quote Given') + '</strong>';
+  if (cnt)  { var n = container.querySelectorAll('div[style]').length; cnt.textContent = n + ' row' + (n!==1?'s':''); }
 }
 
 function createCaspitQuote() {
   var contactId   = (document.getElementById('caspitQuoteContact')||{}).value||'';
   var sheetClient = (document.getElementById('caspitQuoteSheetClient')||{}).value||'';
-  var desc        = (document.getElementById('caspitQuoteDesc')||{}).value||'';
-  var price       = parseFloat((document.getElementById('caspitQuotePrice')||{}).value)||0;
   if (!contactId)   { showToast('Select a Caspit contact'); return; }
-  if (!sheetClient) { showToast('Enter sheet client name'); return; }
-  if (!desc)        { showToast('Enter a description'); return; }
-  if (!price)       { showToast('Enter a price'); return; }
-  var btn = document.getElementById('caspitCreateBtn');
-  btn.textContent = '⏳ שומר בגיליון…'; btn.disabled = true;
+  if (!sheetClient) { showToast('Select a sheet client'); return; }
 
-  // Get CustomerBusinessName from selected Caspit contact
-  var contactSel = document.getElementById('caspitQuoteContact');
+  // Collect rows
+  var container = document.getElementById('caspitQuoteRows');
+  var lines = [];
+  var total = 0;
+  if (container) {
+    container.querySelectorAll('div[style]').forEach(function(row) {
+      var desc  = (row.querySelector('.cq-desc') ||{}).value||'';
+      var qty   = parseFloat((row.querySelector('.cq-qty')  ||{}).value)||1;
+      var price = parseFloat((row.querySelector('.cq-price')||{}).value)||0;
+      lines.push({ ProductName: desc||'—', Details: desc||'—', Qty: qty, UnitPrice: price, ChargeVAT: true });
+      total += qty * price;
+    });
+  }
+  if (!lines.length) { showToast('Add at least one line item'); return; }
+
+  // Use first row description as the sheet job description
+  var desc = lines[0].ProductName;
+
+  var btn = document.getElementById('caspitCreateBtn');
+  btn.textContent = '⏳ Saving to sheet…'; btn.disabled = true;
+
   var selectedContact = _caspitContacts.filter(function(c){ return (c.Id||c.ContactId||'') === contactId; })[0];
   var customerName = selectedContact ? (selectedContact.Name || '') : '';
 
-  // Step 1: Save to sheet using sheetClient
+  // Status based on total
+  var finalStatus = total > 0 ? 'ניתנה הצעה' : 'ממתין להצעה';
+
+  // Step 1: Save to sheet
   fetch(SHEETS_URL + '?action=addJob&client=' + encodeURIComponent(sheetClient) +
     '&desc=' + encodeURIComponent(desc) + '&st=' + encodeURIComponent('ממתין להצעה') +
-    '&pr=' + encodeURIComponent(price))
+    '&pr=' + encodeURIComponent(total))
   .then(function(r){ return r.text(); })
   .then(function(jobId) {
     jobId = jobId.trim();
     if (!jobId || jobId.indexOf('Error')!==-1) throw new Error(jobId);
-    btn.textContent = '⏳ שולח לכספית…';
-    // Step 2: Create in Caspit via proxy using contactId from picker
+    btn.textContent = '⏳ Sending to Caspit…';
     var payload = {
       TrxTypeId: 16, DocumentId: 'YB-Q-' + Date.now(), DocumentSource: 2,
       DocumentNumberBranch: 1, TrxCodeNumber: 3, ChargeVAT: true, ContactId: contactId,
       CustomerBusinessName: customerName || undefined,
-      DocumentLines: [{ ProductName: desc, Details: desc, Qty: 1, UnitPrice: price, ChargeVAT: true }]
+      DocumentLines: lines
     };
-    console.log('Sending to Caspit:', JSON.stringify(payload));
     return _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     }).then(function(r){ return r.json(); })
     .then(function(result) {
+      // Update status based on total
       fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(jobId) +
-        '&client=' + encodeURIComponent(sheetClient) + '&status=' + encodeURIComponent('ניתנה הצעה')).catch(function(){});
+        '&client=' + encodeURIComponent(sheetClient) + '&status=' + encodeURIComponent(finalStatus)).catch(function(){});
       btn.textContent = '💼 Save & Send to Caspit'; btn.disabled = false;
-      console.log('Caspit response:', JSON.stringify(result));
       showCaspitLog(result);
       if (result && (result.DocumentNumber || result.number || result.Id || result.documentId)) {
         _caspitShowSuccess(result);
         document.getElementById('caspitOverlay').style.display = 'none';
       } else {
-        showToast('⚠️ נשמר בגיליון, שגיאה בכספית: ' + (result.error || result.Message || ''));
+        showToast('⚠️ Saved to sheet, Caspit error: ' + (result.error || result.Message || ''));
       }
     });
   })
   .catch(function(err) {
     btn.textContent = '💼 Save & Send to Caspit'; btn.disabled = false;
-    alert('Error: ' + (err.message || err.toString()));
-    showToast('⚠️ שגיאה: ' + (err.message||''));
+    showToast('⚠️ Error: ' + (err.message||''));
   });
 }
 // ── End Caspit ────────────────────────────────────────
