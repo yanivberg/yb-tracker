@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v334</title>
+<title>י.ב אחזקות — v335</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3726,36 +3726,118 @@ function _renderCaspitQuoteTab() {
   }
 }
 
+function _normalizeName(s) {
+  return (s||'').toLowerCase()
+    .replace(/['"״׳`]/g,'')
+    .replace(/\b(בעמ|בע"מ|בע׳מ|ltd|limited|inc|llc|בעמ\.?)\b/g,'')
+    .replace(/[^a-z0-9\u0590-\u05ff]/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+
+function _matchCaspitContact(sheetName, contacts) {
+  if (!sheetName || !contacts || !contacts.length) return null;
+  var nameNorm = _normalizeName(sheetName);
+
+  // 1. Exact match (case-insensitive)
+  for (var i=0; i<contacts.length; i++) {
+    if ((contacts[i].Name||'').toLowerCase() === sheetName.toLowerCase())
+      return { contact: contacts[i], score: 100, method: 'Exact match' };
+  }
+
+  // 2. Normalized exact match
+  for (var i=0; i<contacts.length; i++) {
+    if (_normalizeName(contacts[i].Name) === nameNorm)
+      return { contact: contacts[i], score: 95, method: 'Normalized match' };
+  }
+
+  // 3. Contains match (one contains the other)
+  var best = null, bestScore = 0;
+  for (var i=0; i<contacts.length; i++) {
+    var cNorm = _normalizeName(contacts[i].Name);
+    if (!cNorm || !nameNorm) continue;
+    if (cNorm.indexOf(nameNorm) !== -1 || nameNorm.indexOf(cNorm) !== -1) {
+      var score = Math.round(Math.min(cNorm.length, nameNorm.length) / Math.max(cNorm.length, nameNorm.length) * 90);
+      if (score > bestScore) { bestScore = score; best = contacts[i]; }
+    }
+  }
+  if (best && bestScore >= 75) return { contact: best, score: bestScore, method: 'Partial match' };
+
+  // 4. Fuzzy: token overlap
+  var tokens = nameNorm.split(' ').filter(function(t){return t.length>2;});
+  best = null; bestScore = 0;
+  for (var i=0; i<contacts.length; i++) {
+    var cTokens = _normalizeName(contacts[i].Name).split(' ').filter(function(t){return t.length>2;});
+    var matches = tokens.filter(function(t){ return cTokens.indexOf(t)!==-1; }).length;
+    if (!tokens.length || !cTokens.length) continue;
+    var score = Math.round(matches / Math.max(tokens.length, cTokens.length) * 85);
+    if (score > bestScore) { bestScore = score; best = contacts[i]; }
+  }
+  if (best && bestScore >= 70) return { contact: best, score: bestScore, method: 'Fuzzy match' };
+
+  return null;
+}
+
 function _renderCaspitQuoteForm() {
   var body = document.getElementById('caspitBody');
-  // Build options from Caspit contacts
-  var opts = '<option value="">— בחר לקוח מכספית —</option>';
   var sorted = _caspitContacts.slice().sort(function(a,b){ return (a.Name||'').localeCompare(b.Name||''); });
+  var opts = '<option value="">— בחר לקוח מכספית —</option>';
   sorted.forEach(function(c) {
     opts += '<option value="' + (c.Id||'').replace(/"/g,'&quot;') + '" data-name="' + (c.Name||'').replace(/"/g,'&quot;') + '">' + (c.Name||c.Id) + '</option>';
   });
+
   body.innerHTML =
-    '<div style="margin-bottom:12px;">' +
+    '<div style="margin-bottom:10px;">' +
+      '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">לקוח בגיליון</label>' +
+      '<input id="caspitQuoteSheetClient" type="text" placeholder="שם כפי שמופיע בגיליון…" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;" oninput="_autoMatchCaspitClient()">' +
+    '</div>' +
+    '<div id="caspitMatchResult" style="margin-bottom:10px;display:none;"></div>' +
+    '<div style="margin-bottom:10px;">' +
       '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">לקוח (מכספית)</label>' +
       '<select id="caspitQuoteContact" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;">' + opts + '</select>' +
-      '<div style="font-size:11px;color:#aaa;margin-top:4px;">' + _caspitContacts.length + ' אנשי קשר</div>' +
+      '<div style="font-size:11px;color:#aaa;margin-top:3px;">' + _caspitContacts.length + ' אנשי קשר</div>' +
     '</div>' +
-    '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">שם לקוח בגיליון (לשמירה)</label>' +
-    '<input id="caspitQuoteSheetClient" type="text" placeholder="שם כפי שמופיע בגיליון…" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
     '<div style="margin-bottom:12px;"><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">תיאור</label>' +
     '<input id="caspitQuoteDesc" type="text" placeholder="תיאור העבודה…" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
     '<div style="margin-bottom:14px;"><label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">מחיר (₪)</label>' +
     '<input id="caspitQuotePrice" type="number" placeholder="0" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
     '<div style="background:#e8f0fe;border-radius:8px;padding:10px 12px;font-size:12px;color:#0d47a1;">1. שומר עבודה בגיליון (ממתין להצעה)<br>2. שולח הצעת מחיר לכספית<br>3. מעדכן סטטוס: ניתנה הצעה</div>';
+}
 
-  // Auto-fill sheet client name when contact selected
-  var sel = document.getElementById('caspitQuoteContact');
-  if (sel) sel.onchange = function() {
-    var opt = sel.options[sel.selectedIndex];
-    var name = opt ? opt.getAttribute('data-name') : '';
-    var sheetInput = document.getElementById('caspitQuoteSheetClient');
-    if (sheetInput && name) sheetInput.value = name;
-  };
+function _autoMatchCaspitClient() {
+  var sheetName = (document.getElementById('caspitQuoteSheetClient')||{}).value||'';
+  var matchDiv  = document.getElementById('caspitMatchResult');
+  var sel       = document.getElementById('caspitQuoteContact');
+  if (!matchDiv || !sel) return;
+  if (!sheetName.trim()) { matchDiv.style.display='none'; sel.value=''; return; }
+
+  var result = _matchCaspitContact(sheetName, _caspitContacts);
+  if (result) {
+    var color   = result.score >= 90 ? '#1b5e20' : result.score >= 75 ? '#e65100' : '#555';
+    var bg      = result.score >= 90 ? '#e8f5e9' : result.score >= 75 ? '#fff3e0' : '#f5f5f5';
+    var border  = result.score >= 90 ? '#2e7d32' : result.score >= 75 ? '#e65100' : '#bbb';
+    var icon    = result.score >= 90 ? '✅' : '⚠️';
+    matchDiv.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:' + bg + ';border-radius:10px;border:1.5px solid ' + border + ';">' +
+        '<span style="font-size:16px;">' + icon + '</span>' +
+        '<div style="flex:1;">' +
+          '<div style="font-size:11px;font-weight:700;color:' + color + ';">' + result.method + ' — ' + result.score + '%</div>' +
+          '<div style="font-size:13px;font-weight:700;color:#111;">' + (result.contact.Name||result.contact.Id) + '</div>' +
+        '</div>' +
+      '</div>';
+    matchDiv.style.display = 'block';
+    // Auto-select in dropdown
+    for (var i=0; i<sel.options.length; i++) {
+      if (sel.options[i].value === (result.contact.Id||'')) { sel.selectedIndex = i; break; }
+    }
+  } else {
+    matchDiv.innerHTML =
+      '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:#fff3e0;border-radius:10px;border:1.5px solid #e65100;">' +
+        '<span style="font-size:16px;">⚠️</span>' +
+        '<div style="font-size:12px;color:#e65100;font-weight:700;">No match found — select manually</div>' +
+      '</div>';
+    matchDiv.style.display = 'block';
+    sel.value = '';
+  }
 }
 
 function createCaspitQuote() {
