@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v344</title>
+<title>י.ב אחזקות — v346</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1891,7 +1891,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzEEnG4-lY290_0rrqI34VttaPTxq5Dfm05gh3MUigIpt6IKO-CeZgNhk5J-mJgBwKsRA/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzrDy40o9Tlg3Jc38AbSHRFeVqFGmIdcVNC8BK0c0txoB8HIrgU_FiGKbx5XDPLhW6qxw/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -3574,7 +3574,7 @@ function _caspitLoadData() {
       showToast('Jobs: ' + (data||[]).length);
       invoicesData = (data || []).map(function(j) {
         return { id: j.jobId||j.id||'', client: j.client||'', desc: j.description||j.desc||'',
-                 grossProfit: j.price||j.grossProfit||0, income: j.price||j.income||0,
+                 grossProfit: parseFloat(j.grossProfit)||0, income: parseFloat(j.income)||parseFloat(j.price)||parseFloat(j.grossProfit)||0,
                  po: j.poNumber||j.po||'', hours: j.hours||0 };
       });
       _caspitInvoiceJobs = invoicesData; sheetDone = true; tryRender();
@@ -3636,7 +3636,7 @@ function _renderCaspitInvoiceTab() {
   if (!_caspitInvoiceJobs.length) { body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">אין עבודות להוציא חש</div>'; return; }
 
   _caspitJobList = _caspitInvoiceJobs.map(function(j) {
-    return { id: j.id, client: j.client, gp: parseFloat(j.grossProfit)||parseFloat(j.income)||0, desc: j.desc||'', po: j.po||'' };
+    return { id: j.id, client: j.client, gp: parseFloat(j.grossProfit)||0, income: parseFloat(j.income)||parseFloat(j.grossProfit)||0, desc: j.desc||'', po: j.po||'' };
   });
 
   var html = '<div style="display:flex;gap:8px;margin-bottom:10px;">' +
@@ -3725,7 +3725,7 @@ function createCaspitInvoice() {
       DocumentSource: 2, DocumentNumberBranch: 1, TrxCodeNumber: _caspitDocType === 1 ? 3 : undefined, ChargeVAT: true, ContactId: g.contactId,
       CustomerBusinessName: g.contactId ? null : g.clientName,
       DocumentLines: g.jobs.map(function(job, li) {
-        return { ProductName: job.desc + (job.po ? ' | מ.רכש: ' + job.po : ''), Details: job.desc, Qty: 1, UnitPrice: job.gp, ChargeVAT: true };
+        return { ProductName: job.desc + (job.po ? ' | מ.רכש: ' + job.po : ''), Details: job.desc, Qty: 1, UnitPrice: parseFloat(job.income) || parseFloat(job.gp) || 1, ChargeVAT: true };
       })
     };
     _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
