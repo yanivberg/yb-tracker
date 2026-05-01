@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v333</title>
+<title>י.ב אחזקות — v334</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1206,6 +1206,23 @@ SHEET SYNC
 </div>
 <!-- Caspit Overlay -->
 <div id="caspitOverlay" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10014;align-items:flex-end;justify-content:center;">
+
+  <!-- Log Panel -->
+  <div id="caspitLogPanel" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:10020;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:#0f1923;border-radius:14px;overflow:hidden;border:1px solid #2a3a4a;width:100%;max-width:480px;">
+      <div style="background:#0d47a1;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="color:#fff;font-size:14px;font-weight:700;">📋 Caspit Test Result</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span id="caspitLogStatus" style="background:#1b5e20;color:#a5d6a7;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;"></span>
+          <button onclick="document.getElementById('caspitLogPanel').style.display='none'" style="background:none;border:none;color:#aaa;font-size:20px;cursor:pointer;">✕</button>
+        </div>
+      </div>
+      <div id="caspitLogSummary" style="padding:14px 16px;border-bottom:1px solid #1a2a3a;"></div>
+      <button onclick="var b=document.getElementById('caspitLogJson');var open=b.style.display!=='none';b.style.display=open?'none':'block';this.textContent=open?'▶ Show full JSON':'▼ Hide full JSON';" style="width:100%;padding:10px;background:none;border:none;color:#78909c;font-size:12px;cursor:pointer;font-family:Heebo,sans-serif;border-top:1px solid #1a2a3a;">▶ Show full JSON</button>
+      <div id="caspitLogJson" style="display:none;background:#060e14;padding:14px;font-size:10px;color:#80cbc4;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:280px;overflow-y:auto;"></div>
+      <button onclick="var t=document.getElementById('caspitLogJson').textContent;navigator.clipboard.writeText(t).then(function(){var b=document.getElementById('caspitCopyBtn');b.textContent='✓ Copied!';b.style.background='#1b5e20';setTimeout(function(){b.textContent='📋 Copy Full Result';b.style.background='#0d47a1';},2000);});" id="caspitCopyBtn" style="width:calc(100% - 32px);margin:12px 16px;padding:12px;background:#0d47a1;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">📋 Copy Full Result</button>
+    </div>
+  </div>
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px 0;border-bottom:1px solid #eee;flex-shrink:0;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -2068,6 +2085,41 @@ function openAddJobModal() {
 }
 
 var _addJobCalcMode = 'qty';
+
+function showCaspitLog(result) {
+  var r = result.rawResponse || {};
+  var lines = (r.DocumentLines || []);
+  var firstLine = lines[0] || {};
+  var rows = [
+    ['documentId',            result.documentId || '—'],
+    ['number',                result.number     || '—'],
+    ['status',                result.status     || '—'],
+    ['TrxTypeId',             r.TrxTypeId       != null ? r.TrxTypeId       : '—'],
+    ['TrxCodeNumber',         r.TrxCodeNumber   != null ? r.TrxCodeNumber   : '—'],
+    ['DocumentNumberBranch',  r.DocumentNumberBranch != null ? r.DocumentNumberBranch : '—'],
+    ['CustomerBusinessName',  r.CustomerBusinessName || '—'],
+    ['ProductName',           firstLine.ProductName  || '—'],
+    ['LinkToPdf',             r.LinkToPdf ? r.LinkToPdf.slice(0,50) + '...' : '—'],
+  ];
+  var summaryHtml = rows.map(function(row){
+    var isGreen = row[0]==='number'||row[0]==='status';
+    var isYellow = row[0]==='documentId'||row[0]==='LinkToPdf';
+    var col = isGreen?'#a5d6a7':isYellow?'#fff176':'#e3f2fd';
+    return '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #0d1a2a;">' +
+      '<span style="font-size:11px;color:#78909c;">'+row[0]+'</span>' +
+      '<span style="font-size:12px;font-weight:700;color:'+col+';text-align:right;max-width:65%;word-break:break-all;">'+row[1]+'</span>' +
+    '</div>';
+  }).join('');
+  document.getElementById('caspitLogSummary').innerHTML = summaryHtml;
+  document.getElementById('caspitLogJson').textContent = JSON.stringify(result, null, 2);
+  document.getElementById('caspitLogStatus').textContent = (result.status === 'created' ? '✓ ' : '') + (result.status || '');
+  document.getElementById('caspitLogStatus').style.background = result.status === 'created' ? '#1b5e20' : '#b71c1c';
+  // Reset JSON panel
+  document.getElementById('caspitLogJson').style.display = 'none';
+  var expandBtn = document.getElementById('caspitLogJson').previousElementSibling;
+  if (expandBtn) expandBtn.textContent = '▶ Show full JSON';
+  document.getElementById('caspitLogPanel').style.display = 'flex';
+}
 function setAddJobCalcMode(mode) {
   _addJobCalcMode = mode;
   var isQty = mode === 'qty';
@@ -3616,7 +3668,8 @@ function createCaspitInvoice() {
 function _caspitShowSuccess(result) {
   var docNum = result.number || result.DocumentNumber || result.documentId || result.Id || '?';
   var status = result.status || 'created';
-  showToast('✓ מסמך ' + docNum + ' | ' + status, 5000);
+  showToast('✓ מסמך ' + docNum + ' | ' + status, 4000);
+  showCaspitLog(result);
 }
 
 function _caspitAskManualContact(clientName, payload, callback) {
@@ -3733,7 +3786,6 @@ function createCaspitQuote() {
       DocumentLines: [{ ProductName: desc, Details: desc, Qty: 1, UnitPrice: price, ChargeVAT: true }]
     };
     console.log('Sending to Caspit:', JSON.stringify(payload));
-    showToast('Sending: ContactId=' + contactId.slice(0,12) + '...');
     return _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     }).then(function(r){ return r.json(); })
@@ -3741,8 +3793,8 @@ function createCaspitQuote() {
       fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(jobId) +
         '&client=' + encodeURIComponent(sheetClient) + '&status=' + encodeURIComponent('ניתנה הצעה')).catch(function(){});
       btn.textContent = '💼 שמור ושלח לכספית'; btn.disabled = false;
-      console.log('Caspit raw response:', JSON.stringify(result));
-      showToast(JSON.stringify(result).slice(0,150), 8000);
+      console.log('Caspit response:', JSON.stringify(result));
+      showCaspitLog(result);
       if (result && (result.DocumentNumber || result.number || result.Id || result.documentId)) {
         _caspitShowSuccess(result);
         document.getElementById('caspitOverlay').style.display = 'none';
