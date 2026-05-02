@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v375</title>
+<title>י.ב אחזקות — v377</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -478,58 +478,79 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v288
-Deployed: 24/4/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v377
+Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbwkX3Z...exec (v52)
-Gmail PO: gmail-po-import-v2.gs
+Apps Script: AKfycbwzLMX...exec (v73)
+Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v288 · 24/4/2026
-• Fix: Time filters on Pending Quote now work
-• Fix: Jobs with no date excluded when time/waiting filter active
-• New: 📅 date badge on each pending quote card
-• Apps Script v50: addJob stamps today as תאריך התחלה on creation
+v377 · 02/05/2026
+• Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
+• Fix: Removed duplicate notes fields from quote form (shared footer)
 
-v287 · 24/4/2026
-• Fix: Pending Quote filter — rewritten to pure innerHTML
+v374 · 02/05/2026
+• New: Notes (visible to client) + Internal notes (internal) fields on all documents
+• Maps to Caspit: Comments (max 5000) + Details (max 1000)
 
-v286 · 24/4/2026
-• Fix: Time chips — Apps Script now formats dateStart as dd/MM/yyyy
-• Fix: ✕ נקה on Open Tasks — master list bug fixed
-• New: Sort chips ↑ ישן→חדש / ↓ חדש→ישן
+v373 · 02/05/2026
+• New: addJobsBulk — saves all quote rows in one API call (handles 27+ rows fast)
+• Fix: UnitPrice 0.01 fallback when price is empty
 
-v285 · 24/4/2026
-• New: Filter bar on all lists
-• Client chips, time chips, ⏰ >2 שבועות, sort, ✕ נקה
-• Filters persist in localStorage
+v372 · 02/05/2026
+• Fix: Multi-row quote sequential save → bulk save (race condition fix)
+• Worker v8: Details field now passes through to Caspit
 
-v284 · 23/4/2026
-• New: Pre-Project Timer drawer picker (New / Existing project)
+v369 · 02/05/2026
+• New: Multi-row quotes — one sheet row per line item
+• Each row has Description / Qty / Price / Est. Hours
+• Hours default 0.5 per row
 
-v283 · 23/4/2026
-• Fix: GPS every 5 min instead of continuous (less heat)
+v367 · 02/05/2026
+• New: Inline edit on Pending Quote rows (✏️)
+• Edit: desc, qty, price, hours, status
+• Save creates new Caspit quote + logs update note
 
-v282 · 23/4/2026
-• New: ⏱ Pre-Project Timer (from Pending Quote + Drawer + Day screen)
+v365 · 02/05/2026
+• Fix: יצאה חשבונית stays empty on quote (only fills on invoice)
+• Fix: Start date empty on quote creation (noDate=1)
 
-v281 · 22/4/2026
-• Fix: PO import sequential processing (race condition)
-• New: PO import bulk default bar
+v361 · 02/05/2026
+• Fix: Invoice / Receipt tab now shows jobs (getInvoiceReadyJobs fixed)
+• Apps Script v72: isSystemSheet helper, all iterators standardized
 
-v280 · 21/4/2026
-• New: 📓 יומן עבודה — cumulative work log + sheet sync
+v356 · 02/05/2026
+• New: Caspit Documents sheet tab (10 cols: #, Date, Doc Number, Type, Client, Total, Jobs, ID, PDF, Note)
+• Write-back: doc number + יצאה חש after invoice creation
+
+v350 · 02/05/2026
+• New: Manual Caspit contact picker per client group in Invoice tab
+• Auto-match shows Caspit contact name (not sheet tab name)
+
+v342 · 01/05/2026
+• New: Multi-row line items in New Quotation
+• Live total (green/orange), status hint
+• + Add Row button, ✕ to remove
+
+v338 · 01/05/2026
+• Fix: CustomerBusinessName from matched Caspit contact
+• New: Sheet client dropdown (existing tabs only)
+• New: Auto-match sheet client → Caspit contact
+
+v334 · 01/05/2026
+• New: Result log panel after Caspit document creation
+• Summary rows + expandable full JSON + 📋 Copy button
 
 ─────────────────
 FEATURES
 ─────────────────
 SCREEN 1 — SETUP
 - Pick from open tasks, pending quote, completed, invoices
-- Filter bar on all lists: client / time / waiting / sort
+- Filter bar: client / time / waiting / sort
 - Add project to sheet
-- Create new client from GOLMAT template
+- Create new client (sheet tab + Clients sheet + Caspit contact)
 - 📧 Import PO Emails — bulk default + sequential save
 - 💰 רווח גולמי להוציא חש
 - 📝 הערת יום + 📋 הערות יום קודמות
@@ -547,6 +568,33 @@ SCREEN 3 — SUMMARY (Timeline)
 - Vertical timeline per session
 - Driving / Setup blocks
 - Copy + Save
+
+💼 CASPIT OVERLAY
+- New Quotation: multi-row, auto-match, bulk save, inline edit
+- Invoice / Receipt: grouped by client, manual contact picker
+- Comments (visible to client) + Internal notes
+- Result log panel with Copy JSON
+- Caspit Documents sheet log
+
+─────────────────
+CASPIT API
+─────────────────
+Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
+Base URL: https://app.caspit.biz/api/v1
+
+TrxTypeId:
+  1  = חשבונית מס (invoice)
+  2  = קבלה (receipt) — DISABLED
+  16 = הצעת מחיר (quote)
+
+Document fields:
+  Details  → פרטים שלא מוצגים ללקוח (max 1000)
+  Comments → הערות שכן מוצגות ללקוח (max 5000)
+  DocumentLines: ProductName, Qty, UnitPrice, ChargeVAT
+  DocumentNumberBranch: 1 · TrxCodeNumber: 3
+
+Auth: POST /token/ → Caspit-Token header (8min cache)
+Secrets: CASPIT_USER, CASPIT_PWD, CASPIT_OSEK_MORSHE
 
 SHEET SYNC
 - Hours cumulative
@@ -1055,7 +1103,8 @@ SHEET SYNC
 </div>
       <div style="padding:14px 16px;border-top:1px solid #eee;flex-shrink:0;display:flex;flex-direction:column;gap:8px;">
         <button onclick="copyAppInfo()" id="copyInfoBtn" style="width:100%;padding:13px;background:#111;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">📋 Copy Summary to Clipboard</button>
-        <button onclick="copyAppScript()" id="copyScriptBtn" style="width:100%;padding:13px;background:transparent;color:#111;border:1.5px solid #111;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">📄 Copy Apps Script — v14 · 8/4/2026</button>
+        <button onclick="copyAppScript()" id="copyScriptBtn" style="width:100%;padding:13px;background:transparent;color:#111;border:1.5px solid #111;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">📄 Copy Apps Script — v73 · 02/5/2026</button>
+        <button onclick="copyCaspitInfo()" id="copyCaspitBtn" style="width:100%;padding:13px;margin-top:8px;background:transparent;color:#0d47a1;border:1.5px solid #0d47a1;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">💼 Copy Caspit API Info</button>
       </div>
     </div>
   </div>
@@ -3171,10 +3220,33 @@ function copyAppInfo() { var text = document.getElementById('appInfoText').textC
 
 function copyAppScript() {
   var btn = document.getElementById('copyScriptBtn');
-  var script = '// Apps Script — see app info panel for full script';
   var origText = btn.textContent;
-  function onCopied() { btn.textContent = '✓ Apps Script copied!'; setTimeout(function() { btn.textContent = origText; }, 2500); }
-  if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(script).then(onCopied).catch(function() { fallbackCopy(script, onCopied); }); } else { fallbackCopy(script, onCopied); }
+  var text = [
+    '// Apps Script v73 — י.ב אחזקות',
+    '// Deploy: Web App → Anyone → New deployment each update',
+    '// Spreadsheet: ' + SPREADSHEET_ID,
+    '// URL: ' + SHEETS_URL,
+    '',
+    'Key actions:',
+    'getJobs, getInvoiceReadyJobs, getPendingQuote, getCompletedJobs',
+    'addJob (&desc, &st, &pr, &qt, &eh, &noDate=1)',
+    'addJobsBulk (POST, &client, &noDate, body: rows=JSON)',
+    'setStatus, updateJobFields, updateJob',
+    'saveCaspitDocument (&jobIds, &docNumber, &trxTypeId, &total, &pdfLink, &note)',
+    'createClient, updateClientCaspitId, getClients[&full=1]',
+    'saveWorkLog, searchWorkLog, addDayNote',
+    'getCaspitToken'
+  ].join('\n');
+  function onCopied() { btn.textContent = '✓ Copied!'; setTimeout(function() { btn.textContent = origText; }, 2500); }
+  if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(onCopied).catch(function() { fallbackCopy(text, onCopied); }); } else { fallbackCopy(text, onCopied); }
+}
+
+function copyCaspitInfo() {
+  var btn = document.getElementById('copyCaspitBtn');
+  var origText = btn.textContent;
+  var text = '=== CASPIT API INFO ===\n\nWorker URL: ' + CASPIT_PROXY_URL + '\nWorker version: worker-proxy-v8-document-details\n\nActions:\n  GET  ?action=getContacts\n  POST ?action=createDocument\n  POST ?action=createContact\n  GET  ?action=getDocument&documentId=\n  GET  ?action=listDocuments&number=\n  GET  ?action=testAuth\n  GET  ?action=health\n\nTrxTypeId:\n  1  = חשבונית מס (invoice)\n  2  = קבלה (receipt) — DISABLED\n  16 = הצעת מחיר (quote)\n\nCaspitDocument fields:\n  DocumentId (YB-Q-{ts}), TrxTypeId, DocumentNumberBranch: 1, TrxCodeNumber: 3\n  ContactId, CustomerBusinessName\n  Comments — הערות שכן מוצגות ללקוח (max 5000)\n  Details  — פרטים שלא מוצגים ללקוח (max 1000)\n  DocumentLines[]: ProductName, Details, Qty, UnitPrice, ChargeVAT\n\nAuth: POST /api/v1/token/ with UserName+Password+OsekMorshe → Caspit-Token header\nToken cache: 8 min. Auto-refresh on 401/403.\n\n=== WORKER SCRIPT v8 ===\n\nconst CASPIT_BASE_URL = \'https://app.caspit.biz/api/v1\';\n\nlet tokenCache = { token: \'\', expiresAt: 0 };\n\nconst CORS_HEADERS = {\n  \'Access-Control-Allow-Origin\': \'*\',\n  \'Access-Control-Allow-Methods\': \'GET, POST, OPTIONS\',\n  \'Access-Control-Allow-Headers\': \'Content-Type, Accept\',\n  \'Access-Control-Max-Age\': \'86400\'\n};\n\nexport default {\n  async fetch(request, env) {\n    // ... see full script in Cloudflare dashboard\n    // yb-caspit-proxy.sunroof-dictate-39.workers.dev\n  }\n};\n\nKey build functions:\n- getCaspitToken(env, forceRefresh) — 8min cache\n- caspitFetch(env, path, options) — auto-retry on 401\n- createDocument(env, input) → buildCaspitDocument → POST /documents/\n- buildCaspitDocument: Details+Comments at doc level, DocumentLines at line level\n- createContact(env, input) → POST /Contacts\n- getContacts(env) — paginated, sorted by name\n- getDocument(env, documentId)\n- listDocuments(env, number, page)\n\nSecrets (Cloudflare env vars):\n  CASPIT_USER, CASPIT_PWD, CASPIT_OSEK_MORSHE';
+  function onCopied() { btn.textContent = '✓ Copied!'; setTimeout(function() { btn.textContent = origText; }, 2500); }
+  if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(onCopied).catch(function() { fallbackCopy(text, onCopied); }); } else { fallbackCopy(text, onCopied); }
 }
 
 // ── PO Import Scan (per-item choice) ───────────────────
