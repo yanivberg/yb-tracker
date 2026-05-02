@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v369</title>
+<title>י.ב אחזקות — v370</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -4170,7 +4170,7 @@ function createCaspitQuote() {
   Promise.all(savePromises).then(function() {
     btn.textContent = '⏳ Sending to Caspit…';
     var lines = rowData.map(function(r) {
-      return { ProductName: r.desc, Details: r.desc, Qty: r.qty, UnitPrice: r.price, ChargeVAT: true };
+      return { ProductName: r.desc, Details: r.desc, Qty: r.qty, UnitPrice: r.price > 0 ? r.price : 0.01, ChargeVAT: true };
     });
     var payload = {
       TrxTypeId: 16, DocumentId: 'YB-Q-' + Date.now(), DocumentSource: 2,
