@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v377</title>
+<title>י.ב אחזקות — v378</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -478,7 +478,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v377
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v378
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -487,7 +487,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v377 · 02/05/2026
+v378 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -4119,12 +4119,8 @@ function _renderCaspitQuoteForm() {
     opts += '<option value="' + (c.Id||'').replace(/"/g,'&quot;') + '" data-name="' + (c.Name||'').replace(/"/g,'&quot;') + '">' + (c.Name||c.Id) + '</option>';
   });
 
-  var clientOpts = '<option value="">— Select sheet client —</option>';
-  var sortedClients = savedClients.slice().sort(function(a,b){return a.localeCompare(b);});
-  sortedClients.forEach(function(c){
-    clientOpts += '<option value="' + c.replace(/"/g,'&quot;') + '">' + c + '</option>';
-  });
-
+  // Load all clients from Clients sheet via getClients&full=1
+  var clientOpts = '<option value="">⏳ Loading…</option>';
   body.innerHTML =
     '<div style="margin-bottom:10px;">' +
       '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">Sheet Client</label>' +
@@ -4152,6 +4148,34 @@ function _renderCaspitQuoteForm() {
     '<div style="background:#e8f0fe;border-radius:8px;padding:10px 12px;font-size:12px;color:#0d47a1;margin-bottom:2px;">1. Saves job to sheet (Waiting for Quote)<br>2. Sends all line items to Caspit<br>3. Total &gt; 0 → status: Quote Given &nbsp;|&nbsp; Total = 0 → status: Waiting for Quote</div>';
 
   addCaspitQuoteRow();
+
+  // Populate Sheet Client dropdown from Clients sheet (all clients)
+  fetch(SHEETS_URL + '?action=getClients&full=1')
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      var sel = document.getElementById('caspitQuoteSheetClient');
+      if (!sel) return;
+      var clients = Array.isArray(data) ? data.filter(function(d){ return d && d.name; }) : [];
+      // fallback to tab names if full=1 returns strings
+      if (!clients.length) {
+        return fetch(SHEETS_URL + '?action=getClients')
+          .then(function(r){ return r.json(); })
+          .then(function(tabs) {
+            var sorted = (tabs||[]).sort(function(a,b){ return a.localeCompare(b); });
+            sel.innerHTML = '<option value="">— Select sheet client —</option>';
+            sorted.forEach(function(c){ sel.innerHTML += '<option value="' + c + '">' + c + '</option>'; });
+          });
+      }
+      clients.sort(function(a,b){ return (a.name||'').localeCompare(b.name||''); });
+      sel.innerHTML = '<option value="">— Select sheet client —</option>';
+      clients.forEach(function(c){
+        sel.innerHTML += '<option value="' + (c.name||'').replace(/"/g,'&quot;') + '">' + (c.name||'') + '</option>';
+      });
+    })
+    .catch(function() {
+      var sel = document.getElementById('caspitQuoteSheetClient');
+      if (sel) sel.innerHTML = '<option value="">— Error loading clients —</option>';
+    });
 }
 
 function addCaspitQuoteRow() {
