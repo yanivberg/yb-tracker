@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v363</title>
+<title>י.ב אחזקות — v368</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1891,7 +1891,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxVCjAsxoLX_VQfHLpp_sVIaV9_TnU6f1Bo6efR3tUNJQ3m6EUHx5AUSbVSazCEWSUyKA/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwSVOiPbsa_XyhFfPWNCbYoUsqUFPaVFFK77U923ScSeYx3Ya7KmMrSrHrBFcdIgetylQ/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2053,7 +2053,7 @@ function showPendingQuotePicker(jobs) {
         var rowStyle = clientRowStyle(client);
         var dateBadge = job.dateStart ? '<span style="font-size:10px;color:#444;margin-right:6px;">📅 ' + job.dateStart + '</span>' : '';
         if (complete) {
-          html += '<div style="padding:12px 16px;' + rowStyle + '">' +
+          html += '<div id="pqRow_'+idx+'" style="padding:12px 16px;' + rowStyle + '">' +
             '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">' +
               '<div style="flex:1;"><div style="font-weight:700;font-size:14px;color:#111;">' + job.desc + '</div><div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:2px;">✓ כל הפרטים מולאו ' + dateBadge + '</div></div>' +
               '<div style="display:flex;gap:6px;">' +
@@ -2067,7 +2067,7 @@ function showPendingQuotePicker(jobs) {
             '</div>' +
           '</div>';
         } else {
-          html += '<div style="padding:12px 16px;' + rowStyle + '">' +
+          html += '<div id="pqRow_'+idx+'" style="padding:12px 16px;' + rowStyle + '">' +
             '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
               '<div style="flex:1;"><div style="font-weight:700;font-size:14px;color:#111;">' + job.desc + '</div><div style="font-size:11px;color:rgba(255,255,200,0.8);margin-top:2px;">⚠️ חסרים פרטים ' + dateBadge + '</div></div>' +
               '<div style="display:flex;gap:6px;">' +
@@ -2084,7 +2084,120 @@ function showPendingQuotePicker(jobs) {
   overlay.style.display = 'flex';
 }
 
-function pendingQuoteEdit(idx) { var j = pendingQuoteJobs[idx]; if (!j) return; fetch(SHEETS_URL + '?action=getJobDetails&jobId=' + encodeURIComponent(j.id) + '&client=' + encodeURIComponent(j.client)).then(function(r) { return r.json(); }).then(function(details) { openCompleteJobModal(j, details, null, idx); }).catch(function() { openCompleteJobModal(j, {}, null, idx); }); }
+function pendingQuoteEdit(idx) {
+  var j = pendingQuoteJobs[idx];
+  if (!j) return;
+  var containerId = 'pqEdit_' + idx;
+  var existing = document.getElementById(containerId);
+  if (existing) { existing.style.display = existing.style.display === 'none' ? 'block' : 'none'; return; }
+
+  // Fetch job details then inject inline form
+  fetch(SHEETS_URL + '?action=getJobDetails&jobId=' + encodeURIComponent(j.id) + '&client=' + encodeURIComponent(j.client))
+    .then(function(r){ return r.json(); }).then(function(d) {
+      var rowEl = document.getElementById('pqRow_' + idx);
+      if (!rowEl) return;
+      var oldDoc = j.invoiceQuote || '';
+      var div = document.createElement('div');
+      div.id = containerId;
+      div.style.cssText = 'padding:12px 0 4px;';
+      div.innerHTML =
+        '<div style="display:grid;grid-template-columns:1fr 60px 70px 60px;gap:6px;margin-bottom:8px;">' +
+          '<div><div style="font-size:10px;color:#444;margin-bottom:3px;">Description</div>' +
+            '<input id="pqd_'+idx+'" type="text" value="'+(j.desc||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:8px;border:1.5px solid rgba(0,0,0,0.25);border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;background:rgba(255,255,255,0.85);"></div>' +
+          '<div><div style="font-size:10px;color:#444;margin-bottom:3px;">Qty</div>' +
+            '<input id="pqq_'+idx+'" type="number" value="'+(d.qty||1)+'" style="width:100%;padding:8px;border:1.5px solid rgba(0,0,0,0.25);border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;background:rgba(255,255,255,0.85);"></div>' +
+          '<div><div style="font-size:10px;color:#444;margin-bottom:3px;">Price (₪)</div>' +
+            '<input id="pqp_'+idx+'" type="number" value="'+(d.price||0)+'" style="width:100%;padding:8px;border:1.5px solid rgba(0,0,0,0.25);border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;background:rgba(255,255,255,0.85);"></div>' +
+          '<div><div style="font-size:10px;color:#444;margin-bottom:3px;">Hours</div>' +
+            '<input id="pqh_'+idx+'" type="number" step="0.5" value="'+(d.hours||0.5)+'" style="width:100%;padding:8px;border:1.5px solid rgba(0,0,0,0.25);border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;background:rgba(255,255,255,0.85);"></div>' +
+        '</div>' +
+        '<div style="margin-bottom:8px;"><div style="font-size:10px;color:#444;margin-bottom:3px;">Status</div>' +
+          '<select id="pqs_'+idx+'" style="width:100%;padding:8px;border:1.5px solid rgba(0,0,0,0.25);border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.85);">' +
+            '<option value="ממתין להצעה"' + (j.status==='ממתין להצעה'?' selected':'') + '>Waiting for Quote</option>' +
+            '<option value="ניתנה הצעה"' + (j.status==='ניתנה הצעה'?' selected':'') + '>Quote Given</option>' +
+            '<option value="ממתין לביצוע">Waiting to Execute</option>' +
+            '<option value="בתהליך ביצוע">In Progress</option>' +
+          '</select></div>' +
+        '<div style="display:flex;gap:6px;">' +
+          '<button onclick="cancelPQEdit('+idx+')" style="flex:0 0 80px;padding:9px;background:rgba(0,0,0,0.15);color:#fff;border:none;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">Cancel</button>' +
+          '<button onclick="savePQEdit('+idx+',\''+j.id+'\',\''+j.client.replace(/'/g,"\\'")+'\',\''+oldDoc+'\')" style="flex:1;padding:9px;background:rgba(0,0,0,0.4);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">✓ Save & Send to Caspit</button>' +
+        '</div>';
+      rowEl.appendChild(div);
+    }).catch(function(){ showToast('Failed to load job details'); });
+}
+
+function cancelPQEdit(idx) {
+  var el = document.getElementById('pqEdit_' + idx);
+  if (el) el.style.display = 'none';
+}
+
+function savePQEdit(idx, jobId, client, oldDocNumber) {
+  var desc   = (document.getElementById('pqd_'+idx)||{}).value||'';
+  var qty    = parseFloat((document.getElementById('pqq_'+idx)||{}).value)||1;
+  var price  = parseFloat((document.getElementById('pqp_'+idx)||{}).value)||0;
+  var hours  = parseFloat((document.getElementById('pqh_'+idx)||{}).value)||0;
+  var status = (document.getElementById('pqs_'+idx)||{}).value||'ממתין להצעה';
+  var btn    = document.querySelector('#pqEdit_'+idx+' button:last-child');
+  if (btn) { btn.textContent = '⏳ Saving…'; btn.disabled = true; }
+
+  // Step 1: Update sheet row
+  Promise.all([
+    fetch(SHEETS_URL + '?action=updateJobFields&jobId=' + encodeURIComponent(jobId) + '&client=' + encodeURIComponent(client) +
+      '&price=' + encodeURIComponent(price) + '&qty=' + encodeURIComponent(qty) + '&hours=' + encodeURIComponent(hours)).then(function(r){return r.text();}),
+    fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(jobId) + '&client=' + encodeURIComponent(client) + '&status=' + encodeURIComponent(status)).then(function(r){return r.text();})
+  ]).then(function() {
+    if (btn) btn.textContent = '⏳ Sending to Caspit…';
+
+    // Step 2: Find matched Caspit contact for this client
+    var contactId = _caspitMatchMap[client] || '';
+    var matchedContact = _caspitContacts.filter(function(c){ return (c.Id||c.ContactId||'') === contactId; })[0];
+    var customerName = matchedContact ? (matchedContact.Name||'') : '';
+
+    var newDocId = 'YB-Q-' + Date.now();
+    var payload = {
+      TrxTypeId: 16, DocumentId: newDocId, DocumentSource: 2,
+      DocumentNumberBranch: 1, TrxCodeNumber: 3, ChargeVAT: true,
+      ContactId: contactId, CustomerBusinessName: customerName || undefined,
+      DocumentLines: [{ ProductName: desc||'—', Details: desc||'—', Qty: qty, UnitPrice: price||1, ChargeVAT: true }]
+    };
+    return _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
+    }).then(function(r){ return r.json(); });
+  }).then(function(result) {
+    if (btn) { btn.textContent = '✓ Save & Send to Caspit'; btn.disabled = false; }
+    var docNumber  = result.number || result.DocumentNumber || '';
+    var docId      = result.documentId || result.Id || '';
+    var pdfLink    = (result.rawResponse && result.rawResponse.LinkToPdf) ? result.rawResponse.LinkToPdf : '';
+    var createdAt  = new Date().toLocaleDateString('he-IL');
+    var note       = oldDocNumber ? 'Updated quote — replaces ' + oldDocNumber : 'Updated quote';
+
+    // Step 3: Write back to sheet + log to Caspit Documents
+    fetch(SHEETS_URL + '?action=saveCaspitDocument' +
+      '&jobId='     + encodeURIComponent(jobId) +
+      '&client='    + encodeURIComponent(client) +
+      '&jobIds='    + encodeURIComponent(jobId) +
+      '&docId='     + encodeURIComponent(docId) +
+      '&docNumber=' + encodeURIComponent(docNumber) +
+      '&trxTypeId=16' +
+      '&total='     + encodeURIComponent(price * qty) +
+      '&pdfLink='   + encodeURIComponent(pdfLink) +
+      '&createdAt=' + encodeURIComponent(createdAt) +
+      '&note='      + encodeURIComponent(note)
+    ).catch(function(){});
+
+    showCaspitLog(result);
+    showToast('✓ ' + jobId + ' updated — ' + (docNumber||'sent'));
+    cancelPQEdit(idx);
+    // Refresh pending quote list
+    fetch(SHEETS_URL + '?action=getPendingQuote').then(function(r){return r.json();}).then(function(data){
+      pendingQuoteJobs = data || [];
+      showPendingQuotePicker(pendingQuoteJobs);
+    }).catch(function(){});
+  }).catch(function(err) {
+    if (btn) { btn.textContent = '✓ Save & Send to Caspit'; btn.disabled = false; }
+    showToast('Error: ' + (err.message||''));
+  });
+}
 function setJobStatusFromPicker(idx, status) { var job = pendingQuoteJobs[idx]; fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(job.id) + '&client=' + encodeURIComponent(job.client) + '&status=' + encodeURIComponent(status)).then(function() { showToast('✓ ' + job.id + ' → ' + status); document.getElementById('pendingQuoteOverlay').style.display = 'none'; }).catch(function() { showToast('Failed to update status'); }); }
 
 var _currentCompleteJob = null;
@@ -3960,10 +4073,15 @@ function addCaspitQuoteRow() {
   div.innerHTML =
     '<div style="font-size:10px;font-weight:700;color:#aaa;margin-bottom:5px;">Row ' + idx + '</div>' +
     '<button onclick="delCaspitQuoteRow(this)" type="button" style="position:absolute;top:8px;right:8px;background:none;border:none;color:#ccc;font-size:15px;cursor:pointer;padding:2px 5px;">✕</button>' +
-    '<div style="display:grid;grid-template-columns:1fr 60px 80px;gap:6px;">' +
+    '<div style="display:grid;grid-template-columns:1fr 60px 80px;gap:6px;margin-bottom:6px;">' +
       '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Description</div><input type="text" class="cq-desc" placeholder="…" oninput="calcCaspitTotal()" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
       '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Qty</div><input type="number" class="cq-qty" value="1" oninput="calcCaspitTotal()" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
       '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">Price (₪)</div><input type="number" class="cq-price" value="0" oninput="calcCaspitTotal()" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
+    '</div>' +
+    '<div style="display:flex;align-items:center;gap:8px;">' +
+      '<div style="font-size:10px;color:#888;white-space:nowrap;">Est. Hours</div>' +
+      '<input type="number" class="cq-hours" value="0.5" step="0.5" min="0" style="width:80px;padding:6px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;box-sizing:border-box;">' +
+      '<span style="font-size:11px;color:#aaa;">hrs</span>' +
     '</div>';
   container.appendChild(div);
   calcCaspitTotal();
@@ -4039,10 +4157,16 @@ function createCaspitQuote() {
   // Status based on total
   var finalStatus = total > 0 ? 'ניתנה הצעה' : 'ממתין להצעה';
 
+  var estHours = 0;
+  if (container && container.children.length > 0) {
+    var firstHoursEl = container.children[0].querySelector('.cq-hours');
+    estHours = firstHoursEl ? (parseFloat(firstHoursEl.value)||0) : 0;
+  }
+
   // Step 1: Save to sheet
   fetch(SHEETS_URL + '?action=addJob&client=' + encodeURIComponent(sheetClient) +
     '&desc=' + encodeURIComponent(desc) + '&st=' + encodeURIComponent('ממתין להצעה') +
-    '&pr=' + encodeURIComponent(total))
+    '&pr=' + encodeURIComponent(total) + '&eh=' + encodeURIComponent(estHours) + '&noDate=1')
   .then(function(r){ return r.text(); })
   .then(function(jobId) {
     jobId = jobId.trim();
