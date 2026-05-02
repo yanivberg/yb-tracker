@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v346</title>
+<title>י.ב אחזקות — v347</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3563,15 +3563,14 @@ function switchCaspitTab(tab) {
 
 function _caspitLoadData() {
   var body = document.getElementById('caspitBody');
-  body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ טוען…</div>';
-  var sheetDone = false, contactsDone = false, rendered = false;
-  function tryRender() { if (sheetDone && contactsDone && !rendered) { rendered = true; _buildMatchMap(); _renderCaspitBody(); } }
+  body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ Loading Caspit contacts…</div>';
+  var sheetDone = false, contactsDone = false, clientsDone = false, rendered = false;
+  function tryRender() { if (sheetDone && contactsDone && clientsDone && !rendered) { rendered = true; _buildMatchMap(); _renderCaspitBody(); } }
 
   // Load sheet jobs (getInvoiceReadyJobs with fallback to getInvoices)
   fetch(SHEETS_URL + '?action=getInvoiceReadyJobs')
     .then(function(r){ return r.json(); })
     .then(function(data) {
-      showToast('Jobs: ' + (data||[]).length);
       invoicesData = (data || []).map(function(j) {
         return { id: j.jobId||j.id||'', client: j.client||'', desc: j.description||j.desc||'',
                  grossProfit: parseFloat(j.grossProfit)||0, income: parseFloat(j.income)||parseFloat(j.price)||parseFloat(j.grossProfit)||0,
@@ -3585,7 +3584,13 @@ function _caspitLoadData() {
       }).catch(function() { sheetDone = true; tryRender(); });
     });
 
-  // Load Caspit contacts from proxy only
+  // Load Clients sheet data (for caspitId lookup)
+  fetch(SHEETS_URL + '?action=getClients')
+    .then(function(r){ return r.json(); })
+    .then(function(data) { _sheetClientsData = data || []; clientsDone = true; tryRender(); })
+    .catch(function() { clientsDone = true; tryRender(); });
+
+  // Load Caspit contacts from proxy
   _caspitFetch(CASPIT_PROXY_URL + '?action=getContacts')
     .then(function(r){ return r.json(); })
     .then(function(data) {
@@ -3600,22 +3605,30 @@ function _caspitLoadData() {
 }
 
 var _caspitInvoiceJobs = [];
+var _sheetClientsData = [];
 
 function _buildMatchMap() {
   _caspitMatchMap = {};
-  if (!_caspitContacts.length) return;
-  var map = {};
-  _caspitContacts.forEach(function(c) { map[c.Name ? c.Name.toLowerCase() : ''] = c.Id || c.ContactId || ''; });
-  _caspitInvoiceJobs.forEach(function(job) {
-    var name = (job.client || '').toLowerCase();
-    if (map[name]) { _caspitMatchMap[job.client] = map[name]; return; }
-    // Fuzzy match
-    Object.keys(map).forEach(function(k) {
-      if (!_caspitMatchMap[job.client] && (k.indexOf(name) !== -1 || name.indexOf(k) !== -1)) {
-        _caspitMatchMap[job.client] = map[k];
-      }
-    });
+
+  // Primary: use caspitId from Clients sheet
+  _sheetClientsData.forEach(function(c) {
+    if (c.name && c.caspitId) {
+      _caspitMatchMap[c.name] = c.caspitId;
+    }
   });
+
+  // Fallback: auto-match from Caspit contacts list for any unmatched clients
+  if (_caspitContacts.length) {
+    var map = {};
+    _caspitContacts.forEach(function(c) { map[c.Name ? c.Name.toLowerCase() : ''] = c.Id || c.ContactId || ''; });
+    _caspitInvoiceJobs.forEach(function(job) {
+      if (_caspitMatchMap[job.client]) return; // already matched from Clients sheet
+      var name = (job.client || '').toLowerCase();
+      if (map[name]) { _caspitMatchMap[job.client] = map[name]; return; }
+      var result = _matchCaspitContact(job.client, _caspitContacts);
+      if (result && result.score >= 75) _caspitMatchMap[job.client] = result.contact.Id || result.contact.ContactId || '';
+    });
+  }
 }
 
 function _renderCaspitBody() {
@@ -3720,10 +3733,13 @@ function createCaspitInvoice() {
     }
     var g = groups[i];
     btn.textContent = '⏳ ' + (i+1) + '/' + groups.length + '…';
+    var contactId = g.contactId || '';
+    var matchedContact = _caspitContacts.filter(function(c){ return (c.Id||c.ContactId||'') === contactId; })[0];
+    var customerName = matchedContact ? (matchedContact.Name || '') : '';
     var payload = {
       TrxTypeId: _caspitDocType, DocumentId: 'YB-' + Date.now() + '-' + i,
-      DocumentSource: 2, DocumentNumberBranch: 1, TrxCodeNumber: _caspitDocType === 1 ? 3 : undefined, ChargeVAT: true, ContactId: g.contactId,
-      CustomerBusinessName: g.contactId ? null : g.clientName,
+      DocumentSource: 2, DocumentNumberBranch: 1, TrxCodeNumber: _caspitDocType === 1 ? 3 : undefined, ChargeVAT: true, ContactId: contactId,
+      CustomerBusinessName: customerName || undefined,
       DocumentLines: g.jobs.map(function(job, li) {
         return { ProductName: job.desc + (job.po ? ' | מ.רכש: ' + job.po : ''), Details: job.desc, Qty: 1, UnitPrice: parseFloat(job.income) || parseFloat(job.gp) || 1, ChargeVAT: true };
       })
