@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v370</title>
+<title>י.ב אחזקות — v373</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1891,7 +1891,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwSVOiPbsa_XyhFfPWNCbYoUsqUFPaVFFK77U923ScSeYx3Ya7KmMrSrHrBFcdIgetylQ/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwzLMXV7FSArqBHcvwixXOypyFdRvZ6GLVUVKiKVNbBebR5a0LrEYoeRBMVF5L8dH5TXQ/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -4153,21 +4153,19 @@ function createCaspitQuote() {
   var customerName = selectedContact ? (selectedContact.Name || '') : '';
   var finalStatus  = total > 0 ? 'ניתנה הצעה' : 'ממתין להצעה';
 
-  // Step 1: Save one sheet row per line item, collect all jobIds
+  // Step 1: Save all rows in ONE bulk call
   var jobIds = [];
-  var savePromises = rowData.map(function(r) {
-    return fetch(SHEETS_URL + '?action=addJob&client=' + encodeURIComponent(sheetClient) +
-      '&desc=' + encodeURIComponent(r.desc) +
-      '&st='   + encodeURIComponent('ממתין להצעה') +
-      '&pr='   + encodeURIComponent(r.price) +
-      '&qt='   + encodeURIComponent(r.qty) +
-      '&eh='   + encodeURIComponent(r.hours) +
-      '&noDate=1')
-    .then(function(res){ return res.text(); })
-    .then(function(id){ jobIds.push(id.trim()); return id.trim(); });
+  var bulkRows = rowData.map(function(r) {
+    return { desc: r.desc, st: 'ממתין להצעה', pr: r.price, qt: r.qty, eh: r.hours };
   });
+  var saveSequential = fetch(SHEETS_URL + '?action=addJobsBulk&client=' + encodeURIComponent(sheetClient) + '&noDate=1', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'rows=' + encodeURIComponent(JSON.stringify(bulkRows))
+  }).then(function(r){ return r.json(); })
+  .then(function(ids){ jobIds = ids || []; });
 
-  Promise.all(savePromises).then(function() {
+  saveSequential.then(function() {
     btn.textContent = '⏳ Sending to Caspit…';
     var lines = rowData.map(function(r) {
       return { ProductName: r.desc, Details: r.desc, Qty: r.qty, UnitPrice: r.price > 0 ? r.price : 0.01, ChargeVAT: true };
