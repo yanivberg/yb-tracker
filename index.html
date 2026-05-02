@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v349</title>
+<title>י.ב אחזקות — v351</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3635,8 +3635,36 @@ function _renderCaspitInvoiceTab() {
   order.forEach(function(client) {
     var matched = !!_caspitMatchMap[client];
     var cc = clientColor(client);
-    html += '<div style="margin-bottom:4px;"><div style="padding:6px 10px;font-size:11px;font-weight:900;color:#fff;background:' + cc.grad + ';display:flex;justify-content:space-between;">' +
-      '<span>' + client + '</span><span style="font-size:10px;opacity:0.8;">' + (matched?'✓ Caspit':'⚠️ לא ממופה') + '</span></div>';
+    var sortedC = _caspitContacts.slice().sort(function(a,b){return (a.Name||'').localeCompare(b.Name||'');});
+
+    // Try auto-match
+    var autoMatch = _matchCaspitContact(client, _caspitContacts);
+    if (!matched && autoMatch && autoMatch.score >= 75) {
+      _caspitMatchMap[client] = autoMatch.contact.Id || autoMatch.contact.ContactId || '';
+      matched = true;
+    }
+
+    // Get display name from matched Caspit contact
+    var matchedContact = _caspitContacts.filter(function(c){ return (c.Id||c.ContactId||'') === (_caspitMatchMap[client]||''); })[0];
+    var displayName = matchedContact ? (matchedContact.Name || client) : client;
+
+    var contactOpts = '<option value="">— Select Caspit contact —</option>';
+    sortedC.forEach(function(c) {
+      var cId = c.Id||c.ContactId||'';
+      var sel = cId === (_caspitMatchMap[client]||'') ? ' selected' : '';
+      contactOpts += '<option value="' + cId.replace(/"/g,'&quot;') + '"' + sel + '>' + (c.Name||cId) + '</option>';
+    });
+
+    html += '<div style="margin-bottom:4px;">' +
+      '<div style="padding:6px 10px;font-size:11px;font-weight:900;color:#fff;background:' + cc.grad + ';display:flex;justify-content:space-between;align-items:center;">' +
+        '<span>' + displayName + '</span>' +
+        '<span style="font-size:10px;opacity:0.8;">' + (matched ? '✓ Caspit' : '⚠️ No match') + '</span>' +
+      '</div>' +
+      '<div style="padding:6px 10px;background:#f8f9fa;border-bottom:1px solid #eee;">' +
+        '<select onchange="_caspitSetManualContact(\'' + client.replace(/'/g,"\\'") + '\',this.value)" style="width:100%;padding:7px 10px;border:1.5px solid ' + (matched?'#2e7d32':'#e65100') + ';border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;background:#fff;">' +
+          contactOpts +
+        '</select>' +
+      '</div>';
     groups[client].forEach(function(job) {
       var sel = !!_caspitSelected[job.id];
       html += '<div id="cjr' + job._idx + '" onclick="_caspitTap(' + job._idx + ')" style="padding:12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:12px;cursor:pointer;background:' + (sel?'#e8f0fe':'#fff') + ';">' +
@@ -3647,6 +3675,11 @@ function _renderCaspitInvoiceTab() {
     html += '</div>';
   });
   body.innerHTML = html;
+}
+
+function _caspitSetManualContact(clientName, contactId) {
+  if (contactId) _caspitMatchMap[clientName] = contactId;
+  else delete _caspitMatchMap[clientName];
 }
 
 function _caspitTap(idx) {
