@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v368</title>
+<title>י.ב אחזקות — v369</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -4131,7 +4131,7 @@ function createCaspitQuote() {
 
   // Collect rows
   var container = document.getElementById('caspitQuoteRows');
-  var lines = [];
+  var rowData = [];
   var total = 0;
   if (container) {
     for (var ri = 0; ri < container.children.length; ri++) {
@@ -4139,39 +4139,39 @@ function createCaspitQuote() {
       var desc  = (row.querySelector('.cq-desc') ||{}).value||'';
       var qty   = parseFloat((row.querySelector('.cq-qty')  ||{}).value)||1;
       var price = parseFloat((row.querySelector('.cq-price')||{}).value)||0;
-      lines.push({ ProductName: desc||'—', Details: desc||'—', Qty: qty, UnitPrice: price, ChargeVAT: true });
+      var hours = parseFloat((row.querySelector('.cq-hours')||{}).value)||0;
+      rowData.push({ desc: desc||'—', qty: qty, price: price, hours: hours });
       total += qty * price;
     }
   }
-  if (!lines.length) { showToast('Add at least one line item'); return; }
-
-  // Use first row description as the sheet job description
-  var desc = lines[0].ProductName;
+  if (!rowData.length) { showToast('Add at least one line item'); return; }
 
   var btn = document.getElementById('caspitCreateBtn');
   btn.textContent = '⏳ Saving to sheet…'; btn.disabled = true;
 
   var selectedContact = _caspitContacts.filter(function(c){ return (c.Id||c.ContactId||'') === contactId; })[0];
   var customerName = selectedContact ? (selectedContact.Name || '') : '';
+  var finalStatus  = total > 0 ? 'ניתנה הצעה' : 'ממתין להצעה';
 
-  // Status based on total
-  var finalStatus = total > 0 ? 'ניתנה הצעה' : 'ממתין להצעה';
+  // Step 1: Save one sheet row per line item, collect all jobIds
+  var jobIds = [];
+  var savePromises = rowData.map(function(r) {
+    return fetch(SHEETS_URL + '?action=addJob&client=' + encodeURIComponent(sheetClient) +
+      '&desc=' + encodeURIComponent(r.desc) +
+      '&st='   + encodeURIComponent('ממתין להצעה') +
+      '&pr='   + encodeURIComponent(r.price) +
+      '&qt='   + encodeURIComponent(r.qty) +
+      '&eh='   + encodeURIComponent(r.hours) +
+      '&noDate=1')
+    .then(function(res){ return res.text(); })
+    .then(function(id){ jobIds.push(id.trim()); return id.trim(); });
+  });
 
-  var estHours = 0;
-  if (container && container.children.length > 0) {
-    var firstHoursEl = container.children[0].querySelector('.cq-hours');
-    estHours = firstHoursEl ? (parseFloat(firstHoursEl.value)||0) : 0;
-  }
-
-  // Step 1: Save to sheet
-  fetch(SHEETS_URL + '?action=addJob&client=' + encodeURIComponent(sheetClient) +
-    '&desc=' + encodeURIComponent(desc) + '&st=' + encodeURIComponent('ממתין להצעה') +
-    '&pr=' + encodeURIComponent(total) + '&eh=' + encodeURIComponent(estHours) + '&noDate=1')
-  .then(function(r){ return r.text(); })
-  .then(function(jobId) {
-    jobId = jobId.trim();
-    if (!jobId || jobId.indexOf('Error')!==-1) throw new Error(jobId);
+  Promise.all(savePromises).then(function() {
     btn.textContent = '⏳ Sending to Caspit…';
+    var lines = rowData.map(function(r) {
+      return { ProductName: r.desc, Details: r.desc, Qty: r.qty, UnitPrice: r.price, ChargeVAT: true };
+    });
     var payload = {
       TrxTypeId: 16, DocumentId: 'YB-Q-' + Date.now(), DocumentSource: 2,
       DocumentNumberBranch: 1, TrxCodeNumber: 3, ChargeVAT: true, ContactId: contactId,
@@ -4182,21 +4182,24 @@ function createCaspitQuote() {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     }).then(function(r){ return r.json(); })
     .then(function(result) {
-      // Update status based on total
-      fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(jobId) +
-        '&client=' + encodeURIComponent(sheetClient) + '&status=' + encodeURIComponent(finalStatus)).catch(function(){});
+      // Update status on all saved rows
+      jobIds.forEach(function(jid) {
+        if (!jid || jid.indexOf('Error') !== -1) return;
+        fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(jid) +
+          '&client=' + encodeURIComponent(sheetClient) + '&status=' + encodeURIComponent(finalStatus)).catch(function(){});
+      });
       btn.textContent = '💼 Save & Send to Caspit'; btn.disabled = false;
       showCaspitLog(result);
       if (result && (result.DocumentNumber || result.number || result.Id || result.documentId)) {
-        // Write document number back to sheet
         var docNumber = result.number || result.DocumentNumber || '';
         var docId     = result.documentId || result.Id || '';
         var pdfLink   = (result.rawResponse && result.rawResponse.LinkToPdf) ? result.rawResponse.LinkToPdf : '';
         var createdAt = new Date().toLocaleDateString('he-IL');
+        var jobIdsCsv = jobIds.filter(function(j){ return j && j.indexOf('Error')===-1; }).join(',');
         fetch(SHEETS_URL + '?action=saveCaspitDocument' +
-          '&jobId='     + encodeURIComponent(jobId) +
+          '&jobId='     + encodeURIComponent(jobIds[0]||'') +
           '&client='    + encodeURIComponent(sheetClient) +
-          '&jobIds='    + encodeURIComponent(jobId) +
+          '&jobIds='    + encodeURIComponent(jobIdsCsv) +
           '&docId='     + encodeURIComponent(docId) +
           '&docNumber=' + encodeURIComponent(docNumber) +
           '&trxTypeId=16' +
@@ -4210,8 +4213,7 @@ function createCaspitQuote() {
         showToast('⚠️ Saved to sheet, Caspit error: ' + (result.error || result.Message || ''));
       }
     });
-  })
-  .catch(function(err) {
+  }).catch(function(err) {
     btn.textContent = '💼 Save & Send to Caspit'; btn.disabled = false;
     showToast('⚠️ Error: ' + (err.message||''));
   });
