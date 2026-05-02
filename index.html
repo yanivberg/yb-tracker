@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v351</title>
+<title>י.ב אחזקות — v360</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1891,7 +1891,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzrDy40o9Tlg3Jc38AbSHRFeVqFGmIdcVNC8BK0c0txoB8HIrgU_FiGKbx5XDPLhW6qxw/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzXi8TmV_y2xE3HASvHwOvVH1UfVCTdNRlloKuHY7cyxpNZQTmMd9dcrXkX44-pxhfgTg/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -3549,9 +3549,12 @@ function _caspitLoadData() {
     });
 
   // Load Clients sheet data (for caspitId lookup)
-  fetch(SHEETS_URL + '?action=getClients')
+  fetch(SHEETS_URL + '?action=getClients&full=1')
     .then(function(r){ return r.json(); })
-    .then(function(data) { _sheetClientsData = data || []; clientsDone = true; tryRender(); })
+    .then(function(data) {
+      _sheetClientsData = Array.isArray(data) ? data.filter(function(d){ return d && typeof d === 'object'; }) : [];
+      clientsDone = true; tryRender();
+    })
     .catch(function() { clientsDone = true; tryRender(); });
 
   // Load Caspit contacts from proxy
@@ -3758,10 +3761,29 @@ function createCaspitInvoice() {
         });
         return;
       }
-      if (result && (result.DocumentNumber || result.number || result.Id)) {
-        created++; _caspitShowSuccess(result);
+      if (result && (result.DocumentNumber || result.number || result.Id || result.documentId)) {
+        created++;
+        var docNumber = result.number || result.DocumentNumber || '';
+        var docId     = result.documentId || result.Id || '';
+        var pdfLink   = (result.rawResponse && result.rawResponse.LinkToPdf) ? result.rawResponse.LinkToPdf : '';
+        var createdAt = new Date().toLocaleDateString('he-IL');
+        var jobTotal  = g.jobs.reduce(function(s, j){ return s + (parseFloat(j.income)||parseFloat(j.gp)||0); }, 0);
+        var jobIdsCsv = g.jobs.map(function(j){ return j.id; }).join(',');
+        // Write back to sheet — one call per document group
+        fetch(SHEETS_URL + '?action=saveCaspitDocument' +
+          '&jobId='     + encodeURIComponent(g.jobs[0].id) +
+          '&client='    + encodeURIComponent(g.jobs[0].client) +
+          '&jobIds='    + encodeURIComponent(jobIdsCsv) +
+          '&docId='     + encodeURIComponent(docId) +
+          '&docNumber=' + encodeURIComponent(docNumber) +
+          '&trxTypeId=' + encodeURIComponent(_caspitDocType) +
+          '&total='     + encodeURIComponent(Math.round(jobTotal)) +
+          '&pdfLink='   + encodeURIComponent(pdfLink) +
+          '&createdAt=' + encodeURIComponent(createdAt)
+        ).catch(function(){});
+        showCaspitLog(result);
+        _caspitShowSuccess(result);
       } else {
-        var errMsg = result.error || result.Message || JSON.stringify(result).substring(0,60);
         showToast('⚠️ ' + g.clientName + ': ' + errMsg, 5000);
         errors.push(g.clientName);
       }
@@ -4035,6 +4057,22 @@ function createCaspitQuote() {
       btn.textContent = '💼 Save & Send to Caspit'; btn.disabled = false;
       showCaspitLog(result);
       if (result && (result.DocumentNumber || result.number || result.Id || result.documentId)) {
+        // Write document number back to sheet
+        var docNumber = result.number || result.DocumentNumber || '';
+        var docId     = result.documentId || result.Id || '';
+        var pdfLink   = (result.rawResponse && result.rawResponse.LinkToPdf) ? result.rawResponse.LinkToPdf : '';
+        var createdAt = new Date().toLocaleDateString('he-IL');
+        fetch(SHEETS_URL + '?action=saveCaspitDocument' +
+          '&jobId='     + encodeURIComponent(jobId) +
+          '&client='    + encodeURIComponent(sheetClient) +
+          '&jobIds='    + encodeURIComponent(jobId) +
+          '&docId='     + encodeURIComponent(docId) +
+          '&docNumber=' + encodeURIComponent(docNumber) +
+          '&trxTypeId=16' +
+          '&total='     + encodeURIComponent(Math.round(total)) +
+          '&pdfLink='   + encodeURIComponent(pdfLink) +
+          '&createdAt=' + encodeURIComponent(createdAt)
+        ).catch(function(){});
         _caspitShowSuccess(result);
         document.getElementById('caspitOverlay').style.display = 'none';
       } else {
