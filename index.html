@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v361</title>
+<title>י.ב אחזקות — v363</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -3616,7 +3616,7 @@ function _renderCaspitInvoiceTab() {
   if (!_caspitInvoiceJobs.length) { body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">אין עבודות להוציא חש</div>'; return; }
 
   _caspitJobList = _caspitInvoiceJobs.map(function(j) {
-    return { id: j.id, client: j.client, gp: parseFloat(j.grossProfit)||0, income: parseFloat(j.income)||parseFloat(j.grossProfit)||0, desc: j.desc||'', po: j.po||'' };
+    return { id: j.id, client: j.client, gp: parseFloat(j.grossProfit)||0, income: parseFloat(j.income)||parseFloat(j.price)||parseFloat(j.grossProfit)||0, price: parseFloat(j.price)||0, desc: j.desc||'', po: j.po||'' };
   });
 
   var html = '<div style="display:flex;gap:8px;margin-bottom:10px;">' +
@@ -3741,7 +3741,9 @@ function createCaspitInvoice() {
       DocumentSource: 2, DocumentNumberBranch: 1, TrxCodeNumber: _caspitDocType === 1 ? 3 : undefined, ChargeVAT: true, ContactId: contactId,
       CustomerBusinessName: customerName || undefined,
       DocumentLines: g.jobs.map(function(job, li) {
-        return { ProductName: job.desc + (job.po ? ' | מ.רכש: ' + job.po : ''), Details: job.desc, Qty: 1, UnitPrice: parseFloat(job.income) || parseFloat(job.gp) || 1, ChargeVAT: true };
+        var unitPrice = parseFloat(job.income) || parseFloat(job.gp) || parseFloat(job.price) || 1;
+        if (!unitPrice || isNaN(unitPrice) || unitPrice <= 0) unitPrice = 1;
+        return { ProductName: job.desc + (job.po ? ' | מ.רכש: ' + job.po : ''), Details: job.desc||'-', Qty: 1, UnitPrice: unitPrice, ChargeVAT: true };
       })
     };
     _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
@@ -3981,11 +3983,15 @@ function calcCaspitTotal() {
   var container = document.getElementById('caspitQuoteRows');
   if (!container) return;
   var total = 0;
-  container.querySelectorAll('div[style]').forEach(function(row) {
-    var qty   = parseFloat((row.querySelector('.cq-qty')  ||{}).value) || 0;
-    var price = parseFloat((row.querySelector('.cq-price')||{}).value) || 0;
+  var rows = container.children;
+  for (var i = 0; i < rows.length; i++) {
+    var row = rows[i];
+    var qtyEl   = row.querySelector('.cq-qty');
+    var priceEl = row.querySelector('.cq-price');
+    var qty   = qtyEl   ? (parseFloat(qtyEl.value)   || 0) : 0;
+    var price = priceEl ? (parseFloat(priceEl.value)  || 0) : 0;
     total += qty * price;
-  });
+  }
   var isZero = total === 0;
   var box   = document.getElementById('caspitQuoteTotalBox');
   var lbl   = document.getElementById('caspitTotalLabel');
@@ -3996,7 +4002,7 @@ function calcCaspitTotal() {
   if (lbl)  { lbl.style.color = isZero ? '#e65100' : '#2e7d32'; lbl.textContent = isZero ? 'Total = 0 — prices TBD' : 'Total (excl. VAT)'; }
   if (val)  { val.style.color = isZero ? '#e65100' : '#1b5e20'; val.textContent = '₪' + total.toLocaleString(); }
   if (hint) hint.innerHTML = 'Status after sending: <strong style="color:' + (isZero?'#e65100':'#0d47a1') + '">' + (isZero?'Waiting for Quote':'Quote Given') + '</strong>';
-  if (cnt)  { var n = container.querySelectorAll('div[style]').length; cnt.textContent = n + ' row' + (n!==1?'s':''); }
+  if (cnt)  { cnt.textContent = rows.length + ' row' + (rows.length!==1?'s':''); }
 }
 
 function createCaspitQuote() {
@@ -4010,13 +4016,14 @@ function createCaspitQuote() {
   var lines = [];
   var total = 0;
   if (container) {
-    container.querySelectorAll('div[style]').forEach(function(row) {
+    for (var ri = 0; ri < container.children.length; ri++) {
+      var row = container.children[ri];
       var desc  = (row.querySelector('.cq-desc') ||{}).value||'';
       var qty   = parseFloat((row.querySelector('.cq-qty')  ||{}).value)||1;
       var price = parseFloat((row.querySelector('.cq-price')||{}).value)||0;
       lines.push({ ProductName: desc||'—', Details: desc||'—', Qty: qty, UnitPrice: price, ChargeVAT: true });
       total += qty * price;
-    });
+    }
   }
   if (!lines.length) { showToast('Add at least one line item'); return; }
 
