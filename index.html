@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v374</title>
+<title>י.ב אחזקות — v375</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -4077,21 +4077,6 @@ function _renderCaspitQuoteForm() {
       '<div id="caspitQuoteTotal" style="font-size:22px;font-weight:900;color:#1b5e20;">₪0</div>' +
     '</div>' +
     '<div id="caspitStatusHint" style="font-size:11px;color:#888;text-align:center;margin-bottom:10px;">Status after sending: <strong style="color:#e65100;">Waiting for Quote</strong></div>' +
-    '<div style="border-top:1px solid #f0f0f0;margin:4px 0 12px;"></div>' +
-    '<div style="margin-bottom:10px;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">' +
-        '<label style="font-size:12px;font-weight:700;color:#555;margin-bottom:0;">Notes <span style="color:#2e7d32;font-size:10px;font-weight:400;">👁 visible to client</span></label>' +
-        '<span style="font-size:10px;color:#aaa;">הערות שכן מוצגות ללקוח</span>' +
-      '</div>' +
-      '<textarea id="caspitQuoteComments" placeholder="Payment terms, warranty, delivery notes…" style="width:100%;padding:10px;border:1.5px solid #ddd;border-radius:10px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;resize:vertical;min-height:60px;line-height:1.5;"></textarea>' +
-    '</div>' +
-    '<div style="margin-bottom:12px;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">' +
-        '<label style="font-size:12px;font-weight:700;color:#555;margin-bottom:0;">Internal notes <span style="color:#888;font-size:10px;font-weight:400;">🔒 not shown to client</span></label>' +
-        '<span style="font-size:10px;color:#aaa;">פרטים שלא מוצגים ללקוח</span>' +
-      '</div>' +
-      '<textarea id="caspitQuoteDetails" placeholder="Internal reminders, cost breakdown…" style="width:100%;padding:10px;border:1.5px solid #eee;border-radius:10px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;resize:vertical;min-height:60px;line-height:1.5;background:#fafafa;"></textarea>' +
-    '</div>' +
     '<div style="background:#e8f0fe;border-radius:8px;padding:10px 12px;font-size:12px;color:#0d47a1;margin-bottom:2px;">1. Saves job to sheet (Waiting for Quote)<br>2. Sends all line items to Caspit<br>3. Total &gt; 0 → status: Quote Given &nbsp;|&nbsp; Total = 0 → status: Waiting for Quote</div>';
 
   addCaspitQuoteRow();
@@ -4203,8 +4188,8 @@ function createCaspitQuote() {
     var lines = rowData.map(function(r) {
       return { ProductName: r.desc, Details: r.desc, Qty: r.qty, UnitPrice: r.price > 0 ? r.price : 0.01, ChargeVAT: true };
     });
-    var comments = (document.getElementById('caspitQuoteComments')||{}).value||'';
-    var details  = (document.getElementById('caspitQuoteDetails')||{}).value||'';
+    var comments = (document.getElementById('caspitComments')||{}).value||'';
+    var details  = (document.getElementById('caspitDetails')||{}).value||'';
     var payload = {
       TrxTypeId: 16, DocumentId: 'YB-Q-' + Date.now(), DocumentSource: 2,
       DocumentNumberBranch: 1, TrxCodeNumber: 3, ChargeVAT: true, ContactId: contactId,
