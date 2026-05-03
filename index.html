@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v385</title>
+<title>י.ב אחזקות — v388</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -478,7 +478,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v385
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v388
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -487,7 +487,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v385 · 02/05/2026
+v388 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -1949,10 +1949,10 @@ function checkHashProjectStart() {
 
 function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('screen-' + name).classList.add('active'); }
 
-(function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write('<html><body style="font-family:sans-serif;font-size:24px;padding:40px;direction:rtl;">' + list + '</body></html>'); document.close(); } })();
+(function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxaNJKvechuI0eMYgTepHqeIVNCuzfCO1CPyML6G7wgug060yb5A075aCSkR1rIBAb1pw/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzlm1j-IiMg5lQ_p5IjD3BaJs9okB6qm4aVAITqlVZ6ugA8Hgal2yBudoJpGWdey9br8A/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2544,9 +2544,11 @@ function silentSaveProjectsShortcut() {
         if (p.client) parts.push(p.client);
         parts.push(p.name);
         return parts.join(' ');
-      }).join('. . . . . . ')
+      }).join(', ')
     : 'No active projects';
   try { localStorage.setItem('yb_projectsList', list); } catch(e) {}
+  // Push to Apps Script so Siri shortcut can fetch plain text
+  fetch(SHEETS_URL + '?action=saveProjectsList&list=' + encodeURIComponent(list)).catch(function(){});
 }
 function callSaveProjectsShortcut() { var active = projects.filter(function(p) { return !p.done; }); var list = active.length > 0 ? active.map(function(p) { var num = p.sessionNum || (projects.indexOf(p) + 1); var parts = [num + '.']; if (p.client) parts.push(p.client); parts.push(p.name); return parts.join(' '); }).join('. . . . . . ') : 'No active projects'; localStorage.setItem('yb_pendingToast', '✓ Siri list saved'); localStorage.setItem('yb_sessBackup', '1'); localStorage.setItem('yb_sessBackupTs', Date.now().toString()); var returnUrl = window.location.origin + window.location.pathname; var url = 'shortcuts://run-shortcut?name=Save%20Projects&input=text&text=' + encodeURIComponent(list) + '&x-success=' + encodeURIComponent(returnUrl); window.location.href = url; }
 
