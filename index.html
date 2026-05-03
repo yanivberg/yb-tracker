@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v415</title>
+<title>י.ב אחזקות — v420</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -52,7 +52,7 @@ margin-bottom: 20px;
 .date-hero-day { font-size: 28px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
 .date-hero-date { font-size: 16px; color: var(--muted); margin-top: 6px; }
 
-.setup-label { font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+.setup-label { font-size: 32px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; font-weight: 900; text-align: center; }
 
 .add-row { display: flex; gap: 8px; margin-bottom: 12px; }
 .project-input {
@@ -437,11 +437,8 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     <div style="display:flex;align-items:center;justify-content:space-between;">
       <div style="display:flex;align-items:center;gap:8px;">
         <button onclick="document.getElementById('appInfoOverlay').style.display='flex'" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:50%;width:22px;height:22px;color:#fff;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">ℹ</button>
-              </div>
-      <div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:0.5px;">י.ב אחזקות</div>
-      <div style="text-align:right;">
-        <div style="font-size:12px;font-weight:700;color:#fff;letter-spacing:1px;" id="clock">--:--:--</div>
       </div>
+      <div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:0.5px;">י.ב אחזקות</div>
     </div>
   </div>
 
@@ -488,7 +485,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v415
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v420
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -497,7 +494,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v415 · 02/05/2026
+v420 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -1121,21 +1118,21 @@ SHEET SYNC
 
   <!-- SCREEN 1: SETUP -->
   <div class="screen active" id="screen-setup" style="padding:0 16px 0;">
-    <div style="padding:8px 0 7px;border-bottom:1px solid #e0e0e0;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
-      <div id="headerLocation" style="font-size:11px;color:#888;display:none;direction:ltr;text-align:left;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
-      <div style="direction:rtl;text-align:right;">
-        <span style="font-size:16px;font-weight:900;color:#333;" id="heroDay">יום שבת</span>
-        <span style="font-size:12px;color:#aaa;margin-right:8px;" id="heroDate">11 באפריל 2026</span>
+    <div style="padding:8px 18px 8px;border-bottom:1px solid #e0e0e0;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;direction:ltr;background:#fff;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;font-weight:900;color:#333;" id="heroDay">Sunday</span>
+        <span style="font-size:14px;color:#888;font-weight:500;" id="heroDate">3/5/2026</span>
       </div>
+      <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--:--</span>
     </div>
-    <div class="setup-label" style="text-align:left;">Today's Projects</div>
+    <div class="setup-label">Today's Projects</div>
     <div class="project-list-setup" id="setupList"></div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center;">
       <button id="btnAddBrowseSetup" onclick="openSetupDrawer()" style="width:180px;height:180px;border-radius:20px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Heebo,sans-serif;">
-        <span id="btnAddBrowseSetupIcon" style="display:flex;flex-direction:column;gap:8px;align-items:center;">
-          <span style="display:block;width:60px;height:5px;background:#666;border-radius:3px;"></span>
-          <span style="display:block;width:60px;height:5px;background:#666;border-radius:3px;"></span>
-          <span style="display:block;width:60px;height:5px;background:#666;border-radius:3px;"></span>
+        <span id="btnAddBrowseSetupIcon" style="display:flex;flex-direction:column;gap:40px;align-items:center;">
+          <span style="display:block;width:300px;height:25px;background:#666;border-radius:12px;"></span>
+          <span style="display:block;width:300px;height:25px;background:#666;border-radius:12px;"></span>
+          <span style="display:block;width:300px;height:25px;background:#666;border-radius:12px;"></span>
         </span>
       </button>
     </div>
@@ -1907,8 +1904,9 @@ setInterval(updateClock, 1000);
   var hebrewDays = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
   var hebrewMonths = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
   const el = document.getElementById('heroDay'); const el2 = document.getElementById('heroDate');
-  if (el) el.textContent = 'יום ' + hebrewDays[d.getDay()];
-  if (el2) el2.textContent = d.getDate() + ' ב' + hebrewMonths[d.getMonth()] + ' ' + d.getFullYear();
+  var engDays2 = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  if (el) el.textContent = engDays2[d.getDay()];
+  if (el2) el2.textContent = d.getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear();
   startLocationWatch();
   if (dayEnded) { showScreen('summary'); renderSummary(); }
   else if (dayStartTime) {
@@ -3209,8 +3207,9 @@ function renderSetup() {
   var hebrewDays = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
   var hebrewMonths = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
   var el = document.getElementById('heroDay'); var el2 = document.getElementById('heroDate');
-  if (el) el.textContent = 'יום ' + hebrewDays[d.getDay()];
-  if (el2) el2.textContent = d.getDate() + ' ב' + hebrewMonths[d.getMonth()] + ' ' + d.getFullYear();
+  var engDays2 = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  if (el) el.textContent = engDays2[d.getDay()];
+  if (el2) el2.textContent = d.getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear();
   const list = document.getElementById('setupList');
   const btn = document.getElementById('btnStartDay');
   var activeProjects = projects.filter(function(p) { return !p.done; });
