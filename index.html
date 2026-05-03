@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v420</title>
+<title>י.ב אחזקות — v429</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -450,8 +450,10 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     <div style="flex:1;overflow-y:auto;padding:10px;">
       <div onclick="closeSetupDrawer();openAddJobModal();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">+</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#111;">Add Project to Sheet</span></div>
-      <div id="drawerPreTimerItem" onclick="closeSetupDrawer();openPreTimerPicker();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
-        <span style="font-size:24px;flex-shrink:0;">⏱</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">Pre-Project Timer</span></div>
+      <div id="drawerPreTimerItem" onclick="closeSetupDrawer();openPreTimerPicker();" style="background:#f8f9fa;border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;justify-content:flex-start;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <svg width="52" height="52" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="44" r="28" stroke="#111" stroke-width="5"/><line x1="40" y1="44" x2="40" y2="24" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="44" x2="54" y2="54" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="34" y1="8" x2="46" y2="8" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="8" x2="40" y2="16" stroke="#111" stroke-width="5" stroke-linecap="round"/></svg>
+        <span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">Timer</span>
+      </div>
       <div onclick="closeSetupDrawer();fetchOpenJobs();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📋</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a56db;">Pick from Open Tasks</span></div>
       <div onclick="closeSetupDrawer();fetchPendingQuote();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -485,7 +487,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v420
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v429
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -494,7 +496,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v420 · 02/05/2026
+v429 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -1831,14 +1833,14 @@ var PROJECT_COLORS = [
 
 // ── Client color mapping ──────────────────────────────
 var CLIENT_COLORS = [
-  { grad: 'linear-gradient(90deg,#e65100,#ff8f00)', rgba: 'rgba(230,81,0,0.50)' },
-  { grad: 'linear-gradient(90deg,#2e7d32,#66bb6a)', rgba: 'rgba(46,125,50,0.50)' },
-  { grad: 'linear-gradient(90deg,#1565c0,#42a5f5)', rgba: 'rgba(21,101,192,0.50)' },
-  { grad: 'linear-gradient(90deg,#6a1b9a,#ab47bc)', rgba: 'rgba(106,27,154,0.50)' },
-  { grad: 'linear-gradient(90deg,#00695c,#26a69a)', rgba: 'rgba(0,105,92,0.50)' },
-  { grad: 'linear-gradient(90deg,#c62828,#ef5350)', rgba: 'rgba(198,40,40,0.50)' },
-  { grad: 'linear-gradient(90deg,#f57f17,#ffca28)', rgba: 'rgba(245,127,23,0.50)' },
-  { grad: 'linear-gradient(90deg,#00838f,#26c6da)', rgba: 'rgba(0,131,143,0.50)' },
+  { grad: 'linear-gradient(90deg,#e65100,#ff8f00)', rgba: 'rgba(230,81,0,0.50)', solid: '#e65100' },
+  { grad: 'linear-gradient(90deg,#2e7d32,#66bb6a)', rgba: 'rgba(46,125,50,0.50)',  solid: '#2e7d32' },
+  { grad: 'linear-gradient(90deg,#1565c0,#42a5f5)', rgba: 'rgba(21,101,192,0.50)', solid: '#1565c0' },
+  { grad: 'linear-gradient(90deg,#6a1b9a,#ab47bc)', rgba: 'rgba(106,27,154,0.50)', solid: '#6a1b9a' },
+  { grad: 'linear-gradient(90deg,#00695c,#26a69a)', rgba: 'rgba(0,105,92,0.50)',   solid: '#00695c' },
+  { grad: 'linear-gradient(90deg,#c62828,#ef5350)', rgba: 'rgba(198,40,40,0.50)',  solid: '#c62828' },
+  { grad: 'linear-gradient(90deg,#f57f17,#ffca28)', rgba: 'rgba(245,127,23,0.50)', solid: '#f57f17' },
+  { grad: 'linear-gradient(90deg,#00838f,#26c6da)', rgba: 'rgba(0,131,143,0.50)', solid: '#00838f' },
 ];
 var _clientColorMap = {};
 var _clientColorIdx = 0;
@@ -2042,12 +2044,45 @@ function showJobPicker(jobs) {
   overlay.style.display = 'flex';
 }
 
-function confirmJobSelection() { var overlay = document.getElementById('jobPickerOverlay'); var selected = openJobsList.filter(function(job, idx) { var cb = document.getElementById('jb-' + idx); return cb && cb.checked && !cb.disabled; }); if (selected.length === 0) { showToast('No projects selected'); return; } selected.forEach(function(job) { addJobAsProject(job); }); overlay.style.display = 'none'; if (selected.length > 1) showToast('✓ ' + selected.length + ' projects added'); }
+function confirmJobSelection() { var overlay = document.getElementById('jobPickerOverlay'); var selected = openJobsList.filter(function(job, idx) { var cb = document.getElementById('jb-' + idx); return cb && cb.checked && !cb.disabled; }); if (selected.length === 0) { showToast('No projects selected'); return; } overlay.style.display = 'none'; promptProjectTitles(selected, function(titledJobs) { titledJobs.forEach(function(job) { addJobAsProject(job); }); if (titledJobs.length > 1) showToast('✓ ' + titledJobs.length + ' projects added'); }); }
+
+function promptProjectTitles(jobs, callback) {
+  var modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:flex-end;justify-content:center;';
+  var inner = document.createElement('div');
+  inner.style.cssText = 'background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:20px 20px 40px;max-height:80vh;overflow-y:auto;';
+
+  var html = '<div style="font-size:18px;font-weight:900;color:#111;margin-bottom:6px;">Set Project Titles</div>';
+  html += '<div style="font-size:12px;color:#aaa;margin-bottom:16px;">Short display name — app only, not saved to sheet</div>';
+  jobs.forEach(function(job, i) {
+    html += '<div style="margin-bottom:14px;">';
+    html += '<div style="font-size:11px;color:#aaa;margin-bottom:4px;">' + (job.client||'') + ' · ' + (job.id||'') + '</div>';
+    html += '<div style="font-size:12px;color:#555;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (job.desc||'') + '</div>';
+    html += '<input id="ptitle_'+i+'" type="text" placeholder="Short title *" value="' + (job.desc||'').substring(0,30).replace(/"/g,'&quot;') + '" style="width:100%;padding:10px 12px;border:2px solid #f0c020;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;background:#fffde7;box-sizing:border-box;">';
+    html += '</div>';
+  });
+  html += '<button id="ptitleConfirm" style="width:100%;padding:16px;background:#111;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:900;cursor:pointer;margin-top:4px;">✓ Add to Today</button>';
+  inner.innerHTML = html;
+  modal.appendChild(inner);
+  document.body.appendChild(modal);
+
+  document.getElementById('ptitleConfirm').onclick = function() {
+    var allFilled = true;
+    jobs.forEach(function(job, i) {
+      var val = (document.getElementById('ptitle_'+i)||{}).value||'';
+      if (!val.trim()) { allFilled = false; document.getElementById('ptitle_'+i).style.borderColor = '#e53935'; }
+      else job.title = val.trim();
+    });
+    if (!allFilled) { showToast('Fill all titles'); return; }
+    document.body.removeChild(modal);
+    callback(jobs);
+  };
+}
 
 function addJobAsProject(job) {
   var name = job.desc;
   if (projects.find(function(p) { return p.jobId === job.id; })) { showToast('Job already added'); return; }
-  var proj = { name: name, client: job.client, jobId: job.id, jobClient: job.client, jobDateStart: null, estHours: job.hours || 0, sessionNum: projects.length + 1, totalMs: 0, prevMs: 0, active: false, activeStart: null, done: false, notes: [], noteOpen: false, editOpen: false };
+  var proj = { name: name, title: job.title || name, client: job.client, jobId: job.id, jobClient: job.client, jobDateStart: null, estHours: job.hours || 0, sessionNum: projects.length + 1, totalMs: 0, prevMs: 0, active: false, activeStart: null, done: false, notes: [], noteOpen: false, editOpen: false };
   projects.push(proj);
   saveClient(job.client);
   saveState();
@@ -2755,57 +2790,104 @@ function formatTime(ts) { var d = new Date(ts); return d.toLocaleTimeString('he-
 function formatDate(ts) { var d = new Date(ts); return d.toLocaleDateString('he-IL', {day:'numeric', month:'numeric'}); }
 
 function renderProjectBtns() {
-  const now = Date.now();
-  const container = document.getElementById('projectBtns');
-  let html = '';
-  for (let i = 0; i < projects.length; i++) {
-    const p = projects[i];
-    let ms = p.totalMs; if (p.active && p.activeStart) ms += now - p.activeStart;
-    const cc = clientColor(p.client || p.name || '');
-    const doneCls = p.done ? 'is-done' : '';
-    const icon = p.active ? '⏸ ' : '▶ ';
-    const doneLabel = p.done ? ' ✓' : '';
-    const doneBtn = p.done ? '↩ בטל' : '✓ סיום';
+  var now = Date.now();
+  var container = document.getElementById('projectBtns');
+  var html = '';
+  for (var i = 0; i < projects.length; i++) {
+    var p = projects[i];
+    var ms = p.totalMs; if (p.active && p.activeStart) ms += now - p.activeStart;
+    var totalMs = ms + (p.prevMs || 0);
+    var cc = clientColor(p.client || p.name || '');
+    var headerBg = p.active ? cc.grad : 'linear-gradient(90deg,#999,#aaa)';
+    var cardOpacity = p.done ? '0.5' : (p.active ? '1' : '0.45');
+    var timerColor = p.active ? cc.solid || '#2e7d32' : '#aaa';
+    var displayName = p.title || p.name;
+    var po = p.jobPO || '';
 
-    // Active: full gradient header + strong bg. Paused: grey header + 40% bg
-    const headerBg = p.active ? cc.grad : 'linear-gradient(90deg,#aaa,#bbb)';
-    const cardBg   = p.active ? cc.rgba.replace(/[\d.]+\)$/, '0.50)') : cc.rgba.replace(/[\d.]+\)$/, '0.18)');
-
-    const notes = p.notes || [];
+    // Notes list
+    var notes = p.notes || [];
     var notesList = '';
-    if (notes.length > 0) { notesList = '<div class="project-notes-list">'; for (var n = 0; n < notes.length; n++) { notesList += '<div class="project-note-item"><span>💬 ' + notes[n] + '</span><button class="note-del-btn" onclick="deleteNote(' + i + ',' + n + ')">✕</button></div>'; } notesList += '</div>'; }
-    const noteRowCls = p.noteOpen ? 'open' : '';
-    const editVal = (p.name || '').replace(/"/g, '&quot;');
-    let mainRow = '';
-    if (p.editOpen) {
-      mainRow = '<div class="project-note-row open"><input class="project-note-input" id="editInp-' + i + '" value="' + editVal + '" placeholder="שם פרוייקט..." style="font-size:16px"><button class="note-ok-btn" onclick="saveEdit(' + i + ')">שמור</button></div>';
+    if (notes.length > 0) {
+      notesList = '<div style="margin-bottom:8px;">';
+      for (var n = 0; n < notes.length; n++) {
+        notesList += '<div style="font-size:12px;color:#555;padding:4px 0;border-bottom:1px solid #f8f8f8;display:flex;justify-content:space-between;align-items:flex-start;"><span>' + notes[n] + '</span><button onclick="deleteNote(' + i + ',' + n + ')" style="background:none;border:none;color:#ccc;font-size:11px;cursor:pointer;flex-shrink:0;padding:0 0 0 8px;">✕</button></div>';
+      }
+      notesList += '</div>';
     } else {
-      mainRow = '<button class="project-btn" onclick="toggleProject(' + i + ')" style="color:#111;padding:4px 0;"><span class="project-btn-name"><span style="font-size:11px;opacity:0.55;font-weight:700;margin-right:4px;">' + (p.sessionNum || (i+1)) + '.</span>' + icon + p.name + doneLabel + '</span>' + (p.prevMs > 0 ? '<span style="font-size:10px;color:#555;">היום: ' + formatMs(ms) + '</span>' : '') + '</button>';
+      notesList = '<div style="font-size:12px;color:#ccc;padding:4px 0 8px;">No notes yet</div>';
     }
-    html += '<div class="project-card ' + doneCls + '" style="background:' + cardBg + ';border-color:' + cardBg + ';color:#111;padding:0;overflow:hidden;">' +
-      '<div style="background:' + headerBg + ';padding:5px 12px 4px;display:flex;justify-content:space-between;align-items:center;">' +
-      '<span style="font-size:10px;font-weight:900;color:#fff;letter-spacing:0.04em;">' + (p.client || '—') + (p.active ? ' ●' : '') + '</span>' +
-      '<span style="font-size:12px;font-weight:700;color:#fff;" id="ptime-' + i + '">' + formatMs(ms + (p.prevMs || 0)) + '</span>' +
+
+    html += '<div style="border-radius:14px;overflow:hidden;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);opacity:' + cardOpacity + ';">' +
+      // Header
+      '<div style="background:' + headerBg + ';padding:8px 14px;display:flex;justify-content:space-between;align-items:center;">' +
+        '<span style="font-size:11px;font-weight:900;color:#fff;letter-spacing:0.05em;">' + (p.active ? '● ' : '') + (p.client || '—') + '</span>' +
+        '<div style="display:flex;align-items:center;gap:10px;">' +
+          (po ? '<span style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.85);">' + po + '</span>' : '') +
+          '<button onclick="showProjectInfo(' + i + ')" style="background:rgba(255,255,255,0.25);border:none;color:#fff;border-radius:50%;width:24px;height:24px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">ℹ</button>' +
+        '</div>' +
       '</div>' +
-      '<div style="padding:8px 12px 4px;">' + mainRow + notesList + '</div>' +
-      '<div class="project-note-row ' + noteRowCls + '"><input class="project-note-input" id="noteInp-' + i + '" value="" placeholder="הוסף הערה חדשה..." style="font-size:16px"><button class="note-ok-btn" onclick="saveNote(' + i + ')">הוסף</button></div>' +
-      '<div class="project-actions" style="border-top:1px solid rgba(0,0,0,0.08);">' +
-      '<button class="p-action" onclick="toggleEdit(' + i + ')" style="color:#111">✏️ עריכה</button>' +
-      '<button class="p-action" onclick="toggleNote(' + i + ')" style="color:#111">💬 הערה</button>' +
-      '<button class="p-action p-action-cancel" onclick="toggleDone(' + i + ')" style="color:#111">' + doneBtn + '</button>' +
-      '</div></div>' +
-      '<div class="project-divider"></div>';
+      // Body
+      '<div style="background:#fff;padding:12px 14px;">' +
+        '<div style="font-size:26px;font-weight:900;color:#111;line-height:1.1;margin-bottom:6px;">' + displayName + (p.done ? ' ✓' : '') + '</div>' +
+        '<div style="font-size:32px;font-weight:300;letter-spacing:2px;color:' + timerColor + ';margin-bottom:10px;" id="ptime-' + i + '">' + formatMs(totalMs) + '</div>' +
+        // Action buttons
+        '<div style="display:flex;gap:8px;margin-bottom:10px;">' +
+          '<button onclick="toggleProject(' + i + ')" style="flex:1;padding:10px 6px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;background:' + (p.active ? '#f5f5f5' : (p.done ? '#f5f5f5' : '#e8f5e9')) + ';color:' + (p.active ? '#111' : (p.done ? '#aaa' : '#2e7d32')) + ';">' + (p.done ? '↩ Restore' : (p.active ? '⏸ Pause' : '▶ Start')) + '</button>' +
+          (!p.done ? '<button onclick="toggleDone(' + i + ')" style="flex:1;padding:10px 6px;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;background:#ffebee;color:#c62828;">✓ End Project</button>' : '') +
+        '</div>' +
+        // Notes
+        '<div style="border-top:1px solid #f0f0f0;padding-top:10px;">' +
+          '<div style="font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Notes</div>' +
+          notesList +
+          '<div style="display:flex;gap:6px;">' +
+            '<input id="noteInp-' + i + '" type="text" placeholder="Add note…" style="flex:1;padding:8px 10px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;direction:rtl;">' +
+            '<button onclick="saveNote(' + i + ')" style="padding:8px 14px;background:#111;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">+</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
   }
   container.innerHTML = html;
-  for (let i = 0; i < projects.length; i++) {
-    if (projects[i].editOpen) { (function(idx) { setTimeout(function() { var el = document.getElementById('editInp-' + idx); if (el) { el.focus(); el.select(); } }, 40); })(i); }
-    if (projects[i].noteOpen) { (function(idx) { setTimeout(function() { var el = document.getElementById('noteInp-' + idx); if (el) el.focus(); }, 40); })(i); }
+  for (var i = 0; i < projects.length; i++) {
+    if (projects[i].noteOpen) {
+      (function(idx) { setTimeout(function() { var el = document.getElementById('noteInp-' + idx); if (el) el.focus(); }, 40); })(i);
+    }
   }
 }
 
-function toggleEdit(i) { projects.forEach((p,j) => { if(j!==i) p.editOpen = false; }); projects[i].editOpen = !projects[i].editOpen; renderProjectBtns(); }
-function saveEdit(i) { const el = document.getElementById('editInp-'+i); if (el && el.value.trim()) projects[i].name = el.value.trim(); projects[i].editOpen = false; saveState(); renderProjectBtns(); showToast('✓ Name updated'); }
-function toggleNote(i) { projects[i].noteOpen = !projects[i].noteOpen; renderProjectBtns(); if (projects[i].noteOpen) setTimeout(() => { const el = document.getElementById('noteInp-'+i); if(el) el.focus(); }, 60); }
+function toggleNote(i) { projects[i].noteOpen = !projects[i].noteOpen; renderProjectBtns(); if (projects[i].noteOpen) setTimeout(function() { var el = document.getElementById('noteInp-'+i); if(el) el.focus(); }, 60); }
+
+function showProjectInfo(i) {
+  var p = projects[i];
+  if (!p.jobId) { showToast('No sheet job linked'); return; }
+  fetch(SHEETS_URL + '?action=getFullJobInfo&jobId=' + encodeURIComponent(p.jobId) + '&client=' + encodeURIComponent(p.jobClient || p.client))
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      var rows = [
+        ['ID', d.id||'—'], ['Status', d.status||'—'], ['Description', d.desc||'—'],
+        ['Category', d.category||'—'], ['Price', d.price||'—'], ['Qty', d.qty||'—'],
+        ['Hours (est)', d.hours||'—'], ['Hours (actual)', d.hoursActual||'—'],
+        ['PO', d.po||'—'], ['Invoice/Quote', d.invoiceQuote||'—'],
+        ['Date Start', d.dateStart||'—'], ['Date End', d.dateEnd||'—'],
+        ['Income', d.income||'—'], ['Gross Profit', d.grossProfit||'—']
+      ];
+      var html = '<div style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:flex-end;justify-content:center;" onclick="this.remove()">' +
+        '<div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:20px;max-height:80vh;overflow-y:auto;" onclick="event.stopPropagation()">' +
+        '<div style="font-size:18px;font-weight:900;color:#111;margin-bottom:4px;">' + (p.title || p.name) + '</div>' +
+        '<div style="font-size:12px;color:#aaa;margin-bottom:16px;">' + (p.client||'') + '</div>';
+      rows.forEach(function(r) {
+        if (r[1] && r[1] !== '—' && r[1] !== '0') {
+          html += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0;">' +
+            '<span style="font-size:13px;color:#888;">' + r[0] + '</span>' +
+            '<span style="font-size:13px;font-weight:700;color:#111;">' + r[1] + '</span></div>';
+        }
+      });
+      html += '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="width:100%;padding:14px;margin-top:16px;background:#111;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">Close</button></div></div>';
+      document.body.insertAdjacentHTML('beforeend', html);
+    }).catch(function(){ showToast('Failed to load job info'); });
+}
+
+
 
 function saveNote(i) {
   const el = document.getElementById('noteInp-'+i);
@@ -3216,7 +3298,7 @@ function renderSetup() {
   if (activeProjects.length > 0) { btn.disabled = false; btn.removeAttribute('disabled'); } else { btn.disabled = true; btn.setAttribute('disabled', ''); }
   list.innerHTML = projects.map((p, i) => {
     var cc = clientColor(p.client || p.name || '');
-    return `<div class="setup-project-item" style="padding:0;overflow:hidden;border:none;"><div style="background:${cc.grad};padding:5px 12px 4px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:900;color:#fff;letter-spacing:0.04em;">${p.client || '—'}</span><button class="btn-remove" onclick="removeProject(${i})" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button></div><div style="background:${cc.rgba};padding:8px 12px;display:flex;justify-content:space-between;align-items:center;"><div><span class="setup-project-name" style="color:#111;">${p.name}</span>${p.client ? `<div style="font-size:11px;color:#333;margin-top:2px;">${p.estHours ? hoursToHHMM(p.estHours) + ' est.' : ''}</div>` : ''}${((p.prevMs || 0) + p.totalMs) > 0 ? `<div style="font-size:11px;color:#333;margin-top:2px;font-weight:700;">⏱ ${formatMs((p.prevMs || 0) + p.totalMs)}</div>` : ''}</div><div style="font-size:12px;color:#111;font-weight:700;">${p.done ? '✓ הסתיים' : ''}</div></div></div>`;
+    return `<div class="setup-project-item" style="padding:0;overflow:hidden;border:none;"><div style="background:${cc.grad};padding:5px 12px 4px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:900;color:#fff;letter-spacing:0.04em;">${p.client || '—'}</span><button class="btn-remove" onclick="removeProject(${i})" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button></div><div style="background:${cc.rgba};padding:8px 12px;display:flex;justify-content:space-between;align-items:center;"><div><span class="setup-project-name" style="color:#111;">${p.title || p.name}</span>${p.client ? `<div style="font-size:11px;color:#333;margin-top:2px;">${p.estHours ? hoursToHHMM(p.estHours) + ' est.' : ''}</div>` : ''}${((p.prevMs || 0) + p.totalMs) > 0 ? `<div style="font-size:11px;color:#333;margin-top:2px;font-weight:700;">⏱ ${formatMs((p.prevMs || 0) + p.totalMs)}</div>` : ''}</div><div style="font-size:12px;color:#111;font-weight:700;">${p.done ? '✓ הסתיים' : ''}</div></div></div>`;
   }).join('');
 }
 
@@ -4640,12 +4722,15 @@ function _updatePreTimerUI() {
   if (dayName) dayName.textContent = _preTimer.desc ? _preTimer.desc.substring(0, 20) : 'Pre-Project';
   var drawerItem = document.getElementById('drawerPreTimerItem');
   if (drawerItem) {
+    var svgHtml = '<svg width="52" height="52" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="44" r="28" stroke="#111" stroke-width="5"/><line x1="40" y1="44" x2="40" y2="24" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="44" x2="54" y2="54" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="34" y1="8" x2="46" y2="8" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="8" x2="40" y2="16" stroke="#111" stroke-width="5" stroke-linecap="round"/></svg>';
     if (_preTimer.jobId) {
-      drawerItem.textContent = '⏱ ' + (_preTimer.active ? '▶ ' : '⏸ ') + (_preTimer.desc || 'Pre-Project Timer');
-      drawerItem.style.color = '#00695c';
+      drawerItem.innerHTML = svgHtml + '<span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">▶ ' + (_preTimer.desc || 'Timer') + '</span>';
+      drawerItem.style.background = '#e0f7fa';
+      drawerItem.style.borderColor = '#4db6ac';
     } else {
-      drawerItem.textContent = '⏱ Pre-Project Timer';
-      drawerItem.style.color = '#aaa';
+      drawerItem.innerHTML = svgHtml + '<span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">Timer</span>';
+      drawerItem.style.background = '#f8f9fa';
+      drawerItem.style.borderColor = '#e0e0e0';
     }
   }
 }
