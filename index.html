@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v389</title>
+<title>י.ב אחזקות — v414</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -107,15 +107,17 @@ margin-bottom: 24px;
 }
 
 .btn-start-day {
-width: 100%; padding: 18px;
-background: var(--black); color: white;
-border: none; border-radius: var(--radius);
+width: 100%; padding: 32px 20px;
+background: #f0c020; color: #111;
+border: none; border-radius: 16px;
 font-family: 'Heebo', sans-serif;
-font-size: 17px; font-weight: 900;
+font-size: 26px; font-weight: 900;
 cursor: pointer; transition: transform 0.15s, opacity 0.2s;
 }
 .btn-start-day:active { transform: scale(0.97); }
 .btn-start-day:disabled { opacity: 0.25; }
+
+
 
 /* ── DAY SCREEN ── */
 
@@ -325,14 +327,14 @@ margin-bottom: 20px;
 /* End day button */
 .btn-end-day {
 width: 100%; padding: 18px;
-background: white; color: var(--black);
-border: 2px solid var(--black);
+background: var(--black); color: white;
+border: none;
 border-radius: var(--radius);
 font-family: 'Heebo', sans-serif;
 font-size: 17px; font-weight: 900;
 cursor: pointer; transition: all 0.15s;
 }
-.btn-end-day:active { background: var(--black); color: white; }
+.btn-end-day:active { opacity: 0.8; transform: scale(0.97); }
 
 /* ── SUMMARY SCREEN ── */
 .summary-hero {
@@ -444,31 +446,39 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   </div>
 
   <div id="setupDrawerBackdrop" onclick="closeSetupDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:10000;"></div>
-  <div id="setupDrawer" style="display:none;position:fixed;top:0;left:0;bottom:0;width:82%;max-width:320px;z-index:10001;flex-direction:column;background:#fff;border-radius:0 0 0 0;overflow:hidden;">
-    <div style="background:linear-gradient(135deg,#1a1a2e 0%,#0f3460 100%);padding:14px 16px 16px;flex-shrink:0;">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
-        <button onclick="closeSetupDrawer()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:8px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:Heebo,sans-serif;">✕ סגור</button>
-      </div>
-      <div style="font-size:20px;font-weight:900;color:#fff;">י.ב אחזקות</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin:3px 0 6px;" id="drawerDate"></div>
-      <div style="font-size:28px;font-weight:300;color:#fff;letter-spacing:2px;" id="drawerClock"></div>
+  <div id="setupDrawer" style="display:none;position:fixed;top:0;left:0;bottom:0;width:100%;max-width:100%;z-index:10001;flex-direction:column;background:#fff;border-radius:0 0 0 0;overflow:hidden;">
+    <div style="background:linear-gradient(135deg,#1a1a2e 0%,#0f3460 100%);height:160px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <button onclick="closeSetupDrawer()" style="background:none;border:none;color:#fff;font-size:100px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;line-height:1;padding:0;">✕</button>
     </div>
-    <div style="flex:1;overflow-y:auto;">
-      <div style="font-size:9px;font-weight:700;color:#bbb;letter-spacing:0.1em;padding:12px 16px 4px;">ACTIONS</div>
-      <div onclick="closeSetupDrawer();openAddJobModal();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#111;">+ Add Project to Sheet</div>
-      <div id="drawerPreTimerItem" onclick="closeSetupDrawer();openPreTimerPicker();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#00695c;">⏱ Pre-Project Timer</div>
-      <div onclick="closeSetupDrawer();fetchOpenJobs();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#1a56db;">📋 Pick from Open Tasks</div>
-      <div onclick="closeSetupDrawer();fetchPendingQuote();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#b07d00;">📋 Pending Quote Projects</div>
-      <div onclick="closeSetupDrawer();openNewClientModal();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#555;">➕ Create New Client</div>
-      <div onclick="closeSetupDrawer();fetchCompletedJobs();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#2e7d32;">✅ Recent Completed Projects</div>
-      <div onclick="closeSetupDrawer();fetchInvoices();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#2e7d32;">🧾 Invoices</div>
-      <div onclick="closeSetupDrawer();fetchGrossProfitSummary();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#2e7d32;">💰 רווח גולמי להוציא חש</div>
-      <div onclick="closeSetupDrawer();openDayNote();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#1a1a2e;">📝 הערת יום</div>
-      <div onclick="closeSetupDrawer();openDayNotesList();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#555;">📋 הערות יום קודמות</div>
-      <div onclick="closeSetupDrawer();openWorkLog();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#1a1a2e;">📓 יומן עבודה</div>
-      <div onclick="closeSetupDrawer();openCaspitOverlay();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#0d47a1;">💼 כספית</div>
-      <div onclick="closeSetupDrawer();runPOImportScan();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;border-bottom:1px solid #f0f0f0;color:#6a1b9a;">📧 Import PO Emails</div>
-      <div onclick="closeSetupDrawer();hardReset();" style="padding:15px 18px;font-size:15px;font-weight:600;cursor:pointer;color:#ccc;">🗑 Reset All</div>
+    <div style="flex:1;overflow-y:auto;padding:10px;">
+      <div onclick="closeSetupDrawer();openAddJobModal();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">+</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#111;">Add Project to Sheet</span></div>
+      <div id="drawerPreTimerItem" onclick="closeSetupDrawer();openPreTimerPicker();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">⏱</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">Pre-Project Timer</span></div>
+      <div onclick="closeSetupDrawer();fetchOpenJobs();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">📋</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a56db;">Pick from Open Tasks</span></div>
+      <div onclick="closeSetupDrawer();fetchPendingQuote();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">📋</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#b07d00;">Pending Quote Projects</span></div>
+      <div onclick="closeSetupDrawer();openNewClientModal();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">➕</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#555;">Create New Client</span></div>
+      <div onclick="closeSetupDrawer();fetchCompletedJobs();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">✅</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#2e7d32;">Recent Completed Projects</span></div>
+      <div onclick="closeSetupDrawer();fetchInvoices();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">🧾</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#2e7d32;">Invoices</span></div>
+      <div onclick="closeSetupDrawer();fetchGrossProfitSummary();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">💰</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#2e7d32;">Gross Profit — To Invoice</span></div>
+      <div onclick="closeSetupDrawer();openDayNote();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">📝</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Day Note</span></div>
+      <div onclick="closeSetupDrawer();openDayNotesList();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">📋</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#555;">Previous Day Notes</span></div>
+      <div onclick="closeSetupDrawer();openWorkLog();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">📓</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Work Log</span></div>
+      <div onclick="closeSetupDrawer();openCaspitOverlay();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">⚠️</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">Account Manager</span></div>
+      <div onclick="closeSetupDrawer();runPOImportScan();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">📧</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6a1b9a;">Import PO Emails</span></div>
+      <div onclick="closeSetupDrawer();hardReset();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">🗑</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#ccc;">Reset All</span></div>
     </div>
   </div>
 
@@ -478,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v389
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v414
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -487,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v389 · 02/05/2026
+v414 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -552,9 +562,9 @@ SCREEN 1 — SETUP
 - Add project to sheet
 - Create new client (sheet tab + Clients sheet + Caspit contact)
 - 📧 Import PO Emails — bulk default + sequential save
-- 💰 רווח גולמי להוציא חש
-- 📝 הערת יום + 📋 הערות יום קודמות
-- 📓 יומן עבודה — cumulative log with search
+- 💰 Gross Profit — To Invoice
+- 📝 Day Note + 📋 Previous Day Notes
+- 📓 Work Log — cumulative log with search
 - ⏱ Pre-Project Timer
 
 SCREEN 2 — DAY
@@ -1121,15 +1131,18 @@ SHEET SYNC
     <div class="setup-label" style="text-align:left;">Today's Projects</div>
     <div class="project-list-setup" id="setupList"></div>
     <div style="flex:1;display:flex;align-items:center;justify-content:center;">
-      <button id="btnAddBrowseSetup" onclick="openSetupDrawer()" style="width:180px;height:180px;border-radius:20px;border:2.5px dashed #999;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:Heebo,sans-serif;color:#666;">
-        <span id="btnAddBrowseSetupIcon" style="font-size:38px;color:#666;">☰</span>
-        <span id="btnAddBrowseSetupText" style="font-size:14px;font-weight:700;color:#666;text-align:center;line-height:1.3;">Add / Browse<br>Projects</span>
+      <button id="btnAddBrowseSetup" onclick="openSetupDrawer()" style="width:180px;height:180px;border-radius:20px;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Heebo,sans-serif;">
+        <span id="btnAddBrowseSetupIcon" style="display:flex;flex-direction:column;gap:42px;align-items:center;">
+          <span style="display:block;width:360px;height:30px;background:#666;border-radius:15px;"></span>
+          <span style="display:block;width:360px;height:30px;background:#666;border-radius:15px;"></span>
+          <span style="display:block;width:360px;height:30px;background:#666;border-radius:15px;"></span>
+        </span>
       </button>
     </div>
     <div id="emptyMsg" style="display:none;"></div>
-    <div style="padding:0 0 max(env(safe-area-inset-bottom, 16px), 16px);">
+    <div style="padding:12px 16px max(env(safe-area-inset-bottom,16px),16px);">
       <button class="btn-start-day" id="btnStartDay" onclick="startDay()" disabled>
-        Start Work Day ←
+        Start Work Session ←
       </button>
     </div>
   </div>
@@ -1174,11 +1187,12 @@ SHEET SYNC
       </span>
     </div>
     <div style="height:2px;background:#111;margin:6px 0 8px;flex-shrink:0;"></div>
-    <button class="btn-end-day" onclick="endDay()">End Work Day →</button>
+    <button class="btn-end-day" onclick="endDay()">End Work Session →</button>
   </div>
 
   <!-- SCREEN 3: SUMMARY -->
   <div class="screen" id="screen-summary">
+    <div id="summaryContent" style="padding:16px 16px 0;"></div>
     <div id="timelineView" style="padding:0 0 16px;"></div>
     <div style="padding:0 16px;">
       <button class="copy-summary-btn" id="copySummaryBtn" onclick="copySummary()">💾 שמור Work Summary</button>
@@ -1192,7 +1206,7 @@ SHEET SYNC
 <div id="gpOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10010;align-items:flex-end;justify-content:center;">
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:80vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
-      <div style="font-weight:700;font-size:17px;">💰 רווח גולמי להוציא חש</div>
+      <div style="font-weight:700;font-size:17px;">💰 Gross Profit — To Invoice</div>
       <button onclick="document.getElementById('gpOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
     </div>
     <div id="gpContent" style="overflow-y:auto;flex:1;padding:16px 20px;"></div>
@@ -1206,7 +1220,7 @@ SHEET SYNC
 <div id="dayNoteOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:10010;align-items:flex-end;justify-content:center;">
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;padding:24px 20px 36px;font-family:Heebo,sans-serif;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-      <div style="font-size:18px;font-weight:900;color:#1a1a2e;">📝 הערת יום</div>
+      <div style="font-size:18px;font-weight:900;color:#1a1a2e;">📝 Day Note</div>
       <button onclick="closeDayNote()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888;line-height:1;">✕</button>
     </div>
     <div style="font-size:12px;color:#aaa;margin-bottom:10px;" id="dayNoteTimestamp"></div>
@@ -1275,7 +1289,7 @@ SHEET SYNC
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px 0;border-bottom:1px solid #eee;flex-shrink:0;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-weight:900;font-size:17px;color:#0d47a1;">💼 כספית <span style="font-size:11px;font-weight:400;color:#aaa;">v300</span></div>
+        <div style="font-weight:900;font-size:17px;color:#0d47a1;">💼 Caspit <span style="font-size:11px;font-weight:400;color:#aaa;">v300</span></div>
         <div style="display:flex;gap:8px;align-items:center;">
           <button onclick="testCaspitProxy()" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;color:#666;min-width:44px;min-height:44px;">🔌</button>
           
@@ -1343,7 +1357,7 @@ SHEET SYNC
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px 12px;border-bottom:1px solid #eee;flex-shrink:0;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div style="font-weight:900;font-size:17px;color:#1a1a2e;">📓 יומן עבודה</div>
+        <div style="font-weight:900;font-size:17px;color:#1a1a2e;">📓 Work Log</div>
         <button onclick="document.getElementById('workLogOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;line-height:1;">✕</button>
       </div>
       <input id="workLogSearch" type="search" placeholder="חפש לפי תאריך, פרוייקט, לקוח, מספר עבודה…" oninput="renderWorkLog(this.value)"
@@ -2564,7 +2578,7 @@ function callSaveProjectsShortcut() { var active = projects.filter(function(p) {
 
 function openSetupDrawer() { document.getElementById('setupDrawer').style.display = 'flex'; document.getElementById('setupDrawerBackdrop').style.display = 'block'; updateDrawerClock(); }
 function closeSetupDrawer() { document.getElementById('setupDrawer').style.display = 'none'; document.getElementById('setupDrawerBackdrop').style.display = 'none'; }
-function updateDrawerClock() { var d = new Date(); var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; document.getElementById('drawerDate').textContent = days[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth()+1) + '.' + d.getFullYear(); document.getElementById('drawerClock').textContent = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0'); }
+function updateDrawerClock() { var d = new Date(); var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; var dateEl = document.getElementById('drawerDate'); if (dateEl) dateEl.textContent = days[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth()+1) + '.' + d.getFullYear(); var clockEl = document.getElementById('drawerClock'); if (clockEl) clockEl.textContent = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0'); }
 setInterval(function() { if (document.getElementById('setupDrawer').style.display !== 'none') updateDrawerClock(); }, 1000);
 
 // ── Location ──────────────────────────────────────────
@@ -2856,6 +2870,8 @@ function endDay() {
   clearInterval(mainInterval); cancelNotification();
   dayEnded = true; localStorage.setItem('yb_dayEnded', 'true'); localStorage.setItem('yb_dayEndTime', now.toString()); localStorage.setItem('yb_arrangement', arrangementMs);
   saveState(); autoSaveSummary();
+  // Save session to structured history
+  saveSessionToHistory();
   projects.forEach(function(p) { if (p.jobId) syncJobToSheets(p); });
   showScreen('summary'); renderSummary();
 }
@@ -2884,17 +2900,152 @@ function autoSaveSummary() {
   if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).catch(function() { fallbackCopy(text, null); }); } else { fallbackCopy(text, null); }
 }
 
+function saveSessionToHistory() {
+  var now = Date.now();
+  var sessionStart = dayStartTime || now;
+  var sessionEnd   = parseInt(localStorage.getItem('yb_dayEndTime') || now.toString(), 10);
+  var d = new Date(sessionStart);
+  var dateKey = d.getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear();
+
+  var sessionData = {
+    dateKey:   dateKey,
+    start:     sessionStart,
+    end:       sessionEnd,
+    totalMs:   sessionEnd - sessionStart,
+    projects:  projects.filter(function(p){ return p.totalMs > 0; }).map(function(p){
+      return {
+        name:     p.name,
+        client:   p.client || '',
+        totalMs:  p.totalMs,
+        sessions: (p.sessions || []).map(function(s){ return { start: s.start, end: s.end, ms: s.ms }; })
+      };
+    }),
+    arrangementMs: arrangementMs,
+    drivingMs:     drivingMs
+  };
+
+  var history = JSON.parse(localStorage.getItem('yb_sessionHistory') || '[]');
+  history.unshift(sessionData);
+  if (history.length > 60) history = history.slice(0, 60);
+  try { localStorage.setItem('yb_sessionHistory', JSON.stringify(history)); } catch(e) {}
+}
+
 function renderSummary() {
-  const endTime = parseInt(localStorage.getItem('yb_dayEndTime') || '0', 10);
-  const refTime = endTime > 0 ? endTime : Date.now();
-  const totalDay = dayStartTime ? (refTime - dayStartTime) : 0;
-  const workedTotal = projects.reduce((sum, p) => sum + p.totalMs + (p.prevMs || 0), 0) + arrangementMs;
+  var endTime    = parseInt(localStorage.getItem('yb_dayEndTime') || '0', 10);
+  var refTime    = endTime > 0 ? endTime : Date.now();
+  var totalDay   = dayStartTime ? (refTime - dayStartTime) : 0;
+  var workedTotal = projects.reduce(function(s,p){ return s + p.totalMs + (p.prevMs||0); }, 0) + arrangementMs;
 
   // Update copy button
   var btn = document.getElementById('copySummaryBtn');
   if (btn) { btn.textContent = '✓ נשמר — לחץ להעתקה'; btn.classList.add('copied'); setTimeout(function() { btn.textContent = '💾 שמור Work Summary'; btn.classList.remove('copied'); }, 3000); }
 
-  // ── Build timeline ──────────────────────────────────
+  function tsToHM(ts) { var d=new Date(ts); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); }
+  function fmtMs(ms) { var h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000); return h>0?h+'h '+m+'m':m+'m'; }
+
+  // ── Build date-grouped session view ─────────────────
+  var history = JSON.parse(localStorage.getItem('yb_sessionHistory') || '[]');
+
+  // Group sessions by dateKey
+  var dateMap = {};
+  var dateOrder = [];
+  history.forEach(function(sess) {
+    if (!dateMap[sess.dateKey]) { dateMap[sess.dateKey] = []; dateOrder.push(sess.dateKey); }
+    dateMap[sess.dateKey].push(sess);
+  });
+
+  var summaryEl = document.getElementById('summaryContent');
+  if (!summaryEl) return;
+
+  if (!dateOrder.length) {
+    summaryEl.innerHTML = '<div style="text-align:center;color:#aaa;padding:40px;font-size:14px;">No session history yet.</div>';
+    return;
+  }
+
+  var html = '';
+  dateOrder.forEach(function(dateKey) {
+    var sessions = dateMap[dateKey];
+    // Day totals
+    var dayTotalMs = sessions.reduce(function(s,sess){ return s + sess.totalMs; }, 0);
+    var projTotals = {};
+    sessions.forEach(function(sess){
+      sess.projects.forEach(function(p){
+        if (!projTotals[p.name]) projTotals[p.name] = { name:p.name, client:p.client, ms:0 };
+        projTotals[p.name].ms += p.totalMs;
+      });
+    });
+
+    html += '<div style="background:#fff;border-radius:14px;overflow:hidden;margin-bottom:16px;box-shadow:0 1px 6px rgba(0,0,0,0.08);">';
+
+    // Date header
+    html += '<div style="background:#1a1a2e;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">' +
+      '<span style="font-size:15px;font-weight:700;color:#fff;">' + dateKey + '</span>' +
+      '<span style="font-size:12px;color:rgba(255,255,255,0.6);">' + fmtMs(dayTotalMs) + ' · ' + sessions.length + ' session' + (sessions.length>1?'s':'') + '</span>' +
+    '</div>';
+
+    // Each session
+    sessions.forEach(function(sess, si) {
+      var sessStartStr = tsToHM(sess.start);
+      var sessEndStr   = tsToHM(sess.end);
+      html += '<div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+        '<span style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:0.5px;">Session ' + (si+1) + '</span>' +
+        '<span style="font-size:12px;color:#999;">' + sessStartStr + ' – ' + sessEndStr + ' · ' + fmtMs(sess.totalMs) + '</span>' +
+      '</div>';
+
+      // Time periods (sorted project sessions)
+      var allPeriods = [];
+      sess.projects.forEach(function(p){
+        (p.sessions||[]).forEach(function(s){ allPeriods.push({start:s.start,end:s.end,ms:s.ms,name:p.name,client:p.client}); });
+      });
+      allPeriods.sort(function(a,b){ return a.start-b.start; });
+      allPeriods.forEach(function(per){
+        var cc = clientColor(per.client || per.name);
+        html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+          '<div style="width:8px;height:8px;border-radius:50%;background:' + cc.rgba + ';flex-shrink:0;"></div>' +
+          '<span style="font-size:12px;color:#555;">' + tsToHM(per.start) + ' – ' + tsToHM(per.end) + '</span>' +
+          '<span style="font-size:12px;font-weight:600;color:#333;flex:1;">' + (per.client?per.client+' · ':'')+per.name + '</span>' +
+          '<span style="font-size:11px;color:#888;">' + fmtMs(per.ms) + '</span>' +
+        '</div>';
+      });
+
+      // Per-project totals for this session
+      if (sess.projects.length > 0) {
+        html += '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed #eee;">';
+        sess.projects.forEach(function(p){
+          html += '<div style="display:flex;justify-content:space-between;font-size:12px;padding:2px 0;">' +
+            '<span style="color:#333;">' + p.name + '</span>' +
+            '<span style="color:#666;font-weight:600;">' + fmtMs(p.totalMs) + '</span>' +
+          '</div>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+
+    // Day totals per project (if multiple sessions)
+    if (sessions.length > 1 && Object.keys(projTotals).length > 0) {
+      html += '<div style="padding:10px 16px;background:#f8f9fa;">' +
+        '<div style="font-size:10px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Day totals per project</div>';
+      Object.values(projTotals).forEach(function(p){
+        html += '<div style="display:flex;justify-content:space-between;font-size:13px;padding:2px 0;">' +
+          '<span style="color:#333;">' + p.name + '</span>' +
+          '<span style="color:#333;font-weight:700;">' + fmtMs(p.ms) + '</span>' +
+        '</div>';
+      });
+      html += '</div>';
+    }
+
+    html += '</div>';
+  });
+
+  summaryEl.innerHTML = html;
+
+  // Also render the original timeline below for current session
+  renderTimelineSection();
+}
+
+function renderTimelineSection() {
   var d = new Date(dayStartTime || Date.now());
   var hebrewDays = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
   var hebrewMonths = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
@@ -3415,7 +3566,7 @@ function fetchGrossProfitSummary() {
 function copyGP() {
   if (!_gpData) return;
   var clients = Object.keys(_gpData.clients).sort(function(a,b) { return _gpData.clients[b] - _gpData.clients[a]; });
-  var text = '💰 רווח גולמי להוציא חש\n';
+  var text = '💰 Gross Profit — To Invoice\n';
   text += '─────────────────\n';
   clients.forEach(function(c) { text += c + '\t₪' + _gpData.clients[c].toLocaleString() + '\n'; });
   text += '─────────────────\n';
