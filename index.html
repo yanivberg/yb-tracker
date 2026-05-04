@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v441</title>
+<title>י.ב אחזקות — v443</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -480,7 +480,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v441
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v443
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -489,7 +489,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v441 · 02/05/2026
+v443 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -1960,7 +1960,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzlm1j-IiMg5lQ_p5IjD3BaJs9okB6qm4aVAITqlVZ6ugA8Hgal2yBudoJpGWdey9br8A/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxpxS6l3UbI_sdWHYFU1yIFD1DU1KSi6ueEXBJ2lG7e3r-J038Iv78tJuFj2Z8p4fw31w/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -4153,7 +4153,7 @@ function _renderCaspitInvoiceTab() {
   if (!_caspitInvoiceJobs.length) { body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">אין עבודות להוציא חש</div>'; return; }
 
   _caspitJobList = _caspitInvoiceJobs.map(function(j) {
-    return { id: j.id, client: j.client, gp: parseFloat(j.grossProfit)||0, income: parseFloat(j.income)||parseFloat(j.price)||parseFloat(j.grossProfit)||0, price: parseFloat(j.price)||0, desc: j.desc||'', po: j.po||'' };
+    return { id: j.id, client: j.client, gp: parseFloat(j.grossProfit)||0, income: parseFloat(j.income)||parseFloat(j.price)||parseFloat(j.grossProfit)||0, price: parseFloat(j.price)||0, qty: parseFloat(j.qty)||1, desc: j.desc||'', po: j.poNumber||j.po||'', dateEnd: j.dateEnd||'' };
   });
 
   var html = '<div style="display:flex;gap:8px;margin-bottom:10px;">' +
@@ -4284,7 +4284,13 @@ function createCaspitInvoice() {
       DocumentLines: g.jobs.map(function(job, li) {
         var unitPrice = parseFloat(job.income) || parseFloat(job.gp) || parseFloat(job.price) || 1;
         if (!unitPrice || isNaN(unitPrice) || unitPrice <= 0) unitPrice = 1;
-        return { ProductName: job.desc + (job.po ? ' | מ.רכש: ' + job.po : ''), Details: job.desc||'-', Qty: 1, UnitPrice: unitPrice, ChargeVAT: true };
+        var qty = parseFloat(job.qty) || 1;
+        var parts = [job.client || ''];
+        if (job.po) parts.push(job.po);
+        parts.push(job.desc || '—');
+        if (job.dateEnd) parts.push(job.dateEnd);
+        var lineDesc = parts.join(' | ');
+        return { ProductName: lineDesc, Details: lineDesc, Qty: qty, UnitPrice: unitPrice, ChargeVAT: true };
       })
     };
     _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
