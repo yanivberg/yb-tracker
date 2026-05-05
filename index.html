@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v453</title>
+<title>י.ב אחזקות — v454</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -480,7 +480,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v453
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v454
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -489,7 +489,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v453 · 02/05/2026
+v454 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -1107,6 +1107,7 @@ SHEET SYNC
         <button onclick="copyAppInfo()" id="copyInfoBtn" style="width:100%;padding:13px;background:#111;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">📋 Copy Summary to Clipboard</button>
         <button onclick="copyAppScript()" id="copyScriptBtn" style="width:100%;padding:13px;background:transparent;color:#111;border:1.5px solid #111;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">📄 Copy Apps Script — v73 · 02/5/2026</button>
         <button onclick="copyCaspitInfo()" id="copyCaspitBtn" style="width:100%;padding:13px;margin-top:8px;background:transparent;color:#0d47a1;border:1.5px solid #0d47a1;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">💼 Copy Caspit API Info</button>
+        <button onclick="localStorage.removeItem('yb_syncQueue');showToast('✓ Sync queue cleared');document.getElementById('appInfoOverlay').style.display='none';" style="width:100%;padding:13px;margin-top:8px;background:transparent;color:#c62828;border:1.5px solid #c62828;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">🗑 Clear Sync Queue</button>
       </div>
     </div>
   </div>
