@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v449</title>
+<title>י.ב אחזקות — v451</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -480,7 +480,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v449
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v451
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -489,7 +489,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v449 · 02/05/2026
+v451 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -3321,7 +3321,21 @@ function renderSetup() {
   if (activeProjects.length > 0) { btn.disabled = false; btn.removeAttribute('disabled'); } else { btn.disabled = true; btn.setAttribute('disabled', ''); }
   list.innerHTML = projects.map((p, i) => {
     var cc = clientColor(p.client || p.name || '');
-    return `<div class="setup-project-item" style="padding:0;overflow:hidden;border:none;"><div style="background:${cc.grad};padding:5px 12px 4px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:10px;font-weight:900;color:#fff;letter-spacing:0.04em;">${p.client || '—'}</span><button class="btn-remove" onclick="removeProject(${i})" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:6px;padding:2px 8px;cursor:pointer;">✕</button></div><div style="background:${cc.rgba};padding:8px 12px;display:flex;justify-content:space-between;align-items:center;"><div><span class="setup-project-name" style="color:#111;">${p.title || p.name}</span>${p.client ? `<div style="font-size:11px;color:#333;margin-top:2px;">${p.estHours ? hoursToHHMM(p.estHours) + ' est.' : ''}</div>` : ''}${((p.prevMs || 0) + p.totalMs) > 0 ? `<div style="font-size:11px;color:#333;margin-top:2px;font-weight:700;">⏱ ${formatMs((p.prevMs || 0) + p.totalMs)}</div>` : ''}</div><div style="font-size:12px;color:#111;font-weight:700;">${p.done ? '✓ הסתיים' : ''}</div></div></div>`;
+    return `<div style="border-radius:16px;overflow:hidden;margin-bottom:10px;box-shadow:0 3px 10px rgba(0,0,0,0.1);">
+      <div style="background:${cc.grad};padding:10px 16px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:16px;font-weight:900;color:#fff;">${p.client || '—'}</span>
+        <button onclick="removeProject(${i})" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:13px;font-weight:700;">✕</button>
+      </div>
+      <div style="background:${cc.rgba.replace(/[\d.]+\)$/, '0.55)')};padding:12px 16px;">
+        <div style="font-size:18px;font-weight:900;color:#000;margin-bottom:6px;">${p.title || p.name}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          ${p.jobPO ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.15);border-radius:6px;padding:2px 8px;">${p.jobPO}</span>` : ''}
+          ${p.jobPrice ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;">₪${Number(p.jobPrice).toLocaleString()}</span>` : ''}
+          ${p.estHours ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;">${hoursToHHMM(p.estHours)}</span>` : ''}
+          ${((p.prevMs || 0) + p.totalMs) > 0 ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;">⏱ ${formatMs((p.prevMs||0)+p.totalMs)}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
   }).join('');
 }
 
@@ -5169,6 +5183,18 @@ function showToast(msg) {
     }
   }
 
+  // Clear any stale queue items from old deployments on load
+  (function nukeStaleQueue() {
+    try {
+      var currentUrl = (typeof SHEETS_URL !== 'undefined') ? SHEETS_URL.split('?')[0] : '';
+      var raw = localStorage.getItem('yb_syncQueue');
+      if (!raw) return;
+      var q = JSON.parse(raw) || [];
+      var fresh = q.filter(function(i){ return currentUrl && i.url && i.url.indexOf(currentUrl) === 0 && (i.attempts||0) < 5; });
+      if (fresh.length !== q.length) localStorage.setItem('yb_syncQueue', JSON.stringify(fresh));
+    } catch(e) {}
+  })();
+
   // ── Inject banner HTML ────────────────────────────────
   function injectBanner() {
     if (document.getElementById('yb-offline-banner')) return;
@@ -5188,7 +5214,13 @@ function showToast(msg) {
 
     // Discard items from old deployments (URL doesn't match current SHEETS_URL)
     var currentUrl = (typeof SHEETS_URL !== 'undefined') ? SHEETS_URL : '';
-    var cleaned = q.filter(function(i) { return !currentUrl || i.url.indexOf(currentUrl) === 0; });
+    var cleaned = q.filter(function(i) {
+      if (!currentUrl) return true;
+      // Only keep items that match the EXACT current URL base
+      return i.url.indexOf(currentUrl.split('?')[0]) === 0;
+    });
+    // Also discard items that have exceeded max attempts
+    cleaned = cleaned.filter(function(i) { return (i.attempts || 0) < MAX_ATTEMPTS; });
     if (cleaned.length !== q.length) {
       saveQueue(cleaned);
       updateOfflineBanner();
