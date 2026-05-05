@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v463</title>
+<title>י.ב אחזקות — v464</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,7 +481,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v463
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v464
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -490,7 +490,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v463 · 02/05/2026
+v464 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -1178,7 +1178,10 @@ SHEET SYNC
       </span>
     </div>
     <div style="height:2px;background:#111;margin:6px 0 8px;flex-shrink:0;"></div>
-    <button class="btn-end-day" onclick="endDay()">End Work Session →</button>
+    <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:8px;">
+      <button onclick="openSetupDrawer()" style="width:100%;padding:16px 14px;background:#f0c020;border:none;border-radius:12px;font-family:Heebo,sans-serif;font-size:16px;font-weight:900;color:#111;letter-spacing:0.5px;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);">Open Toolbox</button>
+      <button class="btn-end-day" onclick="endDay()" style="padding:16px 14px;font-size:16px;border-radius:12px;">End Work Session ←</button>
+    </div>
   </div>
 
   <!-- SCREEN 3: SUMMARY -->
