@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v465</title>
+<title>י.ב אחזקות — v468</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,7 +481,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v465
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v468
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -490,7 +490,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v465 · 02/05/2026
+v468 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -2858,18 +2858,18 @@ function renderProjectBtns() {
           (p.jobPrice ? '<div style="font-size:20px;font-weight:900;color:#000;">₪' + Number(p.jobPrice).toLocaleString() + '</div>' : '') +
         '</div>' +
         (tillNowMs > todayMs ? '<div style="background:rgba(0,0,0,0.12);border-radius:8px;padding:5px 12px;display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:10px;font-weight:900;color:#333;text-transform:uppercase;letter-spacing:0.5px;">Till now</span><span style="font-size:15px;font-weight:900;color:#000;">' + formatMs(tillNowMs) + '</span></div>' : '<div style="margin-bottom:12px;"></div>') +
-        '<div style="display:flex;gap:8px;margin-bottom:12px;">' +
-          '<button onclick="toggleProject('+i+')" style="flex:1;padding:13px 6px;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:' + (p.done?'#aaa':'#000') + ';">' +
+        '<div style="margin-bottom:12px;">' +
+          '<button onclick="toggleProject('+i+')" style="width:100%;padding:18px;border:none;border-radius:12px;font-size:22px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:#f0c020;color:#111;letter-spacing:0.5px;box-shadow:0 4px 12px rgba(240,192,32,0.4);">' +
             (p.done ? '↩ Restore' : (p.active ? '⏸ Pause' : '▶ Start')) + '</button>' +
-          (!p.done ? '<button onclick="toggleDone('+i+')" style="flex:1;padding:13px 6px;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#c62828;">✓ End Project</button>' : '') +
         '</div>' +
         '<div style="border-top:2px solid rgba(0,0,0,0.15);padding-top:10px;">' +
           '<div style="font-size:11px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Notes</div>' +
           notesList +
           '<div style="display:flex;gap:6px;margin-top:8px;">' +
-            '<input id="noteInp-'+i+'" type="text" placeholder="Add note…" style="flex:1;padding:10px 12px;border:2px solid rgba(0,0,0,0.25);border-radius:8px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.5);color:#000;direction:rtl;">' +
-            '<button onclick="saveNote('+i+')" style="padding:10px 18px;background:rgba(0,0,0,0.35);color:#000;border:none;border-radius:8px;font-size:16px;font-weight:900;cursor:pointer;">+</button>' +
+            '<input id="noteInp-'+i+'" type="text" placeholder="Add note…" onkeypress="if(event.key===\'Enter\')saveNote('+i+')" style="flex:1;padding:10px 12px;border:2px solid rgba(0,0,0,0.25);border-radius:8px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.5);color:#000;direction:rtl;">' +
+            '<button onclick="saveNote('+i+')" style="padding:10px 20px;background:#f0c020;color:#111;border:none;border-radius:8px;font-size:18px;font-weight:900;cursor:pointer;flex-shrink:0;">+</button>' +
           '</div>' +
+          (!p.done ? '<button onclick="toggleDone('+i+')" style="width:100%;margin-top:10px;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#c62828;">✓ End Project</button>' : '') +
         '</div>' +
       '</div>' +
     '</div>';
@@ -5131,151 +5131,5 @@ function showToast(msg) {
 }
 </script>
 
-</body>
-</html>
-
-  // ── Queue helpers ─────────────────────────────────────
-  function loadQueue() {
-    try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]'); } catch(e) { return []; }
-  }
-  function saveQueue(q) {
-    try { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); } catch(e) {}
-  }
-  function enqueue(url) {
-    var q = loadQueue();
-    // deduplicate: same URL already pending → skip
-    if (q.find(function(i) { return i.url === url; })) return;
-    q.push({ url: url, attempts: 0, ts: Date.now() });
-    saveQueue(q);
-    updateOfflineBanner();
-  }
-  function dequeue(url) {
-    var q = loadQueue().filter(function(i) { return i.url !== url; });
-    saveQueue(q);
-    updateOfflineBanner();
-  }
-
-  // ── Banner ────────────────────────────────────────────
-  function updateOfflineBanner() {
-    var banner = document.getElementById('yb-offline-banner');
-    if (!banner) return;
-    var q = loadQueue();
-    var online = navigator.onLine;
-    if (!online) {
-      banner.textContent = '📡 Offline — changes will sync when connected';
-      banner.style.display = 'block';
-      banner.style.background = '#c62828';
-    } else if (q.length > 0) {
-      banner.textContent = '🔄 Syncing ' + q.length + ' pending update' + (q.length > 1 ? 's' : '') + '…';
-      banner.style.display = 'block';
-      banner.style.background = '#e65100';
-    } else {
-      banner.style.display = 'none';
-    }
-  }
-
-  // Force clear legacy sync queue keys
-  try { localStorage.removeItem('yb_syncQueue'); localStorage.removeItem('yb_offlineQueue'); localStorage.removeItem('yb_syncPaused'); } catch(e) {}
-  // Force clear legacy sync queue keys
-
-  // ── Inject banner HTML ────────────────────────────────
-  function injectBanner() {
-    if (document.getElementById('yb-offline-banner')) return;
-    var banner = document.createElement('div');
-    banner.id = 'yb-offline-banner';
-    banner.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;z-index:9999998;' +
-      'background:#c62828;color:#fff;font-size:12px;font-weight:700;text-align:center;' +
-      'padding:6px 12px;font-family:Heebo,sans-serif;letter-spacing:0.3px;';
-    document.body.insertBefore(banner, document.body.firstChild);
-  }
-
-  // ── Retry queue ───────────────────────────────────────
-  function retryQueue() {
-    if (!navigator.onLine) { updateOfflineBanner(); return; }
-    var q = loadQueue();
-    if (q.length === 0) { updateOfflineBanner(); return; }
-
-    // Discard items from old deployments (URL doesn't match current SHEETS_URL)
-    var currentUrl = (typeof SHEETS_URL !== 'undefined') ? SHEETS_URL : '';
-    var cleaned = q.filter(function(i) {
-      if (!currentUrl) return true;
-      // Only keep items that match the EXACT current URL base
-      return i.url.indexOf(currentUrl.split('?')[0]) === 0;
-    });
-    // Also discard items that have exceeded max attempts
-    cleaned = cleaned.filter(function(i) { return (i.attempts || 0) < MAX_ATTEMPTS; });
-    if (cleaned.length !== q.length) {
-      saveQueue(cleaned);
-      updateOfflineBanner();
-      if (cleaned.length === 0) return;
-      q = cleaned;
-    }
-
-    var item = q[0];
-    item.attempts++;
-    if (item.attempts > MAX_ATTEMPTS) { dequeue(item.url); return; }
-    saveQueue(q);
-    window._ybOrigFetch(item.url)
-      .then(function(r) {
-        if (r.ok || r.status === 200) {
-          dequeue(item.url);
-          updateOfflineBanner();
-          // if more items remain, retry next immediately
-          if (loadQueue().length > 0) setTimeout(retryQueue, 1000);
-        } else {
-          updateOfflineBanner();
-        }
-      })
-      .catch(function() { updateOfflineBanner(); });
-  }
-
-  // ── Patch fetch ───────────────────────────────────────
-  // Save original fetch before the loading-spinner patch runs again
-  // Use _ybOrigFetch as the true raw fetch
-  window._ybOrigFetch = window._ybOrigFetch || window.fetch;
-
-  var _patchedFetch = window.fetch; // the version already wrapped by loading spinner
-  window.fetch = function(url, opts) {
-    // Only queue SHEETS_URL calls (not nominatim/Drive/Sheets API calls)
-    var sheetsUrl = (typeof SHEETS_URL !== 'undefined') ? SHEETS_URL : '';
-    var isSheetCall = sheetsUrl && typeof url === 'string' && url.indexOf(sheetsUrl) === 0;
-
-    if (!isSheetCall) return _patchedFetch.apply(this, arguments);
-
-    // Try live first — use raw fetch to avoid re-queuing on failure
-    return window._ybOrigFetch.apply(window, arguments)
-      .then(function(r) {
-        return r;
-      })
-      .catch(function(err) {
-        // Network failure → queue for retry (unless user paused sync)
-        if (isSheetCall && !localStorage.getItem('yb_syncPaused')) {
-          enqueue(url);
-          updateOfflineBanner();
-          return new Response('QUEUED', { status: 200 });
-        }
-        throw err;
-      });
-  };
-
-  // ── Online/offline events ─────────────────────────────
-  window.addEventListener('online',  function() { updateOfflineBanner(); retryQueue(); });
-  window.addEventListener('offline', function() { updateOfflineBanner(); });
-
-  // ── Periodic retry ────────────────────────────────────
-  setInterval(retryQueue, RETRY_MS);
-
-  // ── Init ─────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', function() {
-    injectBanner();
-    updateOfflineBanner();
-    // Retry any leftover queue from previous session
-    if (loadQueue().length > 0) setTimeout(retryQueue, 3000);
-  });
-  // Also inject immediately if DOM already ready
-  if (document.readyState !== 'loading') { injectBanner(); updateOfflineBanner(); }
-
-})();
-</script>
 </body>
 </html>
