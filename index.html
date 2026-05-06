@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v474</title>
+<title>י.ב אחזקות — v481</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -161,7 +161,7 @@ animation: blink 1.2s infinite;
 
 /* Project toggle buttons */
 .projects-label { font-size: 11px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
-.project-btns { display: flex; flex-direction: column; gap: 0; margin-bottom: 0; }
+.project-btns { display: flex; flex-direction: column; gap: 0; margin-bottom: 0; padding-bottom: 180px; }
 .project-divider { height: 2px; background: #111; margin: 6px 0; flex-shrink: 0; }
 
 .project-card {
@@ -481,7 +481,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v474
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v481
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -490,7 +490,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v474 · 02/05/2026
+v481 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -1151,7 +1151,6 @@ SHEET SYNC
     <div id="voiceFeedback" style="display:none"></div>
     <div class="projects-label">Projects — tap to start/stop</div>
     <div class="project-btns" id="projectBtns"></div>
-    <div style="height:2px;background:#111;margin:2px 0;flex-shrink:0;"></div>
     <div class="arrangement-row" id="preTimerDayRow" style="display:none;cursor:pointer;" onclick="openPreTimerOverlay()">
       <span class="arrangement-label" style="color:#00695c;">⏱ <span id="preTimerDayName">Pre-Project</span></span>
       <span style="display:flex;align-items:center;gap:8px;">
@@ -1159,9 +1158,10 @@ SHEET SYNC
         <span id="preTimerDayDot" style="width:7px;height:7px;border-radius:50%;background:#00695c;display:inline-block;animation:blink 1.2s infinite;"></span>
       </span>
     </div>
-    <div class="arrangement-row">
-      <span class="arrangement-label">⏳ Setup Time</span>
-      <span class="arrangement-time" id="arrangementTime">00:00:00</span>
+    <!-- Setup Time card -->
+    <div style="background:#fff;border-radius:14px;padding:16px 18px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:18px;font-weight:700;color:#555;">⏳ Setup Time</span>
+      <span style="font-size:32px;font-weight:900;color:#111;letter-spacing:1px;" id="arrangementTime">00:00:00</span>
     </div>
     <div class="arrangement-row" id="drivingRow" style="display:none;">
       <span class="arrangement-label" style="color:#1565c0;">🚗 Driving</span>
@@ -1170,8 +1170,7 @@ SHEET SYNC
         <button id="drivingOverrideBtn" onclick="toggleDrivingOverride()" style="font-size:10px;padding:2px 7px;border:1px solid #1565c0;border-radius:8px;background:transparent;color:#1565c0;cursor:pointer;">⏸</button>
       </span>
     </div>
-    <div style="height:2px;background:#111;margin:6px 0 8px;flex-shrink:0;"></div>
-    <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:8px;">
+    <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:8px;padding-top:4px;">
       <button onclick="openSetupDrawer()" style="width:100%;padding:16px 14px;background:#f0c020;border:none;border-radius:12px;font-family:Heebo,sans-serif;font-size:16px;font-weight:900;color:#111;letter-spacing:0.5px;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);">Open Toolbox</button>
       <button onclick="endDay()" style="width:100%;padding:16px 14px;background:#f0c020;border:none;border-radius:12px;font-family:Heebo,sans-serif;font-size:16px;font-weight:900;color:#111;letter-spacing:0.5px;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);">End Work Session ←</button>
     </div>
@@ -2822,6 +2821,17 @@ function renderProjectBtns() {
     var cardOpacity = p.done ? '0.5' : (p.active ? '1' : '0.45');
     var displayName = p.title || p.name;
     var po = p.jobPO || '';
+    // If PO missing, try to load from getJobDetails
+    if (!po && p.jobId && p.jobClient && SHEETS_URL) {
+      (function(idx, jid, jclient) {
+        fetch(SHEETS_URL + '?action=getJobDetails&jobId=' + encodeURIComponent(jid) + '&client=' + encodeURIComponent(jclient))
+          .then(function(r){ return r.json(); })
+          .then(function(d) {
+            if (d.po) { projects[idx].jobPO = d.po; saveState(); renderProjectBtns(); }
+            if (d.price) { projects[idx].jobPrice = parseFloat(d.price)||0; saveState(); }
+          }).catch(function(){});
+      })(i, p.jobId, p.jobClient || p.client);
+    }
 
     // Notes
     var notes = p.notes || [];
@@ -2834,7 +2844,7 @@ function renderProjectBtns() {
       notesList = '<div style="font-size:13px;font-weight:700;color:rgba(0,0,0,0.4);padding:4px 0 6px;">No notes yet</div>';
     }
 
-    var cardStyle = 'border-radius:16px;overflow:hidden;margin-bottom:12px;box-shadow:0 3px 10px rgba(0,0,0,0.15);position:relative;';
+    var cardStyle = 'border-radius:16px;overflow:hidden;margin-bottom:12px;box-shadow:0 3px 10px rgba(0,0,0,0.15);position:relative;' + (p.done ? 'filter:grayscale(100%);opacity:0.4;' : '');
     var fadeOverlay = (!p.active && !p.done) ? '<div style="position:absolute;inset:0;background:rgba(255,255,255,0.55);z-index:1;pointer-events:none;border-radius:16px;"></div>' : '';
 
     html += '<div style="' + cardStyle + '">' + fadeOverlay +
@@ -2848,6 +2858,18 @@ function renderProjectBtns() {
       '</div>' +
       // Body
       '<div style="background:' + bodyBg + ';padding:14px 16px;">' +
+        // Est chips
+        (function() {
+          var actualHrs = tillNowMs / 3600000;
+          var estHrs = p.estHours || 0;
+          var over = estHrs > 0 && actualHrs > estHrs;
+          var chips = '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">';
+          if (p.jobPrice) chips += '<div style="background:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:700;color:#111;box-shadow:0 1px 4px rgba(0,0,0,0.1);"><span style="font-size:9px;font-weight:600;color:#888;display:block;text-transform:uppercase;letter-spacing:0.3px;">Est. Price</span>₪' + Number(p.jobPrice).toLocaleString() + '</div>';
+          if (estHrs) chips += '<div style="background:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:700;color:#111;box-shadow:0 1px 4px rgba(0,0,0,0.1);"><span style="font-size:9px;font-weight:600;color:#888;display:block;text-transform:uppercase;letter-spacing:0.3px;">Est. Hours</span>' + hoursToHHMM(estHrs) + '</div>';
+          chips += '<div style="background:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:' + (over?'900':'700') + ';color:' + (over?'#c62828':'#111') + ';box-shadow:0 1px 4px rgba(0,0,0,0.1);' + (over?'border:3px solid #c62828;':'') + '"><span style="font-size:9px;font-weight:' + (over?'900':'600') + ';color:' + (over?'#c62828':'#888') + ';display:block;text-transform:uppercase;letter-spacing:0.3px;">Actual' + (over?' ⚠️':'') + '</span>' + formatMs(tillNowMs) + '</div>';
+          chips += '</div>';
+          return chips;
+        })() +
         '<div style="font-size:32px;font-weight:900;color:#000;line-height:1.1;margin-bottom:10px;">' + displayName + (p.done ? ' ✓' : '') + '</div>' +
         '<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px;">' +
           '<div style="font-size:36px;font-weight:700;letter-spacing:2px;color:#000;" id="ptime-'+i+'">' + formatMs(todayMs) + '</div>' +
@@ -2855,15 +2877,15 @@ function renderProjectBtns() {
         '</div>' +
         (tillNowMs > todayMs ? '<div style="background:rgba(0,0,0,0.12);border-radius:8px;padding:5px 12px;display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:10px;font-weight:900;color:#333;text-transform:uppercase;letter-spacing:0.5px;">Till now</span><span style="font-size:15px;font-weight:900;color:#000;">' + formatMs(tillNowMs) + '</span></div>' : '<div style="margin-bottom:12px;"></div>') +
         '<div style="margin-bottom:12px;">' +
-          '<button onclick="toggleProject('+i+')" style="width:100%;padding:18px;border:none;border-radius:12px;font-size:22px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:' + (cc.solid||'#333') + ';color:#fff;box-shadow:0 4px 14px rgba(0,0,0,0.25);">' +
+          '<button onclick="toggleProject('+i+')" style="width:100%;padding:18px;border:none;border-radius:12px;font-size:22px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:' + (cc.solid||'#333') + ';color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.25);position:relative;z-index:2;">' +
             (p.done ? '↩ Restore' : (p.active ? '⏸ Pause' : '▶ Start')) + '</button>' +
         '</div>' +
         '<div style="border-top:2px solid rgba(0,0,0,0.15);padding-top:10px;">' +
           '<div style="font-size:11px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Notes</div>' +
           notesList +
           '<div style="display:flex;gap:6px;margin-top:8px;">' +
-            '<input id="noteInp-'+i+'" type="text" placeholder="Add note…" onkeypress="if(event.key===\'Enter\')saveNote('+i+')" style="flex:1;padding:10px 12px;border:2px solid rgba(0,0,0,0.25);border-radius:8px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.5);color:#000;direction:rtl;">' +
-            '<button onclick="saveNote('+i+')" style="padding:10px 20px;background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;font-size:18px;font-weight:900;cursor:pointer;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,0.2);">+</button>' +
+            '<input id="noteInp-'+i+'" type="text" placeholder="Add note…" onkeypress="if(event.key===\'Enter\')saveNote('+i+')" style="flex:1;padding:10px 12px;border:2px solid rgba(0,0,0,0.25);border-radius:8px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.5);color:#000;direction:rtl;position:relative;z-index:2;">' +
+            '<button onclick="saveNote('+i+')" style="padding:10px 20px;background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;font-size:18px;font-weight:900;cursor:pointer;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,0.2);position:relative;z-index:2;">+</button>' +
           '</div>' +
           (!p.done ? '<button onclick="toggleDone('+i+')" style="width:100%;margin-top:10px;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#c62828;">✓ End Project</button>' : '') +
         '</div>' +
@@ -2920,7 +2942,8 @@ function saveNote(i) {
   var hours = String(nowTs.getHours()).padStart(2, '0'); var mins = String(nowTs.getMinutes()).padStart(2, '0');
   var tsStr = day + '.' + month + ' - ' + hours + ':' + mins;
   projects[i].notes.push(noteNum + '. (' + tsStr + ') ' + noteText);
-  projects[i].noteOpen = false; saveState(); renderProjectBtns();
+  el.value = ''; saveState(); renderProjectBtns();
+  setTimeout(function(){ var inp = document.getElementById('noteInp-'+i); if(inp) inp.focus(); }, 50);
   var jobId = projects[i].jobId;
   if (jobId) addNoteToSheet(projects[i], noteNum + '. (' + tsStr + ') ' + noteText);
   showToast('✓ Note added');
