@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v471</title>
+<title>י.ב אחזקות — v473</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,7 +481,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v471
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v473
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -490,7 +490,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v471 · 02/05/2026
+v473 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -2834,7 +2834,10 @@ function renderProjectBtns() {
       notesList = '<div style="font-size:13px;font-weight:700;color:rgba(0,0,0,0.4);padding:4px 0 6px;">No notes yet</div>';
     }
 
-    html += '<div style="border-radius:16px;overflow:hidden;margin-bottom:12px;box-shadow:0 3px 10px rgba(0,0,0,0.15);opacity:' + cardOpacity + ';">' +
+    var cardStyle = 'border-radius:16px;overflow:hidden;margin-bottom:12px;box-shadow:0 3px 10px rgba(0,0,0,0.15);position:relative;';
+    var fadeOverlay = (!p.active && !p.done) ? '<div style="position:absolute;inset:0;background:rgba(255,255,255,0.55);z-index:1;pointer-events:none;border-radius:16px;"></div>' : '';
+
+    html += '<div style="' + cardStyle + '">' + fadeOverlay +
       // Header
       '<div style="background:' + headerBg + ';padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">' +
         '<div style="display:flex;align-items:center;gap:10px;">' +
@@ -2860,7 +2863,7 @@ function renderProjectBtns() {
           notesList +
           '<div style="display:flex;gap:6px;margin-top:8px;">' +
             '<input id="noteInp-'+i+'" type="text" placeholder="Add note…" onkeypress="if(event.key===\'Enter\')saveNote('+i+')" style="flex:1;padding:10px 12px;border:2px solid rgba(0,0,0,0.25);border-radius:8px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.5);color:#000;direction:rtl;">' +
-            '<button onclick="saveNote('+i+')" style="padding:10px 20px;background:#f0c020;color:#111;border:none;border-radius:8px;font-size:18px;font-weight:900;cursor:pointer;flex-shrink:0;">+</button>' +
+            '<button onclick="saveNote('+i+')" style="padding:10px 20px;background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;font-size:18px;font-weight:900;cursor:pointer;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,0.2);">+</button>' +
           '</div>' +
           (!p.done ? '<button onclick="toggleDone('+i+')" style="width:100%;margin-top:10px;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#c62828;">✓ End Project</button>' : '') +
         '</div>' +
