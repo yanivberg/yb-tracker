@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v468</title>
+<title>י.ב אחזקות — v471</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,7 +481,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v468
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v471
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -490,7 +490,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v468 · 02/05/2026
+v471 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -1152,13 +1152,6 @@ SHEET SYNC
     <div class="projects-label">Projects — tap to start/stop</div>
     <div class="project-btns" id="projectBtns"></div>
     <div style="height:2px;background:#111;margin:2px 0;flex-shrink:0;"></div>
-    <div style="display:flex;justify-content:center;margin:6px 0 10px;">
-      <button id="btnAddBrowseDay" onclick="openSetupDrawer()" style="width:120px;height:120px;border-radius:18px;border:2px dashed #aaa;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-family:Heebo,sans-serif;color:#777;">
-        <span id="btnAddBrowseDayIcon" style="font-size:30px;color:#777;">☰</span>
-        <span id="btnAddBrowseDayText" style="font-size:11px;font-weight:700;color:#777;text-align:center;line-height:1.3;">Add / Browse<br>Projects</span>
-      </button>
-    </div>
-    <div style="height:2px;background:#111;margin:2px 0 6px;flex-shrink:0;"></div>
     <div class="arrangement-row" id="preTimerDayRow" style="display:none;cursor:pointer;" onclick="openPreTimerOverlay()">
       <span class="arrangement-label" style="color:#00695c;">⏱ <span id="preTimerDayName">Pre-Project</span></span>
       <span style="display:flex;align-items:center;gap:8px;">
@@ -1180,7 +1173,7 @@ SHEET SYNC
     <div style="height:2px;background:#111;margin:6px 0 8px;flex-shrink:0;"></div>
     <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:8px;">
       <button onclick="openSetupDrawer()" style="width:100%;padding:16px 14px;background:#f0c020;border:none;border-radius:12px;font-family:Heebo,sans-serif;font-size:16px;font-weight:900;color:#111;letter-spacing:0.5px;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);">Open Toolbox</button>
-      <button class="btn-end-day" onclick="endDay()" style="padding:16px 14px;font-size:16px;border-radius:12px;">End Work Session ←</button>
+      <button onclick="endDay()" style="width:100%;padding:16px 14px;background:#f0c020;border:none;border-radius:12px;font-family:Heebo,sans-serif;font-size:16px;font-weight:900;color:#111;letter-spacing:0.5px;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);">End Work Session ←</button>
     </div>
   </div>
 
@@ -1961,7 +1954,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxpxS6l3UbI_sdWHYFU1yIFD1DU1KSi6ueEXBJ2lG7e3r-J038Iv78tJuFj2Z8p4fw31w/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyFBONu4gMpQQje6SQ1sIU3vO4WEe04u2pIE_VAB4l5c2bV0vegOo_NbQnnMAPMuTQ/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2859,7 +2852,7 @@ function renderProjectBtns() {
         '</div>' +
         (tillNowMs > todayMs ? '<div style="background:rgba(0,0,0,0.12);border-radius:8px;padding:5px 12px;display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:10px;font-weight:900;color:#333;text-transform:uppercase;letter-spacing:0.5px;">Till now</span><span style="font-size:15px;font-weight:900;color:#000;">' + formatMs(tillNowMs) + '</span></div>' : '<div style="margin-bottom:12px;"></div>') +
         '<div style="margin-bottom:12px;">' +
-          '<button onclick="toggleProject('+i+')" style="width:100%;padding:18px;border:none;border-radius:12px;font-size:22px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:#f0c020;color:#111;letter-spacing:0.5px;box-shadow:0 4px 12px rgba(240,192,32,0.4);">' +
+          '<button onclick="toggleProject('+i+')" style="width:100%;padding:18px;border:none;border-radius:12px;font-size:22px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:' + (cc.solid||'#333') + ';color:#fff;box-shadow:0 4px 14px rgba(0,0,0,0.25);">' +
             (p.done ? '↩ Restore' : (p.active ? '⏸ Pause' : '▶ Start')) + '</button>' +
         '</div>' +
         '<div style="border-top:2px solid rgba(0,0,0,0.15);padding-top:10px;">' +
