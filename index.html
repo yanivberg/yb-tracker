@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v482</title>
+<title>י.ב אחזקות — v485</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,7 +481,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v482
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v485
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -490,7 +490,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v482 · 02/05/2026
+v485 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -1953,7 +1953,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwdWbaBD5bpc0GUTyOTm9RIV_6tCxQ26OcZMAPw-Y-v5XnmbEZyqaAhMZVz_X0RVC43CQ/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxp23qnCkJoBhPVbhzZ7peMW6GjYaBp4bYVulo81UPgeuyPxocBiMKpLTxlvlXKbb5Ztw/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2763,13 +2763,14 @@ function tick() {
   if (drivingEl) drivingEl.textContent = formatMs(dispDriving);
   var drivingRow = document.getElementById('drivingRow');
   if (drivingRow) drivingRow.style.display = (dispDriving > 0 || drivingStart) ? 'flex' : 'none';
-  const anyEditing = projects.some(function(p) { return p.editOpen || p.noteOpen; });
-  if (anyEditing) {
+  // Don't re-render if user is typing in a note input
+  var focusedEl = document.activeElement;
+  var isTypingNote = focusedEl && focusedEl.id && focusedEl.id.indexOf('noteInp-') === 0;
+  if (isTypingNote) {
     for (var i = 0; i < projects.length; i++) {
       var p = projects[i]; var ms = p.totalMs;
       if (p.active && p.activeStart) ms += now - p.activeStart;
       var el = document.getElementById('ptime-' + i); if (el) el.textContent = formatMs(ms + (p.prevMs || 0));
-      var totalEl = document.getElementById('ptotal-' + i); if (totalEl && p.prevMs > 0) totalEl.textContent = 'Today: ' + formatMs(ms);
     }
   } else { renderProjectBtns(); }
 }
@@ -3316,9 +3317,23 @@ function newDay() {
   localStorage.removeItem('yb_dayEndTime');
   localStorage.removeItem('yb_arrangementStart');
   localStorage.setItem('yb_dayEnded', 'false');
-  projects = projects.map(function(p) {
+
+  // Save done projects to recent completed list
+  var doneProjects = projects.filter(function(p) { return p.done; });
+  if (doneProjects.length > 0) {
+    var recent = JSON.parse(localStorage.getItem('yb_recentCompleted') || '[]');
+    var today = new Date().toLocaleDateString();
+    doneProjects.forEach(function(p) {
+      recent.unshift({ name: p.title || p.name, client: p.client, jobId: p.jobId, totalMs: (p.prevMs||0) + p.totalMs, date: today });
+    });
+    localStorage.setItem('yb_recentCompleted', JSON.stringify(recent.slice(0, 50)));
+  }
+
+  // Keep only non-done projects, reset timers
+  projects = projects.filter(function(p) { return !p.done; }).map(function(p) {
     return Object.assign({}, p, { active: false, activeStart: null, locationSaved: false, jobStarted: false });
   });
+
   saveState(); showScreen('setup'); renderSetup();
 }
 
