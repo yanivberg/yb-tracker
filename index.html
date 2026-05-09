@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v495</title>
+<title>י.ב אחזקות — v497</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,7 +481,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v495
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v497
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxVj2Ny…exec (v84)
@@ -490,7 +490,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v495 · 09/05/2026
+v497 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1125,20 +1125,21 @@ SHEET SYNC
 
   <!-- SCREEN 1: SETUP -->
   <div class="screen active" id="screen-setup" style="padding:0 16px 0;background:#fff;">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 18px 8px;border-bottom:1px solid #e0e0e0;margin-bottom:12px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button onclick="document.getElementById('appInfoOverlay').style.display='flex'" style="background:none;border:none;color:#aaa;font-size:16px;cursor:pointer;padding:0;line-height:1;">ℹ</button>
-        <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
+    <div style="position:sticky;top:0;z-index:50;background:#fff;padding-bottom:10px;border-bottom:1px solid #e0e0e0;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 2px 8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button onclick="document.getElementById('appInfoOverlay').style.display='flex'" style="background:none;border:none;color:#aaa;font-size:16px;cursor:pointer;padding:0;line-height:1;">ℹ</button>
+          <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v497</span>
+          <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
+          <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
-        <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
-      </div>
-    </div>
-    <div style="position:sticky;top:0;z-index:50;background:#fff;padding:8px 0 10px;">
-      <button onclick="openSetupDrawer()" ontouchstart="this.style.transform='scale(0.97)'" ontouchend="this.style.transform='scale(1)'" style="width:100%;padding:18px 20px;background:#f0c020;color:#111;border:none;border-radius:14px;font-family:'Heebo',sans-serif;cursor:pointer;transition:transform 0.15s;box-shadow:0 4px 14px rgba(240,192,32,0.45);-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:space-between;">
-        <span style="font-size:26px;font-weight:900;color:#111;letter-spacing:0.5px;">Today's Projects</span>
-        <span style="width:36px;height:36px;background:rgba(0,0,0,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#111;line-height:1;">+</span>
+      <button onclick="openSetupDrawer()" ontouchstart="this.style.transform='scale(0.97)'" ontouchend="this.style.transform='scale(1)'" style="width:100%;padding:18px 20px;background:#f0c020;color:#111;border:none;border-radius:14px;font-family:'Heebo',sans-serif;cursor:pointer;transition:transform 0.15s;box-shadow:0 4px 14px rgba(240,192,32,0.45);-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:space-between;box-sizing:border-box;">
+        <span style="font-size:26px;font-weight:900;color:#111;letter-spacing:0.5px;pointer-events:none;flex:1;text-align:left;">Today's Projects</span>
+        <span style="width:36px;height:36px;background:rgba(0,0,0,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#111;line-height:1;pointer-events:none;flex-shrink:0;margin-left:auto;">+</span>
       </button>
     </div>
     <div class="project-list-setup" id="setupList"></div>
@@ -3360,10 +3361,11 @@ function renderSetup() {
   var d = new Date();
   var hebrewDays = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
   var hebrewMonths = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
-  var el = document.getElementById('heroDay'); var el2 = document.getElementById('heroDate');
+  var el = document.getElementById('heroDay'); var el2 = document.getElementById('heroDate'); var elV = document.getElementById('heroVersion');
   var engDays2 = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   if (el) el.textContent = engDays2[d.getDay()];
   if (el2) el2.textContent = d.getDate() + '.' + (d.getMonth()+1) + '.' + String(d.getFullYear()).slice(2);
+  if (elV) { var m = document.title.match(/v(\d+)/); if (m) elV.textContent = 'v' + m[1]; }
   const list = document.getElementById('setupList');
   const btn = document.getElementById('btnStartDay');
   var activeProjects = projects.filter(function(p) { return !p.done; });
