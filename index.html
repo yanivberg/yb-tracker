@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v485</title>
+<title>י.ב אחזקות — v486</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,7 +481,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v485
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v486
 Deployed: 02/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwzLMX...exec (v73)
@@ -490,7 +490,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v485 · 02/05/2026
+v486 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -2885,7 +2885,7 @@ function renderProjectBtns() {
           '<div style="font-size:11px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Notes</div>' +
           notesList +
           '<div style="display:flex;gap:6px;margin-top:8px;">' +
-            '<input id="noteInp-'+i+'" type="text" placeholder="Add note…" onkeypress="if(event.key===\'Enter\')saveNote('+i+')" style="flex:1;padding:10px 12px;border:2px solid rgba(0,0,0,0.25);border-radius:8px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.5);color:#000;direction:rtl;position:relative;z-index:2;">' +
+            '<input id="noteInp-'+i+'" type="text" placeholder="Add note…" oninput="projects['+i+']._pendingNote=this.value" onkeypress="if(event.key===\'Enter\')saveNote('+i+')" style="flex:1;padding:10px 12px;border:2px solid rgba(0,0,0,0.25);border-radius:8px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.5);color:#000;direction:rtl;position:relative;z-index:2;">' +
             '<button onclick="saveNote('+i+')" style="padding:10px 20px;background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;font-size:18px;font-weight:900;cursor:pointer;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,0.2);position:relative;z-index:2;">+</button>' +
           '</div>' +
           (!p.done ? '<button onclick="toggleDone('+i+')" style="width:100%;margin-top:10px;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#c62828;">✓ End Project</button>' : '') +
@@ -2933,9 +2933,10 @@ function showProjectInfo(i) {
 
 function saveNote(i) {
   const el = document.getElementById('noteInp-'+i);
-  if (!el || !el.value.trim()) return;
+  var noteText = (el && el.value.trim()) || (projects[i]._pendingNote && projects[i]._pendingNote.trim()) || '';
+  projects[i]._pendingNote = '';
+  if (!noteText) return;
   if (!projects[i].notes) projects[i].notes = [];
-  var noteText = el.value.trim();
   var prevCount = projects[i].prevNoteCount || 0;
   var sessionNotes = projects[i].notes.filter(function(n) { var m = n.match(/^(\d+)\./); return m && parseInt(m[1]) > prevCount; });
   var noteNum = prevCount + sessionNotes.length + 1;
