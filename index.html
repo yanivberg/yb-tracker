@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v486</title>
+<title>י.ב אחזקות — v488</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,16 +481,27 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v486
-Deployed: 02/05/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v488
+Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbwzLMX...exec (v73)
+Apps Script: AKfycbxp23qn…exec (v85)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v486 · 02/05/2026
+v488 · 09/05/2026
+• Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
+
+v487 · 09/05/2026
+• Fix: PAL YAM (and all clients) now visible in Add Project dropdown
+• Fix: Client list always re-fetches fresh on modal open
+
+v486 · 09/05/2026
+• Fix: Note save race condition on iOS (keyboard dismiss)
+• Cache note text on input — survives DOM rebuild
+
+v485 · 02/05/2026
 • Fix: Notes/Internal notes fields now correctly sent to Caspit (Comments + Details)
 • Fix: Removed duplicate notes fields from quote form (shared footer)
 
@@ -2453,7 +2464,7 @@ function openNewClientModal() {
   document.getElementById('newClientOverlay').style.display = 'flex';
   setTimeout(function() { document.getElementById('newClientName').focus(); }, 100);
 }
-function previewClientPrefix() { var name = document.getElementById('newClientName').value.trim(); if (!name) { document.getElementById('clientPrefixPreview').textContent = ''; return; } var prefix = name.replace(/[^a-zA-Z\u0590-\u05FF]/g, '').substring(0, 2).toUpperCase(); if (prefix.length < 2) prefix = (name.replace(/\s/g,'').substring(0,2)).toUpperCase(); document.getElementById('clientPrefixPreview').textContent = 'Serial ID: ' + prefix + '0001, ' + prefix + '0002…'; }
+function previewClientPrefix() { var name = document.getElementById('newClientName').value.trim(); if (!name) { document.getElementById('clientPrefixPreview').textContent = ''; return; } var prefix = name.replace(/\s+/g,'').substring(0,3).toUpperCase(); document.getElementById('clientPrefixPreview').textContent = 'Serial ID: ' + prefix + '001, ' + prefix + '002…'; }
 function createClientTab(clientName) {
   if (!clientName) return;
   if (!confirm('יצירת טאב חדש לכספית ולגיליון עבור: "' + clientName + '"?\n\nפעולה זו תיצור גיליון חדש ותוסיף ללקוחות.')) return;
@@ -2515,9 +2526,10 @@ function submitNewClient() {
 function openAddJobModal() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
   var sel = document.getElementById('addJobClient');
-  if (sel.options.length <= 1) {
-    fetch(SHEETS_URL + '?action=getClients').then(function(r) { return r.json(); }).then(function(clients) { var saved = sel.value; sel.innerHTML = '<option value="">Select client…</option>'; clients.forEach(function(c) { var opt = document.createElement('option'); opt.value = c; opt.textContent = c; sel.appendChild(opt); }); if (saved) sel.value = saved; }).catch(function() { var saved = sel.value; sel.innerHTML = '<option value="">Select client…</option>'; ['BILLINSKY','GOLMAT','ROLLMAT','MODUL PLADA','Y.SHAY','SONIC BEAT LTD'].forEach(function(c) { var opt = document.createElement('option'); opt.value = c; opt.textContent = c; sel.appendChild(opt); }); if (saved) sel.value = saved; });
-  }
+  var _fallbackClients = ['BILLINSKY','GOLMAT','ROLLMAT','MODUL PLADA','Y.SHAY','SONIC BEAT LTD','PAL YAM'];
+  var _savedSel = sel.value;
+  sel.innerHTML = '<option value="">⏳ טוען לקוחות…</option>';
+  fetch(SHEETS_URL + '?action=getClients').then(function(r) { return r.json(); }).then(function(clients) { sel.innerHTML = '<option value="">Select client…</option>'; clients.forEach(function(c) { var opt = document.createElement('option'); opt.value = c; opt.textContent = c; sel.appendChild(opt); }); if (_savedSel) sel.value = _savedSel; }).catch(function() { sel.innerHTML = '<option value="">Select client…</option>'; _fallbackClients.forEach(function(c) { var opt = document.createElement('option'); opt.value = c; opt.textContent = c; sel.appendChild(opt); }); if (_savedSel) sel.value = _savedSel; });
   document.getElementById('addJobDesc').value = '';
   document.getElementById('addJobStatus').value = 'ממתין להצעה';
   document.getElementById('addJobCategory').value = '';
