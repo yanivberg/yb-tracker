@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v510</title>
+<title>י.ב אחזקות — v511</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,7 +481,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v510
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v511
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbzsCUMQ…exec (v86)
@@ -490,7 +490,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v510 · 09/05/2026
+v511 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1132,7 +1132,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v510</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v511</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -4306,7 +4306,7 @@ function _renderCaspitInvoiceListTab() {
           '<div style="font-size:14px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (job.desc||'—') + '</div>' +
           (income || gp ? '<div style="font-size:12px;color:#2e7d32;margin-top:2px;">' + [income,gp].filter(Boolean).join(' · ') + '</div>' : '') +
         '</div>' +
-        '<button onclick="markInvoiceIssued('' + job.id.replace(/'/g,"\'") + '','' + client.replace(/'/g,"\'") + '')" style="background:#1b5e20;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;flex-shrink:0;white-space:nowrap;">✓ יצאה חש</button>' +
+        '<button onclick="markInvoiceIssued(this.dataset.id,this.dataset.client)" data-id="' + job.id.replace(/"/g,'&quot;') + '" data-client="' + client.replace(/"/g,'&quot;') + '" style="background:#1b5e20;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;flex-shrink:0;white-space:nowrap;">✓ יצאה חש</button>' +
       '</div>';
     });
   });
