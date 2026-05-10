@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v507</title>
+<title>י.ב אחזקות — v510</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,16 +481,16 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v507
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v510
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbw_g7X-…exec (v85)
+Apps Script: AKfycbzsCUMQ…exec (v86)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v507 · 09/05/2026
+v510 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1132,7 +1132,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v507</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v510</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1299,6 +1299,7 @@ SHEET SYNC
       <div style="display:flex;gap:0;border-bottom:2px solid #eee;">
         <button onclick="switchCaspitTab('invoice')" id="ctab-invoice" style="flex:1;padding:10px 4px;border:none;background:none;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;color:#0d47a1;border-bottom:3px solid #0d47a1;margin-bottom:-2px;">Invoice / Receipt</button>
         <button onclick="switchCaspitTab('quote')" id="ctab-quote" style="flex:1;padding:10px 4px;border:none;background:none;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;color:#aaa;border-bottom:3px solid transparent;margin-bottom:-2px;">New Quotation</button>
+        <button onclick="switchCaspitTab('invoicelist')" id="ctab-invoicelist" style="flex:1;padding:10px 4px;border:none;background:none;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;color:#aaa;border-bottom:3px solid transparent;margin-bottom:-2px;">להוציא חש</button>
       </div>
     </div>
     <div id="caspitBody" style="overflow-y:auto;flex:1;padding:16px 20px 8px;direction:rtl;"></div>
@@ -1575,6 +1576,10 @@ SHEET SYNC
     <div style="margin-bottom:20px;">
       <div style="font-size:13px;color:#888;margin-bottom:6px;">Purchase Order #</div>
       <input id="addJobPO" type="text" placeholder="מספר הזמנת רכש..." maxlength="50" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;" oninput="updateAddJobBtn()">
+    </div>
+    <div style="margin-bottom:20px;">
+      <div style="font-size:13px;color:#888;margin-bottom:6px;">Y.B. Quotation # <span style="font-size:11px;color:#aaa;">מס׳ הצעת מחיר</span></div>
+      <input id="addJobQuote" type="text" placeholder="01/900..." maxlength="50" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;">
     </div>
     <div id="addJobStatusMsg" style="display:none;font-size:12px;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-family:Heebo,sans-serif;direction:rtl;"></div>
     <button id="addJobSubmitBtn" onclick="submitAddJob()" style="width:100%;padding:14px;background:#111;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">✓ הוסף לגיליון וליום</button>
@@ -1967,7 +1972,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw_g7X-Ics4T4AS6as2J0Z4Kh8KaLF-hBM3QmH95_gkfMSiGa18xrWPJ70utN6WFt-txA/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzsCUMQ8xq7WKNw0R5WSGjJjr3RkdbgmGvnIh1TLIJKWYD8btmT7djpTPwQcdSHQExNGw/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2619,7 +2624,7 @@ function calcAddJobIncome() {
 
 function updateAddJobBtn() { var category = document.getElementById('addJobCategory').value; var price = document.getElementById('addJobPrice').value; var qty = document.getElementById('addJobQty').value; var hours = document.getElementById('addJobHours').value; var po = document.getElementById('addJobPO').value.trim(); var allFilled = category && price && qty && hours && po; var anyFilled = category || price || qty || hours || po; var btn = document.getElementById('addJobSubmitBtn'); var msg = document.getElementById('addJobStatusMsg'); var hint = document.getElementById('addJobStatusHint'); var sel = document.getElementById('addJobStatus'); var restrictedStatuses = ['ממתין לביצוע', 'בתהליך ביצוע', 'בוצע']; for (var i = 0; i < sel.options.length; i++) { var opt = sel.options[i]; if (restrictedStatuses.indexOf(opt.value) !== -1) { opt.disabled = !allFilled; } } if (!allFilled && restrictedStatuses.indexOf(sel.value) !== -1) { sel.value = 'ממתין להצעה'; } if (hint) hint.style.display = allFilled ? 'none' : 'block'; if (allFilled) { btn.textContent = '✓ Add to Sheet & Day'; btn.style.background = '#111'; msg.style.display = 'none'; } else if (anyFilled) { btn.textContent = '💾 Save to Sheet Only'; btn.style.background = '#555'; msg.style.display = 'block'; msg.style.background = '#fff8e1'; msg.style.border = '1px solid #f0c040'; msg.style.color = '#7a5c00'; msg.textContent = '⚠️ Some fields missing — project will be saved to sheet but not added to day. Fill all fields to add to day.'; } else { btn.textContent = '💾 Save to Sheet Only'; btn.style.background = '#555'; msg.style.display = 'block'; msg.style.background = '#f5f5f5'; msg.style.border = '1px solid #ddd'; msg.style.color = '#888'; msg.textContent = 'Fill category, price, quantity, estimated hours and PO number to add the project to day.'; } }
 
-function submitAddJob() { var client = document.getElementById('addJobClient').value; var desc = document.getElementById('addJobDesc').value.trim(); var status = document.getElementById('addJobStatus').value; var category = document.getElementById('addJobCategory').value; var price = document.getElementById('addJobPrice').value; var qty = document.getElementById('addJobQty').value; var hours = document.getElementById('addJobHours').value; var po = document.getElementById('addJobPO').value.trim(); if (!client) { showToast('Please select a client'); return; } if (!desc) { showToast('Please enter a description'); return; } if (!status) { showToast('Please select a status'); return; } var statusMap = {'In Progress':'בתהליך ביצוע','Pending':'ממתין לביצוע','Waiting for Quote':'ממתין להצעה','Quote Given':'ניתנה הצעה','Done':'בוצע','Ready to Invoice':'להוציא חש'}; var statusHe = statusMap[status] || status; var allFilled = category && price && qty && hours && po; var btn = document.getElementById('addJobSubmitBtn'); btn.textContent = '⏳ שומר…'; btn.disabled = true; var canAddToDay = (statusHe === 'ממתין לביצוע' || statusHe === 'בתהליך ביצוע'); var params = '?action=addJob&client=' + encodeURIComponent(client) + '&desc=' + encodeURIComponent(desc) + '&st=' + encodeURIComponent(statusHe) + '&ca=' + encodeURIComponent(category) + '&pr=' + encodeURIComponent(price) + '&qt=' + encodeURIComponent(qty) + '&eh=' + encodeURIComponent(hours) + '&po=' + encodeURIComponent(po) + '&incomeMode=' + encodeURIComponent(_addJobCalcMode); fetch(SHEETS_URL + params).then(function(r) { return r.text(); }).then(function(result) { btn.disabled = false; document.getElementById('addJobOverlay').style.display = 'none'; if (allFilled) { if (canAddToDay) { var job = { id: result, desc: desc, client: client, hours: parseFloat(hours) || 0 }; addJobAsProject(job); } else { renderSetup(); showToast('✓ ' + result + ' — saved to sheet'); } } else { renderSetup(); showToast('💾 ' + result + ' — saved to sheet'); } }).catch(function() { btn.textContent = allFilled ? '✓ Add to Sheet & Day' : '💾 Save to Sheet Only'; btn.disabled = false; showToast('Failed to add job'); }); }
+function submitAddJob() { var client = document.getElementById('addJobClient').value; var desc = document.getElementById('addJobDesc').value.trim(); var status = document.getElementById('addJobStatus').value; var category = document.getElementById('addJobCategory').value; var price = document.getElementById('addJobPrice').value; var qty = document.getElementById('addJobQty').value; var hours = document.getElementById('addJobHours').value; var po = document.getElementById('addJobPO').value.trim(); var quote = (document.getElementById('addJobQuote')||{value:''}).value.trim(); if (!client) { showToast('Please select a client'); return; } if (!desc) { showToast('Please enter a description'); return; } if (!status) { showToast('Please select a status'); return; } var statusMap = {'In Progress':'בתהליך ביצוע','Pending':'ממתין לביצוע','Waiting for Quote':'ממתין להצעה','Quote Given':'ניתנה הצעה','Done':'בוצע','Ready to Invoice':'להוציא חש'}; var statusHe = statusMap[status] || status; var allFilled = category && price && qty && hours && po; var btn = document.getElementById('addJobSubmitBtn'); btn.textContent = '⏳ שומר…'; btn.disabled = true; var canAddToDay = (statusHe === 'ממתין לביצוע' || statusHe === 'בתהליך ביצוע'); var params = '?action=addJob&client=' + encodeURIComponent(client) + '&desc=' + encodeURIComponent(desc) + '&st=' + encodeURIComponent(statusHe) + '&ca=' + encodeURIComponent(category) + '&pr=' + encodeURIComponent(price) + '&qt=' + encodeURIComponent(qty) + '&eh=' + encodeURIComponent(hours) + '&po=' + encodeURIComponent(po) + '&iq=' + encodeURIComponent(quote) + '&incomeMode=' + encodeURIComponent(_addJobCalcMode); fetch(SHEETS_URL + params).then(function(r) { return r.text(); }).then(function(result) { btn.disabled = false; document.getElementById('addJobOverlay').style.display = 'none'; var qEl = document.getElementById('addJobQuote'); if (qEl) qEl.value = ''; if (allFilled) { if (canAddToDay) { var job = { id: result, desc: desc, client: client, hours: parseFloat(hours) || 0 }; addJobAsProject(job); } else { renderSetup(); showToast('✓ ' + result + ' — saved to sheet'); } } else { renderSetup(); showToast('💾 ' + result + ' — saved to sheet'); } }).catch(function() { btn.textContent = allFilled ? '✓ Add to Sheet & Day' : '💾 Save to Sheet Only'; btn.disabled = false; showToast('Failed to add job'); }); }
 
 function setInvoiceStatusOnDone(project) { if (!SHEETS_URL || !project.jobId) return; fetch(SHEETS_URL + '?action=setInvoiceStatus&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client) + '&invoiceStatus=' + encodeURIComponent('להוציא חש')).then(function(r) { return r.text(); }).then(function(res) { if (res === 'OK') showToast('✓ יצאה חשבונית → להוציא חש'); else showToast('Invoice status: ' + res); }).catch(function() { showToast('⚠️ Invoice status update failed'); }); }
 function revertInvoiceStatus(project) { if (!SHEETS_URL || !project.jobId) return; fetch(SHEETS_URL + '?action=setInvoiceStatus&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client) + '&invoiceStatus=' + encodeURIComponent('')).then(function(r) { return r.text(); }).then(function(res) { if (res === 'OK') showToast('↩ יצאה חשבונית cleared'); else showToast('Revert status: ' + res); }).catch(function() { showToast('⚠️ Invoice revert failed'); }); }
@@ -4174,10 +4179,15 @@ function openCaspitOverlay() {
 
 function switchCaspitTab(tab) {
   _caspitTab = tab;
-  ['invoice','quote'].forEach(function(t) {
+  ['invoice','quote','invoicelist'].forEach(function(t) {
     var btn = document.getElementById('ctab-' + t);
     if (btn) { btn.style.color = t===tab?'#0d47a1':'#aaa'; btn.style.borderBottomColor = t===tab?'#0d47a1':'transparent'; }
   });
+  var notesArea = document.getElementById('caspitNotesArea');
+  var createBtn = document.getElementById('caspitCreateBtn');
+  var isInvoiceList = tab === 'invoicelist';
+  if (notesArea) notesArea.style.display = isInvoiceList ? 'none' : '';
+  if (createBtn) createBtn.style.display = isInvoiceList ? 'none' : '';
   _renderCaspitBody();
 }
 
@@ -4256,13 +4266,67 @@ function _buildMatchMap() {
 
 function _renderCaspitBody() {
   if (_caspitTab === 'invoice') _renderCaspitInvoiceTab();
+  else if (_caspitTab === 'invoicelist') _renderCaspitInvoiceListTab();
   else _renderCaspitQuoteTab();
 }
 
 function caspitCreateDispatch() {
   if (_caspitTab === 'invoice') createCaspitInvoice();
+  else if (_caspitTab === 'invoicelist') return;
   else createCaspitQuote();
 }
+
+
+// ── Invoice List tab (להוציא חש) ──────────────────────
+function _renderCaspitInvoiceListTab() {
+  var body = document.getElementById('caspitBody');
+  if (!_caspitInvoiceJobs.length) {
+    body.innerHTML = '<div style="padding:40px;text-align:center;color:#aaa;font-size:15px;">⏳ Loading…</div>';
+    fetch(SHEETS_URL + '?action=getInvoiceReadyJobs')
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        _caspitInvoiceJobs = (data||[]).map(function(j){ return { id:j.jobId||j.id||'', client:j.client||'', desc:j.description||j.desc||'', po:j.poNumber||j.po||'', income:parseFloat(j.income)||parseFloat(j.price)||0, grossProfit:parseFloat(j.grossProfit)||0 }; });
+        _renderCaspitInvoiceListTab();
+      }).catch(function(){ body.innerHTML = '<div style="padding:32px;text-align:center;color:#e53935;">Failed to load</div>'; });
+    return;
+  }
+  if (!_caspitInvoiceJobs.length) { body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">אין עבודות להוציא חשבונית</div>'; return; }
+  var groups = {}, order = [];
+  _caspitInvoiceJobs.forEach(function(j) { if (!groups[j.client]) { groups[j.client]=[]; order.push(j.client); } groups[j.client].push(j); });
+  var html = '';
+  order.forEach(function(client) {
+    var cc = clientColor(client);
+    html += '<div style="font-size:12px;font-weight:900;color:#fff;padding:6px 12px;border-radius:8px;margin-bottom:6px;background:' + (cc.solid||'#555') + ';">' + client + '</div>';
+    groups[client].forEach(function(job) {
+      var income = job.income ? '₪' + Number(job.income).toLocaleString() : '';
+      var gp = job.grossProfit ? '💰 ₪' + Math.round(job.grossProfit).toLocaleString() : '';
+      html += '<div style="border:0.5px solid #e0e0e0;border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:12px;font-weight:700;color:#555;margin-bottom:2px;">' + job.id + (job.po ? ' · ' + job.po : '') + '</div>' +
+          '<div style="font-size:14px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (job.desc||'—') + '</div>' +
+          (income || gp ? '<div style="font-size:12px;color:#2e7d32;margin-top:2px;">' + [income,gp].filter(Boolean).join(' · ') + '</div>' : '') +
+        '</div>' +
+        '<button onclick="markInvoiceIssued('' + job.id.replace(/'/g,"\'") + '','' + client.replace(/'/g,"\'") + '')" style="background:#1b5e20;color:#fff;border:none;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;flex-shrink:0;white-space:nowrap;">✓ יצאה חש</button>' +
+      '</div>';
+    });
+  });
+  body.innerHTML = html;
+}
+
+function markInvoiceIssued(jobId, client) {
+  var btn = event.target;
+  btn.textContent = '⏳'; btn.disabled = true;
+  fetch(SHEETS_URL + '?action=setInvoiceStatus&jobId=' + encodeURIComponent(jobId) + '&client=' + encodeURIComponent(client) + '&invoiceStatus=' + encodeURIComponent('יצאה חש'))
+    .then(function(r){ return r.text(); })
+    .then(function(res) {
+      if (res === 'OK') {
+        showToast('✓ ' + jobId + ' → יצאה חש');
+        _caspitInvoiceJobs = _caspitInvoiceJobs.filter(function(j){ return !(j.id===jobId && j.client===client); });
+        _renderCaspitInvoiceListTab();
+      } else { btn.textContent = '✓ יצאה חש'; btn.disabled = false; showToast('⚠️ ' + res); }
+    }).catch(function(){ btn.textContent = '✓ יצאה חש'; btn.disabled = false; showToast('⚠️ Failed'); });
+}
+// ── end Invoice List tab ──────────────────────────────
 
 // ── Invoice / Receipt tab ─────────────────────────────
 function _renderCaspitInvoiceTab() {
