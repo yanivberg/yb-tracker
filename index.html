@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v519</title>
+<title>י.ב אחזקות — v523</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -465,6 +465,8 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <span style="font-size:24px;flex-shrink:0;">📓</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Work Log</span></div>
       <div onclick="closeSetupDrawer();openCaspitOverlay('invoicelist');" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">⚠️</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">Account Manager</span></div>
+      <div onclick="closeSetupDrawer();openAIAdvisor();" style="background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;box-shadow:0 4px 12px rgba(13,71,161,0.3);">
+        <span style="font-size:24px;flex-shrink:0;">🤖</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#fff;">AI Advisor</div><div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px;">Most Profitable Category</div></div></div>
       <div onclick="closeSetupDrawer();runPOImportScan();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📧</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6a1b9a;">Import PO Emails</span></div>
       <div onclick="closeSetupDrawer();hardReset();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -481,16 +483,16 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v519
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v523
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbzsCUMQ…exec (v86)
+Apps Script: AKfycbwwDRYc…exec (v87)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v519 · 09/05/2026
+v523 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1132,7 +1134,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v519</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v523</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1973,7 +1975,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzsCUMQ8xq7WKNw0R5WSGjJjr3RkdbgmGvnIh1TLIJKWYD8btmT7djpTPwQcdSHQExNGw/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwwDRYcZfpzgbkHLC4mcASoPsW2zaX_epOaT7jjGUnbjcJ7VMFp-FblchyQxKj_GMNekw/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2845,15 +2847,24 @@ function renderProjectBtns() {
     var po = p.jobPO || '';
     var jobId = p.jobId || '';
 
-    // ── Paused card: compact Option-E style (tap to start) ─
+    // ── Paused card: filled color B-style (tap ▶ to start) ─
     if (!p.active && !p.done) {
+      var todayFmt = formatMs(p.totalMs || 0);
       html +=
-        '<div onclick="toggleProject('+i+')" style="border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
-          '<div style="background:' + (cc.solid||'#555') + ';height:6px;"></div>' +
-          '<div style="background:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;">' +
-            '<span style="font-size:12px;font-weight:700;color:#888;flex-shrink:0;">' + (p.client||'—') + '</span>' +
-            '<span style="font-size:14px;font-weight:700;color:#111;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + displayName + '</span>' +
-            (po ? '<span style="font-size:11px;color:#888;background:#f0f0f0;padding:3px 9px;border-radius:8px;flex-shrink:0;white-space:nowrap;">' + po + '</span>' : '') +
+        '<div style="border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 3px 12px rgba(0,0,0,0.15);">' +
+          '<div style="background:' + headerBg + ';padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">' +
+            '<span style="font-size:13px;font-weight:900;color:#fff;">' + (p.client||'—') + '</span>' +
+          '</div>' +
+          '<div style="background:' + bodyBg + ';padding:8px 12px;">' +
+            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
+              '<span style="font-size:14px;font-weight:700;color:' + (cc.solid||'#333') + ';flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + displayName + '</span>' +
+              '<button onclick="event.stopPropagation();toggleProject('+i+')" style="background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:14px;font-weight:900;flex-shrink:0;cursor:pointer;-webkit-tap-highlight-color:transparent;">▶</button>' +
+            '</div>' +
+            '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+              (todayFmt && todayFmt !== '00:00' ? '<span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">⏱ ' + todayFmt + '</span>' : '') +
+              (p.jobPrice ? '<span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">₪' + Number(p.jobPrice).toLocaleString() + '</span>' : '') +
+              (po ? '<span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">' + po + '</span>' : '') +
+            '</div>' +
           '</div>' +
         '</div>';
       continue;
@@ -4914,6 +4925,78 @@ function createCaspitQuote() {
 }
 // ── End Caspit ────────────────────────────────────────
 
+
+// ── AI Advisor ────────────────────────────────────────────
+function openAIAdvisor() {
+  var overlay = document.getElementById('aiAdvisorOverlay');
+  overlay.style.display = 'flex';
+  var body = document.getElementById('aiAdvisorBody');
+  body.innerHTML = '<div style="text-align:center;padding:40px 0;"><div style="font-size:32px;margin-bottom:12px;">⏳</div><div style="color:#555;font-size:14px;font-weight:700;">מושך נתונים מהגיליון…</div></div>';
+
+  fetch(SHEETS_URL + '?action=getProfitByCategory')
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (!data || !data.length) {
+        body.innerHTML = '<div style="text-align:center;color:#aaa;padding:40px;">אין נתונים מספיקים. סיים עבודות עם קטגוריה ורווח גולמי.</div>';
+        return;
+      }
+      body.innerHTML = '<div style="text-align:center;padding:20px 0;"><div style="font-size:32px;">🤖</div><div style="color:#555;font-size:14px;font-weight:700;margin-top:8px;">שולח ל-AI לניתוח…</div></div>';
+
+      var prompt = 'You are a business advisor for a field maintenance company in Israel. ' +
+        'Analyze the following profitability data by job category and provide clear, actionable insights in Hebrew. ' +
+        'Data is from completed jobs: category name, job count, total gross profit (₪), total hours worked, and profit per hour (₪). ' +
+        'Be direct and specific. Format your response with: ' +
+        '1. Which category is most profitable and why ' +
+        '2. Which category to avoid or reprice ' +
+        '3. One clear action to take this week. ' +
+        'Keep it under 150 words. Use ₪ for currency. ' +
+        'Data: ' + JSON.stringify(data);
+
+      fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(result) {
+        var text = result.content && result.content[0] ? result.content[0].text : 'שגיאה';
+        var topCat = data[0];
+        var bottomCat = data[data.length - 1];
+
+        var tableRows = data.slice(0, 5).map(function(c, i) {
+          var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1) + '.';
+          return '<tr style="border-bottom:1px solid #f0f0f0;">' +
+            '<td style="padding:8px 4px;font-size:13px;">' + medal + '</td>' +
+            '<td style="padding:8px 6px;font-size:13px;font-weight:700;color:#111;">' + c.category + '</td>' +
+            '<td style="padding:8px 4px;font-size:12px;color:#555;text-align:center;">' + c.jobCount + ' עבודות</td>' +
+            '<td style="padding:8px 4px;font-size:13px;font-weight:900;color:' + (i===0?'#2e7d32':'#333') + ';text-align:left;">₪' + c.profitPerHour + '/hr</td>' +
+            '</tr>';
+        }).join('');
+
+        body.innerHTML =
+          '<table style="width:100%;border-collapse:collapse;margin-bottom:16px;background:white;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);">' +
+            '<thead><tr style="background:#0d47a1;"><th style="padding:10px 6px;font-size:11px;font-weight:900;color:white;text-align:right;">קטגוריה</th><th style="padding:10px 4px;font-size:11px;color:rgba(255,255,255,0.8);text-align:center;">עבודות</th><th style="padding:10px 4px;font-size:11px;color:rgba(255,255,255,0.8);text-align:left;">רווח/שעה</th></tr></thead>' +
+            '<tbody>' + tableRows + '</tbody>' +
+          '</table>' +
+          '<div style="background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:14px;padding:16px;margin-bottom:8px;">' +
+            '<div style="font-size:11px;font-weight:900;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">🤖 ניתוח AI</div>' +
+            '<div style="font-size:13px;color:#fff;line-height:1.6;direction:rtl;">' + text.split('\n').join('<br>') + '</div>' +
+          '</div>';
+      })
+      .catch(function(err) {
+        body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ AI Error: ' + err.message + '</div>';
+      });
+    })
+    .catch(function() {
+      body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ Failed to load data</div>';
+    });
+}
+// ── end AI Advisor ─────────────────────────────────────────
+
 // ── Pre-Project Timer ─────────────────────────────────
 var _preTimer = (function() {
   try { return JSON.parse(localStorage.getItem('yb_preTimer') || 'null'); } catch(e) { return null; }
@@ -5308,6 +5391,24 @@ function showToast(msg) {
   toastTimer = setTimeout(function() { t.style.transform = 'translateX(-50%) translateY(80px)'; setTimeout(function() { t.style.display = 'none'; }, 300); }, 3000);
 }
 </script>
+
+
+<!-- ── AI Advisor Overlay ──────────────────────────────── -->
+<div id="aiAdvisorOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10005;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:85vh;display:flex;flex-direction:column;">
+    <div style="background:linear-gradient(135deg,#0d47a1,#1565c0);padding:18px 20px;border-radius:24px 24px 0 0;display:flex;align-items:center;gap:12px;flex-shrink:0;">
+      <span style="font-size:24px;">🤖</span>
+      <div style="flex:1;">
+        <div style="font-size:17px;font-weight:900;color:#fff;">AI Business Advisor</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.7);">Most Profitable Category</div>
+      </div>
+      <button onclick="document.getElementById('aiAdvisorOverlay').style.display='none'" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+    <div id="aiAdvisorBody" style="flex:1;overflow-y:auto;padding:20px;background:#f8f9fa;">
+      <div style="text-align:center;color:#aaa;padding:40px 0;">טוען נתונים…</div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
