@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v539</title>
+<title>י.ב אחזקות — v541</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -483,16 +483,16 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v539
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v541
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbwMkdYa…exec (v95)
+Apps Script: AKfycbwiUTsa…exec (v96)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v539 · 09/05/2026
+v541 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1134,7 +1134,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v539</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v541</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1146,10 +1146,11 @@ SHEET SYNC
     </div>
     <div class="project-list-setup" id="setupList"></div>
     <div id="emptyMsg" style="display:none;"></div>
-    <div style="position:fixed;bottom:0;left:0;right:0;padding:4px 96px max(env(safe-area-inset-bottom,8px),8px);z-index:100;">
-      <button class="btn-start-day" id="btnStartDay" onclick="startDay()" disabled style="font-size:30px;letter-spacing:1px;padding:14px 16px;border-radius:12px;">
+    <div style="position:fixed;bottom:0;left:0;right:0;padding:4px 96px max(env(safe-area-inset-bottom,8px),8px);z-index:100;display:flex;gap:8px;">
+      <button class="btn-start-day" id="btnStartDay" onclick="startDay()" disabled style="flex:1;font-size:30px;letter-spacing:1px;padding:14px 16px;border-radius:12px;">
         Start Work Session
       </button>
+      <button onclick="openAIBriefing()" style="width:58px;background:#0d47a1;border:none;border-radius:12px;font-size:24px;cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 12px rgba(13,71,161,0.4);">🤖</button>
     </div>
     <div style="height:120px;"></div>
   </div>
@@ -1975,7 +1976,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwMkdYaTylo-qPCn-13UZX3TXmYb1vPLZwISsCWkSRnDs_wKuIHkbk-a6mu7R-mDM1Jkg/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwiUTsaFWHRUGS5f3i2z5ezXYJVILWovAAv7DQv4yt5xcijPz17IDZndzoVvtBLfQN81Q/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -5079,6 +5080,62 @@ function _toggleAISec(id) {
   if (arr) arr.textContent = open ? '›' : '∨';
 }
 
+
+// ── AI Daily Briefing ─────────────────────────────────
+function openAIBriefing() {
+  if (!projects || !projects.length) { showToast('Add projects first'); return; }
+  document.getElementById('aiBriefingOverlay').style.display = 'flex';
+  var body = document.getElementById('aiBriefingBody');
+  var subtitle = document.getElementById('briefingSubtitle');
+  body.innerHTML = '<div style="text-align:center;padding:40px 0;"><div style="font-size:32px;margin-bottom:12px;">⏳</div><div style="color:#555;font-size:14px;font-weight:700;">מנתח את הפרויקטים שלך…</div></div>';
+
+  var todayProjects = projects.map(function(p) {
+    return { client: p.client || '', desc: p.title || p.name || '', cat: p.category || '', estHours: p.estHours || 0, price: p.jobPrice || 0 };
+  });
+  subtitle.textContent = todayProjects.length + ' פרויקטים · ' + new Date().toLocaleDateString('he-IL');
+
+  fetch(SHEETS_URL + '?action=getAIBriefing&projects=' + encodeURIComponent(JSON.stringify(todayProjects)))
+    .then(function(r){ return r.json(); })
+    .then(function(result) {
+      if (result.error) { body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + result.error + '</div>'; return; }
+      var parsed = result.parsed;
+      var html = '';
+
+      if (parsed && parsed.projects) {
+        html += '<div style="font-size:10px;font-weight:900;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">💼 טיפים לפרויקטים</div>';
+        parsed.projects.forEach(function(p, idx) {
+          var proj = todayProjects[idx] || {};
+          var cc = clientColor(proj.client || '');
+          html += '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:8px;border-right:4px solid ' + (cc.solid||'#555') + ';">' +
+            '<div style="font-size:12px;font-weight:900;color:' + (cc.solid||'#333') + ';margin-bottom:5px;">' + (proj.client||'') + ' — ' + (proj.desc||'') + '</div>' +
+            '<div style="font-size:12px;color:#444;line-height:1.6;direction:rtl;">' + (p.tip||'').split('\n').join('<br>') + '</div>' +
+          '</div>';
+        });
+      }
+
+      if (parsed && parsed.tools && parsed.tools.length) {
+        html += '<div style="font-size:10px;font-weight:900;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 8px;">🔧 רשימת כלים ליום</div>';
+        html += '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:8px;">';
+        parsed.tools.forEach(function(t) {
+          html += '<div style="font-size:13px;color:#333;padding:4px 0;direction:rtl;border-bottom:1px solid #f5f5f5;">☐ &nbsp;' + t + '</div>';
+        });
+        html += '</div>';
+      }
+
+      if (parsed && parsed.warning) {
+        html += '<div style="background:#fff3e0;border-radius:12px;padding:12px 14px;border-right:4px solid #ff9800;">' +
+          '<div style="font-size:12px;font-weight:900;color:#e65100;margin-bottom:4px;">⚠️ שים לב</div>' +
+          '<div style="font-size:12px;color:#555;direction:rtl;">' + parsed.warning + '</div>' +
+        '</div>';
+      }
+
+      if (!html) html = '<div style="padding:32px;text-align:center;color:#aaa;">No data returned</div>';
+      body.innerHTML = html;
+    })
+    .catch(function(err) { body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + err.message + '</div>'; });
+}
+// ── end AI Daily Briefing ─────────────────────────────
+
 // ── end AI Advisor ─────────────────────────────────────────
 
 // ── Pre-Project Timer ─────────────────────────────────
@@ -5491,6 +5548,19 @@ function showToast(msg) {
     <div id="aiAdvisorBody" style="flex:1;overflow-y:auto;padding:20px;background:#f8f9fa;">
       <div style="text-align:center;color:#aaa;padding:40px 0;">טוען נתונים…</div>
     </div>
+  </div>
+</div>
+
+
+<!-- ── AI Daily Briefing Overlay ─────────────────────── -->
+<div id="aiBriefingOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10006;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:88vh;display:flex;flex-direction:column;">
+    <div style="background:linear-gradient(135deg,#0d47a1,#1565c0);padding:16px 18px;border-radius:24px 24px 0 0;display:flex;align-items:center;gap:12px;flex-shrink:0;">
+      <span style="font-size:22px;">🤖</span>
+      <div style="flex:1;"><div style="font-size:16px;font-weight:900;color:#fff;">AI Daily Briefing</div><div style="font-size:11px;color:rgba(255,255,255,0.65);" id="briefingSubtitle">טיפים + רשימת כלים</div></div>
+      <button onclick="document.getElementById('aiBriefingOverlay').style.display='none'" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
+    </div>
+    <div id="aiBriefingBody" style="flex:1;overflow-y:auto;padding:16px;background:#f8f9fa;"></div>
   </div>
 </div>
 
