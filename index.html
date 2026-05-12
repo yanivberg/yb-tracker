@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v537</title>
+<title>י.ב אחזקות — v539</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -483,16 +483,16 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v537
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v539
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbwzmQmI…exec (v93)
+Apps Script: AKfycbwMkdYa…exec (v95)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v537 · 09/05/2026
+v539 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1134,7 +1134,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v537</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v539</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1975,7 +1975,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwzmQmI3eELQQXafItd-Su7w4dZuDLNci8LcoNUnbQhKRJ_zT6Pqqlh2LBomx_zm8crVw/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwMkdYaTylo-qPCn-13UZX3TXmYb1vPLZwISsCWkSRnDs_wKuIHkbk-a6mu7R-mDM1Jkg/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -5021,31 +5021,62 @@ function openAIDeepAnalysis() {
     .then(function(r){ return r.json(); })
     .then(function(result) {
       if (result.error) { body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + result.error + '</div>'; return; }
-      var text = result.text || 'שגיאה';
       var jobCount = result.jobCount || 0;
+      var parsed = result.parsed;
 
-      // Parse sections by emoji markers
-      var sections = [
-        { emoji: '🏆', color: '#f0c020' },
-        { emoji: '📂', color: '#80cbc4' },
-        { emoji: '🔗', color: '#90caf9' },
-        { emoji: '💡', color: '#ffe082' },
-        { emoji: '⚠️', color: '#ef9a9a' },
-        { emoji: '🎯', color: '#a5d6a7' }
+      var SECTIONS = [
+        {key:'profitable', emoji:'🏆', title:'הכי רווחי',       color:'#f0c020', dark:false},
+        {key:'categories', emoji:'📂', title:'קטגוריות שגויות', color:'#80cbc4', dark:false},
+        {key:'clients',    emoji:'🔗', title:'דפוסי לקוחות',    color:'#90caf9', dark:false},
+        {key:'notes',      emoji:'💡', title:'מהערות',          color:'#ffe082', dark:false},
+        {key:'underpriced',emoji:'⚠️', title:'תמחור חסר',       color:'#ef9a9a', dark:false},
+        {key:'progress',   emoji:'📅', title:'מגמת עסק',        color:'#a5d6a7', dark:false},
+        {key:'action',     emoji:'🎯', title:'פעולה השבוע',     color:'blue',    dark:true}
       ];
 
-      var html =
-        '<div style="font-size:11px;color:#aaa;text-align:center;margin-bottom:12px;">ניתחתי ' + jobCount + ' עבודות · ' + (result.clients || 1) + ' לקוחות · תיאורים + הערות + תאריכים + קטגוריות</div>' +
-        '<div style="background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:14px;padding:14px;">' +
-          '<div style="font-size:10px;font-weight:900;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">🔬 ניתוח AI מעמיק</div>' +
-          '<div style="font-size:13px;color:#fff;line-height:1.7;direction:rtl;white-space:pre-wrap;">' + text.split('\n').join('<br>') + '</div>' +
-        '</div>';
+      var html = '<div style="font-size:11px;color:#aaa;text-align:center;margin-bottom:10px;">ניתחתי ' + jobCount + ' עבודות · ' + (result.clients||1) + ' לקוחות</div>';
 
+      if (parsed && parsed.sections) {
+        parsed.sections.forEach(function(sec) {
+          var def = SECTIONS.find(function(s){ return s.key === sec.key; }) || {emoji:'•',title:sec.key,color:'#ccc',dark:false};
+          var isBlue = def.dark;
+          var bg = isBlue ? 'linear-gradient(135deg,#0d47a1,#1565c0)' : 'white';
+          var titleColor = isBlue ? '#f0c020' : '#111';
+          var summaryColor = isBlue ? '#fff' : '#444';
+          var id = 'aisec_' + sec.key;
+          html +=
+            '<div style="background:' + bg + ';border-radius:12px;margin-bottom:8px;border-right:4px solid ' + (isBlue?'#0d47a1':def.color) + ';overflow:hidden;">' +
+              '<div onclick="_toggleAISec(this.dataset.id)" data-id="' + id + '" style="padding:11px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+                '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+                  '<div style="font-size:12px;font-weight:900;color:' + titleColor + ';">' + def.emoji + ' ' + def.title + '</div>' +
+                  '<span id="' + id + '_arr" style="color:' + (isBlue?'rgba(255,255,255,0.6)':'#aaa') + ';font-size:14px;">›</span>' +
+                '</div>' +
+                '<div style="font-size:12px;color:' + summaryColor + ';line-height:1.6;direction:rtl;margin-top:4px;">' + (sec.summary||'').split('\n').join('<br>') + '</div>' +
+              '</div>' +
+              '<div id="' + id + '" style="display:none;border-top:1px solid rgba(0,0,0,0.08);padding:12px 14px;background:' + (isBlue?'rgba(255,255,255,0.1)':'#f8f9fa') + ';">' +
+                '<div style="font-size:12px;color:' + (isBlue?'#fff':'#333') + ';line-height:1.7;direction:rtl;">' + (sec.details||'').split('\n').join('<br>') + '</div>' +
+              '</div>' +
+            '</div>';
+        });
+      } else {
+        // Fallback: plain text
+        html += '<div style="background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:14px;padding:14px;"><div style="font-size:13px;color:#fff;line-height:1.7;direction:rtl;white-space:pre-wrap;">' + (result.text||'').split('\n').join('<br>') + '</div></div>';
+      }
       body.innerHTML = html;
     })
     .catch(function(err) {
       body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + err.message + '</div>';
     });
+}
+
+
+function _toggleAISec(id) {
+  var el = document.getElementById(id);
+  var arr = document.getElementById(id + '_arr');
+  if (!el) return;
+  var open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (arr) arr.textContent = open ? '›' : '∨';
 }
 
 // ── end AI Advisor ─────────────────────────────────────────
