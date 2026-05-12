@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v531</title>
+<title>י.ב אחזקות — v533</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -483,16 +483,16 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v531
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v533
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycby2EMlS…exec (v89)
+Apps Script: AKfycbxVl_ub…exec (v91)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v531 · 09/05/2026
+v533 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1134,7 +1134,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v531</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v533</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1975,7 +1975,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycby2EMlS0psRcix0i5Uz75bVm-KsGSzyaID9yyBFdvkICIGJtQK08bWNgfgJqxZIX4gNLg/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxVl_ubmoA6cP1XZac7sdPn6O4xqloT00_6ECs3aUeML7hgCu7ynlqpmMNRA5V7FuCUAA/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -4989,6 +4989,42 @@ function openAIAdvisor() {
       body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ Failed to load data</div>';
     });
 }
+
+function openAIDeepAnalysis() {
+  var body = document.getElementById('aiAdvisorBody');
+  body.innerHTML = '<div style="text-align:center;padding:40px 0;"><div style="font-size:32px;margin-bottom:12px;">🔬</div><div style="color:#555;font-size:14px;font-weight:700;">קורא תיאורים והערות מהגיליון…</div><div style="color:#aaa;font-size:12px;margin-top:8px;">ניתוח מעמיק — עד 30 שניות</div></div>';
+
+  fetch(SHEETS_URL + '?action=getAIDeepAnalysis')
+    .then(function(r){ return r.json(); })
+    .then(function(result) {
+      if (result.error) { body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + result.error + '</div>'; return; }
+      var text = result.text || 'שגיאה';
+      var jobCount = result.jobCount || 0;
+
+      // Parse sections by emoji markers
+      var sections = [
+        { emoji: '🏆', color: '#f0c020' },
+        { emoji: '📂', color: '#80cbc4' },
+        { emoji: '🔗', color: '#90caf9' },
+        { emoji: '💡', color: '#ffe082' },
+        { emoji: '⚠️', color: '#ef9a9a' },
+        { emoji: '🎯', color: '#a5d6a7' }
+      ];
+
+      var html =
+        '<div style="font-size:11px;color:#aaa;text-align:center;margin-bottom:12px;">ניתחתי ' + jobCount + ' עבודות · תיאורים + הערות + קטגוריות</div>' +
+        '<div style="background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:14px;padding:14px;">' +
+          '<div style="font-size:10px;font-weight:900;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">🔬 ניתוח AI מעמיק</div>' +
+          '<div style="font-size:13px;color:#fff;line-height:1.7;direction:rtl;white-space:pre-wrap;">' + text.split('\n').join('<br>') + '</div>' +
+        '</div>';
+
+      body.innerHTML = html;
+    })
+    .catch(function(err) {
+      body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + err.message + '</div>';
+    });
+}
+
 // ── end AI Advisor ─────────────────────────────────────────
 
 // ── Pre-Project Timer ─────────────────────────────────
@@ -5396,6 +5432,7 @@ function showToast(msg) {
         <div style="font-size:17px;font-weight:900;color:#fff;">AI Business Advisor</div>
         <div style="font-size:12px;color:rgba(255,255,255,0.7);">Most Profitable Category</div>
       </div>
+      <button onclick="openAIDeepAnalysis()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">🔬 Deep</button>
       <button onclick="document.getElementById('aiAdvisorOverlay').style.display='none'" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">✕</button>
     </div>
     <div id="aiAdvisorBody" style="flex:1;overflow-y:auto;padding:20px;background:#f8f9fa;">
