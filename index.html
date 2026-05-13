@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v544</title>
+<title>י.ב אחזקות — v546</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -467,6 +467,8 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <span style="font-size:24px;flex-shrink:0;">⚠️</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">Account Manager</span></div>
       <div onclick="closeSetupDrawer();openAIAdvisor();" style="background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;box-shadow:0 4px 12px rgba(13,71,161,0.3);">
         <span style="font-size:24px;flex-shrink:0;">💫</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#fff;">AI Business Advisor</div><div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px;">Most Profitable Category</div></div></div>
+      <div onclick="closeSetupDrawer();openMyToolbox();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">🧰</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#333;">My Toolbox</div><div style="font-size:11px;color:#888;margin-top:1px;">Manage your tools</div></div></div>
       <div onclick="closeSetupDrawer();runPOImportScan();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📧</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6a1b9a;">Import PO Emails</span></div>
       <div onclick="closeSetupDrawer();hardReset();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -483,7 +485,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v544
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v546
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbzbHyWK…exec (v97)
@@ -492,7 +494,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v544 · 09/05/2026
+v546 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1134,7 +1136,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v544</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v546</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2134,7 +2136,7 @@ function promptProjectTitles(jobs, callback) {
 function addJobAsProject(job) {
   var name = job.desc;
   if (projects.find(function(p) { return p.jobId === job.id; })) { showToast('Job already added'); return; }
-  var proj = { name: name, title: job.title || name, client: job.client, jobId: job.id, jobClient: job.client, jobDateStart: null, estHours: job.hours || 0, jobPO: job.poNumber || job.po || '', jobPrice: job.price || 0, sessionNum: projects.length + 1, totalMs: 0, prevMs: 0, active: false, activeStart: null, done: false, notes: [], noteOpen: false, editOpen: false };
+  var proj = { name: name, title: job.title || name, client: job.client, jobId: job.id, jobClient: job.client, jobDateStart: null, estHours: job.hours || 0, jobPO: job.poNumber || job.po || '', jobPrice: job.price || 0, jobIncome: parseFloat(job.income) || 0, sessionNum: projects.length + 1, totalMs: 0, prevMs: 0, active: false, activeStart: null, done: false, notes: [], noteOpen: false, editOpen: false };
   projects.push(proj);
   saveClient(job.client);
   saveState();
@@ -2152,6 +2154,7 @@ function addJobAsProject(job) {
           .then(function(d) {
             if (d.po) projects[idx].jobPO = d.po;
             if (d.price) projects[idx].jobPrice = parseFloat(d.price) || 0;
+            if (d.income) projects[idx].jobIncome = parseFloat(d.income) || 0;
             saveState(); if (dayStartTime) renderProjectBtns(); else renderSetup();
           }).catch(function(){});
         return fetch(SHEETS_URL + '?action=getJobNotes&jobId=' + encodeURIComponent(job.id) + '&client=' + encodeURIComponent(job.client));
@@ -2902,7 +2905,7 @@ function renderProjectBtns() {
           .then(function(r){ return r.json(); })
           .then(function(d) {
             if (d.po) { projects[idx].jobPO = d.po; saveState(); renderProjectBtns(); }
-            if (d.price) { projects[idx].jobPrice = parseFloat(d.price)||0; saveState(); }
+            if (d.price) { projects[idx].jobPrice = parseFloat(d.price)||0; if (d.income) projects[idx].jobIncome = parseFloat(d.income)||0; saveState(); }
           }).catch(function(){});
       })(i, p.jobId, p.jobClient || p.client);
     }
@@ -5159,7 +5162,7 @@ function openAISessionTips() {
       client: p.client||'', desc: p.title||p.name||'',
       cat: p.category||'', estHours: p.estHours||0,
       actualHrs: Math.round(tillNow/3600000*10)/10,
-      price: p.jobPrice||0, po: p.jobPO||'',
+      price: p.jobPrice||0, jobIncome: p.jobIncome||0, po: p.jobPO||'',
       status: p.done ? 'done' : (p.active ? 'active' : 'paused'),
       notes: (p.notes||[]).join(' | ')
     };
@@ -5178,10 +5181,10 @@ function openAISessionTips() {
       // Stats bar
       var estTotal = sessionProjects.reduce(function(s,p){ return s + (p.estHours||0); }, 0);
       var overPct = estTotal > 0 ? Math.round((totalHrs/estTotal-1)*100) : 0;
-      var estProfit = sessionProjects.reduce(function(s,p){ return s + (p.price||0); }, 0);
+      var estProfit = sessionProjects.reduce(function(s,p){ return s + (p.jobIncome||p.price||0); }, 0);
       html += '<div style="background:white;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;margin-bottom:12px;">' +
         '<div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:#0d47a1;">' + totalHrs + 'h</div><div style="font-size:10px;color:#888;">זמן כולל</div></div>' +
-        (estProfit ? '<div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:#2e7d32;">₪' + Number(estProfit).toLocaleString() + '</div><div style="font-size:10px;color:#888;">רווח משוער</div></div>' : '') +
+        (estProfit ? '<div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:#2e7d32;">₪' + Number(estProfit).toLocaleString() + '</div><div style="font-size:10px;color:#888;">הכנסה מתוכננת</div></div>' : '') +
         (estTotal > 0 ? '<div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:' + (overPct>20?'#e65100':'#2e7d32') + ';">' + (overPct>=0?'+':'') + overPct + '%</div><div style="font-size:10px;color:#888;">מעל אומדן</div></div>' : '') +
       '</div>';
 
@@ -5210,6 +5213,156 @@ function openAISessionTips() {
     })
     .catch(function(err) { body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + err.message + '</div>'; });
 }
+
+// ── My Toolbox ────────────────────────────────────────
+var TOOLBOX_CATEGORIES = [
+  { name:'Hand Tools', emoji:'🔨', color:'#333', tools:['Hammer','Screwdriver (+)','Screwdriver (-)','Adjustable Wrench','Pliers','Pry Bar','Hand Saw','Chisel','Allen Keys','Wire Brush','Putty Knife','Utility Knife','Rubber Mallet','Pipe Wrench','Punch'] },
+  { name:'Power Tools', emoji:'⚡', color:'#1565c0', tools:['Drill','Impact Driver','Angle Grinder','Circular Saw','Reciprocating Saw','Air Compressor','Air Nailer','Jigsaw','Rotary Hammer','Heat Gun','Belt Sander','Oscillating Tool','Plasma Cutter','Router','Polisher'] },
+  { name:'Welding & Metalwork', emoji:'🔥', color:'#b71c1c', tools:['MIG Welder','TIG Welder','Arc Welder','Angle Grinder','Metal Saw','Column Drill','Rivet Gun','Welding Mask','Welding Gloves','Wire Feed','Cutting Disc','Grinding Disc','Welding Table','Clamp Magnets','Chipping Hammer'] },
+  { name:'Measuring & Testing', emoji:'📏', color:'#2e7d32', tools:['Tape Measure','Spirit Level','Laser Measure','Multimeter','Voltage Tester','Square','Angle Finder','Chalk Line','Caliper','Stud Finder','Thermal Camera','Clamp Meter','Wire Tracer','Plumb Bob','Thickness Gauge'] },
+  { name:'Plumbing', emoji:'🚰', color:'#00695c', tools:['Pipe Wrench','Basin Wrench','Pipe Cutter','Teflon Tape','Drain Snake','Soldering Torch','Pipe Bender','Push-fit Tool','Thread Tap','Plunger','Pressure Gauge','Hacksaw','Pipe Deburrer','Compression Tool','Fitting Brush'] },
+  { name:'Access & Lifting', emoji:'🪜', color:'#4527a0', tools:['Step Ladder','Extension Ladder','Scaffolding','Pallet Jack','Hand Truck','Lifting Slings','Chain Hoist','Rope','Safety Harness','Work Platform','Roller Stand','Toe Board','Wheel Chocks','Ratchet Straps','Cargo Net'] },
+  { name:'Safety', emoji:'🦺', color:'#e65100', tools:['Hard Hat','Safety Glasses','Ear Plugs','Safety Gloves','Steel-toe Boots','Hi-Vis Vest','Dust Mask','Respirator','Face Shield','Knee Pads','First Aid Kit','Fire Extinguisher','Gas Detector','Safety Cones','Lockout Kit'] },
+  { name:'Wood Tools', emoji:'🪵', color:'#5d4037', tools:['Hand Plane','Wood Chisels','Wood Saw','Miter Saw','Router','Wood Clamps','Biscuit Joiner','Dowel Drill','Card Scraper','Wood Rasp','Spoke Shave','Marking Gauge','Cabinet Scraper','Mortise Chisel','Dovetail Saw'] },
+  { name:'Sealing Tools', emoji:'🔒', color:'#37474f', tools:['Caulking Gun','Silicone Smoother','Foam Gun','Putty Knife','Heat Gun','Sealing Tape','Waterproof Membrane','Corner Bead','Grout Float','Tile Spacers','Sealant Remover','Brush Set','Paint Roller','Masking Tape','Mixing Stick'] },
+  { name:'Drywall & Prefab', emoji:'🧱', color:'#6d4c41', tools:['Drywall Knife','T-Square','Drywall Screwgun','Joint Knife','Corner Tool','Sanding Block','Mud Pan','Stilts','Panel Lift','Plasterboard Saw','Rasp Plane','Angle Bead','Tape Applicator','Corner Finisher','Snapper Cutter'] },
+  { name:'Nuts, Bolts & Screws', emoji:'🔩', color:'#455a64', tools:['M6 Bolts','M8 Bolts','M10 Bolts','M12 Bolts','Hex Nuts','Wing Nuts','Lock Washers','Flat Washers','Wood Screws','Self-drilling Screws','Anchor Bolts','Spring Nuts','Rivet Nuts','Threaded Rod','Nails Assortment'] },
+  { name:'Writing & Marking', emoji:'✏️', color:'#1a237e', tools:['Permanent Marker','Chalk','Chalk Line','Pencil','Marking Pen','Paint Marker','Wax Crayon','Label Maker','Scriber','Center Punch','Marking Gauge','Angle Marker','Stencils','Notes Pad','Clipboard'] },
+  { name:'Electricity Tools', emoji:'🔌', color:'#f9a825', tools:['Wire Stripper','Wire Cutter','Crimping Tool','Cable Tester','Voltage Meter','Phase Tester','Conduit Bender','Fish Tape','Cable Stapler','Insulation Tape','Terminal Block','Circuit Tester','Label Maker','Punch Down Tool','Continuity Tester'] },
+  { name:'Construction Tools', emoji:'🏗️', color:'#795548', tools:['Mixing Drill','Concrete Mixer','Sledgehammer','Jackhammer','Tamper','Wheelbarrow','Trowel','Float','Grouting Gun','Line Level','Bolt Cutter','Rebar Bender','Concrete Vibrator','Block Splitter','Bull Float'] },
+  { name:'Gardening Tools', emoji:'🌿', color:'#388e3c', tools:['Pruning Shears','Garden Fork','Spade','Rake','Hoe','Garden Trowel','Hose Reel','Wheelbarrow','Hedge Trimmer','Leaf Blower','Lawn Mower','Chain Saw','Soil Knife','Weeder','Sprinkler'] },
+  { name:'Cleaning Tools', emoji:'🧹', color:'#0288d1', tools:['Broom','Dustpan','Mop','Pressure Washer','Vacuum','Squeegee','Scrub Brush','Sponge','Bucket','Spray Bottle','Degreaser','Industrial Wipes','Air Blower','Wet Vac','Floor Scrubber'] }
+];
+
+function _getToolboxStorage() {
+  try { return JSON.parse(localStorage.getItem('myToolbox') || '{}'); } catch(e) { return {}; }
+}
+
+function getMyToolbox() {
+  var data = _getToolboxStorage();
+  var selected = [];
+  TOOLBOX_CATEGORIES.forEach(function(cat) {
+    (data[cat.name] || []).forEach(function(t) { selected.push(t); });
+  });
+  (data._custom || []).forEach(function(t) { selected.push(t.name); });
+  return selected;
+}
+
+function openMyToolbox() {
+  document.getElementById('myToolboxOverlay').style.display = 'flex';
+  _renderToolbox();
+}
+
+function _renderToolbox() {
+  var data = _getToolboxStorage();
+  var body = document.getElementById('myToolboxBody');
+  var totalSelected = 0;
+  var html = '';
+
+  TOOLBOX_CATEGORIES.forEach(function(cat, ci) {
+    var sel = data[cat.name] || [];
+    totalSelected += sel.length;
+    var isOpen = (ci === 0);
+    html += '<div style="background:white;border-radius:12px;overflow:hidden;margin-bottom:8px;">' +
+      '<div onclick="_toggleToolCat(' + ci + ')" style="background:' + cat.color + ';padding:10px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+        '<span style="font-size:13px;font-weight:900;color:#fff;">' + cat.emoji + ' ' + cat.name + '</span>' +
+        '<span id="toolcat_count_' + ci + '" style="font-size:10px;color:rgba(255,255,255,0.75);">' + sel.length + '/15 · ' + (isOpen ? '∨' : '›') + '</span>' +
+      '</div>' +
+      '<div id="toolcat_' + ci + '" style="display:' + (isOpen ? 'block' : 'none') + ';padding:8px 14px;">' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;">';
+
+    cat.tools.forEach(function(tool) {
+      var checked = sel.indexOf(tool) !== -1;
+      html += '<label style="display:flex;align-items:center;gap:5px;padding:5px 0;font-size:12px;color:#333;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+        '<input type="checkbox" data-cat="' + ci + '" data-tool="' + tool.replace(/"/g,'&quot;') + '"' + (checked ? ' checked' : '') + ' onchange="_toolCheckChange(this)"> ' + tool + '</label>';
+    });
+
+    // Custom tools in this category
+    (data._custom || []).forEach(function(ct) {
+      if (ct.category === cat.name) {
+        html += '<label style="display:flex;align-items:center;gap:5px;padding:5px 0;font-size:12px;color:#0d47a1;cursor:pointer;">' +
+          '<input type="checkbox" data-cat="' + ci + '" data-tool="' + ct.name.replace(/"/g,'&quot;') + '" data-custom="1" checked onchange="_toolCheckChange(this)"> ' + ct.name + ' ✦</label>';
+      }
+    });
+
+    html += '</div></div></div>';
+  });
+
+  // Add custom tool
+  html += '<div style="background:white;border-radius:12px;padding:12px 14px;border:2px dashed #0d47a1;margin-bottom:8px;">' +
+    '<div style="font-size:12px;font-weight:700;color:#0d47a1;margin-bottom:8px;">+ Add a tool not in the list</div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<input id="customToolName" type="text" placeholder="Tool name..." style="flex:1;padding:9px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;" onkeypress="if(event.key===\'Enter\')_addCustomTool()">' +
+      '<select id="customToolCat" style="padding:9px 6px;border:1px solid #ddd;border-radius:8px;font-size:10px;color:#333;font-family:Heebo,sans-serif;">' +
+        '<option value="">Category</option>' +
+        TOOLBOX_CATEGORIES.map(function(c){ return '<option value="' + c.name + '">' + c.name + '</option>'; }).join('') +
+      '</select>' +
+      '<button onclick="_addCustomTool()" style="background:#0d47a1;color:#fff;border:none;border-radius:8px;padding:9px 12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">+</button>' +
+    '</div>' +
+  '</div>' +
+  '<button onclick="saveMyToolbox()" style="width:100%;padding:14px;background:#f0c020;border:none;border-radius:12px;font-size:16px;font-weight:900;color:#111;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);font-family:Heebo,sans-serif;">✓ Save My Toolbox</button>';
+
+  body.innerHTML = html;
+  document.getElementById('toolboxSubtitle').textContent = totalSelected + ' tools selected across 16 categories';
+}
+
+function _toggleToolCat(ci) {
+  var el = document.getElementById('toolcat_' + ci);
+  var cnt = document.getElementById('toolcat_count_' + ci);
+  if (!el) return;
+  var open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (cnt) {
+    var parts = cnt.textContent.split(' · ');
+    cnt.textContent = parts[0] + ' · ' + (open ? '›' : '∨');
+  }
+}
+
+function _toolCheckChange(cb) {
+  // Live update count badge
+  var ci = parseInt(cb.dataset.cat);
+  var el = document.getElementById('toolcat_' + ci);
+  var cnt = document.getElementById('toolcat_count_' + ci);
+  if (el && cnt) {
+    var checked = el.querySelectorAll('input[type=checkbox]:checked').length;
+    var parts = cnt.textContent.split(' · ');
+    cnt.textContent = checked + '/15 · ' + parts[parts.length-1];
+  }
+}
+
+function _addCustomTool() {
+  var name = (document.getElementById('customToolName').value || '').trim();
+  var cat  = document.getElementById('customToolCat').value;
+  if (!name) { showToast('Enter a tool name'); return; }
+  if (!cat)  { showToast('Select a category'); return; }
+  var data = _getToolboxStorage();
+  if (!data._custom) data._custom = [];
+  if (data._custom.find(function(t){ return t.name === name; })) { showToast('Already in list'); return; }
+  data._custom.push({ name: name, category: cat });
+  localStorage.setItem('myToolbox', JSON.stringify(data));
+  document.getElementById('customToolName').value = '';
+  _renderToolbox();
+  showToast('✓ ' + name + ' added to ' + cat);
+}
+
+function saveMyToolbox() {
+  var data = _getToolboxStorage();
+  TOOLBOX_CATEGORIES.forEach(function(cat, ci) {
+    var el = document.getElementById('toolcat_' + ci);
+    if (!el) return;
+    var checked = [];
+    el.querySelectorAll('input[type=checkbox]:not([data-custom]):checked').forEach(function(cb) {
+      checked.push(cb.dataset.tool);
+    });
+    data[cat.name] = checked;
+  });
+  localStorage.setItem('myToolbox', JSON.stringify(data));
+  var total = getMyToolbox().length;
+  document.getElementById('myToolboxOverlay').style.display = 'none';
+  showToast('🧰 Toolbox saved — ' + total + ' tools');
+}
+// ── end My Toolbox ─────────────────────────────────────
+
 // ── end AI Session Tips ───────────────────────────────
 
 // ── end AI Daily Briefing ─────────────────────────────
@@ -5652,6 +5805,20 @@ function showToast(msg) {
       <button onclick="document.getElementById('aiSessionOverlay').style.display='none'" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
     </div>
     <div id="aiSessionBody" style="flex:1;overflow-y:auto;padding:16px;background:#f8f9fa;"></div>
+  </div>
+</div>
+
+
+<!-- ── My Toolbox Overlay ─────────────────────────────── -->
+<div id="myToolboxOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10008;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:92vh;display:flex;flex-direction:column;">
+    <div style="background:#111;padding:16px 18px;border-radius:24px 24px 0 0;display:flex;align-items:center;gap:12px;flex-shrink:0;">
+      <span style="font-size:22px;">🧰</span>
+      <div style="flex:1;"><div style="font-size:16px;font-weight:900;color:#fff;">My Toolbox</div><div style="font-size:11px;color:#aaa;" id="toolboxSubtitle">Check the tools you own</div></div>
+      <button onclick="saveMyToolbox()" style="background:#f0c020;border:none;border-radius:8px;padding:7px 16px;font-size:13px;font-weight:900;color:#111;cursor:pointer;font-family:Heebo,sans-serif;">Save</button>
+      <button onclick="document.getElementById('myToolboxOverlay').style.display='none'" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:50%;width:30px;height:30px;font-size:14px;cursor:pointer;">✕</button>
+    </div>
+    <div id="myToolboxBody" style="flex:1;overflow-y:auto;padding:14px;background:#f8f9fa;"></div>
   </div>
 </div>
 
