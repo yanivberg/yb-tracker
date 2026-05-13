@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v541</title>
+<title>י.ב אחזקות — v544</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -466,7 +466,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       <div onclick="closeSetupDrawer();openCaspitOverlay('invoicelist');" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">⚠️</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">Account Manager</span></div>
       <div onclick="closeSetupDrawer();openAIAdvisor();" style="background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;box-shadow:0 4px 12px rgba(13,71,161,0.3);">
-        <span style="font-size:24px;flex-shrink:0;">🤖</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#fff;">AI Advisor</div><div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px;">Most Profitable Category</div></div></div>
+        <span style="font-size:24px;flex-shrink:0;">💫</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#fff;">AI Business Advisor</div><div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px;">Most Profitable Category</div></div></div>
       <div onclick="closeSetupDrawer();runPOImportScan();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📧</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6a1b9a;">Import PO Emails</span></div>
       <div onclick="closeSetupDrawer();hardReset();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -483,16 +483,16 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v541
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v544
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbwiUTsa…exec (v96)
+Apps Script: AKfycbzbHyWK…exec (v97)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v541 · 09/05/2026
+v544 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1134,7 +1134,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v541</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v544</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1150,7 +1150,9 @@ SHEET SYNC
       <button class="btn-start-day" id="btnStartDay" onclick="startDay()" disabled style="flex:1;font-size:30px;letter-spacing:1px;padding:14px 16px;border-radius:12px;">
         Start Work Session
       </button>
-      <button onclick="openAIBriefing()" style="width:58px;background:#0d47a1;border:none;border-radius:12px;font-size:24px;cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 12px rgba(13,71,161,0.4);">🤖</button>
+      <button onclick="openAIBriefing()" style="background:#0d47a1;border:none;border-radius:12px;padding:11px 13px;font-size:12px;font-weight:900;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 12px rgba(13,71,161,0.4);display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.4;font-family:Heebo,sans-serif;">
+        <span style="font-size:18px;">💫</span><span>AI<br>WIZARD</span>
+      </button>
     </div>
     <div style="height:120px;"></div>
   </div>
@@ -1188,7 +1190,12 @@ SHEET SYNC
       </span>
     </div>
     <div style="display:flex;flex-direction:column;gap:10px;padding-bottom:8px;padding-top:4px;">
-      <button onclick="openSetupDrawer()" style="width:100%;padding:16px 14px;background:#f0c020;border:none;border-radius:12px;font-family:Heebo,sans-serif;font-size:16px;font-weight:900;color:#111;letter-spacing:0.5px;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);">Open Toolbox</button>
+      <div style="display:flex;gap:8px;">
+        <button onclick="openSetupDrawer()" style="flex:1;padding:16px 14px;background:#f0c020;border:none;border-radius:12px;font-family:Heebo,sans-serif;font-size:16px;font-weight:900;color:#111;letter-spacing:0.5px;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);">Open Toolbox</button>
+        <button onclick="openAISessionTips()" style="background:#0d47a1;border:none;border-radius:12px;padding:12px 13px;font-size:11px;font-weight:900;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(13,71,161,0.4);display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.4;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">
+          <span style="font-size:18px;">💫</span><span>AI<br>WIZARD</span>
+        </button>
+      </div>
       <button onclick="endDay()" style="width:100%;padding:16px 14px;background:#f0c020;border:none;border-radius:12px;font-family:Heebo,sans-serif;font-size:16px;font-weight:900;color:#111;letter-spacing:0.5px;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);">End Work Session ←</button>
     </div>
   </div>
@@ -1976,7 +1983,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwiUTsaFWHRUGS5f3i2z5ezXYJVILWovAAv7DQv4yt5xcijPz17IDZndzoVvtBLfQN81Q/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzbHyWKHlN2IRm0IfRStS92vP3_mce8T2q8eiq4iv2BnCdYDpMkv6Lz9hvLOGd3JUFzuQ/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -5134,6 +5141,77 @@ function openAIBriefing() {
     })
     .catch(function(err) { body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + err.message + '</div>'; });
 }
+
+// ── AI Session Tips (Accumulation) ───────────────────
+function openAISessionTips() {
+  document.getElementById('aiSessionOverlay').style.display = 'flex';
+  var body = document.getElementById('aiSessionBody');
+  var subtitle = document.getElementById('sessionTipsSubtitle');
+  body.innerHTML = '<div style="text-align:center;padding:40px 0;"><div style="font-size:32px;margin-bottom:12px;">💫</div><div style="color:#555;font-size:14px;font-weight:700;">מנתח את הסשן שלך…</div></div>';
+
+  // Build current session snapshot
+  var now = Date.now();
+  var totalMs = 0;
+  var sessionProjects = projects.map(function(p) {
+    var tillNow = (p.totalMs||0) + (p.active && p.activeStart ? (now - p.activeStart) : 0);
+    totalMs += tillNow;
+    return {
+      client: p.client||'', desc: p.title||p.name||'',
+      cat: p.category||'', estHours: p.estHours||0,
+      actualHrs: Math.round(tillNow/3600000*10)/10,
+      price: p.jobPrice||0, po: p.jobPO||'',
+      status: p.done ? 'done' : (p.active ? 'active' : 'paused'),
+      notes: (p.notes||[]).join(' | ')
+    };
+  });
+
+  var totalHrs = Math.round(totalMs/3600000*10)/10;
+  subtitle.textContent = 'עודכן עכשיו · ' + sessionProjects.length + ' פרויקטים · ' + totalHrs + ' שעות';
+
+  fetch(SHEETS_URL + '?action=getAISessionTips&projects=' + encodeURIComponent(JSON.stringify(sessionProjects)) + '&totalHrs=' + totalHrs)
+    .then(function(r){ return r.json(); })
+    .then(function(result) {
+      if (result.error) { body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + result.error + '</div>'; return; }
+      var parsed = result.parsed;
+      var html = '';
+
+      // Stats bar
+      var estTotal = sessionProjects.reduce(function(s,p){ return s + (p.estHours||0); }, 0);
+      var overPct = estTotal > 0 ? Math.round((totalHrs/estTotal-1)*100) : 0;
+      var estProfit = sessionProjects.reduce(function(s,p){ return s + (p.price||0); }, 0);
+      html += '<div style="background:white;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;margin-bottom:12px;">' +
+        '<div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:#0d47a1;">' + totalHrs + 'h</div><div style="font-size:10px;color:#888;">זמן כולל</div></div>' +
+        (estProfit ? '<div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:#2e7d32;">₪' + Number(estProfit).toLocaleString() + '</div><div style="font-size:10px;color:#888;">רווח משוער</div></div>' : '') +
+        (estTotal > 0 ? '<div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:' + (overPct>20?'#e65100':'#2e7d32') + ';">' + (overPct>=0?'+':'') + overPct + '%</div><div style="font-size:10px;color:#888;">מעל אומדן</div></div>' : '') +
+      '</div>';
+
+      if (parsed) {
+        html += '<div style="font-size:10px;font-weight:900;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">💡 טיפים בזמן אמת</div>';
+
+        if (parsed.tips && parsed.tips.length) {
+          parsed.tips.forEach(function(t) {
+            var colors = {'warning':'#e65100','good':'#2e7d32','note':'#f0c020','focus':'#0d47a1'};
+            var emojis = {'warning':'⏱','good':'✅','note':'📝','focus':'🎯'};
+            var type = t.type || 'note';
+            var isBlue = type === 'focus';
+            html +=
+              '<div style="background:' + (isBlue?'linear-gradient(135deg,#0d47a1,#1565c0)':'white') + ';border-radius:12px;padding:12px 14px;margin-bottom:8px;border-right:4px solid ' + (isBlue?'#0d47a1':(colors[type]||'#aaa')) + ';">' +
+                '<div style="font-size:12px;font-weight:900;color:' + (isBlue?'#f0c020':(colors[type]||'#333')) + ';margin-bottom:5px;">' + (emojis[type]||'·') + ' ' + (t.title||'') + '</div>' +
+                '<div style="font-size:12px;color:' + (isBlue?'#fff':'#444') + ';line-height:1.6;direction:rtl;">' + (t.body||'') + '</div>' +
+              '</div>';
+          });
+        }
+      } else {
+        html += '<div style="background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:12px;padding:14px;"><div style="font-size:13px;color:#fff;line-height:1.7;direction:rtl;">' + (result.text||'').split('\n').join('<br>') + '</div></div>';
+      }
+
+      html += '<button onclick="openAISessionTips()" style="width:100%;padding:12px;background:#f0f0f0;border:none;border-radius:12px;font-size:14px;font-weight:700;color:#333;cursor:pointer;font-family:Heebo,sans-serif;margin-top:4px;">🔄 רענן ניתוח</button>';
+      body.innerHTML = html;
+    })
+    .catch(function(err) { body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + err.message + '</div>'; });
+}
+// ── end AI Session Tips ───────────────────────────────
+
 // ── end AI Daily Briefing ─────────────────────────────
 
 // ── end AI Advisor ─────────────────────────────────────────
@@ -5561,6 +5639,19 @@ function showToast(msg) {
       <button onclick="document.getElementById('aiBriefingOverlay').style.display='none'" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
     </div>
     <div id="aiBriefingBody" style="flex:1;overflow-y:auto;padding:16px;background:#f8f9fa;"></div>
+  </div>
+</div>
+
+
+<!-- ── AI Session Tips Overlay ───────────────────────── -->
+<div id="aiSessionOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10007;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:88vh;display:flex;flex-direction:column;">
+    <div style="background:linear-gradient(135deg,#0d47a1,#1565c0);padding:16px 18px;border-radius:24px 24px 0 0;display:flex;align-items:center;gap:12px;flex-shrink:0;">
+      <span style="font-size:22px;">💫</span>
+      <div style="flex:1;"><div style="font-size:16px;font-weight:900;color:#fff;">AI Session Tips</div><div style="font-size:11px;color:rgba(255,255,255,0.65);" id="sessionTipsSubtitle">טוען…</div></div>
+      <button onclick="document.getElementById('aiSessionOverlay').style.display='none'" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;">✕</button>
+    </div>
+    <div id="aiSessionBody" style="flex:1;overflow-y:auto;padding:16px;background:#f8f9fa;"></div>
   </div>
 </div>
 
