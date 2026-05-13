@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v550</title>
+<title>י.ב אחזקות — v551</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -485,7 +485,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v550
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v551
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbzbHyWK…exec (v97)
@@ -494,7 +494,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v550 · 09/05/2026
+v551 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1136,7 +1136,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v550</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v551</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2873,7 +2873,7 @@ function renderProjectBtns() {
             '</div>' +
             '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
               (todayFmt && todayFmt !== '00:00' ? '<span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">⏱ ' + todayFmt + '</span>' : '') +
-              (p.jobPrice ? '<span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">₪' + Number(p.jobPrice).toLocaleString() + '</span>' : '') +
+              ((p.jobIncome||p.jobPrice) ? '<span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">₪' + Number(p.jobPrice).toLocaleString() + '</span>' : '') +
               (po ? '<span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">' + po + '</span>' : '') +
             '</div>' +
           '</div>' +
@@ -2940,7 +2940,7 @@ function renderProjectBtns() {
           var estHrs = p.estHours || 0;
           var over = estHrs > 0 && actualHrs > estHrs;
           var chips = '<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">';
-          if (p.jobPrice) chips += '<div style="background:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:700;color:#111;box-shadow:0 1px 4px rgba(0,0,0,0.1);"><span style="font-size:9px;font-weight:600;color:#888;display:block;text-transform:uppercase;letter-spacing:0.3px;">Est. Price</span>₪' + Number(p.jobPrice).toLocaleString() + '</div>';
+          if (p.jobIncome||p.jobPrice) chips += '<div style="background:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:700;color:#111;box-shadow:0 1px 4px rgba(0,0,0,0.1);"><span style="font-size:9px;font-weight:600;color:#888;display:block;text-transform:uppercase;letter-spacing:0.3px;">Est. Price</span>₪' + Number(p.jobIncome||p.jobPrice).toLocaleString() + '</div>';
           if (estHrs) chips += '<div style="background:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:700;color:#111;box-shadow:0 1px 4px rgba(0,0,0,0.1);"><span style="font-size:9px;font-weight:600;color:#888;display:block;text-transform:uppercase;letter-spacing:0.3px;">Est. Hours</span>' + hoursToHHMM(estHrs) + '</div>';
           chips += '<div style="background:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:' + (over?'900':'700') + ';color:' + (over?'#c62828':'#111') + ';box-shadow:0 1px 4px rgba(0,0,0,0.1);' + (over?'border:3px solid #c62828;':'') + '"><span style="font-size:9px;font-weight:' + (over?'900':'600') + ';color:' + (over?'#c62828':'#888') + ';display:block;text-transform:uppercase;letter-spacing:0.3px;">Actual' + (over?' ⚠️':'') + '</span>' + formatMs(tillNowMs) + '</div>';
           chips += '</div>';
@@ -2949,7 +2949,7 @@ function renderProjectBtns() {
         '<div style="font-size:32px;font-weight:900;color:#000;line-height:1.1;margin-bottom:10px;">' + displayName + (p.done ? ' ✓' : '') + '</div>' +
         '<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px;">' +
           '<div style="font-size:36px;font-weight:700;letter-spacing:2px;color:#000;" id="ptime-'+i+'">' + formatMs(todayMs) + '</div>' +
-          (p.jobPrice ? '<div style="font-size:20px;font-weight:900;color:#000;">₪' + Number(p.jobPrice).toLocaleString() + '</div>' : '') +
+          ((p.jobIncome||p.jobPrice) ? '<div style="font-size:20px;font-weight:900;color:#000;">₪' + Number(p.jobIncome||p.jobPrice).toLocaleString() + '</div>' : '') +
         '</div>' +
         (tillNowMs > todayMs ? '<div style="background:rgba(0,0,0,0.12);border-radius:8px;padding:5px 12px;display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:10px;font-weight:900;color:#333;text-transform:uppercase;letter-spacing:0.5px;">Till now</span><span style="font-size:15px;font-weight:900;color:#000;">' + formatMs(tillNowMs) + '</span></div>' : '<div style="margin-bottom:12px;"></div>') +
         '<div style="margin-bottom:12px;">' +
@@ -3441,7 +3441,7 @@ function renderSetup() {
         <div style="font-size:18px;font-weight:900;color:#000;margin-bottom:6px;">${p.title || p.name}</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           ${p.jobPO ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.15);border-radius:6px;padding:2px 8px;">${p.jobPO}</span>` : ''}
-          ${p.jobPrice ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;">₪${Number(p.jobPrice).toLocaleString()}</span>` : ''}
+          ${(p.jobIncome||p.jobPrice) ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;">₪${Number(p.jobIncome||p.jobPrice).toLocaleString()}</span>` : ``}
           ${p.estHours ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;">${hoursToHHMM(p.estHours)}</span>` : ''}
           ${((p.prevMs || 0) + p.totalMs) > 0 ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;">⏱ ${formatMs((p.prevMs||0)+p.totalMs)}</span>` : ''}
         </div>
