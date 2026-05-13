@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v546</title>
+<title>י.ב אחזקות — v548</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -485,7 +485,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v546
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v548
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbzbHyWK…exec (v97)
@@ -494,7 +494,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v546 · 09/05/2026
+v548 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1136,7 +1136,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v546</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v548</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -5156,12 +5156,15 @@ function openAISessionTips() {
   var now = Date.now();
   var totalMs = 0;
   var sessionProjects = projects.map(function(p) {
-    var tillNow = (p.totalMs||0) + (p.active && p.activeStart ? (now - p.activeStart) : 0);
-    totalMs += tillNow;
+    var todayMs = (p.totalMs||0) + (p.active && p.activeStart ? (now - p.activeStart) : 0);
+    var historyHrs = parseFloat(p.hoursActual) || 0;
+    var totalProjectMs = todayMs + (historyHrs * 3600000);
+    totalMs += todayMs;
     return {
       client: p.client||'', desc: p.title||p.name||'',
       cat: p.category||'', estHours: p.estHours||0,
-      actualHrs: Math.round(tillNow/3600000*10)/10,
+      actualHrs: Math.round(totalProjectMs/3600000*100)/100,
+      todayHrs: Math.round(todayMs/3600000*100)/100,
       price: p.jobPrice||0, jobIncome: p.jobIncome||0, po: p.jobPO||'',
       status: p.done ? 'done' : (p.active ? 'active' : 'paused'),
       notes: (p.notes||[]).join(' | ')
@@ -5169,7 +5172,7 @@ function openAISessionTips() {
   });
 
   var totalHrs = Math.round(totalMs/3600000*10)/10;
-  subtitle.textContent = 'עודכן עכשיו · ' + sessionProjects.length + ' פרויקטים · ' + totalHrs + ' שעות';
+  subtitle.textContent = 'עודכן עכשיו · ' + sessionProjects.length + ' פרויקטים · ' + (formatMs ? formatMs(totalMs) : totalHrs + 'h');
 
   fetch(SHEETS_URL + '?action=getAISessionTips&projects=' + encodeURIComponent(JSON.stringify(sessionProjects)) + '&totalHrs=' + totalHrs)
     .then(function(r){ return r.json(); })
@@ -5182,8 +5185,9 @@ function openAISessionTips() {
       var estTotal = sessionProjects.reduce(function(s,p){ return s + (p.estHours||0); }, 0);
       var overPct = estTotal > 0 ? Math.round((totalHrs/estTotal-1)*100) : 0;
       var estProfit = sessionProjects.reduce(function(s,p){ return s + (p.jobIncome||p.price||0); }, 0);
+      var timeDisplay = formatMs ? formatMs(totalMs) : (Math.round(totalMs/3600000*100)/100 + 'h');
       html += '<div style="background:white;border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;margin-bottom:12px;">' +
-        '<div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:#0d47a1;">' + totalHrs + 'h</div><div style="font-size:10px;color:#888;">זמן כולל</div></div>' +
+        '<div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:#0d47a1;">' + timeDisplay + '</div><div style="font-size:10px;color:#888;">זמן כולל</div></div>' +
         (estProfit ? '<div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:#2e7d32;">₪' + Number(estProfit).toLocaleString() + '</div><div style="font-size:10px;color:#888;">הכנסה מתוכננת</div></div>' : '') +
         (estTotal > 0 ? '<div style="text-align:center;"><div style="font-size:18px;font-weight:900;color:' + (overPct>20?'#e65100':'#2e7d32') + ';">' + (overPct>=0?'+':'') + overPct + '%</div><div style="font-size:10px;color:#888;">מעל אומדן</div></div>' : '') +
       '</div>';
