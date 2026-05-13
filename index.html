@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v551</title>
+<title>י.ב אחזקות — v554</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -485,16 +485,16 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v551
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v554
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbzbHyWK…exec (v97)
+Apps Script: AKfycbxP2yyM…exec (v99)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v551 · 09/05/2026
+v554 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1136,7 +1136,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v551</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v554</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1985,7 +1985,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzbHyWKHlN2IRm0IfRStS92vP3_mce8T2q8eiq4iv2BnCdYDpMkv6Lz9hvLOGd3JUFzuQ/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxP2yyMZsmXWOCBm8pGOTXti7KyeoNn128jOVA4oRYpWd3fnHTPUdF7ZUYGSvcfqb2rew/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -5198,7 +5198,7 @@ function openAISessionTips() {
     }, 0);
     totalMs = enrichedTotalMs;
 
-    fetch(SHEETS_URL + '?action=getAISessionTips&projects=' + encodeURIComponent(JSON.stringify(enrichedProjects)) + '&totalHrs=' + Math.round(enrichedTotalMs/3600000*100)/100)
+    fetch(SHEETS_URL + '?action=getAISessionTips&projects=' + encodeURIComponent(JSON.stringify(enrichedProjects)) + '&totalHrs=' + Math.round(enrichedTotalMs/3600000*100)/100 + '&toolbox=' + encodeURIComponent(JSON.stringify(getMyToolbox())) + '&categoryTools=' + encodeURIComponent(JSON.stringify(getCategoryTools())))
     .then(function(r){ return r.json(); })
     .then(function(result) {
       if (result.error) { body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + result.error + '</div>'; return; }
@@ -5219,8 +5219,48 @@ function openAISessionTips() {
       '</div>';
 
       if (parsed) {
-        html += '<div style="font-size:10px;font-weight:900;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">💡 טיפים בזמן אמת</div>';
+        // Per-project summaries + tools
+        if (parsed.projects && parsed.projects.length) {
+          parsed.projects.forEach(function(proj, pi) {
+            var p = enrichedProjects[pi] || {};
+            var cc = clientColor ? clientColor(p.client||'') : {solid:'#555'};
+            var secId = 'psec_' + pi;
+            html +=
+              '<div style="background:white;border-radius:12px;overflow:hidden;margin-bottom:8px;border-right:4px solid ' + (cc.solid||'#555') + ';">' +
+                '<div style="padding:10px 14px;background:rgba(0,0,0,0.03);">' +
+                  '<div style="font-size:12px;font-weight:900;color:' + (cc.solid||'#333') + ';margin-bottom:5px;">● ' + (p.client||'') + ' — ' + (p.desc||'') + '</div>' +
+                  '<div style="font-size:12px;color:#333;line-height:1.6;direction:rtl;">' + (proj.summary||'').split('\n').join('<br>') + '</div>' +
+                '</div>' +
+                '<div onclick="_toggleAISec(\'' + secId + '\')" style="padding:8px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;border-top:1px solid #f0f0f0;background:#fafafa;-webkit-tap-highlight-color:transparent;">' +
+                  '<span style="font-size:11px;font-weight:700;color:#333;">🔧 כלים נדרשים' +
+                    ((proj.tools||[]).length ? ' <span style=\"color:#2e7d32;font-size:10px;\">✓ ' + (proj.tools||[]).length + '</span>' : '') +
+                    ((proj.missing_tools||[]).length ? ' <span style=\"color:#e53935;font-size:10px;\">⚠️ ' + (proj.missing_tools||[]).length + ' חסרים</span>' : '') +
+                  '</span>' +
+                  '<span id="' + secId + '_arr" style="color:#aaa;font-size:14px;">›</span>' +
+                '</div>' +
+                '<div id="' + secId + '" style="display:none;padding:10px 14px;border-top:1px solid #f0f0f0;">' +
+                  (proj.tools||[]).map(function(t){ return '<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#2e7d32;padding:3px 0;direction:rtl;"><span>✓</span><span>' + t + '</span></div>'; }).join('') +
+                  (proj.missing_tools||[]).map(function(t,ti){
+                    var btnId = secId + '_btn_' + ti;
+                    var safeTool = t.replace(/'/g,"\\'");
+                    var safeCat = (p.cat||'').replace(/'/g,"\\'");
+                    return '<div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#e53935;font-weight:700;padding:4px 0;direction:rtl;">' +
+                      '<div style="display:flex;align-items:center;gap:6px;"><span>⚠️</span>' + t + ' <span style=\"background:#fce4ec;border-radius:4px;padding:1px 6px;font-size:10px;\">קנה</span></div>' +
+                      '<button id=\"' + btnId + '\" onclick=\"_addMissingTool(\'' + safeTool + '\',\'' + safeCat + '\',document.getElementById(\'' + btnId + '\'))\" style=\"background:#e53935;color:#fff;border:none;border-radius:6px;padding:3px 10px;font-size:11px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;\">+ הוסף</button>' +
+                    '</div>';
+                  }).join('') +
+                  '<div style="border-top:1px dashed #e0e0e0;margin:8px 0;"></div>' +
+                  '<div style="display:flex;gap:6px;align-items:center;">' +
+                    '<input id=\"' + secId + '_inp\" type=\"text\" placeholder=\"כלי נוסף...\" style=\"flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;\">' +
+                    '<button onclick=\"_addCustomCatTool(\'' + secId + '_inp\',\'' + (p.cat||'').replace(/'/g,"\\'") + '\')\" style=\"background:#0d47a1;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;\">+</button>' +
+                  '</div>' +
+                  '<div style=\"font-size:10px;color:#888;margin-top:4px;direction:rtl;\">יתווסף לארגז הכלים ויזכר לפרויקטי <strong>' + (p.cat||'') + '</strong></div>' +
+                '</div>' +
+              '</div>';
+          });
+        }
 
+        html += '<div style="font-size:10px;font-weight:900;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">💡 טיפים בזמן אמת</div>';
         if (parsed.tips && parsed.tips.length) {
           parsed.tips.forEach(function(t) {
             var colors = {'warning':'#e65100','good':'#2e7d32','note':'#f0c020','focus':'#0d47a1'};
@@ -5247,22 +5287,22 @@ function openAISessionTips() {
 
 // ── My Toolbox ────────────────────────────────────────
 var TOOLBOX_CATEGORIES = [
-  { name:'Hand Tools', emoji:'🔨', color:'#333', tools:['Hammer','Screwdriver (+)','Screwdriver (-)','Adjustable Wrench','Pliers','Pry Bar','Hand Saw','Chisel','Allen Keys','Wire Brush','Putty Knife','Utility Knife','Rubber Mallet','Pipe Wrench','Punch'] },
-  { name:'Power Tools', emoji:'⚡', color:'#1565c0', tools:['Drill','Impact Driver','Angle Grinder','Circular Saw','Reciprocating Saw','Air Compressor','Air Nailer','Jigsaw','Rotary Hammer','Heat Gun','Belt Sander','Oscillating Tool','Plasma Cutter','Router','Polisher'] },
-  { name:'Welding & Metalwork', emoji:'🔥', color:'#b71c1c', tools:['MIG Welder','TIG Welder','Arc Welder','Angle Grinder','Metal Saw','Column Drill','Rivet Gun','Welding Mask','Welding Gloves','Wire Feed','Cutting Disc','Grinding Disc','Welding Table','Clamp Magnets','Chipping Hammer'] },
-  { name:'Measuring & Testing', emoji:'📏', color:'#2e7d32', tools:['Tape Measure','Spirit Level','Laser Measure','Multimeter','Voltage Tester','Square','Angle Finder','Chalk Line','Caliper','Stud Finder','Thermal Camera','Clamp Meter','Wire Tracer','Plumb Bob','Thickness Gauge'] },
-  { name:'Plumbing', emoji:'🚰', color:'#00695c', tools:['Pipe Wrench','Basin Wrench','Pipe Cutter','Teflon Tape','Drain Snake','Soldering Torch','Pipe Bender','Push-fit Tool','Thread Tap','Plunger','Pressure Gauge','Hacksaw','Pipe Deburrer','Compression Tool','Fitting Brush'] },
-  { name:'Access & Lifting', emoji:'🪜', color:'#4527a0', tools:['Step Ladder','Extension Ladder','Scaffolding','Pallet Jack','Hand Truck','Lifting Slings','Chain Hoist','Rope','Safety Harness','Work Platform','Roller Stand','Toe Board','Wheel Chocks','Ratchet Straps','Cargo Net'] },
-  { name:'Safety', emoji:'🦺', color:'#e65100', tools:['Hard Hat','Safety Glasses','Ear Plugs','Safety Gloves','Steel-toe Boots','Hi-Vis Vest','Dust Mask','Respirator','Face Shield','Knee Pads','First Aid Kit','Fire Extinguisher','Gas Detector','Safety Cones','Lockout Kit'] },
-  { name:'Wood Tools', emoji:'🪵', color:'#5d4037', tools:['Hand Plane','Wood Chisels','Wood Saw','Miter Saw','Router','Wood Clamps','Biscuit Joiner','Dowel Drill','Card Scraper','Wood Rasp','Spoke Shave','Marking Gauge','Cabinet Scraper','Mortise Chisel','Dovetail Saw'] },
-  { name:'Sealing Tools', emoji:'🔒', color:'#37474f', tools:['Caulking Gun','Silicone Smoother','Foam Gun','Putty Knife','Heat Gun','Sealing Tape','Waterproof Membrane','Corner Bead','Grout Float','Tile Spacers','Sealant Remover','Brush Set','Paint Roller','Masking Tape','Mixing Stick'] },
-  { name:'Drywall & Prefab', emoji:'🧱', color:'#6d4c41', tools:['Drywall Knife','T-Square','Drywall Screwgun','Joint Knife','Corner Tool','Sanding Block','Mud Pan','Stilts','Panel Lift','Plasterboard Saw','Rasp Plane','Angle Bead','Tape Applicator','Corner Finisher','Snapper Cutter'] },
-  { name:'Nuts, Bolts & Screws', emoji:'🔩', color:'#455a64', tools:['M6 Bolts','M8 Bolts','M10 Bolts','M12 Bolts','Hex Nuts','Wing Nuts','Lock Washers','Flat Washers','Wood Screws','Self-drilling Screws','Anchor Bolts','Spring Nuts','Rivet Nuts','Threaded Rod','Nails Assortment'] },
-  { name:'Writing & Marking', emoji:'✏️', color:'#1a237e', tools:['Permanent Marker','Chalk','Chalk Line','Pencil','Marking Pen','Paint Marker','Wax Crayon','Label Maker','Scriber','Center Punch','Marking Gauge','Angle Marker','Stencils','Notes Pad','Clipboard'] },
-  { name:'Electricity Tools', emoji:'🔌', color:'#f9a825', tools:['Wire Stripper','Wire Cutter','Crimping Tool','Cable Tester','Voltage Meter','Phase Tester','Conduit Bender','Fish Tape','Cable Stapler','Insulation Tape','Terminal Block','Circuit Tester','Label Maker','Punch Down Tool','Continuity Tester'] },
-  { name:'Construction Tools', emoji:'🏗️', color:'#795548', tools:['Mixing Drill','Concrete Mixer','Sledgehammer','Jackhammer','Tamper','Wheelbarrow','Trowel','Float','Grouting Gun','Line Level','Bolt Cutter','Rebar Bender','Concrete Vibrator','Block Splitter','Bull Float'] },
-  { name:'Gardening Tools', emoji:'🌿', color:'#388e3c', tools:['Pruning Shears','Garden Fork','Spade','Rake','Hoe','Garden Trowel','Hose Reel','Wheelbarrow','Hedge Trimmer','Leaf Blower','Lawn Mower','Chain Saw','Soil Knife','Weeder','Sprinkler'] },
-  { name:'Cleaning Tools', emoji:'🧹', color:'#0288d1', tools:['Broom','Dustpan','Mop','Pressure Washer','Vacuum','Squeegee','Scrub Brush','Sponge','Bucket','Spray Bottle','Degreaser','Industrial Wipes','Air Blower','Wet Vac','Floor Scrubber'] }
+  { name:'Hand Tools', emoji:'🔨', color:'#333', tools:['פטיש','מברג פלוס','מברג מינוס','מפתח שוודי','פלייר','לברנש','מסור ידני','אזמל','מפתחות אלן','מברשת תיל','שפכטל','סכין שטף','פטיש גומי','מפתח צינור','אגרוף'] },
+  { name:'Power Tools', emoji:'⚡', color:'#1565c0', tools:['מקדחה','מברגה מפרקת','גרינדר','מסור עגול','מסור סייבר','מדחס','מסמרייה פנאומטית','מסור פאזל','פטישון','מפוח חום','מלטשת ברצועה','כלי תנודות','פלזמה','כרסומת','מלטשת'] },
+  { name:'Welding & Metalwork', emoji:'🔥', color:'#b71c1c', tools:['מרתך MIG','מרתך TIG','מרתך אלקטרודה','גרינדר','מסור ברזל','מקדחת עמוד','מסמרייה','מסכת ריתוך','כפפות ריתוך','חוט ריתוך','דיסק חיתוך','דיסק השחזה','שולחן ריתוך','מגנטי קיבוע','פטיש שבירה'] },
+  { name:'Measuring & Testing', emoji:'📏', color:'#2e7d32', tools:['סרט מידה','פלס','מד לייזר','מולטימטר','בודק מתח','כיכר','מד זוויות','חוט גיר','קליפר','גלאי קורות','מצלמה תרמית','מלחציים מד','גלאי כבלים','אנך','מד עובי'] },
+  { name:'Plumbing', emoji:'🚰', color:'#00695c', tools:['מפתח בריזל','מפתח כיור','חותך צינורות','טפלון','ספירלה לביוב','לפיד לחמה','כופף צינורות','כלי חיבור מהיר','ברז הברגה','פומפה','מד לחץ','מסור ברזל ידני','כלי פינת צינור','כלי דחיסה','מברשת חיבורים'] },
+  { name:'Access & Lifting', emoji:'🪜', color:'#4527a0', tools:['סולם מדרגות','סולם הארכה','פיגום','עגלת הרמה','עגלת יד','רצועות הרמה','גלגלת שרשרת','חבל','רתמת בטיחות','פלטפורמת עבודה','עמד גלגלים','לוח בטיחות תחתון','טריזי גלגל','רצועות רצ\'ט','רשת מטען'] },
+  { name:'Safety', emoji:'🦺', color:'#e65100', tools:['קסדה','משקפי מגן','אטמי אוזניים','כפפות בטיחות','נעלי בטיחות','אפוד זוהר','מסיכת אבק','מסיכת נשימה','מגן פנים','מגני ברכיים','ערכת עזרה ראשונה','מטף כיבוי','גלאי גז','קונוסי בטיחות','ערכת נעילה'] },
+  { name:'Wood Tools', emoji:'🪵', color:'#5d4037', tools:['מקצוע','אזמלי עץ','מסור עץ','מסור מצדד','כרסומת','מהדקי עץ','מכונת ביסקוויט','מקדח ביסקוויט','גרד','פצירה לעץ','רנדת תבנית','סרגל סימון','גרד קבינט','אזמל חריץ','מסור שוביך'] },
+  { name:'Sealing Tools', emoji:'🔒', color:'#37474f', tools:['אקדח סיליקון','כלי פינוי סיליקון','אקדח פום','שפכטל','מפוח חום','סרט איטום','ממברנה עמידת מים','פינת איטום','צף מילוי','מרווחי אריחים','מסיר איטום','ערכת מברשות','גלגלת צבע','סרט נייר','מקל ערבול'] },
+  { name:'Drywall & Prefab', emoji:'🧱', color:'#6d4c41', tools:['סכין גבס','כיכר T','מברגת גבס','סכין מפגש','כלי פינה','גוש שיוף','מגש טיח','כלונסאות','מרים לוח','מסור גבס','רנדת פצירה','פס פינה','מיישם סרט','כלי גימור פינה','חותך שבירה'] },
+  { name:'Nuts, Bolts & Screws', emoji:'🔩', color:'#455a64', tools:['בורגי M6','בורגי M8','בורגי M10','בורגי M12','אומות שישה צלעות','אומות פרפר','שיבות נגד פתיחה','שיבות שטוחות','ברגי עץ','ברגי קידוח עצמי','עוגנים','אומות קפיץ','אומות ריווט','מוט הברגה','מגוון מסמרים'] },
+  { name:'Writing & Marking', emoji:'✏️', color:'#1a237e', tools:['טוש קבוע','גיר','חוט גיר','עיפרון','עט סימון','טוש צבע','עפרון שעווה','מכשיר תיוג','מחריט','מרכז אגרוף','סרגל סימון','מסמן זוויות','שבלונות','מחברת שטח','לוח לכתיבה'] },
+  { name:'Electricity Tools', emoji:'🔌', color:'#f9a825', tools:['קולפן תיל','גוזז תיל','כלי הברגה חשמל','בודק כבלים','מד מתח','בודק פאזה','כופף צינור','חוט משיכה','מהדק כבלים','סרט בידוד','לוח מסוף','בודק מעגל','מכשיר תיוג','כלי הכנסה','בודק רציפות'] },
+  { name:'Construction Tools', emoji:'🏗️', color:'#795548', tools:['מקדחת ערבול','מערבת בטון','פטיש כבד','פטיש אוויר','דוחס','מריצה','כף טיח','מגהץ טיח','אקדח מילוי','פלס חוט','גוזז בורגים','כופף ברזל בניה','ויברטור בטון','מפצל בלוקים','מגהץ גדול'] },
+  { name:'Gardening Tools', emoji:'🌿', color:'#388e3c', tools:['מספריים לגיזום','וילת גן','את','גרדום','מעדר','את קטן','גלגלת צינור','מריצה','גוזז גדרות','מפוח עלים','דשאייה','מסור שרשרת','סכין אדמה','מעקר עשבים','ממטרה'] },
+  { name:'Cleaning Tools', emoji:'🧹', color:'#0288d1', tools:['מטאטא','יעה','מגב','שוטף לחץ','שואב אבק','מגב זכוכית','מברשת שפשוף','ספוג','דלי','בקבוק ריסוס','מסיר שומן','מגבונים תעשייתיים','מפוח אוויר','שואב אבק רטוב','מלטשת רצפה'] }
 ];
 
 function _getToolboxStorage() {
@@ -5392,6 +5432,46 @@ function saveMyToolbox() {
   document.getElementById('myToolboxOverlay').style.display = 'none';
   showToast('🧰 Toolbox saved — ' + total + ' tools');
 }
+
+function getCategoryTools() {
+  try { return JSON.parse(localStorage.getItem('categoryTools') || '{}'); } catch(e) { return {}; }
+}
+
+function addToolToCategory(toolName, category) {
+  // 1. Add to toolbox
+  var tb = JSON.parse(localStorage.getItem('myToolbox') || '{}');
+  if (!tb._custom) tb._custom = [];
+  if (!tb._custom.find(function(t){ return t.name === toolName; })) {
+    tb._custom.push({ name: toolName, category: category || 'Hand Tools' });
+    localStorage.setItem('myToolbox', JSON.stringify(tb));
+  }
+  // 2. Add to category memory
+  var ct = getCategoryTools();
+  if (!ct[category]) ct[category] = [];
+  if (ct[category].indexOf(toolName) === -1) ct[category].push(toolName);
+  localStorage.setItem('categoryTools', JSON.stringify(ct));
+}
+
+function _addMissingTool(toolName, category, btn) {
+  addToolToCategory(toolName, category);
+  if (btn) {
+    btn.textContent = '✓';
+    btn.style.background = '#2e7d32';
+    btn.disabled = true;
+    btn.parentElement.style.color = '#2e7d32';
+  }
+  showToast('✓ ' + toolName + ' נוסף לארגז · יוצג בפרויקטי ' + (category||''));
+}
+
+function _addCustomCatTool(inputId, category) {
+  var inp = document.getElementById(inputId);
+  var name = (inp ? inp.value : '').trim();
+  if (!name) { showToast('הכנס שם כלי'); return; }
+  addToolToCategory(name, category);
+  inp.value = '';
+  showToast('✓ ' + name + ' נוסף לארגז · יוצג בפרויקטי ' + (category||''));
+}
+
 // ── end My Toolbox ─────────────────────────────────────
 
 // ── end AI Session Tips ───────────────────────────────
