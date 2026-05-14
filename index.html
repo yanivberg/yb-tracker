@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v569</title>
+<title>י.ב אחזקות — v573</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -485,16 +485,16 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v569
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v573
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbx5ZDNt…exec (v105)
+Apps Script: AKfycbwZ4z4I…exec (v107)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v569 · 09/05/2026
+v573 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1136,7 +1136,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v569</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v573</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1985,7 +1985,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbx5ZDNtp4nkpZMoIzrHkm-rBWwsdw-Lhvt0zBAEKBhHLWKCb_l_2vdKVKgG1DpcQtUN6Q/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwZ4z4IizzkKvB0ANgK7_wP50TkGSmW5_H_sZsR8ARItlt3-V9dSA3BtsJldMbGvtjSiA/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -5777,6 +5777,42 @@ function _renderPreSurveyBodyAI(descSummary, aiSteps, successKeys, suggestedTool
       '</div>' +
     '</div>' +
 
+    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
+      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:10px;">⚙️ Job Conditions</div>' +
+      '<div style="display:flex;flex-direction:column;gap:10px;">' +
+
+        '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+          '<span style="font-size:12px;font-weight:700;color:#333;">Working at height?</span>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="height" id="heightYes" value="yes"> Yes</label>' +
+            '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="height" id="heightNo" value="no" checked> No</label>' +
+          '</div>' +
+        '</div>' +
+
+        '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+          '<span style="font-size:12px;font-weight:700;color:#333;">Number of workers</span>' +
+          '<input type="number" id="workerCount" min="1" max="20" value="1" style="width:70px;padding:6px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;font-weight:700;text-align:center;font-family:Heebo,sans-serif;">' +
+        '</div>' +
+
+        '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+          '<span style="font-size:12px;font-weight:700;color:#333;">Outdoor or indoor?</span>' +
+          '<select id="jobLocation" style="padding:6px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;">' +
+            '<option value="outdoor">Outdoor</option>' +
+            '<option value="indoor">Indoor</option>' +
+            '<option value="both">Both</option>' +
+          '</select>' +
+        '</div>' +
+
+        '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+          '<span style="font-size:12px;font-weight:700;color:#333;">Power supply available?</span>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="power" id="powerYes" value="yes" checked> Yes</label>' +
+            '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="power" id="powerNo" value="no"> No</label>' +
+          '</div>' +
+        '</div>' +
+
+      '</div>' +
+    '</div>' +
     '<button onclick="submitPreProjectSurvey()" style="width:100%;padding:14px;background:#f0c020;border:none;border-radius:12px;font-size:16px;font-weight:900;color:#111;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);font-family:Heebo,sans-serif;margin-bottom:8px;">✓ Ready — Add to Today</button>';
 
   return html;
@@ -5827,8 +5863,12 @@ function submitPreProjectSurvey() {
   var keys = Array.from(document.querySelectorAll('[id^="pkey_"]:checked')).map(function(cb){ return cb.dataset.key; });
   var tools = Array.from(document.querySelectorAll('[id^="ptool_"]:checked')).map(function(cb){ return cb.dataset.tool; });
   var materials = Array.from(document.querySelectorAll('#preMaterialsList [data-mat]')).map(function(s){ return s.dataset.mat; });
+  var heightWork  = (document.getElementById('heightYes')||{}).checked ? 'yes' : 'no';
+  var workerCount = (document.getElementById('workerCount')||{}).value || '1';
+  var jobLocation = (document.getElementById('jobLocation')||{}).value || 'outdoor';
+  var powerSupply = (document.getElementById('powerYes')||{}).checked ? 'yes' : 'no';
 
-  var survey = { jobId:job.id||'', client:job.client||'', desc:job.desc||'', cat:job.category||'', date:new Date().toLocaleDateString('he-IL'), steps:steps, keys:keys, tools:tools, materials:materials };
+  var survey = { jobId:job.id||'', client:job.client||'', desc:job.desc||'', cat:job.category||'', date:new Date().toLocaleDateString('he-IL'), steps:steps, keys:keys, tools:tools, materials:materials, heightWork:heightWork, workers:workerCount, location:jobLocation, powerSupply:powerSupply };
 
   // Save to localStorage
   var surveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
