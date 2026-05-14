@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v558</title>
+<title>י.ב אחזקות — v560</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -485,16 +485,16 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v558
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v560
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxrsYyY…exec (v103)
+Apps Script: AKfycbzAvOf5…exec (v104)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v558 · 09/05/2026
+v560 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1136,7 +1136,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v558</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v560</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1985,7 +1985,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxrsYyYDBAbSIgVX1xUrl2rSO94RddXhlVs9a8gDWrhX1wpPDKjtnwsauRLn4EdHltt5g/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzAvOf5-7pVaAhnQrFQq1vGzY04rM1Dh6idh-kfRTuZ68LKrpQU37uKRqreq-EtKklCNg/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -5655,27 +5655,69 @@ function openPreProjectSurvey(job) {
       '<span style="font-size:24px;">📋</span>' +
       '<div style="flex:1;"><div style="font-size:16px;font-weight:900;color:#fff;">Pre-Project Briefing</div>' +
       '<div style="font-size:11px;color:rgba(255,255,255,0.8);">' + (job.client||'') + ' — ' + (job.desc||job.id||'') + '</div></div>' +
-      '<div style="background:rgba(255,255,255,0.2);border-radius:6px;padding:3px 8px;font-size:10px;color:#fff;font-weight:700;">First time</div>' +
+      '<div style="background:rgba(255,255,255,0.2);border-radius:6px;padding:3px 8px;font-size:10px;color:#fff;font-weight:700;">🤖 AI</div>' +
     '</div>';
 
-  var cat = job.category || '';
-  var successKeys = SUCCESS_KEYS_BY_CAT[cat] || SUCCESS_KEYS_BY_CAT['default'];
-  var suggestedTools = (getCategoryTools()[cat] || []).concat(getMyToolbox().slice(0,6)).filter(function(t,i,a){ return a.indexOf(t)===i; }).slice(0,10);
+  // Show loading screen
+  body.innerHTML =
+    '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;gap:14px;">' +
+      '<div style="font-size:40px;">🤖</div>' +
+      '<div style="font-size:14px;font-weight:700;color:#333;text-align:center;">מנתח תיאור הפרויקט...</div>' +
+      '<div style="width:100%;background:#e0e0e0;border-radius:4px;height:5px;overflow:hidden;"><div style="width:60%;height:100%;background:linear-gradient(90deg,#0d47a1,#1565c0);border-radius:4px;animation:none;"></div></div>' +
+      '<div style="font-size:11px;color:#aaa;text-align:center;direction:rtl;">קורא תיאור · בודק היסטוריה · מכין הצעות</div>' +
+    '</div>';
 
-  body.innerHTML = _renderPreSurveyBody(successKeys, suggestedTools, cat);
+  // Fetch AI analysis
+  var params = '?action=analyzeJobForPreSurvey' +
+    '&desc='   + encodeURIComponent(job.desc   || job.name || '') +
+    '&cat='    + encodeURIComponent(job.category || '') +
+    '&client=' + encodeURIComponent(job.client  || '') +
+    '&notes='  + encodeURIComponent((job.notes||[]).join(' ') || '');
+
+  fetch(SHEETS_URL + params)
+    .then(function(r){ return r.json(); })
+    .then(function(result) {
+      var ai = result.parsed || {};
+      var cat = job.category || '';
+      var fallbackKeys  = SUCCESS_KEYS_BY_CAT[cat] || SUCCESS_KEYS_BY_CAT['default'];
+      var fallbackTools = (getCategoryTools()[cat]||[]).concat(getMyToolbox().slice(0,6)).filter(function(t,i,a){ return a.indexOf(t)===i; }).slice(0,10);
+
+      var aiSteps   = ai.steps    || ['','','',''];
+      var aiKeys    = ai.keys     || fallbackKeys;
+      var aiTools   = ai.tools    || fallbackTools;
+      var aiMats    = ai.materials|| [];
+      var aiSummary = ai.descSummary || '';
+
+      body.innerHTML = _renderPreSurveyBodyAI(aiSummary, aiSteps, aiKeys, aiTools, aiMats, job.desc||'', cat);
+    })
+    .catch(function() {
+      var cat = job.category || '';
+      body.innerHTML = _renderPreSurveyBodyAI('', ['','','',''], SUCCESS_KEYS_BY_CAT[cat]||SUCCESS_KEYS_BY_CAT['default'], (getCategoryTools()[cat]||[]).slice(0,8), [], job.desc||'', cat);
+    });
 }
 
-function _renderPreSurveyBody(successKeys, suggestedTools, cat) {
-  var steps = ['','','',''];
-  var html =
+function _renderPreSurveyBodyAI(descSummary, aiSteps, successKeys, suggestedTools, materials, rawDesc, cat) {
+  var html = '';
+
+  // Description reference
+  if (rawDesc || descSummary) {
+    html += '<div style="background:#e8eaf6;border-radius:12px;padding:10px 14px;margin-bottom:10px;border-right:3px solid #3949ab;">' +
+      '<div style="font-size:10px;font-weight:700;color:#3949ab;margin-bottom:4px;">📄 מתיאור הפרויקט</div>' +
+      (descSummary ? '<div style="font-size:12px;color:#333;direction:rtl;line-height:1.5;margin-bottom:4px;">' + descSummary + '</div>' : '') +
+      (rawDesc ? '<div style="font-size:11px;color:#666;direction:rtl;line-height:1.4;font-style:italic;">' + rawDesc + '</div>' : '') +
+    '</div>';
+  }
+
+  var steps = aiSteps.length ? aiSteps : ['','','',''];
+  html +=
     // Working Strategy
     '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
-      '<div style="font-size:12px;font-weight:900;color:#0d47a1;margin-bottom:8px;">🗂 Working Strategy</div>' +
+      '<div style="font-size:12px;font-weight:900;color:#0d47a1;margin-bottom:8px;">🗂 Working Strategy <span style=\"font-size:10px;background:#e3f2fd;color:#0d47a1;padding:1px 6px;border-radius:4px;\">AI ✨</span></div>' +
       '<div id="strategySteps" style="display:flex;flex-direction:column;gap:6px;">' +
-        steps.map(function(_,i){
+        steps.map(function(stepVal,i){
           return '<div style="display:flex;align-items:center;gap:8px;">' +
             '<span style="font-size:11px;font-weight:900;color:#0d47a1;background:#e3f2fd;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + (i+1) + '</span>' +
-            '<input id="pstep_'+i+'" placeholder="שלב ' + (i+1) + '..." style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;">' +
+            '<input id="pstep_'+i+'" placeholder="שלב ' + (i+1) + '..." value=\"" + (stepVal||"").replace(/"/g,'&quot;') + "\" style=\"flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;\">' +
           '</div>';
         }).join('') +
       '</div>' +
@@ -5693,15 +5735,17 @@ function _renderPreSurveyBody(successKeys, suggestedTools, cat) {
 
     // Suggested Tools
     (suggestedTools.length ? '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
-      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:6px;">🔧 Suggested Tools <span style="font-size:10px;color:#888;font-weight:400;">מבוסס היסטוריה</span></div>' +
+      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:6px;">🔧 Suggested Tools <span style=\"font-size:10px;background:#e8f5e9;color:#2e7d32;padding:1px 6px;border-radius:4px;margin-right:4px;\">AI ✨</span><span style="font-size:10px;color:#888;font-weight:400;">מבוסס היסטוריה</span></div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">' +
         suggestedTools.map(function(t,ti){ return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:3px 0;"><input type="checkbox" id="ptool_'+ti+'" data-tool="'+t.replace(/"/g,'&quot;')+'"> '+t+'</label>'; }).join('') +
       '</div></div>' : '') +
 
     // Materials
     '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
-      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">📦 Materials needed</div>' +
-      '<div id="preMaterialsList" style="display:flex;flex-direction:column;gap:4px;margin-bottom:6px;"></div>' +
+      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">📦 Materials needed <span style=\'font-size:10px;background:#e8f5e9;color:#2e7d32;padding:1px 6px;border-radius:4px;\'>AI ✨</span></div>' +
+      '<div id="preMaterialsList" style="display:flex;flex-direction:column;gap:4px;margin-bottom:6px;">' +
+        materials.map(function(m){ return '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f5f5f5;"><span style="font-size:12px;direction:rtl;" data-mat="' + m.replace(/"/g,'&quot;') + '">' + m + '</span><span onclick="this.parentElement.remove()" style="color:#e53935;font-size:14px;cursor:pointer;">×</span></div>'; }).join('') +
+      '</div>' +
       '<div style="display:flex;gap:6px;">' +
         '<input id="preMaterialInp" placeholder="חומר / פריט..." style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;" onkeypress="if(event.key===\'Enter\')_addPreMaterial()">' +
         '<button onclick="_addPreMaterial()" style="background:#0d47a1;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">+</button>' +
