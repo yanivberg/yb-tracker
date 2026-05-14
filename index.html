@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v555</title>
+<title>י.ב אחזקות — v558</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -485,16 +485,16 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v555
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v558
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbwa_VUC…exec (v100)
+Apps Script: AKfycbxrsYyY…exec (v103)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v555 · 09/05/2026
+v558 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1136,7 +1136,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v555</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v558</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1985,7 +1985,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwa_VUCAJZqXT9Gmbu4wIucy-WtC2QJ8FubYJfQuDE2XJleNGQrf3J9P9sBPYACfW3z0w/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxrsYyYDBAbSIgVX1xUrl2rSO94RddXhlVs9a8gDWrhX1wpPDKjtnwsauRLn4EdHltt5g/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2134,6 +2134,14 @@ function promptProjectTitles(jobs, callback) {
 }
 
 function addJobAsProject(job) {
+  // Check if pre-survey was already done for this job
+  var done = JSON.parse(localStorage.getItem('preSurveyDone')||'{}');
+  if (job.id && done[job.id]) { _doAddJobAsProject(job); return; }
+  // Show mandatory pre-survey
+  _preSurveyPendingJob = job;
+  openPreProjectSurvey(job);
+}
+function _doAddJobAsProject(job) {
   var name = job.desc;
   if (projects.find(function(p) { return p.jobId === job.id; })) { showToast('Job already added'); return; }
   var proj = { name: name, title: job.title || name, client: job.client, jobId: job.id, jobClient: job.client, jobDateStart: null, estHours: job.hours || 0, jobPO: job.poNumber || job.po || '', jobPrice: job.price || 0, jobIncome: parseFloat(job.income) || 0, sessionNum: projects.length + 1, totalMs: 0, prevMs: 0, active: false, activeStart: null, done: false, notes: [], noteOpen: false, editOpen: false };
@@ -2963,7 +2971,7 @@ function renderProjectBtns() {
             '<input id="noteInp-'+i+'" type="text" placeholder="Add note…" oninput="projects['+i+']._pendingNote=this.value" onkeypress="if(event.key===\'Enter\')saveNote('+i+')" style="flex:1;padding:10px 12px;border:2px solid rgba(0,0,0,0.25);border-radius:8px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.5);color:#000;direction:rtl;position:relative;z-index:2;">' +
             '<button onclick="saveNote('+i+')" style="padding:10px 20px;background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;font-size:18px;font-weight:900;cursor:pointer;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,0.2);position:relative;z-index:2;">+</button>' +
           '</div>' +
-          (!p.done ? '<button onclick="toggleDone('+i+')" style="width:100%;margin-top:10px;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#c62828;">✓ End Project</button>' : '') +
+          (!p.done ? '<button onclick="openProjectSurvey('+i+')" style="width:100%;margin-top:10px;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#c62828;">✓ End Project</button>' : '') +
         '</div>' +
       '</div>' +
     '</div>';
@@ -5472,6 +5480,309 @@ function _addCustomCatTool(inputId, category) {
   showToast('✓ ' + name + ' נוסף לארגז · יוצג בפרויקטי ' + (category||''));
 }
 
+
+// ── Post-Project Survey ───────────────────────────────
+var _surveyIdx = -1;
+var _surveyRating = 0;
+
+var PROCESS_STEPS_BY_CAT = {
+  'מסגרות':    ['הכנה ומדידות','חיתוך ברזל','ריתוך','עיבוד ועיצוב','צביעה','קיבוע סופי','ניקוי שטח'],
+  'חשמל':      ['בדיקת מתח','תכנון מסלול','הנחת כבלים','חיבורים','בדיקה סופית','ניקוי שטח'],
+  'אינסטלציה': ['בדיקת מערכת','פירוק ישן','התקנה חדשה','חיבור צינורות','בדיקת דליפות','ניקוי שטח'],
+  'איטום':     ['הכנת משטח','ניקוי וייבוש','הנחת ממברנה','איטום פינות','בדיקת עמידות','ניקוי שטח'],
+  'צבע':       ['הכנת משטח','טיפול בסדקים','בסיס ראשון','צביעה','שכבה שנייה','ניקוי שטח'],
+  'פיקוח':     ['סקר ראשוני','תיאום קבלנים','מעקב ביצוע','בדיקת איכות','דיווח ותיעוד'],
+  'נגרות':     ['מדידות','חיתוך עץ','הרכבה','ליטוש','גימור ולכה','ניקוי שטח'],
+  'גגות':      ['הכנה ומדידות','חיתוך חומרים','התקנה','קיבוע','איטום','ניקוי שטח'],
+  'default':   ['הכנה ומדידות','ביצוע עבודה ראשי','בדיקה ופינישינג','ניקוי שטח']
+};
+
+var ISSUE_OPTIONS = ['חסר ציוד','חסר חומרים','חריגה מזמן','בעיה טכנית','שינוי בהיקף','בעיית גישה','מזג אוויר','בעיית לקוח'];
+
+function openProjectSurvey(i) {
+  _surveyIdx = i;
+  _surveyRating = 0;
+  var p = projects[i];
+  var overlay = document.getElementById('projectSurveyOverlay');
+  var header  = document.getElementById('surveyHeader');
+  var body    = document.getElementById('surveyBody');
+  overlay.style.display = 'flex';
+
+  var hrs = formatMs((p.totalMs||0) + (parseFloat(p.hoursActual||0)*3600000));
+  header.innerHTML =
+    '<div style="display:flex;align-items:center;gap:12px;">' +
+      '<span style="font-size:24px;">✅</span>' +
+      '<div style="flex:1;"><div style="font-size:16px;font-weight:900;color:#fff;">Project Complete!</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.8);">' + (p.client||'') + ' — ' + (p.title||p.name||'') + '</div></div>' +
+      '<div style="text-align:right;"><div style="font-size:14px;font-weight:900;color:#fff;">' + hrs + '</div>' +
+      '<div style="font-size:9px;color:rgba(255,255,255,0.7);">שעות</div></div>' +
+    '</div>';
+
+  var steps = PROCESS_STEPS_BY_CAT[p.category] || PROCESS_STEPS_BY_CAT['default'];
+  var myTools = getMyToolbox();
+  var catSpecific = (getCategoryTools()[p.category] || []);
+  var suggestedTools = myTools.concat(catSpecific.filter(function(t){ return myTools.indexOf(t)<0; })).slice(0,12);
+
+  var html =
+    // Rating
+    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
+      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">⭐ Rate this job</div>' +
+      '<div style="display:flex;gap:6px;justify-content:center;" id="surveyStars">' +
+        [1,2,3,4,5].map(function(n){ return '<span onclick="_setSurveyRating('+n+')" id="surveyStar'+n+'" style="font-size:30px;cursor:pointer;opacity:0.25;-webkit-tap-highlight-color:transparent;">⭐</span>'; }).join('') +
+      '</div>' +
+      '<div id="surveyRatingLabel" style="text-align:center;font-size:11px;color:#888;margin-top:4px;">Tap to rate</div>' +
+    '</div>' +
+
+    // Tools used
+    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
+      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">🔧 Tools used</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">' +
+        suggestedTools.map(function(t,ti){ return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:4px 0;"><input type="checkbox" id="stool_'+ti+'" data-tool="'+t.replace(/"/g,'&quot;')+'"> '+t+'</label>'; }).join('') +
+      '</div>' +
+      '<div style="margin-top:8px;display:flex;gap:6px;">' +
+        '<input id="surveyCustomTool" placeholder="כלי נוסף..." style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;" onkeypress="if(event.key===\'Enter\')_addSurveyTool()">' +
+        '<button onclick="_addSurveyTool()" style="background:#0d47a1;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">+</button>' +
+      '</div>' +
+    '</div>' +
+
+    // Process
+    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
+      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">📋 Process — what was done?</div>' +
+      '<div style="display:flex;flex-direction:column;gap:4px;">' +
+        steps.map(function(s,si){ return '<label style="display:flex;align-items:center;gap:6px;font-size:12px;direction:rtl;cursor:pointer;padding:3px 0;"><input type="checkbox" id="sstep_'+si+'" data-step="'+s.replace(/"/g,'&quot;')+'"> '+s+'</label>'; }).join('') +
+      '</div>' +
+    '</div>' +
+
+    // Issues
+    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
+      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">⚠️ Issues encountered</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:8px;">' +
+        ISSUE_OPTIONS.map(function(s,si){ return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:3px 0;"><input type="checkbox" id="sissue_'+si+'" data-issue="'+s+'"> '+s+'</label>'; }).join('') +
+      '</div>' +
+      '<textarea id="surveyIssueText" placeholder="פרט בעיות..." style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;height:56px;resize:none;"></textarea>' +
+    '</div>' +
+
+    '<button onclick="submitProjectSurvey()" style="width:100%;padding:14px;background:#f0c020;border:none;border-radius:12px;font-size:16px;font-weight:900;color:#111;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);font-family:Heebo,sans-serif;margin-bottom:8px;">✓ Save & End Project</button>' +
+    '<button onclick="skipProjectSurvey()" style="width:100%;padding:10px;background:transparent;border:none;font-size:12px;color:#aaa;cursor:pointer;font-family:Heebo,sans-serif;">Skip survey</button>';
+
+  body.innerHTML = html;
+}
+
+function _setSurveyRating(n) {
+  _surveyRating = n;
+  var labels = ['','לא משתלם','מתחת לממוצע','סביר','משתלם','מצוין ✨'];
+  [1,2,3,4,5].forEach(function(i){
+    var s = document.getElementById('surveyStar'+i);
+    if(s) s.style.opacity = i<=n ? '1' : '0.25';
+  });
+  var lbl = document.getElementById('surveyRatingLabel');
+  if(lbl) lbl.textContent = labels[n] || '';
+}
+
+function _addSurveyTool() {
+  var inp = document.getElementById('surveyCustomTool');
+  var name = (inp?inp.value:'').trim();
+  if(!name) return;
+  var grid = inp.parentElement.previousElementSibling;
+  var idx = grid.querySelectorAll('label').length;
+  var lbl = document.createElement('label');
+  lbl.style.cssText = 'display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:4px 0;';
+  lbl.innerHTML = '<input type="checkbox" id="stool_c'+idx+'" data-tool="'+name.replace(/"/g,'&quot;')+'" checked> '+name;
+  grid.appendChild(lbl);
+  inp.value = '';
+}
+
+function submitProjectSurvey() {
+  var p = projects[_surveyIdx];
+  if(!p) return;
+
+  var toolsUsed = Array.from(document.querySelectorAll('[id^="stool_"]:checked')).map(function(cb){ return cb.dataset.tool; });
+  var steps     = Array.from(document.querySelectorAll('[id^="sstep_"]:checked')).map(function(cb){ return cb.dataset.step; });
+  var issues    = Array.from(document.querySelectorAll('[id^="sissue_"]:checked')).map(function(cb){ return cb.dataset.issue; });
+  var issueText = (document.getElementById('surveyIssueText')||{}).value || '';
+
+  var survey = { jobId:p.jobId||'', client:p.client||'', desc:p.title||p.name||'', cat:p.category||'', date:new Date().toLocaleDateString('he-IL'), rating:_surveyRating, toolsUsed:toolsUsed, steps:steps, issues:issues, issueText:issueText, hrs:Math.round((p.totalMs||0)/3600000*100)/100 };
+
+  // Save to localStorage
+  var surveys = JSON.parse(localStorage.getItem('projectSurveys')||'[]');
+  surveys.push(survey);
+  localStorage.setItem('projectSurveys', JSON.stringify(surveys));
+
+  // Update categoryTools with actual tools used
+  if(survey.cat && toolsUsed.length) {
+    var ct = getCategoryTools();
+    if(!ct[survey.cat]) ct[survey.cat] = [];
+    toolsUsed.forEach(function(t){ if(ct[survey.cat].indexOf(t)<0) ct[survey.cat].push(t); });
+    localStorage.setItem('categoryTools', JSON.stringify(ct));
+  }
+
+  // Save to Apps Script
+  fetch(SHEETS_URL + '?action=saveProjectSurvey', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(survey)
+  }).catch(function(){});
+
+  document.getElementById('projectSurveyOverlay').style.display = 'none';
+  toggleDone(_surveyIdx);
+  showToast('✓ Survey saved — tools learned for ' + (survey.cat||'this category'));
+}
+
+function skipProjectSurvey() {
+  document.getElementById('projectSurveyOverlay').style.display = 'none';
+  toggleDone(_surveyIdx);
+}
+
+// ── Pre-Project Survey ────────────────────────────────
+var _preSurveyPendingJob = null;
+var _preSurveyStepCount = 4;
+
+var SUCCESS_KEYS_BY_CAT = {
+  'מסגרות':    ['מדידות מדויקות לפני חיתוך','בדיקת חומרים לפני יציאה','תיעוד לפני ואחרי','תיאום עם לקוח'],
+  'חשמל':      ['בדיקת מתח לפני עבודה','כיבוי חשמל ראשי','בדיקה סופית','תיעוד'],
+  'אינסטלציה': ['סגירת ברז ראשי','בדיקת דליפות בסיום','תיעוד חלקים שהוחלפו','ניקוי שטח'],
+  'איטום':     ['ייבוש מלא לפני ממברנה','חפיפה בין שכבות','בדיקת אטימות','תיעוד'],
+  'default':   ['בדיקת ציוד לפני יציאה','תיאום עם לקוח','תיעוד לפני ואחרי','ניקוי שטח בסיום']
+};
+
+function openPreProjectSurvey(job) {
+  var overlay = document.getElementById('preProjectSurveyOverlay');
+  var header  = document.getElementById('preSurveyHeader');
+  var body    = document.getElementById('preSurveyBody');
+  overlay.style.display = 'flex';
+  _preSurveyStepCount = 4;
+
+  header.innerHTML =
+    '<div style="display:flex;align-items:center;gap:12px;">' +
+      '<span style="font-size:24px;">📋</span>' +
+      '<div style="flex:1;"><div style="font-size:16px;font-weight:900;color:#fff;">Pre-Project Briefing</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.8);">' + (job.client||'') + ' — ' + (job.desc||job.id||'') + '</div></div>' +
+      '<div style="background:rgba(255,255,255,0.2);border-radius:6px;padding:3px 8px;font-size:10px;color:#fff;font-weight:700;">First time</div>' +
+    '</div>';
+
+  var cat = job.category || '';
+  var successKeys = SUCCESS_KEYS_BY_CAT[cat] || SUCCESS_KEYS_BY_CAT['default'];
+  var suggestedTools = (getCategoryTools()[cat] || []).concat(getMyToolbox().slice(0,6)).filter(function(t,i,a){ return a.indexOf(t)===i; }).slice(0,10);
+
+  body.innerHTML = _renderPreSurveyBody(successKeys, suggestedTools, cat);
+}
+
+function _renderPreSurveyBody(successKeys, suggestedTools, cat) {
+  var steps = ['','','',''];
+  var html =
+    // Working Strategy
+    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
+      '<div style="font-size:12px;font-weight:900;color:#0d47a1;margin-bottom:8px;">🗂 Working Strategy</div>' +
+      '<div id="strategySteps" style="display:flex;flex-direction:column;gap:6px;">' +
+        steps.map(function(_,i){
+          return '<div style="display:flex;align-items:center;gap:8px;">' +
+            '<span style="font-size:11px;font-weight:900;color:#0d47a1;background:#e3f2fd;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + (i+1) + '</span>' +
+            '<input id="pstep_'+i+'" placeholder="שלב ' + (i+1) + '..." style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;">' +
+          '</div>';
+        }).join('') +
+      '</div>' +
+      '<button onclick="_addPreSurveyStep()" style="margin-top:8px;width:100%;padding:8px;background:#e3f2fd;border:1px dashed #0d47a1;border-radius:8px;font-size:12px;font-weight:700;color:#0d47a1;cursor:pointer;font-family:Heebo,sans-serif;">+ Add Step</button>' +
+    '</div>' +
+
+    // Key for Success
+    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
+      '<div style="font-size:12px;font-weight:900;color:#2e7d32;margin-bottom:8px;">🏆 Key for Success</div>' +
+      '<div style="display:flex;flex-direction:column;gap:4px;">' +
+        successKeys.map(function(k,ki){ return '<label style="display:flex;align-items:center;gap:6px;font-size:12px;direction:rtl;cursor:pointer;padding:3px 0;"><input type="checkbox" id="pkey_'+ki+'" data-key="'+k.replace(/"/g,'&quot;')+'"> '+k+'</label>'; }).join('') +
+      '</div>' +
+      '<input id="preSurveyCustomKey" placeholder="הוסף נקודת מפתח..." style="margin-top:6px;width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;" onkeypress="if(event.key===\'Enter\')_addPreSurveyKey()">' +
+    '</div>' +
+
+    // Suggested Tools
+    (suggestedTools.length ? '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
+      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:6px;">🔧 Suggested Tools <span style="font-size:10px;color:#888;font-weight:400;">מבוסס היסטוריה</span></div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">' +
+        suggestedTools.map(function(t,ti){ return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:3px 0;"><input type="checkbox" id="ptool_'+ti+'" data-tool="'+t.replace(/"/g,'&quot;')+'"> '+t+'</label>'; }).join('') +
+      '</div></div>' : '') +
+
+    // Materials
+    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
+      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">📦 Materials needed</div>' +
+      '<div id="preMaterialsList" style="display:flex;flex-direction:column;gap:4px;margin-bottom:6px;"></div>' +
+      '<div style="display:flex;gap:6px;">' +
+        '<input id="preMaterialInp" placeholder="חומר / פריט..." style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;" onkeypress="if(event.key===\'Enter\')_addPreMaterial()">' +
+        '<button onclick="_addPreMaterial()" style="background:#0d47a1;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">+</button>' +
+      '</div>' +
+    '</div>' +
+
+    '<button onclick="submitPreProjectSurvey()" style="width:100%;padding:14px;background:#f0c020;border:none;border-radius:12px;font-size:16px;font-weight:900;color:#111;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);font-family:Heebo,sans-serif;margin-bottom:8px;">✓ Ready — Add to Today</button>';
+
+  return html;
+}
+
+function _addPreSurveyStep() {
+  var container = document.getElementById('strategySteps');
+  if (!container) return;
+  var n = container.querySelectorAll('input').length + 1;
+  var div = document.createElement('div');
+  div.style.cssText = 'display:flex;align-items:center;gap:8px;';
+  div.innerHTML = '<span style="font-size:11px;font-weight:900;color:#0d47a1;background:#e3f2fd;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + n + '</span>' +
+    '<input id="pstep_' + (n-1) + '" placeholder="שלב ' + n + '..." style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;">';
+  container.appendChild(div);
+}
+
+function _addPreSurveyKey() {
+  var inp = document.getElementById('preSurveyCustomKey');
+  var key = (inp?inp.value:'').trim();
+  if(!key) return;
+  var container = inp.previousElementSibling;
+  var n = container.querySelectorAll('label').length;
+  var lbl = document.createElement('label');
+  lbl.style.cssText = 'display:flex;align-items:center;gap:6px;font-size:12px;direction:rtl;cursor:pointer;padding:3px 0;';
+  lbl.innerHTML = '<input type="checkbox" id="pkey_c'+n+'" data-key="'+key.replace(/"/g,'&quot;')+'" checked> ' + key;
+  container.appendChild(lbl);
+  inp.value = '';
+}
+
+function _addPreMaterial() {
+  var inp = document.getElementById('preMaterialInp');
+  var mat = (inp?inp.value:'').trim();
+  if(!mat) return;
+  var list = document.getElementById('preMaterialsList');
+  var div = document.createElement('div');
+  div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f5f5f5;';
+  var name = mat;
+  div.innerHTML = '<span style="font-size:12px;direction:rtl;" data-mat="'+name.replace(/"/g,'&quot;')+'">'+name+'</span><span onclick="this.parentElement.remove()" style="color:#e53935;font-size:14px;cursor:pointer;">×</span>';
+  list.appendChild(div);
+  inp.value = '';
+}
+
+function submitPreProjectSurvey() {
+  var job = _preSurveyPendingJob;
+  if (!job) return;
+
+  var steps = Array.from(document.querySelectorAll('[id^="pstep_"]')).map(function(i){ return i.value.trim(); }).filter(Boolean);
+  var keys = Array.from(document.querySelectorAll('[id^="pkey_"]:checked')).map(function(cb){ return cb.dataset.key; });
+  var tools = Array.from(document.querySelectorAll('[id^="ptool_"]:checked')).map(function(cb){ return cb.dataset.tool; });
+  var materials = Array.from(document.querySelectorAll('#preMaterialsList [data-mat]')).map(function(s){ return s.dataset.mat; });
+
+  var survey = { jobId:job.id||'', client:job.client||'', desc:job.desc||'', cat:job.category||'', date:new Date().toLocaleDateString('he-IL'), steps:steps, keys:keys, tools:tools, materials:materials };
+
+  // Save to localStorage
+  var surveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
+  surveys.push(survey);
+  localStorage.setItem('preProjectSurveys', JSON.stringify(surveys));
+
+  // Mark as done
+  var done = JSON.parse(localStorage.getItem('preSurveyDone')||'{}');
+  if (job.id) { done[job.id] = true; localStorage.setItem('preSurveyDone', JSON.stringify(done)); }
+
+  // Save to Apps Script
+  fetch(SHEETS_URL + '?action=savePreProjectSurvey', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(survey)
+  }).catch(function(){});
+
+  document.getElementById('preProjectSurveyOverlay').style.display = 'none';
+  _doAddJobAsProject(job);
+  showToast('✓ Briefing saved — project added');
+}
+// ── end Pre-Project Survey ─────────────────────────────
+
+// ── end Post-Project Survey ───────────────────────────
+
 // ── end My Toolbox ─────────────────────────────────────
 
 // ── end AI Session Tips ───────────────────────────────
@@ -5930,6 +6241,24 @@ function showToast(msg) {
       <button onclick="document.getElementById('myToolboxOverlay').style.display='none'" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:50%;width:30px;height:30px;font-size:14px;cursor:pointer;">✕</button>
     </div>
     <div id="myToolboxBody" style="flex:1;overflow-y:auto;padding:14px;background:#f8f9fa;"></div>
+  </div>
+</div>
+
+
+<!-- ── Post-Project Survey Overlay ───────────────────── -->
+<div id="projectSurveyOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:10009;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:94vh;display:flex;flex-direction:column;">
+    <div id="surveyHeader" style="background:linear-gradient(135deg,#2e7d32,#388e3c);padding:16px 18px;border-radius:24px 24px 0 0;flex-shrink:0;"></div>
+    <div id="surveyBody" style="flex:1;overflow-y:auto;padding:14px;background:#f8f9fa;"></div>
+  </div>
+</div>
+
+
+<!-- ── Pre-Project Survey Overlay ────────────────────── -->
+<div id="preProjectSurveyOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.65);z-index:10010;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:94vh;display:flex;flex-direction:column;">
+    <div id="preSurveyHeader" style="background:linear-gradient(135deg,#0d47a1,#1565c0);padding:16px 18px;border-radius:24px 24px 0 0;flex-shrink:0;"></div>
+    <div id="preSurveyBody" style="flex:1;overflow-y:auto;padding:14px;background:#f8f9fa;"></div>
   </div>
 </div>
 
