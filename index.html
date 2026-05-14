@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v562</title>
+<title>י.ב אחזקות — v564</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -485,7 +485,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v562
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v564
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbx5ZDNt…exec (v105)
@@ -494,7 +494,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v562 · 09/05/2026
+v564 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1136,7 +1136,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v562</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v564</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -5658,14 +5658,25 @@ function openPreProjectSurvey(job) {
       '<div style="background:rgba(255,255,255,0.2);border-radius:6px;padding:3px 8px;font-size:10px;color:#fff;font-weight:700;">🤖 AI</div>' +
     '</div>';
 
-  // Show loading screen
+  // Show loading screen with Skip button
   body.innerHTML =
     '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;gap:14px;">' +
       '<div style="font-size:40px;">🤖</div>' +
       '<div style="font-size:14px;font-weight:700;color:#333;text-align:center;">מנתח תיאור הפרויקט...</div>' +
-      '<div style="width:100%;background:#e0e0e0;border-radius:4px;height:5px;overflow:hidden;"><div style="width:60%;height:100%;background:linear-gradient(90deg,#0d47a1,#1565c0);border-radius:4px;animation:none;"></div></div>' +
+      '<div style="width:100%;background:#e0e0e0;border-radius:4px;height:5px;overflow:hidden;"><div style="width:60%;height:100%;background:linear-gradient(90deg,#0d47a1,#1565c0);border-radius:4px;"></div></div>' +
       '<div style="font-size:11px;color:#aaa;text-align:center;direction:rtl;">קורא תיאור · בודק היסטוריה · מכין הצעות</div>' +
+      '<button onclick="_skipAIPreSurvey()" style="margin-top:10px;padding:10px 24px;background:#f0f0f0;border:none;border-radius:10px;font-size:13px;font-weight:700;color:#555;cursor:pointer;font-family:Heebo,sans-serif;">Skip AI — Fill manually</button>' +
     '</div>';
+
+  function _skipAIPreSurvey() {
+    clearTimeout(_preSurveyTimer);
+    var cat = job.category || '';
+    try {
+      body.innerHTML = _renderPreSurveyBodyAI('', ['','','',''], SUCCESS_KEYS_BY_CAT[cat]||SUCCESS_KEYS_BY_CAT['default'], (getCategoryTools()[cat]||[]).slice(0,8), [], job.desc||'', cat);
+    } catch(e) {
+      body.innerHTML = '<div style="padding:20px;color:#e53935;direction:rtl;">⚠️ שגיאה: ' + e.message + '</div>';
+    }
+  }
 
   // Fetch AI analysis
   var params = '?action=analyzeJobForPreSurvey' +
@@ -5676,9 +5687,11 @@ function openPreProjectSurvey(job) {
 
   var _preSurveyTimer = setTimeout(function() {
     var cat = job.category || '';
-    body.innerHTML = _renderPreSurveyBodyAI('', ['','','',''], SUCCESS_KEYS_BY_CAT[cat]||SUCCESS_KEYS_BY_CAT['default'], (getCategoryTools()[cat]||[]).slice(0,8), [], job.desc||'', cat);
+    try {
+      body.innerHTML = _renderPreSurveyBodyAI('', ['','','',''], SUCCESS_KEYS_BY_CAT[cat]||SUCCESS_KEYS_BY_CAT['default'], (getCategoryTools()[cat]||[]).slice(0,8), [], job.desc||'', cat);
+    } catch(e) { body.innerHTML = '<div style="padding:20px;color:#e53935;direction:rtl;">⚠️ ' + e.message + '<br><button onclick="_skipAIPreSurvey()" style="margin-top:10px;padding:8px 16px;background:#f0f0f0;border:none;border-radius:8px;cursor:pointer;">Fill manually</button></div>'; }
     showToast('⚠️ AI timeout — fill manually');
-  }, 20000);
+  }, 15000);
 
   fetch(SHEETS_URL + params)
     .then(function(r){ return r.json(); })
@@ -5688,20 +5701,23 @@ function openPreProjectSurvey(job) {
       var cat = job.category || '';
       var fallbackKeys  = SUCCESS_KEYS_BY_CAT[cat] || SUCCESS_KEYS_BY_CAT['default'];
       var fallbackTools = (getCategoryTools()[cat]||[]).concat(getMyToolbox().slice(0,6)).filter(function(t,i,a){ return a.indexOf(t)===i; }).slice(0,10);
-
-      var aiSteps   = ai.steps    || ['','','',''];
-      var aiKeys    = ai.keys     || fallbackKeys;
-      var aiTools   = ai.tools    || fallbackTools;
-      var aiMats    = ai.materials|| [];
+      var aiSteps   = (ai.steps   && ai.steps.length)   ? ai.steps    : ['','','',''];
+      var aiKeys    = (ai.keys    && ai.keys.length)     ? ai.keys     : fallbackKeys;
+      var aiTools   = (ai.tools   && ai.tools.length)   ? ai.tools    : fallbackTools;
+      var aiMats    = (ai.materials && ai.materials.length) ? ai.materials : [];
       var aiSummary = ai.descSummary || '';
-
-      body.innerHTML = _renderPreSurveyBodyAI(aiSummary, aiSteps, aiKeys, aiTools, aiMats, job.desc||'', cat);
+      try {
+        body.innerHTML = _renderPreSurveyBodyAI(aiSummary, aiSteps, aiKeys, aiTools, aiMats, job.desc||'', cat);
+        // Set step values from data-val
+        body.querySelectorAll('[data-val]').forEach(function(el){ if(el.dataset.val) el.value = el.dataset.val; });
+      } catch(e) { body.innerHTML = '<div style="padding:20px;color:#e53935;direction:rtl;">⚠️ Render error: ' + e.message + '</div>'; }
     })
     .catch(function(err) {
       clearTimeout(_preSurveyTimer);
       var cat = job.category || '';
-      body.innerHTML = _renderPreSurveyBodyAI('', ['','','',''], SUCCESS_KEYS_BY_CAT[cat]||SUCCESS_KEYS_BY_CAT['default'], (getCategoryTools()[cat]||[]).slice(0,8), [], job.desc||'', cat);
-      showToast('⚠️ ' + (err.message||'AI error') + ' — fill manually');
+      try {
+        body.innerHTML = _renderPreSurveyBodyAI('', ['','','',''], SUCCESS_KEYS_BY_CAT[cat]||SUCCESS_KEYS_BY_CAT['default'], (getCategoryTools()[cat]||[]).slice(0,8), [], job.desc||'', cat);
+      } catch(e) { body.innerHTML = '<div style="padding:20px;color:#e53935;direction:rtl;">⚠️ ' + (err.message||'error') + '</div>'; }
     });
 }
 
@@ -5726,7 +5742,7 @@ function _renderPreSurveyBodyAI(descSummary, aiSteps, successKeys, suggestedTool
         steps.map(function(stepVal,i){
           return '<div style="display:flex;align-items:center;gap:8px;">' +
             '<span style="font-size:11px;font-weight:900;color:#0d47a1;background:#e3f2fd;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + (i+1) + '</span>' +
-            '<input id="pstep_'+i+'" placeholder="שלב ' + (i+1) + '..." value=\"" + (stepVal||"").replace(/"/g,'&quot;') + "\" style=\"flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;\">' +
+            '<input id="pstep_'+i+'" placeholder="שלב ' + (i+1) + '..." data-val="' + (stepVal||'').replace(/"/g,'') + '" style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;">' +
           '</div>';
         }).join('') +
       '</div>' +
