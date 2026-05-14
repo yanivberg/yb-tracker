@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v560</title>
+<title>י.ב אחזקות — v562</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -485,16 +485,16 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v560
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v562
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbzAvOf5…exec (v104)
+Apps Script: AKfycbx5ZDNt…exec (v105)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v560 · 09/05/2026
+v562 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1136,7 +1136,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v560</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v562</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1985,7 +1985,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzAvOf5-7pVaAhnQrFQq1vGzY04rM1Dh6idh-kfRTuZ68LKrpQU37uKRqreq-EtKklCNg/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbx5ZDNtp4nkpZMoIzrHkm-rBWwsdw-Lhvt0zBAEKBhHLWKCb_l_2vdKVKgG1DpcQtUN6Q/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -5674,9 +5674,16 @@ function openPreProjectSurvey(job) {
     '&client=' + encodeURIComponent(job.client  || '') +
     '&notes='  + encodeURIComponent((job.notes||[]).join(' ') || '');
 
+  var _preSurveyTimer = setTimeout(function() {
+    var cat = job.category || '';
+    body.innerHTML = _renderPreSurveyBodyAI('', ['','','',''], SUCCESS_KEYS_BY_CAT[cat]||SUCCESS_KEYS_BY_CAT['default'], (getCategoryTools()[cat]||[]).slice(0,8), [], job.desc||'', cat);
+    showToast('⚠️ AI timeout — fill manually');
+  }, 20000);
+
   fetch(SHEETS_URL + params)
     .then(function(r){ return r.json(); })
     .then(function(result) {
+      clearTimeout(_preSurveyTimer);
       var ai = result.parsed || {};
       var cat = job.category || '';
       var fallbackKeys  = SUCCESS_KEYS_BY_CAT[cat] || SUCCESS_KEYS_BY_CAT['default'];
@@ -5690,9 +5697,11 @@ function openPreProjectSurvey(job) {
 
       body.innerHTML = _renderPreSurveyBodyAI(aiSummary, aiSteps, aiKeys, aiTools, aiMats, job.desc||'', cat);
     })
-    .catch(function() {
+    .catch(function(err) {
+      clearTimeout(_preSurveyTimer);
       var cat = job.category || '';
       body.innerHTML = _renderPreSurveyBodyAI('', ['','','',''], SUCCESS_KEYS_BY_CAT[cat]||SUCCESS_KEYS_BY_CAT['default'], (getCategoryTools()[cat]||[]).slice(0,8), [], job.desc||'', cat);
+      showToast('⚠️ ' + (err.message||'AI error') + ' — fill manually');
     });
 }
 
