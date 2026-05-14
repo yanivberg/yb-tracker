@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v573</title>
+<title>י.ב אחזקות — v581</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -483,18 +483,21 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:85vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;">
       <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
         <div style="font-weight:900;font-size:17px;">App Information</div>
-        <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button onclick="logout()" style="background:#e53935;border:none;color:#fff;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">🚪 Logout</button>
+          <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+        </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v573
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v581
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbwZ4z4I…exec (v107)
+Apps Script: AKfycbz8PuGp…exec (v112)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v573 · 09/05/2026
+v581 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1136,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v573</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v581</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1919,8 +1922,9 @@ updateClock();
 setInterval(updateClock, 1000);
 
 // ── Init ──────────────────────────────────────────────
-(function init() {
+function init() {
   if (window.__ybIsDuplicate) return;
+  if (!_checkAuth()) return;
   const d = new Date();
   var hebrewDays = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
   var hebrewMonths = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
@@ -1944,7 +1948,7 @@ setInterval(updateClock, 1000);
       }
     }
   } else { showScreen('setup'); renderSetup(); }
-})();
+}
 
 function checkURLProjectStart() { var params = new URLSearchParams(window.location.search); var startName = params.get('start'); if (!startName) return; window.history.replaceState({}, '', window.location.pathname); if (!dayStartTime) { showToast('Start work day first'); return; } var spoken = startName.toLowerCase().trim(); var matchedIdx = -1; var bestScore = -1; projects.forEach(function(p, i) { var pname = p.name.toLowerCase(); var score = 0; if (pname === spoken) score = 3; else if (pname.indexOf(spoken) !== -1 || spoken.indexOf(pname) !== -1) score = 2; else { var words = spoken.split(/\s+/); words.forEach(function(w) { if (w.length > 1 && pname.indexOf(w) !== -1) score += 1; }); } if (score > bestScore) { bestScore = score; matchedIdx = i; } }); if (bestScore > 0 && matchedIdx >= 0) { var proj = projects[matchedIdx]; if (proj.done) { showToast('Project "' + proj.name + '" is marked done'); return; } if (proj.active) { toggleProject(matchedIdx); showToast('⏸ ' + proj.name + ' — stopped'); } else { projects.forEach(function(p, i) { if (p.active) toggleProject(i); }); toggleProject(matchedIdx); showToast('▶ ' + proj.name + ' — started'); } } else { showToast('Project not found: ' + startName); } }
 
@@ -1985,7 +1989,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwZ4z4IizzkKvB0ANgK7_wP50TkGSmW5_H_sZsR8ARItlt3-V9dSA3BtsJldMbGvtjSiA/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz8PuGp9atWz1snYPUAMwRpIW2jCY4w5FZow_p9O9eebKvQIFBLpyzGjGsyuOmhyivT/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -5206,7 +5210,27 @@ function openAISessionTips() {
     }, 0);
     totalMs = enrichedTotalMs;
 
-    fetch(SHEETS_URL + '?action=getAISessionTips&projects=' + encodeURIComponent(JSON.stringify(enrichedProjects)) + '&totalHrs=' + Math.round(enrichedTotalMs/3600000*100)/100 + '&toolbox=' + encodeURIComponent(JSON.stringify(getMyToolbox())) + '&categoryTools=' + encodeURIComponent(JSON.stringify(getCategoryTools())))
+    // Build full context snapshot
+    var preSurveyHistory = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
+    var allDoneTips = JSON.parse(localStorage.getItem('doneTips')||'{}');
+    var currentHour = new Date().getHours();
+    var dayCtx = {
+      timeOfDay: currentHour + ':' + String(new Date().getMinutes()).padStart(2,'0'),
+      hoursLeftInDay: Math.max(0, 18 - currentHour),
+      totalToday: projects.length,
+      completed: projects.filter(function(p){ return p.done; }).length,
+      active: projects.filter(function(p){ return p.active; }).length,
+      paused: projects.filter(function(p){ return !p.active && !p.done; }).length
+    };
+    // Attach pre-survey + done tips per project
+    enrichedProjects.forEach(function(sp) {
+      var ps = preSurveyHistory.filter(function(s){ return s.desc === sp.desc || s.client === sp.client; }).pop();
+      if (ps) sp.preSurvey = { height:ps.heightWork, workers:ps.workers, location:ps.location, power:ps.powerSupply, agreement:ps.needAgreement, heightDocs:ps.heightDocs };
+      var jobKey = 'proj_' + (sp.jobId||'') + (sp.client||'') + '_' + (sp.desc||'');
+      sp.doneTips = allDoneTips[jobKey] || [];
+    });
+
+    fetch(SHEETS_URL + '?action=getAISessionTips&projects=' + encodeURIComponent(JSON.stringify(enrichedProjects)) + '&totalHrs=' + Math.round(enrichedTotalMs/3600000*100)/100 + '&toolbox=' + encodeURIComponent(JSON.stringify(getMyToolbox())) + '&categoryTools=' + encodeURIComponent(JSON.stringify(getCategoryTools())) + '&dayContext=' + encodeURIComponent(JSON.stringify(dayCtx)))
     .then(function(r){ return r.json(); })
     .then(function(result) {
       if (result.error) { body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + result.error + '</div>'; return; }
@@ -5784,8 +5808,8 @@ function _renderPreSurveyBodyAI(descSummary, aiSteps, successKeys, suggestedTool
         '<div style="display:flex;align-items:center;justify-content:space-between;">' +
           '<span style="font-size:12px;font-weight:700;color:#333;">Working at height?</span>' +
           '<div style="display:flex;gap:6px;">' +
-            '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="height" id="heightYes" value="yes"> Yes</label>' +
-            '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="height" id="heightNo" value="no" checked> No</label>' +
+            '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="height" id="heightYes" value="yes" onchange="document.getElementById(\'heightDocsRow\').style.display=this.checked?\'flex\':\'none\'"> Yes</label>' +
+            '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="height" id="heightNo" value="no" checked onchange="document.getElementById(\'heightDocsRow\').style.display=\'none\'"> No</label>' +
           '</div>' +
         '</div>' +
 
@@ -5808,6 +5832,22 @@ function _renderPreSurveyBodyAI(descSummary, aiSteps, successKeys, suggestedTool
           '<div style="display:flex;gap:6px;">' +
             '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="power" id="powerYes" value="yes" checked> Yes</label>' +
             '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="power" id="powerNo" value="no"> No</label>' +
+          '</div>' +
+        '</div>' +
+
+        '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+          '<span style="font-size:12px;font-weight:700;color:#333;">Contractor agreement needed?</span>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="agreement" id="agreementYes" value="yes"> Yes</label>' +
+            '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="agreement" id="agreementNo" value="no" checked> No</label>' +
+          '</div>' +
+        '</div>' +
+
+        '<div id="heightDocsRow" style="display:flex;align-items:center;justify-content:space-between;">' +
+          '<span style="font-size:12px;font-weight:700;color:#e65100;">⚠️ Height docs updated?</span>' +
+          '<div style="display:flex;gap:6px;">' +
+            '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="heightDocs" id="heightDocsYes" value="yes" checked> Yes</label>' +
+            '<label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;"><input type="radio" name="heightDocs" id="heightDocsNo" value="no"> No</label>' +
           '</div>' +
         '</div>' +
 
@@ -5867,8 +5907,10 @@ function submitPreProjectSurvey() {
   var workerCount = (document.getElementById('workerCount')||{}).value || '1';
   var jobLocation = (document.getElementById('jobLocation')||{}).value || 'outdoor';
   var powerSupply = (document.getElementById('powerYes')||{}).checked ? 'yes' : 'no';
+  var needAgreement = (document.getElementById('agreementYes')||{}).checked ? 'yes' : 'no';
+  var heightDocs  = heightWork === 'yes' ? ((document.getElementById('heightDocsYes')||{}).checked ? 'yes' : 'no') : 'n/a';
 
-  var survey = { jobId:job.id||'', client:job.client||'', desc:job.desc||'', cat:job.category||'', date:new Date().toLocaleDateString('he-IL'), steps:steps, keys:keys, tools:tools, materials:materials, heightWork:heightWork, workers:workerCount, location:jobLocation, powerSupply:powerSupply };
+  var survey = { jobId:job.id||'', client:job.client||'', desc:job.desc||'', cat:job.category||'', date:new Date().toLocaleDateString('he-IL'), steps:steps, keys:keys, tools:tools, materials:materials, heightWork:heightWork, workers:workerCount, location:jobLocation, powerSupply:powerSupply, needAgreement:needAgreement, heightDocs:heightDocs };
 
   // Save to localStorage
   var surveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
@@ -6034,6 +6076,11 @@ function openProjectAI(i) {
     .replace(/\d+:\d{2}:\d{2}/g,'')
     .replace(/\s+/g,' ').trim();
 
+  // Get job location from pre-survey data
+  var preSurveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
+  var jobSurvey = preSurveys.filter(function(s){ return s.jobId === (p.jobId||'') || s.desc === (p.title||p.name||''); }).pop() || {};
+  var jobLoc = jobSurvey.location || '';
+
   var params = '?action=getProjectTips' +
     '&desc='    + encodeURIComponent(p.title||p.name||'') +
     '&cat='     + encodeURIComponent(p.category||'') +
@@ -6041,7 +6088,9 @@ function openProjectAI(i) {
     '&notes='   + encodeURIComponent(cleanNotes) +
     '&actualHrs=' + encodeURIComponent(Math.round(totalMs/3600000*100)/100) +
     '&estHrs='  + encodeURIComponent(p.estHours||0) +
-    '&income='  + encodeURIComponent(p.jobIncome||p.jobPrice||0);
+    '&income='  + encodeURIComponent(p.jobIncome||p.jobPrice||0) +
+    '&location=' + encodeURIComponent(jobLoc) +
+    '&done='     + encodeURIComponent(JSON.stringify(getDoneTips('proj_' + (p.jobId||'') + (p.client||'') + '_' + (p.title||p.name||''))));
 
   var _timer = setTimeout(function(){
     body.innerHTML = '<div style="padding:16px;color:#888;text-align:center;direction:rtl;">⏱ AI timeout — נסה שוב</div>' +
@@ -6056,12 +6105,18 @@ function openProjectAI(i) {
       var colors = {warning:'#e65100', good:'#2e7d32', note:'#f0c020', focus:'#0d47a1'};
       var emojis = {warning:'⏱', good:'✅', note:'📝', focus:'🎯'};
       var html = '';
+      var jobKey = 'proj_' + (p.jobId || (p.client||'') + '_' + (p.title||p.name||''));
+      var doneTipsList = getDoneTips(jobKey);
       if (parsed && parsed.tips && parsed.tips.length) {
         parsed.tips.forEach(function(t) {
           var type = t.type||'note'; var isBlue = type==='focus';
-          html += '<div style="background:' + (isBlue?'linear-gradient(135deg,#0d47a1,#1565c0)':'white') + ';border-radius:10px;padding:10px 12px;margin-bottom:8px;border-right:3px solid ' + (isBlue?'#0d47a1':(colors[type]||'#aaa')) + ';">' +
-            '<div style="font-size:11px;font-weight:900;color:' + (isBlue?'#f0c020':(colors[type]||'#333')) + ';margin-bottom:3px;">' + (emojis[type]||'·') + ' ' + (t.title||'') + '</div>' +
-            '<div style="font-size:12px;color:' + (isBlue?'#fff':'#444') + ';line-height:1.5;direction:rtl;">' + (t.body||'') + '</div>' +
+          var isDone = doneTipsList.indexOf(t.body||'') !== -1;
+          var safeTipBody = (t.body||'').replace(/'/g,"\'");
+          var safeJobKey = jobKey.replace(/'/g,"\'");
+          html += '<div onclick="_tipClick(this,\'' + safeJobKey + '\',\'' + safeTipBody + '\')" style="background:' + (isBlue?'linear-gradient(135deg,#0d47a1,#1565c0)':'white') + ';border-radius:10px;padding:10px 12px;margin-bottom:8px;border-right:3px solid ' + (isDone?'#ccc':(isBlue?'#0d47a1':(colors[type]||'#aaa'))) + ';cursor:pointer;opacity:' + (isDone?'0.55':'1') + ';-webkit-tap-highlight-color:transparent;">' +
+            '<div data-tip-title style="font-size:11px;font-weight:900;color:' + (isDone?'#aaa':(isBlue?'#f0c020':(colors[type]||'#333'))) + ';margin-bottom:3px;' + (isDone?'text-decoration:line-through;':'') + '">' + (emojis[type]||'·') + ' ' + (t.title||'') + '</div>' +
+            '<div data-tip-body style="font-size:12px;color:' + (isDone?'#aaa':(isBlue?'#fff':'#444')) + ';line-height:1.5;direction:rtl;' + (isDone?'text-decoration:line-through;':'') + '">' + (t.body||'') + '</div>' +
+            '<div data-done-lbl style="font-size:10px;color:#2e7d32;margin-top:3px;display:' + (isDone?'block':'none') + ';">✓ Done</div>' +
           '</div>';
         });
       } else {
@@ -6075,7 +6130,102 @@ function openProjectAI(i) {
       body.innerHTML = '<div style="padding:16px;color:#e53935;text-align:center;">⚠️ ' + (err.message||'error') + '</div>';
     });
 }
+
+// ── Done Tips ─────────────────────────────────────────
+function getDoneTips(jobKey) {
+  var all = JSON.parse(localStorage.getItem('doneTips')||'{}');
+  return all[jobKey] || [];
+}
+function toggleDoneTip(jobKey, tipBody, el) {
+  var all = JSON.parse(localStorage.getItem('doneTips')||'{}');
+  if (!all[jobKey]) all[jobKey] = [];
+  var idx = all[jobKey].indexOf(tipBody);
+  if (idx === -1) {
+    all[jobKey].push(tipBody);
+    el.style.opacity = '0.55';
+    el.style.borderRightColor = '#ccc';
+    el.querySelectorAll('[data-tip-title],[data-tip-body]').forEach(function(e){ e.style.textDecoration='line-through'; e.style.color='#aaa'; });
+    var lbl = el.querySelector('[data-done-lbl]');
+    if (lbl) lbl.style.display='block';
+  } else {
+    all[jobKey].splice(idx,1);
+    el.style.opacity='1';
+    el.style.borderRightColor='';
+    el.querySelectorAll('[data-tip-title],[data-tip-body]').forEach(function(e){ e.style.textDecoration=''; e.style.color=''; });
+    var lbl = el.querySelector('[data-done-lbl]');
+    if (lbl) lbl.style.display='none';
+  }
+  localStorage.setItem('doneTips', JSON.stringify(all));
+}
+
+function _tipClick(el, jobKey, tipBody) {
+  toggleDoneTip(jobKey, tipBody, el);
+}
+
+// ── end Done Tips ──────────────────────────────────────
+
 // ── end Per-Project AI Tips ────────────────────────────
+
+
+// ── Auth ─────────────────────────────────────────────
+var SESSION_KEY = 'yb_session';
+
+function _checkAuth() {
+  var loginEl = document.getElementById('loginScreen');
+  if (!loginEl) {
+    // DOM not ready yet — wait for DOMContentLoaded
+    return false;
+  }
+  var session = null;
+  try { session = JSON.parse(localStorage.getItem(SESSION_KEY)); } catch(e) {}
+  if (session && session.token && session.expires && Date.now() < session.expires) {
+    loginEl.style.display = 'none';
+    return true;
+  }
+  // No valid session — show login
+  loginEl.style.display = 'flex';
+  document.querySelectorAll('.screen').forEach(function(s){ s.style.visibility = 'hidden'; });
+  return false;
+}
+
+function submitLogin() {
+  var email = (document.getElementById('loginEmail').value||'').trim().toLowerCase();
+  var pass  = (document.getElementById('loginPassword').value||'');
+  var errEl = document.getElementById('loginError');
+  var btn   = document.getElementById('loginBtn');
+
+  if (!email || !pass) { errEl.textContent='Please enter email and password'; errEl.style.display='block'; return; }
+  errEl.style.display = 'none';
+  btn.textContent = 'Signing in…'; btn.disabled = true;
+
+  fetch(SHEETS_URL + '?action=adminLogin&email=' + encodeURIComponent(email) + '&pass=' + encodeURIComponent(pass))
+    .then(function(r){ return r.json(); })
+    .then(function(result) {
+      btn.textContent = 'Sign In'; btn.disabled = false;
+      if (result.ok && result.token) {
+        localStorage.setItem(SESSION_KEY, JSON.stringify({ token: result.token, expires: Date.now() + 30*24*60*60*1000, email: email }));
+        document.getElementById('loginScreen').style.display = 'none';
+        document.querySelectorAll('.screen').forEach(function(s){ s.style.visibility = ''; });
+        location.reload();
+      } else {
+        errEl.textContent = result.error || 'Invalid email or password';
+        errEl.style.display = 'block';
+      }
+    })
+    .catch(function(err) {
+      btn.textContent = 'Sign In'; btn.disabled = false;
+      errEl.textContent = 'Connection error — try again';
+      errEl.style.display = 'block';
+    });
+}
+
+function logout() {
+  localStorage.removeItem(SESSION_KEY);
+  location.reload();
+}
+// ── end Auth ──────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', function() { init(); });
 
 // ── end Post-Project Survey ───────────────────────────
 
@@ -6564,6 +6714,31 @@ function showToast(msg) {
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:75vh;display:flex;flex-direction:column;">
     <div id="projectAIHeader" style="background:linear-gradient(135deg,#0d47a1,#1565c0);padding:14px 18px;border-radius:20px 20px 0 0;display:flex;align-items:center;gap:10px;flex-shrink:0;"></div>
     <div id="projectAIBody" style="flex:1;overflow-y:auto;padding:14px;background:#f8f9fa;"></div>
+  </div>
+</div>
+
+
+<!-- ── Login Screen ──────────────────────────────────── -->
+<div id="loginScreen" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#0d47a1,#1565c0);z-index:99999;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="text-align:center;margin-bottom:28px;">
+      <div style="font-size:40px;margin-bottom:10px;">🔐</div>
+      <div style="font-size:22px;font-weight:900;color:#0d47a1;">י.ב אחזקות</div>
+      <div style="font-size:13px;color:#888;margin-top:4px;">Admin Login</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#555;margin-bottom:5px;">Email</div>
+        <input id="loginEmail" type="email" placeholder="your@email.com" style="width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;outline:none;" onkeypress="if(event.key==='Enter')document.getElementById('loginPassword').focus()">
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#555;margin-bottom:5px;">Password</div>
+        <input id="loginPassword" type="password" placeholder="••••••••" style="width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;outline:none;" onkeypress="if(event.key==='Enter')submitLogin()">
+      </div>
+      <div id="loginError" style="display:none;background:#fce4ec;border-radius:8px;padding:8px 12px;font-size:12px;color:#c62828;text-align:center;direction:rtl;"></div>
+      <button onclick="submitLogin()" id="loginBtn" style="width:100%;padding:14px;background:#0d47a1;border:none;border-radius:12px;font-size:16px;font-weight:900;color:#fff;cursor:pointer;font-family:Heebo,sans-serif;box-shadow:0 4px 12px rgba(13,71,161,0.35);">Sign In</button>
+    </div>
+    <div style="text-align:center;margin-top:16px;font-size:11px;color:#aaa;">YB Tracker Admin Portal</div>
   </div>
 </div>
 
