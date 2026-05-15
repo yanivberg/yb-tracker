@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v581</title>
+<title>י.ב אחזקות — v583</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,16 +488,16 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v581
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v583
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbz8PuGp…exec (v112)
+Apps Script: AKfycbxi3VPm…exec (v113)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v581 · 09/05/2026
+v583 · 09/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v581</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v583</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1989,7 +1989,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz8PuGp9atWz1snYPUAMwRpIW2jCY4w5FZow_p9O9eebKvQIFBLpyzGjGsyuOmhyivT/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxi3VPmMiQu3u9E_3mhH9Ky0eaDN0G0cssra1F9NVBaAE0l-ZwNbpbetqbyheEwhFy_yg/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -6198,12 +6198,14 @@ function submitLogin() {
   errEl.style.display = 'none';
   btn.textContent = 'Signing in…'; btn.disabled = true;
 
-  fetch(SHEETS_URL + '?action=adminLogin&email=' + encodeURIComponent(email) + '&pass=' + encodeURIComponent(pass))
+  var rememberMe = (document.getElementById('rememberMe')||{}).checked;
+  fetch(SHEETS_URL + '?action=adminLogin&email=' + encodeURIComponent(email) + '&pass=' + encodeURIComponent(pass) + '&remember=' + (rememberMe?'1':'0'))
     .then(function(r){ return r.json(); })
     .then(function(result) {
       btn.textContent = 'Sign In'; btn.disabled = false;
       if (result.ok && result.token) {
-        localStorage.setItem(SESSION_KEY, JSON.stringify({ token: result.token, expires: Date.now() + 30*24*60*60*1000, email: email }));
+        var expiryDays = result.remember === '1' ? 90 : 30;
+        localStorage.setItem(SESSION_KEY, JSON.stringify({ token: result.token, expires: Date.now() + expiryDays*24*60*60*1000, email: email, remember: result.remember }));
         document.getElementById('loginScreen').style.display = 'none';
         document.querySelectorAll('.screen').forEach(function(s){ s.style.visibility = ''; });
         location.reload();
@@ -6736,6 +6738,10 @@ function showToast(msg) {
         <input id="loginPassword" type="password" placeholder="••••••••" style="width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;outline:none;" onkeypress="if(event.key==='Enter')submitLogin()">
       </div>
       <div id="loginError" style="display:none;background:#fce4ec;border-radius:8px;padding:8px 12px;font-size:12px;color:#c62828;text-align:center;direction:rtl;"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <input type="checkbox" id="rememberMe" style="width:16px;height:16px;cursor:pointer;">
+        <label for="rememberMe" style="font-size:13px;color:#666;cursor:pointer;user-select:none;">Remember me for 90 days</label>
+      </div>
       <button onclick="submitLogin()" id="loginBtn" style="width:100%;padding:14px;background:#0d47a1;border:none;border-radius:12px;font-size:16px;font-weight:900;color:#fff;cursor:pointer;font-family:Heebo,sans-serif;box-shadow:0 4px 12px rgba(13,71,161,0.35);">Sign In</button>
     </div>
     <div style="text-align:center;margin-top:16px;font-size:11px;color:#aaa;">YB Tracker Admin Portal</div>
