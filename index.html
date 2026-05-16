@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v592</title>
+<title>י.ב אחזקות — v593</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v592
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v593
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v592 · 17/05/2026
+v593 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v592</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v593</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6354,33 +6354,6 @@ function openProjectAI(i) {
       body.innerHTML = '<div style="padding:16px;color:#e53935;text-align:center;">⚠️ ' + (err.message||'error') + '</div>';
     });
 }
-
-  body.innerHTML =
-    '<div style="display:flex;flex-direction:column;gap:9px;padding:4px 0;">' +
-      ['חיזוק','לשיפור','טיפ טכני','תנאי עבודה'].map(function(cat) {
-        var cfg = {
-          'חיזוק':       { icon:'💪', grad:'linear-gradient(135deg,#1b5e20,#388e3c)', light:'#e8f5e9', accent:'#2e7d32', sub:'חיזוק חיובי' },
-          'לשיפור':      { icon:'🔧', grad:'linear-gradient(135deg,#e65100,#f57c00)', light:'#fff3e0', accent:'#e65100', sub:'הצעה לשיפור' },
-          'טיפ טכני':   { icon:'🔩', grad:'linear-gradient(135deg,#0d47a1,#1565c0)', light:'#e3f2fd', accent:'#0d47a1', sub:'הדרכה טכנית' },
-          'תנאי עבודה': { icon:'🌤️', grad:'linear-gradient(135deg,#f57f17,#fbc02d)', light:'#fffde7', accent:'#f57f17', sub:'בטיחות ותנאים' }
-        }[cat];
-        return '<div style="background:' + cfg.light + ';border-radius:13px;overflow:hidden;">' +
-          '<div style="background:' + cfg.grad + ';padding:9px 13px;display:flex;align-items:center;gap:8px;">' +
-            '<span style="font-size:16px;">' + cfg.icon + '</span>' +
-            '<div style="flex:1;">' +
-              '<div style="font-size:13px;font-weight:900;color:#fff;">' + cat + '</div>' +
-              '<div style="font-size:10px;color:rgba(255,255,255,0.75);">' + cfg.sub + '</div>' +
-            '</div>' +
-          '</div>' +
-          '<div id="aiCat_' + cat.replace(/\s/g,'_') + '" style="padding:11px 13px;">' +
-            '<div style="width:50%;height:8px;background:rgba(0,0,0,0.08);border-radius:4px;margin-bottom:5px;"></div>' +
-            '<div style="width:80%;height:8px;background:rgba(0,0,0,0.06);border-radius:4px;margin-bottom:5px;"></div>' +
-            '<div style="width:65%;height:8px;background:rgba(0,0,0,0.06);border-radius:4px;"></div>' +
-          '</div>' +
-        '</div>';
-      }).join('') +
-      '<button onclick="openProjectAI('+i+')" id="projAIRefreshBtn" style="width:100%;padding:9px;background:#f0f0f0;border:none;border-radius:8px;font-size:12px;font-weight:700;color:#333;cursor:pointer;font-family:Heebo,sans-serif;margin-top:4px;">🔄 רענן</button>' +
-    '</div>';
 
 // ── Done Tips ─────────────────────────────────────────
 function getDoneTips(jobKey) {
