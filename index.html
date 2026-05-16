@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v591</title>
+<title>י.ב אחזקות — v592</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v591
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v592
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v591 · 17/05/2026
+v592 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v591</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v592</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6217,7 +6217,17 @@ function submitQuotationSurvey() {
 
 
 // ── Per-Project AI Tips ──────────────────────────────
+var _projectTipsCache = {}; // jobKey → parsed tips array
+
 function _closeProjectAI() { document.getElementById("projectAIOverlay").style.display="none"; }
+
+function _refreshProjectAI(i) {
+  var p = projects[i]; if (!p) return;
+  var jobKey = 'proj_' + (p.jobId || (p.client||'') + '_' + (p.title||p.name||''));
+  delete _projectTipsCache[jobKey];
+  openProjectAI(i);
+}
+
 function openProjectAI(i) {
   var p = projects[i];
   if (!p) return;
@@ -6232,6 +6242,118 @@ function openProjectAI(i) {
     '<div style="flex:1;"><div style="font-size:14px;font-weight:900;color:#fff;">' + (p.title||p.name||'') + '</div>' +
     '<div style="font-size:10px;color:rgba(255,255,255,0.7);">' + (p.client||'') + (p.category ? ' · ' + p.category : '') + '</div></div>' +
     '<button onclick="_closeProjectAI()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;">✕</button>';
+
+  var jobKey = 'proj_' + (p.jobId || (p.client||'') + '_' + (p.title||p.name||''));
+  var doneTipsList = getDoneTips(jobKey);
+
+  var catCfg = {
+    'חיזוק':       { icon:'💪', grad:'linear-gradient(135deg,#1b5e20,#388e3c)', light:'#e8f5e9', accent:'#2e7d32', sub:'חיזוק חיובי' },
+    'לשיפור':      { icon:'🔧', grad:'linear-gradient(135deg,#e65100,#f57c00)', light:'#fff3e0', accent:'#e65100', sub:'הצעה לשיפור' },
+    'טיפ טכני':   { icon:'🔩', grad:'linear-gradient(135deg,#0d47a1,#1565c0)', light:'#e3f2fd', accent:'#0d47a1', sub:'הדרכה טכנית' },
+    'תנאי עבודה': { icon:'🌤️', grad:'linear-gradient(135deg,#f57f17,#fbc02d)', light:'#fffde7', accent:'#f57f17', sub:'בטיחות ותנאים' }
+  };
+
+  function buildShell(loading) {
+    return '<div style="display:flex;flex-direction:column;gap:9px;padding:4px 0;">' +
+      ['חיזוק','לשיפור','טיפ טכני','תנאי עבודה'].map(function(cat) {
+        var cfg = catCfg[cat];
+        return '<div style="background:' + cfg.light + ';border-radius:13px;overflow:hidden;">' +
+          '<div style="background:' + cfg.grad + ';padding:9px 13px;display:flex;align-items:center;gap:8px;">' +
+            '<span style="font-size:16px;">' + cfg.icon + '</span>' +
+            '<div style="flex:1;">' +
+              '<div style="font-size:13px;font-weight:900;color:#fff;">' + cat + '</div>' +
+              '<div style="font-size:10px;color:rgba(255,255,255,0.75);">' + cfg.sub + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div id="aiCat_' + cat.replace(/\s/g,'_') + '" style="padding:11px 13px;">' +
+            (loading ?
+              '<div style="width:50%;height:8px;background:rgba(0,0,0,0.08);border-radius:4px;margin-bottom:5px;"></div>' +
+              '<div style="width:80%;height:8px;background:rgba(0,0,0,0.06);border-radius:4px;margin-bottom:5px;"></div>' +
+              '<div style="width:65%;height:8px;background:rgba(0,0,0,0.06);border-radius:4px;"></div>'
+            : '') +
+          '</div>' +
+        '</div>';
+      }).join('') +
+      '<button onclick="_refreshProjectAI('+i+')" style="width:100%;padding:9px;background:#f0f0f0;border:none;border-radius:8px;font-size:12px;font-weight:700;color:#333;cursor:pointer;font-family:Heebo,sans-serif;margin-top:4px;">🔄 רענן</button>' +
+    '</div>';
+  }
+
+  function renderTips(tips) {
+    tips.forEach(function(t) {
+      var catId = (t.cat||'').replace(/\s/g,'_');
+      var el = document.getElementById('aiCat_' + catId);
+      if (!el) return;
+      var cfg = catCfg[t.cat] || { accent:'#333' };
+      var isDone = doneTipsList.indexOf(t.body||'') !== -1;
+      var safeTipBody = (t.body||'').replace(/'/g,"\\'").replace(/\n/g,' ');
+      var safeJobKey  = jobKey.replace(/'/g,"\\'");
+      el.innerHTML =
+        '<div onclick="_tipClick(this,\'' + safeJobKey + '\',\'' + safeTipBody + '\')" style="cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+          '<div data-tip-title style="font-size:12px;font-weight:900;color:' + (isDone?'#bbb':cfg.accent) + ';margin-bottom:4px;' + (isDone?'text-decoration:line-through;':'') + '">' + (t.title||'') + '</div>' +
+          '<div data-tip-body style="font-size:13px;color:' + (isDone?'#bbb':'#333') + ';line-height:1.55;direction:rtl;' + (isDone?'text-decoration:line-through;':'') + '">' + (t.body||'').replace(/\n/g,'<br>') + '</div>' +
+          '<div data-done-lbl style="font-size:10px;color:#2e7d32;margin-top:4px;display:' + (isDone?'block':'none') + ';">✓ בוצע</div>' +
+        '</div>';
+    });
+  }
+
+  // ── Use cache if available ────────────────────────────
+  if (_projectTipsCache[jobKey]) {
+    body.innerHTML = buildShell(false);
+    renderTips(_projectTipsCache[jobKey]);
+    return;
+  }
+
+  // ── Show loading skeletons ────────────────────────────
+  body.innerHTML = buildShell(true);
+
+  var now = Date.now();
+  var todayMs = (p.totalMs||0) + (p.active && p.activeStart ? (now - p.activeStart) : 0);
+  var totalMs = todayMs + (parseFloat(p.hoursActual||0) * 3600000);
+  var cleanNotes = (p.notes||[]).join(' | ')
+    .replace(/\(\d{1,2}:\d{2}[^)]*\)/g,'')
+    .replace(/\d+:\d{2}:\d{2}/g,'')
+    .replace(/\s+/g,' ').trim();
+
+  var preSurveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
+  var jobSurvey = preSurveys.filter(function(s){ return s.jobId === (p.jobId||'') || s.desc === (p.title||p.name||''); }).pop() || {};
+
+  var params = '?action=getProjectTips' +
+    '&desc='      + encodeURIComponent(p.title||p.name||'') +
+    '&cat='       + encodeURIComponent(p.category||'') +
+    '&client='    + encodeURIComponent(p.client||'') +
+    '&notes='     + encodeURIComponent(cleanNotes) +
+    '&actualHrs=' + encodeURIComponent(Math.round(totalMs/3600000*100)/100) +
+    '&estHrs='    + encodeURIComponent(p.estHours||0) +
+    '&income='    + encodeURIComponent(p.jobIncome||p.jobPrice||0) +
+    '&materials=' + encodeURIComponent(JSON.stringify(jobSurvey.materials||[])) +
+    '&steps='     + encodeURIComponent(JSON.stringify(jobSurvey.steps||[])) +
+    '&done='      + encodeURIComponent(JSON.stringify(doneTipsList));
+
+  var _timer = setTimeout(function(){
+    ['חיזוק','לשיפור','טיפ_טכני','תנאי_עבודה'].forEach(function(c){
+      var el = document.getElementById('aiCat_'+c);
+      if (el) el.innerHTML = '<div style="font-size:12px;color:#888;padding:4px 0;">⏱ timeout</div>';
+    });
+  }, 18000);
+
+  fetch(SHEETS_URL + params)
+    .then(function(r){ return r.json(); })
+    .then(function(result) {
+      clearTimeout(_timer);
+      var parsed = result.parsed;
+      if (!parsed || !parsed.tips || !parsed.tips.length) {
+        body.innerHTML = '<div style="padding:20px;color:#888;text-align:center;direction:rtl;">' + (result.text||'No tips') + '</div>' +
+          '<button onclick="_refreshProjectAI('+i+')" style="width:100%;padding:9px;background:#f0f0f0;border:none;border-radius:8px;font-size:12px;font-weight:700;color:#333;cursor:pointer;font-family:Heebo,sans-serif;">🔄 רענן</button>';
+        return;
+      }
+      _projectTipsCache[jobKey] = parsed.tips;
+      renderTips(parsed.tips);
+    })
+    .catch(function(err) {
+      clearTimeout(_timer);
+      body.innerHTML = '<div style="padding:16px;color:#e53935;text-align:center;">⚠️ ' + (err.message||'error') + '</div>';
+    });
+}
 
   body.innerHTML =
     '<div style="display:flex;flex-direction:column;gap:9px;padding:4px 0;">' +
@@ -6259,80 +6381,6 @@ function openProjectAI(i) {
       }).join('') +
       '<button onclick="openProjectAI('+i+')" id="projAIRefreshBtn" style="width:100%;padding:9px;background:#f0f0f0;border:none;border-radius:8px;font-size:12px;font-weight:700;color:#333;cursor:pointer;font-family:Heebo,sans-serif;margin-top:4px;">🔄 רענן</button>' +
     '</div>';
-
-  var now = Date.now();
-  var todayMs = (p.totalMs||0) + (p.active && p.activeStart ? (now - p.activeStart) : 0);
-  var totalMs = todayMs + (parseFloat(p.hoursActual||0) * 3600000);
-  var cleanNotes = (p.notes||[]).join(' | ')
-    .replace(/\(\d{1,2}:\d{2}[^)]*\)/g,'')
-    .replace(/\d+:\d{2}:\d{2}/g,'')
-    .replace(/\s+/g,' ').trim();
-
-  var preSurveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
-  var jobSurvey = preSurveys.filter(function(s){ return s.jobId === (p.jobId||'') || s.desc === (p.title||p.name||''); }).pop() || {};
-  var surveyMaterials = jobSurvey.materials || [];
-  var surveySteps     = jobSurvey.steps     || [];
-
-  var jobKey = 'proj_' + (p.jobId || (p.client||'') + '_' + (p.title||p.name||''));
-  var doneTipsList = getDoneTips(jobKey);
-
-  var params = '?action=getProjectTips' +
-    '&desc='      + encodeURIComponent(p.title||p.name||'') +
-    '&cat='       + encodeURIComponent(p.category||'') +
-    '&client='    + encodeURIComponent(p.client||'') +
-    '&notes='     + encodeURIComponent(cleanNotes) +
-    '&actualHrs=' + encodeURIComponent(Math.round(totalMs/3600000*100)/100) +
-    '&estHrs='    + encodeURIComponent(p.estHours||0) +
-    '&income='    + encodeURIComponent(p.jobIncome||p.jobPrice||0) +
-    '&materials=' + encodeURIComponent(JSON.stringify(surveyMaterials)) +
-    '&steps='     + encodeURIComponent(JSON.stringify(surveySteps)) +
-    '&done='      + encodeURIComponent(JSON.stringify(doneTipsList));
-
-  var _timer = setTimeout(function(){
-    ['חיזוק','לשיפור','טיפ_טכני','תנאי_עבודה'].forEach(function(c){
-      var el = document.getElementById('aiCat_'+c);
-      if (el) el.innerHTML = '<div style="font-size:12px;color:#888;padding:4px 0;">⏱ timeout</div>';
-    });
-  }, 18000);
-
-  var catCfg = {
-    'חיזוק':       { accent:'#2e7d32' },
-    'לשיפור':      { accent:'#e65100' },
-    'טיפ טכני':   { accent:'#0d47a1' },
-    'תנאי עבודה': { accent:'#f57f17' }
-  };
-
-  fetch(SHEETS_URL + params)
-    .then(function(r){ return r.json(); })
-    .then(function(result) {
-      clearTimeout(_timer);
-      var parsed = result.parsed;
-      if (!parsed || !parsed.tips || !parsed.tips.length) {
-        body.innerHTML = '<div style="padding:20px;color:#888;text-align:center;direction:rtl;">' + (result.text||'No tips') + '</div>' +
-          '<button onclick="openProjectAI('+i+')" style="width:100%;padding:9px;background:#f0f0f0;border:none;border-radius:8px;font-size:12px;font-weight:700;color:#333;cursor:pointer;font-family:Heebo,sans-serif;">🔄 רענן</button>';
-        return;
-      }
-      parsed.tips.forEach(function(t) {
-        var catId = (t.cat||'').replace(/\s/g,'_');
-        var el = document.getElementById('aiCat_' + catId);
-        if (!el) return;
-        var cfg = catCfg[t.cat] || { accent:'#333' };
-        var isDone = doneTipsList.indexOf(t.body||'') !== -1;
-        var safeTipBody = (t.body||'').replace(/'/g,"\\'").replace(/\n/g,' ');
-        var safeJobKey  = jobKey.replace(/'/g,"\\'");
-        el.innerHTML =
-          '<div onclick="_tipClick(this,\'' + safeJobKey + '\',\'' + safeTipBody + '\')" style="cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
-            '<div data-tip-title style="font-size:12px;font-weight:900;color:' + (isDone?'#bbb':cfg.accent) + ';margin-bottom:4px;' + (isDone?'text-decoration:line-through;':'') + '">' + (t.title||'') + '</div>' +
-            '<div data-tip-body style="font-size:13px;color:' + (isDone?'#bbb':'#333') + ';line-height:1.55;direction:rtl;' + (isDone?'text-decoration:line-through;':'') + '">' + (t.body||'').replace(/\n/g,'<br>') + '</div>' +
-            '<div data-done-lbl style="font-size:10px;color:#2e7d32;margin-top:4px;display:' + (isDone?'block':'none') + ';">✓ בוצע</div>' +
-          '</div>';
-      });
-    })
-    .catch(function(err) {
-      clearTimeout(_timer);
-      body.innerHTML = '<div style="padding:16px;color:#e53935;text-align:center;">⚠️ ' + (err.message||'error') + '</div>';
-    });
-}
 
 // ── Done Tips ─────────────────────────────────────────
 function getDoneTips(jobKey) {
