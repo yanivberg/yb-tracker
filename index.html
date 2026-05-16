@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v583</title>
+<title>י.ב אחזקות — v586</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1209,6 +1209,10 @@ SHEET SYNC
   <div class="screen" id="screen-summary">
     <div id="summaryContent" style="padding:16px 16px 0;"></div>
     <div id="timelineView" style="padding:0 0 16px;"></div>
+    <div id="workPatternResult" style="padding:0 16px 0;display:none;"></div>
+    <div style="padding:12px 16px 0;">
+      <button onclick="openWorkPatternAI()" id="workPatternBtn" style="width:100%;margin-bottom:10px;padding:14px;background:linear-gradient(135deg,#1a1a2e,#0d47a1);color:#fff;border:none;border-radius:14px;font-family:Heebo,sans-serif;font-size:15px;font-weight:900;cursor:pointer;letter-spacing:0.03em;box-shadow:0 4px 14px rgba(13,71,161,0.35);-webkit-tap-highlight-color:transparent;">🧠 Work Pattern Analysis</button>
+    </div>
     <div style="padding:0 16px;">
       <button class="copy-summary-btn" id="copySummaryBtn" onclick="copySummary()">💾 שמור Work Summary</button>
       <button onclick="copyFullLog()" style="width:100%;margin-bottom:12px;padding:13px;background:transparent;border:1px solid #111;border-radius:12px;font-family:Heebo,sans-serif;font-size:14px;font-weight:600;cursor:pointer;">📋 Copy Work Log</button>
@@ -1989,7 +1993,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxi3VPmMiQu3u9E_3mhH9Ky0eaDN0G0cssra1F9NVBaAE0l-ZwNbpbetqbyheEwhFy_yg/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxdLTp0FIABQP-Bo_dm7QBETNbJmP4nRGoKxbPPfCWUNGssc1rNc_nhtOtC-Fy2GuUp8w/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2868,6 +2872,12 @@ function renderProjectBtns() {
     // ── Paused card: filled color B-style (tap ▶ to start) ─
     if (!p.active && !p.done) {
       var todayFmt = formatMs(p.totalMs || 0);
+      var pausedNotes = p.notes || [];
+      var pausedNotesList = pausedNotes.length > 0
+        ? pausedNotes.map(function(n, ni) {
+            return '<div style="font-size:12px;font-weight:700;color:#000;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:flex-start;"><span>' + n + '</span><button onclick="event.stopPropagation();deleteNote('+i+','+ni+')" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;padding:0 0 0 6px;flex-shrink:0;">✕</button></div>';
+          }).join('')
+        : '<div style="font-size:12px;color:rgba(0,0,0,0.3);padding:3px 0 4px;">אין הערות</div>';
       html +=
         '<div style="border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 3px 12px rgba(0,0,0,0.15);">' +
           '<div style="background:' + headerBg + ';padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">' +
@@ -2876,11 +2886,20 @@ function renderProjectBtns() {
           '<div style="background:' + bodyBg + ';padding:8px 12px;">' +
             '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
               '<span style="font-size:14px;font-weight:700;color:' + (cc.solid||'#333') + ';flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + displayName + '</span>' +
-              '<button onclick="event.stopPropagation();openProjectAI('+i+')" style="background:#0d47a1;color:#fff;border:none;border-radius:10px;padding:4px 9px;font-size:11px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent;">💫 AI</button>' +'<button onclick="event.stopPropagation();toggleProject('+i+')" style="background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:14px;font-weight:900;flex-shrink:0;cursor:pointer;-webkit-tap-highlight-color:transparent;">▶</button>' +
+              '<button onclick="event.stopPropagation();openProjectAI('+i+')" style="background:#0d47a1;color:#fff;border:none;border-radius:10px;padding:4px 9px;font-size:11px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent;">💫 AI</button>' +
+              '<button onclick="event.stopPropagation();toggleProject('+i+')" style="background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:14px;font-weight:900;flex-shrink:0;cursor:pointer;-webkit-tap-highlight-color:transparent;">▶</button>' +
             '</div>' +
-            '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+            '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">' +
               (todayFmt && todayFmt !== '00:00' ? '<span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">⏱ ' + todayFmt + '</span>' : '') +
               (po ? '<span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">' + po + '</span>' : '') +
+            '</div>' +
+            '<div style="border-top:1.5px solid rgba(0,0,0,0.12);padding-top:7px;">' +
+              '<div style="font-size:10px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Notes</div>' +
+              pausedNotesList +
+              '<div style="display:flex;gap:5px;margin-top:6px;">' +
+                '<input id="noteInp-'+i+'" type="text" placeholder="הוסף הערה…" oninput="projects['+i+']._pendingNote=this.value" onkeypress="if(event.key===\'Enter\')saveNote('+i+')" style="flex:1;padding:7px 10px;border:1.5px solid rgba(0,0,0,0.2);border-radius:8px;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#000;direction:rtl;">' +
+                '<button onclick="event.stopPropagation();saveNote('+i+')" style="padding:7px 14px;background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:900;cursor:pointer;flex-shrink:0;">+</button>' +
+              '</div>' +
             '</div>' +
           '</div>' +
         '</div>';
@@ -2980,7 +2999,8 @@ function renderProjectBtns() {
   container.innerHTML = html;
 }
 
-function toggleNote(i) { projects[i].noteOpen = !projects[i].noteOpen; renderProjectBtns(); if (projects[i].noteOpen) setTimeout(function() { var el = document.getElementById('noteInp-'+i); if(el) el.focus(); }, 60); }
+function toggleNote(i) { projects[i].noteOpen = !projects[i].noteOpen; reRender(); if (projects[i].noteOpen) setTimeout(function() { var el = document.getElementById('noteInp-'+i); if(el) el.focus(); }, 60); }
+function reRender() { var s = document.getElementById('screen-setup'); if (s && s.classList.contains('active')) { renderSetup(); } else { renderProjectBtns(); } }
 
 
 function showProjectInfo(i) {
@@ -3028,7 +3048,7 @@ function saveNote(i) {
   var hours = String(nowTs.getHours()).padStart(2, '0'); var mins = String(nowTs.getMinutes()).padStart(2, '0');
   var tsStr = day + '.' + month + ' - ' + hours + ':' + mins;
   projects[i].notes.push(noteNum + '. (' + tsStr + ') ' + noteText);
-  el.value = ''; saveState(); renderProjectBtns();
+  el.value = ''; saveState(); reRender();
   setTimeout(function(){ var inp = document.getElementById('noteInp-'+i); if(inp) inp.focus(); }, 50);
   var jobId = projects[i].jobId;
   if (jobId) addNoteToSheet(projects[i], noteNum + '. (' + tsStr + ') ' + noteText);
@@ -3047,7 +3067,7 @@ function deleteNote(i, n) {
   if (!projects[i].notes) return;
   var noteText = projects[i].notes[n];
   projects[i].notes.splice(n, 1);
-  saveState(); renderProjectBtns();
+  saveState(); reRender();
   // Delete from sheet
   var p = projects[i];
   if (SHEETS_URL && p.jobId && noteText) {
@@ -3396,6 +3416,117 @@ function copySummary() {
 
 function fallbackCopy(text, callback) { var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.focus(); ta.select(); try { document.execCommand('copy'); if (callback) callback(); } catch(e) { showToast('Copy failed — copy manually'); } document.body.removeChild(ta); }
 
+// ── Work Pattern Analysis ──────────────────────────────────────────────────
+function openWorkPatternAI() {
+  var resultEl = document.getElementById('workPatternResult');
+  var btn = document.getElementById('workPatternBtn');
+  var history = JSON.parse(localStorage.getItem('yb_sessionHistory') || '[]');
+  if (!history.length) { showToast('No session history yet'); return; }
+
+  // Show loading state
+  resultEl.style.display = 'block';
+  resultEl.innerHTML =
+    '<div style="background:#fff;border-radius:14px;padding:20px 18px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,0.08);">' +
+      '<div style="display:flex;align-items:center;gap:12px;">' +
+        '<div style="font-size:26px;">🧠</div>' +
+        '<div>' +
+          '<div style="font-size:14px;font-weight:900;color:#1a1a2e;">מנתח ' + history.length + ' סשנים…</div>' +
+          '<div style="font-size:12px;color:#888;margin-top:2px;">מזהה תבניות עבודה</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-top:14px;height:4px;background:#f0f0f0;border-radius:4px;overflow:hidden;">' +
+        '<div id="patternProgressBar" style="height:100%;background:linear-gradient(90deg,#0d47a1,#42a5f5);width:15%;border-radius:4px;transition:width 2s ease;"></div>' +
+      '</div>' +
+    '</div>';
+  if (btn) { btn.textContent = '⏳ מנתח…'; btn.disabled = true; }
+  setTimeout(function() { var pb = document.getElementById('patternProgressBar'); if(pb) pb.style.width = '70%'; }, 200);
+
+  fetch(SHEETS_URL + '?action=getWorkPatternAnalysis&history=' + encodeURIComponent(JSON.stringify(history)))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (btn) { btn.textContent = '🔄 רענן ניתוח'; btn.disabled = false; }
+      if (data.error) { resultEl.innerHTML = '<div style="padding:16px;color:#c62828;font-size:14px;">⚠️ ' + data.error + '</div>'; return; }
+
+      var patterns = data.patterns || [];
+      var habits   = data.habits   || [];
+      var records  = data.records  || {};
+
+      var html = '<div style="margin-bottom:12px;">';
+
+      // ── Header ──
+      html += '<div style="background:linear-gradient(135deg,#1a1a2e,#0d47a1);border-radius:14px;padding:16px 18px;margin-bottom:10px;">' +
+        '<div style="font-size:17px;font-weight:900;color:#fff;">🧠 Work Pattern Analysis</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:3px;">מבוסס על ' + history.length + ' סשנים</div>' +
+      '</div>';
+
+      // ── Patterns ──
+      if (patterns.length) {
+        html += '<div style="font-size:10px;font-weight:900;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;padding:0 2px;">תבניות נתונים</div>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">';
+        patterns.forEach(function(p) {
+          html +=
+            '<div style="background:#fff;border-radius:12px;padding:12px 13px;box-shadow:0 1px 6px rgba(0,0,0,0.07);">' +
+              '<div style="font-size:20px;margin-bottom:4px;">' + (p.icon||'📊') + '</div>' +
+              '<div style="font-size:11px;font-weight:900;color:#1a1a2e;margin-bottom:2px;">' + (p.title||'') + '</div>' +
+              '<div style="font-size:13px;font-weight:700;color:#0d47a1;">' + (p.value||'') + '</div>' +
+              (p.detail ? '<div style="font-size:11px;color:#888;margin-top:3px;line-height:1.4;">' + p.detail + '</div>' : '') +
+            '</div>';
+        });
+        html += '</div>';
+      }
+
+      // ── Records ──
+      var recEntries = [];
+      if (records.longestDay    && records.longestDay.value)    recEntries.push({ icon:'🏆', label:'יום ארוך ביותר',   date: records.longestDay.date,    value: records.longestDay.value });
+      if (records.shortestDay   && records.shortestDay.value)   recEntries.push({ icon:'⚡', label:'יום קצר ביותר',    date: records.shortestDay.date,   value: records.shortestDay.value });
+      if (records.mostProjects  && records.mostProjects.value)  recEntries.push({ icon:'📋', label:'הכי הרבה פרויקטים',date: records.mostProjects.date,  value: records.mostProjects.value });
+      if (records.earliestStart && records.earliestStart.value) recEntries.push({ icon:'🌅', label:'התחלה מוקדמת ביותר',date: records.earliestStart.date, value: records.earliestStart.value });
+      if (records.latestEnd     && records.latestEnd.value)     recEntries.push({ icon:'🌙', label:'סיום מאוחר ביותר', date: records.latestEnd.date,     value: records.latestEnd.value });
+      if (recEntries.length) {
+        html += '<div style="font-size:10px;font-weight:900;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;padding:0 2px;">שיאים</div>';
+        html += '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.07);margin-bottom:10px;">';
+        recEntries.forEach(function(r, ri) {
+          html +=
+            '<div style="padding:10px 14px;' + (ri < recEntries.length-1 ? 'border-bottom:1px solid #f0f0f0;' : '') + 'display:flex;align-items:center;gap:10px;">' +
+              '<span style="font-size:18px;">' + r.icon + '</span>' +
+              '<div style="flex:1;">' +
+                '<div style="font-size:12px;font-weight:700;color:#333;">' + r.label + '</div>' +
+                (r.date ? '<div style="font-size:11px;color:#aaa;">' + r.date + '</div>' : '') +
+              '</div>' +
+              '<div style="font-size:13px;font-weight:900;color:#0d47a1;">' + r.value + '</div>' +
+            '</div>';
+        });
+        html += '</div>';
+      }
+
+      // ── Habits ──
+      if (habits.length) {
+        html += '<div style="font-size:10px;font-weight:900;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px;padding:0 2px;">הרגלי עבודה</div>';
+        habits.forEach(function(h) {
+          var typeColor = { warning:'#e65100', good:'#2e7d32', note:'#1565c0', focus:'#6a1b9a' };
+          var typeBg    = { warning:'#fff3e0',  good:'#f1f8e9',  note:'#e3f2fd',  focus:'#f3e5f5' };
+          var t = h.type || 'note';
+          html +=
+            '<div style="background:' + (typeBg[t]||'#f5f5f5') + ';border-radius:12px;padding:12px 14px;margin-bottom:8px;">' +
+              '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+                '<span style="font-size:17px;">' + (h.icon||'💡') + '</span>' +
+                '<span style="font-size:13px;font-weight:900;color:' + (typeColor[t]||'#333') + ';">' + (h.title||'') + '</span>' +
+              '</div>' +
+              '<div style="font-size:13px;color:#333;line-height:1.5;direction:rtl;">' + (h.body||'').replace(/\n/g,'<br>') + '</div>' +
+            '</div>';
+        });
+      }
+
+      html += '</div>';
+      resultEl.innerHTML = html;
+      resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    })
+    .catch(function(err) {
+      if (btn) { btn.textContent = '🧠 Work Pattern Analysis'; btn.disabled = false; }
+      resultEl.innerHTML = '<div style="padding:16px;color:#c62828;font-size:14px;">⚠️ שגיאת חיבור</div>';
+    });
+}
+
 function newDay() {
   dayStartTime = null; arrangementStart = null; dayEnded = false;
   localStorage.removeItem('yb_dayStart');
@@ -3441,6 +3572,10 @@ function renderSetup() {
   if (activeProjects.length > 0) { btn.disabled = false; btn.removeAttribute('disabled'); } else { btn.disabled = true; btn.setAttribute('disabled', ''); }
   list.innerHTML = projects.map((p, i) => {
     var cc = clientColor(p.client || p.name || '');
+    var notes = p.notes || [];
+    var notesHtml = notes.length > 0
+      ? notes.map((n, ni) => `<div style="font-size:13px;font-weight:700;color:#000;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:flex-start;"><span>${n}</span><button onclick="event.stopPropagation();deleteNote(${i},${ni})" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;padding:0 0 0 8px;flex-shrink:0;">✕</button></div>`).join('')
+      : `<div style="font-size:12px;color:rgba(0,0,0,0.35);padding:3px 0 5px;">אין הערות</div>`;
     return `<div style="border-radius:16px;overflow:hidden;margin-bottom:10px;box-shadow:0 3px 10px rgba(0,0,0,0.1);">
       <div style="background:${cc.grad};padding:10px 16px;display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:16px;font-weight:900;color:#fff;">${p.client || '—'}</span>
@@ -3451,11 +3586,19 @@ function renderSetup() {
           <div style="font-size:18px;font-weight:900;color:#000;flex:1;">${p.title || p.name}</div>
           <button onclick="event.stopPropagation();openProjectAI(${i})" style="background:#0d47a1;color:#fff;border:none;border-radius:10px;padding:4px 10px;font-size:11px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;white-space:nowrap;-webkit-tap-highlight-color:transparent;">💫 AI</button>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
           ${p.jobPO ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.15);border-radius:6px;padding:2px 8px;">${p.jobPO}</span>` : ''}
           ${(p.jobIncome||p.jobPrice) ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;">₪${Number(p.jobIncome||p.jobPrice).toLocaleString()}</span>` : ``}
           ${p.estHours ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;">${hoursToHHMM(p.estHours)}</span>` : ''}
           ${((p.prevMs || 0) + p.totalMs) > 0 ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;">⏱ ${formatMs((p.prevMs||0)+p.totalMs)}</span>` : ''}
+        </div>
+        <div style="border-top:1.5px solid rgba(0,0,0,0.12);padding-top:8px;">
+          <div style="font-size:10px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Notes</div>
+          ${notesHtml}
+          <div style="display:flex;gap:6px;margin-top:7px;">
+            <input id="noteInp-${i}" type="text" placeholder="הוסף הערה…" oninput="projects[${i}]._pendingNote=this.value" onkeypress="if(event.key==='Enter')saveNote(${i})" style="flex:1;padding:8px 11px;border:1.5px solid rgba(0,0,0,0.2);border-radius:8px;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#000;direction:rtl;">
+            <button onclick="event.stopPropagation();saveNote(${i})" style="padding:8px 16px;background:${cc.solid||'#333'};color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:900;cursor:pointer;flex-shrink:0;">+</button>
+          </div>
         </div>
       </div>
     </div>`;
