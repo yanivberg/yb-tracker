@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v586</title>
+<title>י.ב אחזקות — v591</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v583
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v591
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v583 · 09/05/2026
+v591 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v583</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v591</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1993,7 +1993,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxdLTp0FIABQP-Bo_dm7QBETNbJmP4nRGoKxbPPfCWUNGssc1rNc_nhtOtC-Fy2GuUp8w/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyb-6qxmjTMc2khScI8tsjPEC2TUF7Gcg6FS3LO5_Zo_UWtz_3rgIB7ioUb85o2CM41vA/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2871,13 +2871,24 @@ function renderProjectBtns() {
 
     // ── Paused card: filled color B-style (tap ▶ to start) ─
     if (!p.active && !p.done) {
-      var todayFmt = formatMs(p.totalMs || 0);
+      var actualMs2 = (p.prevMs || 0) + p.totalMs;
+      var actualFmt2 = actualMs2 > 0 ? formatMsHHMM(actualMs2) : '';
       var pausedNotes = p.notes || [];
+      var pausedOpen = !!p._notesOpen;
       var pausedNotesList = pausedNotes.length > 0
         ? pausedNotes.map(function(n, ni) {
             return '<div style="font-size:12px;font-weight:700;color:#000;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:flex-start;"><span>' + n + '</span><button onclick="event.stopPropagation();deleteNote('+i+','+ni+')" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;padding:0 0 0 6px;flex-shrink:0;">✕</button></div>';
           }).join('')
         : '<div style="font-size:12px;color:rgba(0,0,0,0.3);padding:3px 0 4px;">אין הערות</div>';
+      var pausedPanel = pausedOpen
+        ? '<div style="padding-top:7px;">' +
+            pausedNotesList +
+            '<div style="display:flex;gap:5px;margin-top:6px;">' +
+              '<input id="noteInp-'+i+'" type="text" placeholder="הוסף הערה…" oninput="projects['+i+']._pendingNote=this.value" onkeypress="if(event.key===\'Enter\')saveNote('+i+')" style="flex:1;padding:7px 10px;border:1.5px solid rgba(0,0,0,0.2);border-radius:8px;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#000;direction:rtl;">' +
+              '<button onclick="event.stopPropagation();saveNote('+i+')" style="padding:7px 14px;background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:900;cursor:pointer;flex-shrink:0;">+</button>' +
+            '</div>' +
+          '</div>'
+        : '';
       html +=
         '<div style="border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 3px 12px rgba(0,0,0,0.15);">' +
           '<div style="background:' + headerBg + ';padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">' +
@@ -2885,21 +2896,20 @@ function renderProjectBtns() {
           '</div>' +
           '<div style="background:' + bodyBg + ';padding:8px 12px;">' +
             '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
-              '<span style="font-size:14px;font-weight:700;color:' + (cc.solid||'#333') + ';flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + displayName + '</span>' +
+              '<div style="flex:1;min-width:0;">' +
+                '<span style="font-size:14px;font-weight:700;color:' + (cc.solid||'#333') + ';">' + displayName + '</span>' +
+                (actualFmt2 ? '<span style="font-size:12px;font-weight:700;color:rgba(0,0,0,0.45);"> · ' + actualFmt2 + '</span>' : '') +
+              '</div>' +
               '<button onclick="event.stopPropagation();openProjectAI('+i+')" style="background:#0d47a1;color:#fff;border:none;border-radius:10px;padding:4px 9px;font-size:11px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent;">💫 AI</button>' +
               '<button onclick="event.stopPropagation();toggleProject('+i+')" style="background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:14px;font-weight:900;flex-shrink:0;cursor:pointer;-webkit-tap-highlight-color:transparent;">▶</button>' +
             '</div>' +
-            '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">' +
-              (todayFmt && todayFmt !== '00:00' ? '<span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">⏱ ' + todayFmt + '</span>' : '') +
-              (po ? '<span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">' + po + '</span>' : '') +
-            '</div>' +
-            '<div style="border-top:1.5px solid rgba(0,0,0,0.12);padding-top:7px;">' +
-              '<div style="font-size:10px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Notes</div>' +
-              pausedNotesList +
-              '<div style="display:flex;gap:5px;margin-top:6px;">' +
-                '<input id="noteInp-'+i+'" type="text" placeholder="הוסף הערה…" oninput="projects['+i+']._pendingNote=this.value" onkeypress="if(event.key===\'Enter\')saveNote('+i+')" style="flex:1;padding:7px 10px;border:1.5px solid rgba(0,0,0,0.2);border-radius:8px;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#000;direction:rtl;">' +
-                '<button onclick="event.stopPropagation();saveNote('+i+')" style="padding:7px 14px;background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:900;cursor:pointer;flex-shrink:0;">+</button>' +
-              '</div>' +
+            (po ? '<div style="margin-bottom:6px;"><span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">' + po + '</span></div>' : '') +
+            '<div style="border-top:1.5px solid rgba(0,0,0,0.12);padding-top:4px;">' +
+              '<button onclick="event.stopPropagation();toggleSetupNotes('+i+')" style="background:none;border:none;width:100%;display:flex;align-items:center;justify-content:space-between;padding:4px 0;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+                '<span style="font-size:10px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">📝 Notes' + (pausedNotes.length ? ' (' + pausedNotes.length + ')' : '') + '</span>' +
+                '<span style="font-size:13px;color:#555;font-weight:700;">' + (pausedOpen ? '▲' : '▼') + '</span>' +
+              '</button>' +
+              pausedPanel +
             '</div>' +
           '</div>' +
         '</div>';
@@ -3001,6 +3011,8 @@ function renderProjectBtns() {
 
 function toggleNote(i) { projects[i].noteOpen = !projects[i].noteOpen; reRender(); if (projects[i].noteOpen) setTimeout(function() { var el = document.getElementById('noteInp-'+i); if(el) el.focus(); }, 60); }
 function reRender() { var s = document.getElementById('screen-setup'); if (s && s.classList.contains('active')) { renderSetup(); } else { renderProjectBtns(); } }
+function toggleSetupNotes(i) { projects[i]._notesOpen = !projects[i]._notesOpen; reRender(); if (projects[i]._notesOpen) setTimeout(function() { var el = document.getElementById('noteInp-'+i); if(el) el.focus(); }, 60); }
+function formatMsHHMM(ms) { var t = Math.floor(ms/1000); return pad(Math.floor(t/3600)) + ':' + pad(Math.floor((t%3600)/60)); }
 
 
 function showProjectInfo(i) {
@@ -3445,7 +3457,7 @@ function openWorkPatternAI() {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (btn) { btn.textContent = '🔄 רענן ניתוח'; btn.disabled = false; }
-      if (data.error) { resultEl.innerHTML = '<div style="padding:16px;color:#c62828;font-size:14px;">⚠️ ' + data.error + '</div>'; return; }
+      if (data.error) { resultEl.innerHTML = '<div style="padding:16px;color:#c62828;font-size:13px;background:#fff;border-radius:12px;direction:rtl;">⚠️ ' + data.error + '</div>'; return; }
 
       var patterns = data.patterns || [];
       var habits   = data.habits   || [];
@@ -3573,9 +3585,23 @@ function renderSetup() {
   list.innerHTML = projects.map((p, i) => {
     var cc = clientColor(p.client || p.name || '');
     var notes = p.notes || [];
-    var notesHtml = notes.length > 0
+    var notesOpen = !!p._notesOpen;
+    var actualMs = (p.prevMs || 0) + p.totalMs;
+    var actualFmt = actualMs > 0 ? formatMsHHMM(actualMs) : '';
+
+    var notesListHtml = notes.length > 0
       ? notes.map((n, ni) => `<div style="font-size:13px;font-weight:700;color:#000;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:flex-start;"><span>${n}</span><button onclick="event.stopPropagation();deleteNote(${i},${ni})" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;padding:0 0 0 8px;flex-shrink:0;">✕</button></div>`).join('')
       : `<div style="font-size:12px;color:rgba(0,0,0,0.35);padding:3px 0 5px;">אין הערות</div>`;
+
+    var notesPanel = notesOpen ? `
+      <div style="padding-top:8px;">
+        ${notesListHtml}
+        <div style="display:flex;gap:6px;margin-top:7px;">
+          <input id="noteInp-${i}" type="text" placeholder="הוסף הערה…" oninput="projects[${i}]._pendingNote=this.value" onkeypress="if(event.key==='Enter')saveNote(${i})" style="flex:1;padding:8px 11px;border:1.5px solid rgba(0,0,0,0.2);border-radius:8px;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#000;direction:rtl;">
+          <button onclick="event.stopPropagation();saveNote(${i})" style="padding:8px 16px;background:${cc.solid||'#333'};color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:900;cursor:pointer;flex-shrink:0;">+</button>
+        </div>
+      </div>` : '';
+
     return `<div style="border-radius:16px;overflow:hidden;margin-bottom:10px;box-shadow:0 3px 10px rgba(0,0,0,0.1);">
       <div style="background:${cc.grad};padding:10px 16px;display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:16px;font-weight:900;color:#fff;">${p.client || '—'}</span>
@@ -3583,22 +3609,20 @@ function renderSetup() {
       </div>
       <div style="background:${cc.rgba.replace(/[\d.]+\)$/, '0.55)')};padding:12px 16px;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-          <div style="font-size:18px;font-weight:900;color:#000;flex:1;">${p.title || p.name}</div>
+          <div style="font-size:18px;font-weight:900;color:#000;flex:1;">${p.title || p.name}${actualFmt ? `<span style="font-size:13px;font-weight:700;color:rgba(0,0,0,0.5);margin-right:6px;"> · ${actualFmt}</span>` : ''}</div>
           <button onclick="event.stopPropagation();openProjectAI(${i})" style="background:#0d47a1;color:#fff;border:none;border-radius:10px;padding:4px 10px;font-size:11px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;white-space:nowrap;-webkit-tap-highlight-color:transparent;">💫 AI</button>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
           ${p.jobPO ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.15);border-radius:6px;padding:2px 8px;">${p.jobPO}</span>` : ''}
           ${(p.jobIncome||p.jobPrice) ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;">₪${Number(p.jobIncome||p.jobPrice).toLocaleString()}</span>` : ``}
           ${p.estHours ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;">${hoursToHHMM(p.estHours)}</span>` : ''}
-          ${((p.prevMs || 0) + p.totalMs) > 0 ? `<span style="font-size:11px;font-weight:700;color:#000;background:rgba(0,0,0,0.12);border-radius:6px;padding:2px 8px;">⏱ ${formatMs((p.prevMs||0)+p.totalMs)}</span>` : ''}
         </div>
-        <div style="border-top:1.5px solid rgba(0,0,0,0.12);padding-top:8px;">
-          <div style="font-size:10px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:5px;">Notes</div>
-          ${notesHtml}
-          <div style="display:flex;gap:6px;margin-top:7px;">
-            <input id="noteInp-${i}" type="text" placeholder="הוסף הערה…" oninput="projects[${i}]._pendingNote=this.value" onkeypress="if(event.key==='Enter')saveNote(${i})" style="flex:1;padding:8px 11px;border:1.5px solid rgba(0,0,0,0.2);border-radius:8px;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#000;direction:rtl;">
-            <button onclick="event.stopPropagation();saveNote(${i})" style="padding:8px 16px;background:${cc.solid||'#333'};color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:900;cursor:pointer;flex-shrink:0;">+</button>
-          </div>
+        <div style="border-top:1.5px solid rgba(0,0,0,0.12);padding-top:6px;">
+          <button onclick="event.stopPropagation();toggleSetupNotes(${i})" style="background:none;border:none;width:100%;text-align:right;display:flex;align-items:center;justify-content:space-between;padding:4px 0;cursor:pointer;-webkit-tap-highlight-color:transparent;">
+            <span style="font-size:10px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">📝 Notes${notes.length ? ' (' + notes.length + ')' : ''}</span>
+            <span style="font-size:13px;color:#555;font-weight:700;">${notesOpen ? '▲' : '▼'}</span>
+          </button>
+          ${notesPanel}
         </div>
       </div>
     </div>`;
@@ -6209,7 +6233,32 @@ function openProjectAI(i) {
     '<div style="font-size:10px;color:rgba(255,255,255,0.7);">' + (p.client||'') + (p.category ? ' · ' + p.category : '') + '</div></div>' +
     '<button onclick="_closeProjectAI()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;">✕</button>';
 
-  body.innerHTML = '<div style="text-align:center;padding:30px 0;"><div style="font-size:28px;margin-bottom:8px;">💫</div><div style="font-size:13px;color:#555;font-weight:700;">מנתח פרויקט...</div></div>';
+  body.innerHTML =
+    '<div style="display:flex;flex-direction:column;gap:9px;padding:4px 0;">' +
+      ['חיזוק','לשיפור','טיפ טכני','תנאי עבודה'].map(function(cat) {
+        var cfg = {
+          'חיזוק':       { icon:'💪', grad:'linear-gradient(135deg,#1b5e20,#388e3c)', light:'#e8f5e9', accent:'#2e7d32', sub:'חיזוק חיובי' },
+          'לשיפור':      { icon:'🔧', grad:'linear-gradient(135deg,#e65100,#f57c00)', light:'#fff3e0', accent:'#e65100', sub:'הצעה לשיפור' },
+          'טיפ טכני':   { icon:'🔩', grad:'linear-gradient(135deg,#0d47a1,#1565c0)', light:'#e3f2fd', accent:'#0d47a1', sub:'הדרכה טכנית' },
+          'תנאי עבודה': { icon:'🌤️', grad:'linear-gradient(135deg,#f57f17,#fbc02d)', light:'#fffde7', accent:'#f57f17', sub:'בטיחות ותנאים' }
+        }[cat];
+        return '<div style="background:' + cfg.light + ';border-radius:13px;overflow:hidden;">' +
+          '<div style="background:' + cfg.grad + ';padding:9px 13px;display:flex;align-items:center;gap:8px;">' +
+            '<span style="font-size:16px;">' + cfg.icon + '</span>' +
+            '<div style="flex:1;">' +
+              '<div style="font-size:13px;font-weight:900;color:#fff;">' + cat + '</div>' +
+              '<div style="font-size:10px;color:rgba(255,255,255,0.75);">' + cfg.sub + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div id="aiCat_' + cat.replace(/\s/g,'_') + '" style="padding:11px 13px;">' +
+            '<div style="width:50%;height:8px;background:rgba(0,0,0,0.08);border-radius:4px;margin-bottom:5px;"></div>' +
+            '<div style="width:80%;height:8px;background:rgba(0,0,0,0.06);border-radius:4px;margin-bottom:5px;"></div>' +
+            '<div style="width:65%;height:8px;background:rgba(0,0,0,0.06);border-radius:4px;"></div>' +
+          '</div>' +
+        '</div>';
+      }).join('') +
+      '<button onclick="openProjectAI('+i+')" id="projAIRefreshBtn" style="width:100%;padding:9px;background:#f0f0f0;border:none;border-radius:8px;font-size:12px;font-weight:700;color:#333;cursor:pointer;font-family:Heebo,sans-serif;margin-top:4px;">🔄 רענן</button>' +
+    '</div>';
 
   var now = Date.now();
   var todayMs = (p.totalMs||0) + (p.active && p.activeStart ? (now - p.activeStart) : 0);
@@ -6219,54 +6268,65 @@ function openProjectAI(i) {
     .replace(/\d+:\d{2}:\d{2}/g,'')
     .replace(/\s+/g,' ').trim();
 
-  // Get job location from pre-survey data
   var preSurveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
   var jobSurvey = preSurveys.filter(function(s){ return s.jobId === (p.jobId||'') || s.desc === (p.title||p.name||''); }).pop() || {};
-  var jobLoc = jobSurvey.location || '';
+  var surveyMaterials = jobSurvey.materials || [];
+  var surveySteps     = jobSurvey.steps     || [];
+
+  var jobKey = 'proj_' + (p.jobId || (p.client||'') + '_' + (p.title||p.name||''));
+  var doneTipsList = getDoneTips(jobKey);
 
   var params = '?action=getProjectTips' +
-    '&desc='    + encodeURIComponent(p.title||p.name||'') +
-    '&cat='     + encodeURIComponent(p.category||'') +
-    '&client='  + encodeURIComponent(p.client||'') +
-    '&notes='   + encodeURIComponent(cleanNotes) +
+    '&desc='      + encodeURIComponent(p.title||p.name||'') +
+    '&cat='       + encodeURIComponent(p.category||'') +
+    '&client='    + encodeURIComponent(p.client||'') +
+    '&notes='     + encodeURIComponent(cleanNotes) +
     '&actualHrs=' + encodeURIComponent(Math.round(totalMs/3600000*100)/100) +
-    '&estHrs='  + encodeURIComponent(p.estHours||0) +
-    '&income='  + encodeURIComponent(p.jobIncome||p.jobPrice||0) +
-    '&location=' + encodeURIComponent(jobLoc) +
-    '&done='     + encodeURIComponent(JSON.stringify(getDoneTips('proj_' + (p.jobId||'') + (p.client||'') + '_' + (p.title||p.name||''))));
+    '&estHrs='    + encodeURIComponent(p.estHours||0) +
+    '&income='    + encodeURIComponent(p.jobIncome||p.jobPrice||0) +
+    '&materials=' + encodeURIComponent(JSON.stringify(surveyMaterials)) +
+    '&steps='     + encodeURIComponent(JSON.stringify(surveySteps)) +
+    '&done='      + encodeURIComponent(JSON.stringify(doneTipsList));
 
   var _timer = setTimeout(function(){
-    body.innerHTML = '<div style="padding:16px;color:#888;text-align:center;direction:rtl;">⏱ AI timeout — נסה שוב</div>' +
-      '<button onclick="openProjectAI('+i+')" style="width:100%;padding:10px;background:#f0f0f0;border:none;border-radius:8px;font-size:13px;font-weight:700;color:#333;cursor:pointer;margin-top:8px;">🔄 Retry</button>';
-  }, 15000);
+    ['חיזוק','לשיפור','טיפ_טכני','תנאי_עבודה'].forEach(function(c){
+      var el = document.getElementById('aiCat_'+c);
+      if (el) el.innerHTML = '<div style="font-size:12px;color:#888;padding:4px 0;">⏱ timeout</div>';
+    });
+  }, 18000);
+
+  var catCfg = {
+    'חיזוק':       { accent:'#2e7d32' },
+    'לשיפור':      { accent:'#e65100' },
+    'טיפ טכני':   { accent:'#0d47a1' },
+    'תנאי עבודה': { accent:'#f57f17' }
+  };
 
   fetch(SHEETS_URL + params)
     .then(function(r){ return r.json(); })
     .then(function(result) {
       clearTimeout(_timer);
       var parsed = result.parsed;
-      var colors = {warning:'#e65100', good:'#2e7d32', note:'#f0c020', focus:'#0d47a1'};
-      var emojis = {warning:'⏱', good:'✅', note:'📝', focus:'🎯'};
-      var html = '';
-      var jobKey = 'proj_' + (p.jobId || (p.client||'') + '_' + (p.title||p.name||''));
-      var doneTipsList = getDoneTips(jobKey);
-      if (parsed && parsed.tips && parsed.tips.length) {
-        parsed.tips.forEach(function(t) {
-          var type = t.type||'note'; var isBlue = type==='focus';
-          var isDone = doneTipsList.indexOf(t.body||'') !== -1;
-          var safeTipBody = (t.body||'').replace(/'/g,"\'");
-          var safeJobKey = jobKey.replace(/'/g,"\'");
-          html += '<div onclick="_tipClick(this,\'' + safeJobKey + '\',\'' + safeTipBody + '\')" style="background:' + (isBlue?'linear-gradient(135deg,#0d47a1,#1565c0)':'white') + ';border-radius:10px;padding:10px 12px;margin-bottom:8px;border-right:3px solid ' + (isDone?'#ccc':(isBlue?'#0d47a1':(colors[type]||'#aaa'))) + ';cursor:pointer;opacity:' + (isDone?'0.55':'1') + ';-webkit-tap-highlight-color:transparent;">' +
-            '<div data-tip-title style="font-size:11px;font-weight:900;color:' + (isDone?'#aaa':(isBlue?'#f0c020':(colors[type]||'#333'))) + ';margin-bottom:3px;' + (isDone?'text-decoration:line-through;':'') + '">' + (emojis[type]||'·') + ' ' + (t.title||'') + '</div>' +
-            '<div data-tip-body style="font-size:12px;color:' + (isDone?'#aaa':(isBlue?'#fff':'#444')) + ';line-height:1.5;direction:rtl;' + (isDone?'text-decoration:line-through;':'') + '">' + (t.body||'') + '</div>' +
-            '<div data-done-lbl style="font-size:10px;color:#2e7d32;margin-top:3px;display:' + (isDone?'block':'none') + ';">✓ Done</div>' +
-          '</div>';
-        });
-      } else {
-        html = '<div style="padding:16px;color:#888;text-align:center;">' + (result.text||'No tips') + '</div>';
+      if (!parsed || !parsed.tips || !parsed.tips.length) {
+        body.innerHTML = '<div style="padding:20px;color:#888;text-align:center;direction:rtl;">' + (result.text||'No tips') + '</div>' +
+          '<button onclick="openProjectAI('+i+')" style="width:100%;padding:9px;background:#f0f0f0;border:none;border-radius:8px;font-size:12px;font-weight:700;color:#333;cursor:pointer;font-family:Heebo,sans-serif;">🔄 רענן</button>';
+        return;
       }
-      html += '<button onclick="openProjectAI('+i+')" style="width:100%;padding:9px;background:#f0f0f0;border:none;border-radius:8px;font-size:12px;font-weight:700;color:#333;cursor:pointer;font-family:Heebo,sans-serif;">🔄 רענן</button>';
-      body.innerHTML = html;
+      parsed.tips.forEach(function(t) {
+        var catId = (t.cat||'').replace(/\s/g,'_');
+        var el = document.getElementById('aiCat_' + catId);
+        if (!el) return;
+        var cfg = catCfg[t.cat] || { accent:'#333' };
+        var isDone = doneTipsList.indexOf(t.body||'') !== -1;
+        var safeTipBody = (t.body||'').replace(/'/g,"\\'").replace(/\n/g,' ');
+        var safeJobKey  = jobKey.replace(/'/g,"\\'");
+        el.innerHTML =
+          '<div onclick="_tipClick(this,\'' + safeJobKey + '\',\'' + safeTipBody + '\')" style="cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+            '<div data-tip-title style="font-size:12px;font-weight:900;color:' + (isDone?'#bbb':cfg.accent) + ';margin-bottom:4px;' + (isDone?'text-decoration:line-through;':'') + '">' + (t.title||'') + '</div>' +
+            '<div data-tip-body style="font-size:13px;color:' + (isDone?'#bbb':'#333') + ';line-height:1.55;direction:rtl;' + (isDone?'text-decoration:line-through;':'') + '">' + (t.body||'').replace(/\n/g,'<br>') + '</div>' +
+            '<div data-done-lbl style="font-size:10px;color:#2e7d32;margin-top:4px;display:' + (isDone?'block':'none') + ';">✓ בוצע</div>' +
+          '</div>';
+      });
     })
     .catch(function(err) {
       clearTimeout(_timer);
@@ -6867,8 +6927,7 @@ function showToast(msg) {
 <div id="loginScreen" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#0d47a1,#1565c0);z-index:99999;align-items:center;justify-content:center;padding:24px;">
   <div style="background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
     <div style="text-align:center;margin-bottom:28px;">
-      <div style="font-size:40px;margin-bottom:10px;">🔐</div>
-      <div style="font-size:22px;font-weight:900;color:#0d47a1;">י.ב אחזקות</div>
+      <div style="font-size:22px;font-weight:900;color:#0d47a1;">BLUE</div>
       <div style="font-size:13px;color:#888;margin-top:4px;">Admin Login</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px;">
