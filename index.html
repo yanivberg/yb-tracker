@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v598</title>
+<title>י.ב אחזקות — v599</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v598
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v599
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v598 · 17/05/2026
+v599 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v598</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v599</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2957,18 +2957,25 @@ function renderProjectBtns() {
     }
 
     var cardStyle = 'border-radius:16px;overflow:hidden;margin-bottom:12px;box-shadow:0 3px 10px rgba(0,0,0,0.15);position:relative;' + (p.done ? 'filter:grayscale(100%);opacity:0.4;' : '');
+    var isMin = !!p._minimized && p.active && !p.done;
 
     html += '<div style="' + cardStyle + '">' +
       // Header
       '<div style="background:' + headerBg + ';padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">' +
-        '<div style="display:flex;align-items:center;gap:10px;">' +
-          '<span style="font-size:18px;font-weight:900;color:#fff;letter-spacing:0.03em;">' + (p.active ? '● ' : '') + (p.client || '—') + '</span>' +
-          (po ? '<span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.85);background:rgba(0,0,0,0.2);border-radius:6px;padding:2px 8px;">' + po + '</span>' : '') +
+        '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">' +
+          '<span style="font-size:18px;font-weight:900;color:#fff;letter-spacing:0.03em;white-space:nowrap;">' + (p.active ? '● ' : '') + (p.client || '—') + '</span>' +
+          (po ? '<span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.85);background:rgba(0,0,0,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;">' + po + '</span>' : '') +
+          (isMin ? '<span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + displayName + '</span>' : '') +
+          (isMin ? '<span style="font-size:13px;font-weight:900;color:#fff;background:rgba(0,0,0,0.25);border-radius:6px;padding:2px 8px;white-space:nowrap;" id="ptime-'+i+'">' + formatMs(todayMs) + '</span>' : '') +
         '</div>' +
-        '<button onclick="showProjectInfo('+i+')" style="background:rgba(255,255,255,0.3);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">ℹ</button>' +
+        '<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">' +
+          (p.active && !p.done ? '<button onclick="event.stopPropagation();toggleMinimizeCard('+i+')" style="background:rgba(255,255,255,0.25);border:none;color:#fff;border-radius:8px;padding:4px 9px;font-size:13px;font-weight:900;cursor:pointer;-webkit-tap-highlight-color:transparent;">' + (isMin ? '▼' : '▲') + '</button>' : '') +
+          '<button onclick="showProjectInfo('+i+')" style="background:rgba(255,255,255,0.3);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">ℹ</button>' +
+        '</div>' +
       '</div>' +
-      // Body
-      '<div style="background:' + bodyBg + ';padding:14px 16px;">' +
+      // Body — hidden when minimized
+      (isMin ? '' :
+      '<div style="background:' + bodyBg + ';padding:14px 16px;">') +
         // Est chips
         (function() {
           var actualHrs = tillNowMs / 3600000;
@@ -3004,6 +3011,7 @@ function renderProjectBtns() {
           (!p.done ? '<button onclick="openProjectSurvey('+i+')" style="width:100%;margin-top:10px;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#c62828;">✓ End Project</button>' : '') +
         '</div>' +
       '</div>' +
+    (isMin ? '' : '</div>') +
     '</div>';
   }
   container.innerHTML = html;
@@ -3012,6 +3020,7 @@ function renderProjectBtns() {
 function toggleNote(i) { projects[i].noteOpen = !projects[i].noteOpen; reRender(); if (projects[i].noteOpen) setTimeout(function() { var el = document.getElementById('noteInp-'+i); if(el) el.focus(); }, 60); }
 function reRender() { var s = document.getElementById('screen-setup'); if (s && s.classList.contains('active')) { renderSetup(); } else { renderProjectBtns(); } }
 function toggleSetupNotes(i) { projects[i]._notesOpen = !projects[i]._notesOpen; reRender(); if (projects[i]._notesOpen) setTimeout(function() { var el = document.getElementById('noteInp-'+i); if(el) el.focus(); }, 60); }
+function toggleMinimizeCard(i) { projects[i]._minimized = !projects[i]._minimized; reRender(); }
 function formatMsHHMM(ms) { var t = Math.floor(ms/1000); return pad(Math.floor(t/3600)) + ':' + pad(Math.floor((t%3600)/60)); }
 
 
