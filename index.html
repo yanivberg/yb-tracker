@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v593</title>
+<title>י.ב אחזקות — v594</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v593
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v594
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v593 · 17/05/2026
+v594 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v593</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v594</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3435,6 +3435,17 @@ function openWorkPatternAI() {
   var history = JSON.parse(localStorage.getItem('yb_sessionHistory') || '[]');
   if (!history.length) { showToast('No session history yet'); return; }
 
+  // Need at least 3 sessions with meaningful work time
+  var realSessions = history.filter(function(s){ return (s.totalMs||0) > 60000; }); // >1 min
+  if (realSessions.length < 3) {
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = '<div style="background:#fff3e0;border-radius:12px;padding:16px 18px;text-align:right;direction:rtl;">' +
+      '<div style="font-size:14px;font-weight:900;color:#e65100;margin-bottom:6px;">⏳ צריך עוד נתונים</div>' +
+      '<div style="font-size:13px;color:#555;line-height:1.6;">יש ' + realSessions.length + ' סשן' + (realSessions.length===1?'':'ים') + ' עם זמן עבודה אמיתי.<br>הניתוח זמין מ-3 סשנים ומעלה.</div>' +
+    '</div>';
+    return;
+  }
+
   // Show loading state
   resultEl.style.display = 'block';
   resultEl.innerHTML =
@@ -3442,7 +3453,7 @@ function openWorkPatternAI() {
       '<div style="display:flex;align-items:center;gap:12px;">' +
         '<div style="font-size:26px;">🧠</div>' +
         '<div>' +
-          '<div style="font-size:14px;font-weight:900;color:#1a1a2e;">מנתח ' + history.length + ' סשנים…</div>' +
+          '<div style="font-size:14px;font-weight:900;color:#1a1a2e;">מנתח ' + realSessions.length + ' סשנים…</div>' +
           '<div style="font-size:12px;color:#888;margin-top:2px;">מזהה תבניות עבודה</div>' +
         '</div>' +
       '</div>' +
@@ -3453,7 +3464,7 @@ function openWorkPatternAI() {
   if (btn) { btn.textContent = '⏳ מנתח…'; btn.disabled = true; }
   setTimeout(function() { var pb = document.getElementById('patternProgressBar'); if(pb) pb.style.width = '70%'; }, 200);
 
-  fetch(SHEETS_URL + '?action=getWorkPatternAnalysis&history=' + encodeURIComponent(JSON.stringify(history)))
+  fetch(SHEETS_URL + '?action=getWorkPatternAnalysis&history=' + encodeURIComponent(JSON.stringify(realSessions)))
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (btn) { btn.textContent = '🔄 רענן ניתוח'; btn.disabled = false; }
