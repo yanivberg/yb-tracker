@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v606</title>
+<title>י.ב אחזקות — v608</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v606
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v608
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v606 · 17/05/2026
+v608 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v606</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v608</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1339,6 +1339,14 @@ SHEET SYNC
           <span id="acc-arrow-invoicelist" style="font-size:13px;color:#aaa;">▼</span>
         </button>
         <div id="caspitBody-invoicelist" style="display:none;padding:0 20px 16px;direction:rtl;"></div>
+      </div>
+      <!-- יומן תנועות accordion -->
+      <div style="border-bottom:1px solid #f0f0f0;">
+        <button id="acc-hdr-txlog" onclick="toggleCaspitAccordion('txlog')" style="width:100%;padding:14px 20px;background:none;border:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">
+          <span style="font-size:14px;font-weight:900;color:inherit;">📊 יומן תנועות</span>
+          <span id="acc-arrow-txlog" style="font-size:13px;color:#aaa;">▼</span>
+        </button>
+        <div id="caspitBody-txlog" style="display:none;padding:0 20px 16px;direction:rtl;"></div>
       </div>
     </div>
     <div style="padding:8px 16px 0;border-top:1px solid #eee;flex-shrink:0;">
@@ -2012,7 +2020,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxaIdENEEIIesG1E67Wsq8Ui26tjGyy_Kc8mLNAYuzaE3hn4q7jaELbT_C7900vkorCZA/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxThV2NjARRemmU3PosBGLnH8wKRiC8VtIlc7ZvXyby2A0pDj69OjvDsydEiVgzNEwIyg/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -4429,7 +4437,7 @@ function getCaspitBody() {
 }
 
 function _caspitAccordionVisuals(activeTab) {
-  ['invoice','quote','invoicelist'].forEach(function(t) {
+  ['invoice','quote','invoicelist','txlog'].forEach(function(t) {
     var body  = document.getElementById('caspitBody-' + t);
     var arrow = document.getElementById('acc-arrow-' + t);
     var hdr   = document.getElementById('acc-hdr-' + t);
@@ -4440,7 +4448,7 @@ function _caspitAccordionVisuals(activeTab) {
   });
   var notesArea = document.getElementById('caspitNotesArea');
   var createBtn = document.getElementById('caspitCreateBtn');
-  var show = !!activeTab && activeTab !== 'invoicelist';
+  var show = !!activeTab && activeTab !== 'invoicelist' && activeTab !== 'txlog';
   if (notesArea) notesArea.style.display = show ? '' : 'none';
   if (createBtn) {
     createBtn.style.display  = show ? '' : 'none';
@@ -4468,6 +4476,7 @@ function toggleCaspitAccordion(tab) {
   } else {
     _caspitTab = tab;
     _caspitAccordionVisuals(tab);
+    if (tab === 'txlog') { _renderTransactionLogForm(); return; }
     _renderCaspitBody();
   }
 }
@@ -6371,6 +6380,74 @@ function submitQuotationSurvey() {
 }
 
 // ── end Pre-Project Survey ─────────────────────────────
+
+// ── יומן תנועות ────────────────────────────────────────────────────────────
+function _renderTransactionLogForm() {
+  var body = document.getElementById('caspitBody-txlog');
+  if (!body) return;
+  var today = new Date();
+  var firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  function fmtDate(d) { return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2); }
+  var savedEmail = localStorage.getItem('ybd_txlog_email') || '';
+  body.innerHTML =
+    '<div style="padding-top:10px;">' +
+    '<div style="font-size:12px;font-weight:900;color:#555;margin-bottom:5px;">טווח תאריכים</div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:12px;">' +
+      '<div style="flex:1;"><div style="font-size:10px;color:#aaa;margin-bottom:3px;">מתאריך</div>' +
+      '<input type="date" id="txlogFrom" value="'+fmtDate(firstOfMonth)+'" style="width:100%;padding:9px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
+      '<div style="flex:1;"><div style="font-size:10px;color:#aaa;margin-bottom:3px;">עד תאריך</div>' +
+      '<input type="date" id="txlogTo" value="'+fmtDate(today)+'" style="width:100%;padding:9px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
+    '</div>' +
+    '<div style="font-size:12px;font-weight:900;color:#555;margin-bottom:8px;">סוגי מסמכים</div>' +
+    '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">' +
+      [['1','חשבונית מס'],['2','קבלה'],['3','חש / קבלה'],['7','חשבונית זיכוי'],['16','הצעת מחיר']].map(function(t){
+        return '<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#f8f9fa;border-radius:8px;cursor:pointer;">' +
+          '<input type="checkbox" class="txlog-type" value="'+t[0]+'" checked style="width:16px;height:16px;cursor:pointer;accent-color:#0d47a1;">' +
+          '<span style="font-size:13px;font-weight:700;color:#333;">'+t[1]+'</span>' +
+        '</label>';
+      }).join('') +
+    '</div>' +
+    '<div style="font-size:12px;font-weight:900;color:#555;margin-bottom:5px;">כתובת מייל</div>' +
+    '<input type="email" id="txlogEmail" value="'+savedEmail+'" placeholder="your@email.com" oninput="localStorage.setItem(\'ybd_txlog_email\',this.value)" style="width:100%;padding:9px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;margin-bottom:14px;direction:ltr;">' +
+    '<div id="txlogStatus" style="margin-bottom:10px;display:none;"></div>' +
+    '<button onclick="_sendTransactionLog()" id="txlogSendBtn" style="width:100%;padding:13px;background:linear-gradient(135deg,#0d47a1,#1565c0);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">📧 שלח יומן למייל</button>' +
+    '</div>';
+}
+
+function _sendTransactionLog() {
+  var from  = (document.getElementById('txlogFrom')||{}).value;
+  var to    = (document.getElementById('txlogTo')||{}).value;
+  var email = (document.getElementById('txlogEmail')||{}).value.trim();
+  var types = Array.from(document.querySelectorAll('.txlog-type:checked')).map(function(cb){ return cb.value; });
+  var btn   = document.getElementById('txlogSendBtn');
+  var status= document.getElementById('txlogStatus');
+  if (!from || !to)   { showToast('בחר טווח תאריכים'); return; }
+  if (!types.length)  { showToast('בחר לפחות סוג מסמך אחד'); return; }
+  if (!email)         { showToast('הכנס כתובת מייל'); return; }
+  btn.disabled = true; btn.textContent = '⏳ שולח…';
+  status.style.display = 'block';
+  status.innerHTML = '<div style="font-size:12px;color:#0d47a1;padding:8px;background:#e8eaf6;border-radius:8px;">מושך נתונים מכספית…</div>';
+  fetch(SHEETS_URL + '?action=sendTransactionLog' +
+    '&from='  + encodeURIComponent(from) +
+    '&to='    + encodeURIComponent(to) +
+    '&types=' + encodeURIComponent(types.join(',')) +
+    '&email=' + encodeURIComponent(email))
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (d.ok) {
+        status.innerHTML = '<div style="font-size:13px;color:#2e7d32;padding:10px;background:#e8f5e9;border-radius:8px;font-weight:700;">✓ נשלח! ' + d.count + ' תנועות ל-' + email + '</div>';
+        btn.textContent = '📧 שלח שוב';
+      } else {
+        status.innerHTML = '<div style="font-size:12px;color:#c62828;padding:8px;background:#fce4ec;border-radius:8px;">⚠️ ' + (d.error||'שגיאה') + '</div>';
+        btn.textContent = '📧 שלח יומן למייל';
+      }
+      btn.disabled = false;
+    })
+    .catch(function() {
+      status.innerHTML = '<div style="font-size:12px;color:#c62828;padding:8px;background:#fce4ec;border-radius:8px;">⚠️ שגיאת חיבור</div>';
+      btn.textContent = '📧 שלח יומן למייל'; btn.disabled = false;
+    });
+}
 
 
 // ── Per-Project AI Tips ──────────────────────────────
