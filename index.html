@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v603</title>
+<title>י.ב אחזקות — v606</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -463,7 +463,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <span style="font-size:24px;flex-shrink:0;">📋</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#555;">Previous Day Notes</span></div>
       <div onclick="closeSetupDrawer();openWorkLog();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📓</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Work Log</span></div>
-      <div onclick="closeSetupDrawer();openCaspitOverlay('invoicelist');" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+      <div onclick="closeSetupDrawer();openCaspitOverlay();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">⚠️</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">Account Manager</span></div>
       <div onclick="closeSetupDrawer();openAIAdvisor();" style="background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;box-shadow:0 4px 12px rgba(13,71,161,0.3);">
         <span style="font-size:24px;flex-shrink:0;">💫</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#fff;">AI Business Advisor</div><div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px;">Most Profitable Category</div></div></div>
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v603
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v606
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v603 · 17/05/2026
+v606 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v603</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v606</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1307,21 +1307,40 @@ SHEET SYNC
   </div>
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px 0;border-bottom:1px solid #eee;flex-shrink:0;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <div style="font-weight:900;font-size:17px;color:#0d47a1;">💼 Caspit <span style="font-size:11px;font-weight:400;color:#aaa;">v300</span></div>
         <div style="display:flex;gap:8px;align-items:center;">
           <button onclick="testCaspitProxy()" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;color:#666;min-width:44px;min-height:44px;">🔌</button>
-          
           <button onclick="this.closest('#caspitOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="display:flex;gap:0;border-bottom:2px solid #eee;">
-        <button onclick="switchCaspitTab('invoice')" id="ctab-invoice" style="flex:1;padding:10px 4px;border:none;background:none;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;color:#0d47a1;border-bottom:3px solid #0d47a1;margin-bottom:-2px;">Invoice / Receipt</button>
-        <button onclick="openQuotationWithSurvey()" id="ctab-quote" style="flex:1;padding:10px 4px;border:none;background:none;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;color:#aaa;border-bottom:3px solid transparent;margin-bottom:-2px;">New Quotation</button>
-        <button onclick="switchCaspitTab('invoicelist')" id="ctab-invoicelist" style="flex:1;padding:10px 4px;border:none;background:none;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;color:#aaa;border-bottom:3px solid transparent;margin-bottom:-2px;">Invoice Info</button>
+    </div>
+    <div style="overflow-y:auto;flex:1;">
+      <!-- Invoice / Receipt accordion -->
+      <div style="border-bottom:1px solid #f0f0f0;">
+        <button id="acc-hdr-invoice" onclick="toggleCaspitAccordion('invoice')" style="width:100%;padding:14px 20px;background:none;border:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">
+          <span style="font-size:14px;font-weight:900;color:inherit;">📄 Invoice / Receipt</span>
+          <span id="acc-arrow-invoice" style="font-size:13px;color:#aaa;">▼</span>
+        </button>
+        <div id="caspitBody-invoice" style="display:none;padding:0 20px 16px;direction:rtl;"></div>
+      </div>
+      <!-- New Quotation accordion -->
+      <div style="border-bottom:1px solid #f0f0f0;">
+        <button id="acc-hdr-quote" onclick="toggleCaspitAccordion('quote')" style="width:100%;padding:14px 20px;background:none;border:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">
+          <span style="font-size:14px;font-weight:900;color:inherit;">💬 New Quotation</span>
+          <span id="acc-arrow-quote" style="font-size:13px;color:#aaa;">▼</span>
+        </button>
+        <div id="caspitBody-quote" style="display:none;padding:0 20px 16px;direction:rtl;"></div>
+      </div>
+      <!-- Invoice Info accordion -->
+      <div style="border-bottom:1px solid #f0f0f0;">
+        <button id="acc-hdr-invoicelist" onclick="toggleCaspitAccordion('invoicelist')" style="width:100%;padding:14px 20px;background:none;border:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">
+          <span style="font-size:14px;font-weight:900;color:inherit;">📋 Invoice Info</span>
+          <span id="acc-arrow-invoicelist" style="font-size:13px;color:#aaa;">▼</span>
+        </button>
+        <div id="caspitBody-invoicelist" style="display:none;padding:0 20px 16px;direction:rtl;"></div>
       </div>
     </div>
-    <div id="caspitBody" style="overflow-y:auto;flex:1;padding:16px 20px 8px;direction:rtl;"></div>
     <div style="padding:8px 16px 0;border-top:1px solid #eee;flex-shrink:0;">
       <div id="caspitNotesArea" style="margin-bottom:8px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
@@ -4405,32 +4424,74 @@ var _caspitJobList  = [];
 var _caspitContacts = [];
 var _caspitMatchMap = {};
 
+function getCaspitBody() {
+  return _caspitTab ? document.getElementById('caspitBody-' + _caspitTab) : null;
+}
+
+function _caspitAccordionVisuals(activeTab) {
+  ['invoice','quote','invoicelist'].forEach(function(t) {
+    var body  = document.getElementById('caspitBody-' + t);
+    var arrow = document.getElementById('acc-arrow-' + t);
+    var hdr   = document.getElementById('acc-hdr-' + t);
+    var open  = t === activeTab;
+    if (body)  body.style.display  = open ? 'block' : 'none';
+    if (arrow) arrow.textContent   = open ? '▲' : '▼';
+    if (hdr)   { hdr.style.background = open ? '#e8eaf6' : ''; hdr.style.color = open ? '#0d47a1' : ''; }
+  });
+  var notesArea = document.getElementById('caspitNotesArea');
+  var createBtn = document.getElementById('caspitCreateBtn');
+  var show = !!activeTab && activeTab !== 'invoicelist';
+  if (notesArea) notesArea.style.display = show ? '' : 'none';
+  if (createBtn) {
+    createBtn.style.display  = show ? '' : 'none';
+    if (show) createBtn.textContent = activeTab === 'quote' ? '💼 Save & Send to Caspit' : '💼 Create Document';
+  }
+}
+
+function toggleCaspitAccordion(tab) {
+  if (tab === 'quote') {
+    // Quote has its own flow (pre-briefing overlay)
+    if (_caspitTab === 'quote') {
+      // collapse
+      _caspitTab = '';
+      _caspitAccordionVisuals('');
+    } else {
+      _caspitTab = 'quote';
+      _caspitAccordionVisuals('quote');
+      openQuotationWithSurvey();
+    }
+    return;
+  }
+  if (_caspitTab === tab) {
+    _caspitTab = '';
+    _caspitAccordionVisuals('');
+  } else {
+    _caspitTab = tab;
+    _caspitAccordionVisuals(tab);
+    _renderCaspitBody();
+  }
+}
+
 function openCaspitOverlay(tab) {
   _caspitSelected = {}; _caspitDocType = 1;
   var c = document.getElementById('caspitComments'); if(c) c.value='';
   var d = document.getElementById('caspitDetails');  if(d) d.value='';
   document.getElementById('caspitOverlay').style.display = 'flex';
-  switchCaspitTab(tab || 'invoicelist');
+  _caspitTab = '';
+  _caspitAccordionVisuals('');
   _caspitLoadData();
+  if (tab) switchCaspitTab(tab);
 }
 
 function switchCaspitTab(tab) {
   _caspitTab = tab;
-  ['invoice','quote','invoicelist'].forEach(function(t) {
-    var btn = document.getElementById('ctab-' + t);
-    if (btn) { btn.style.color = t===tab?'#0d47a1':'#aaa'; btn.style.borderBottomColor = t===tab?'#0d47a1':'transparent'; }
-  });
-  var notesArea = document.getElementById('caspitNotesArea');
-  var createBtn = document.getElementById('caspitCreateBtn');
-  var isInvoiceList = tab === 'invoicelist';
-  if (notesArea) notesArea.style.display = isInvoiceList ? 'none' : '';
-  if (createBtn) createBtn.style.display = isInvoiceList ? 'none' : '';
+  _caspitAccordionVisuals(tab);
   _renderCaspitBody();
 }
 
 function _caspitLoadData() {
-  var body = document.getElementById('caspitBody');
-  body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ Loading Caspit contacts…</div>';
+  var body = getCaspitBody();
+  if (body) body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ Loading Caspit contacts…</div>';
   var sheetDone = false, contactsDone = false, clientsDone = false, rendered = false;
   function tryRender() { if (sheetDone && contactsDone && clientsDone && !rendered) { rendered = true; _buildMatchMap(); _renderCaspitBody(); } }
 
@@ -4502,6 +4563,7 @@ function _buildMatchMap() {
 }
 
 function _renderCaspitBody() {
+  if (!_caspitTab) return;
   if (_caspitTab === 'invoice') _renderCaspitInvoiceTab();
   else if (_caspitTab === 'invoicelist') _renderCaspitInvoiceListTab();
   else _renderCaspitQuoteTab();
@@ -4516,7 +4578,7 @@ function caspitCreateDispatch() {
 
 // ── Invoice List tab (להוציא חש) ──────────────────────
 function _renderCaspitInvoiceListTab() {
-  var body = document.getElementById('caspitBody');
+  var body = getCaspitBody(); if (!body) return;
   if (!_caspitInvoiceJobs.length) {
     body.innerHTML = '<div style="padding:40px;text-align:center;color:#aaa;font-size:15px;">⏳ Loading…</div>';
     fetch(SHEETS_URL + '?action=getInvoiceReadyJobs')
@@ -4566,7 +4628,7 @@ function markInvoiceIssued(jobId, client) {
 }
 
 function showInvoiceJobDetail(jobId, client) {
-  var body = document.getElementById('caspitBody');
+  var body = getCaspitBody();
   body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ Loading…</div>';
   fetch(SHEETS_URL + '?action=getFullJobInfo&jobId=' + encodeURIComponent(jobId) + '&client=' + encodeURIComponent(client))
     .then(function(r){ return r.json(); })
@@ -4610,7 +4672,7 @@ function _openInvoiceEdit(jobId, client) {
 
 // ── Invoice / Receipt tab ─────────────────────────────
 function _renderCaspitInvoiceTab() {
-  var body = document.getElementById('caspitBody');
+  var body = getCaspitBody(); if (!body) return;
   var createBtn = document.getElementById('caspitCreateBtn');
   if (createBtn) createBtn.textContent = '💼 Create Document';
   if (!_caspitInvoiceJobs.length) { body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">אין עבודות להוציא חש</div>'; return; }
@@ -4814,7 +4876,7 @@ function _caspitShowSuccess(result) {
 }
 
 function _caspitAskManualContact(clientName, payload, callback) {
-  var body = document.getElementById('caspitBody');
+  var body = getCaspitBody();
   var opts = '<option value="">— בחר לקוח מכספית —</option>';
   _caspitContacts.forEach(function(c) {
     opts += '<option value="' + (c.Id||c.ContactId||'') + '">' + (c.Name||'') + '</option>';
@@ -4852,7 +4914,7 @@ function _caspitPickManual() {
 
 // ── Quote tab ─────────────────────────────────────────
 function _renderCaspitQuoteTab() {
-  var body = document.getElementById('caspitBody');
+  var body = getCaspitBody(); if (!body) return;
   var createBtn = document.getElementById('caspitCreateBtn');
   if (createBtn) createBtn.textContent = '💼 Save & Send to Caspit';
 
@@ -4919,7 +4981,7 @@ function _matchCaspitContact(sheetName, contacts) {
 }
 
 function _renderCaspitQuoteForm() {
-  var body = document.getElementById('caspitBody');
+  var body = getCaspitBody();
   var sorted = _caspitContacts.slice().sort(function(a,b){ return (a.Name||'').localeCompare(b.Name||''); });
   var opts = '<option value="">— Select Caspit contact —</option>';
   sorted.forEach(function(c) {
@@ -4958,15 +5020,31 @@ function _renderCaspitQuoteForm() {
 
   // Apply prefill from briefing (use setTimeout to let DOM settle after addCaspitQuoteRow)
   setTimeout(function() {
+    var prefillLines = (_quotePrefill && _quotePrefill.lines && _quotePrefill.lines.length)
+      ? _quotePrefill.lines
+      : (_quotePrefill && _quotePrefill.desc ? [_quotePrefill.desc] : []);
+
+    // Fill first row with first line
     var descs = document.querySelectorAll('#caspitQuoteRows .cq-desc');
-    if (_quotePrefill && _quotePrefill.desc && descs[0]) descs[0].value = _quotePrefill.desc;
-    var steps = (_quotePrefill && _quotePrefill.steps) ? _quotePrefill.steps.filter(Boolean) : [];
-    steps.forEach(function(step) {
+    if (prefillLines[0] && descs[0]) descs[0].value = prefillLines[0];
+
+    // Add additional rows for remaining lines
+    for (var li = 1; li < prefillLines.length; li++) {
       addCaspitQuoteRow();
       var allDescs = document.querySelectorAll('#caspitQuoteRows .cq-desc');
-      if (allDescs[allDescs.length-1]) allDescs[allDescs.length-1].value = step;
-    });
-    if (steps.length) calcCaspitTotal();
+      if (allDescs[allDescs.length-1]) allDescs[allDescs.length-1].value = prefillLines[li];
+    }
+    if (prefillLines.length > 1) calcCaspitTotal();
+
+    // Put AI steps into the Internal notes field as numbered list
+    var steps = (_quotePrefill && _quotePrefill.steps) ? _quotePrefill.steps.filter(Boolean) : [];
+    if (steps.length) {
+      var detailsEl = document.getElementById('caspitDetails');
+      if (detailsEl) {
+        var existing = detailsEl.value ? detailsEl.value + '\n' : '';
+        detailsEl.value = existing + steps.map(function(s, idx) { return (idx+1) + '. ' + s; }).join('\n');
+      }
+    }
   }, 80);
 
   // Load sheet clients and auto-select from prefill
@@ -6141,11 +6219,7 @@ function submitPreProjectSurvey() {
 }
 
 function openQuotationWithSurvey() {
-  // Mark the quote tab active visually
-  ['invoice','quote','invoicelist'].forEach(function(t) {
-    var btn = document.getElementById('ctab-' + t);
-    if (btn) { btn.style.color = t==='quote'?'#0d47a1':'#aaa'; btn.style.borderBottomColor = t==='quote'?'#0d47a1':'transparent'; }
-  });
+  _caspitAccordionVisuals('quote');
   // Show optional pre-survey overlay
   _preSurveyPendingJob = { desc: '', client: '', category: '', id: '', _forQuotation: true };
   var overlay = document.getElementById('preProjectSurveyOverlay');
@@ -6168,8 +6242,15 @@ function openQuotationWithSurvey() {
     '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">' +
       '<div><div style="font-size:11px;color:#888;margin-bottom:4px;direction:rtl;">לקוח</div>' +
       '<input id="qsClient" placeholder="שם הלקוח..." style="width:100%;padding:9px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
-      '<div><div style="font-size:11px;color:#888;margin-bottom:4px;direction:rtl;">תיאור הפרויקט</div>' +
-      '<textarea id="qsDesc" placeholder="מה צריך לעשות? כמה שיותר פרטים..." style="width:100%;padding:9px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;height:80px;resize:none;"></textarea></div>' +
+      '<div>' +
+        '<div style="font-size:11px;color:#888;margin-bottom:4px;direction:rtl;">שורות להצעת מחיר <span style="color:#0d47a1;font-weight:700;">— כל שורה = פריט נפרד</span></div>' +
+        '<div id="qsLinesList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px;">' +
+          '<div style="display:flex;gap:6px;align-items:center;">' +
+            '<input class="qs-line" placeholder="תיאור שורה 1..." style="flex:1;padding:9px 10px;border:1.5px solid #0d47a1;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;">' +
+          '</div>' +
+        '</div>' +
+        '<button onclick="_addQsLine()" type="button" style="width:100%;padding:8px;background:none;border:1.5px dashed #0d47a1;border-radius:8px;color:#0d47a1;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">+ הוסף שורה</button>' +
+      '</div>' +
       '<div><div style="font-size:11px;color:#888;margin-bottom:4px;direction:rtl;">קטגוריה</div>' +
       '<select id="qsCat" style="width:100%;padding:9px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;">' +
         '<option value="">בחר קטגוריה</option>' +
@@ -6180,22 +6261,44 @@ function openQuotationWithSurvey() {
     '<button onclick="_skipToQuotation()" style="width:100%;padding:10px;background:transparent;border:none;font-size:13px;color:#aaa;cursor:pointer;font-family:Heebo,sans-serif;">Skip — Go straight to quotation</button>';
 }
 
+function _addQsLine() {
+  var list = document.getElementById('qsLinesList');
+  if (!list) return;
+  var idx = list.children.length + 1;
+  var row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:6px;align-items:center;';
+  row.innerHTML =
+    '<input class="qs-line" placeholder="תיאור שורה ' + idx + '..." style="flex:1;padding:9px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;">' +
+    '<button onclick="this.parentNode.remove()" type="button" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;padding:0 4px;flex-shrink:0;">✕</button>';
+  list.appendChild(row);
+  row.querySelector('input').focus();
+}
+
+function _getQsLines() {
+  return Array.from(document.querySelectorAll('#qsLinesList .qs-line'))
+    .map(function(el){ return el.value.trim(); })
+    .filter(Boolean);
+}
+
 function _skipToQuotation() {
+  var lines = _getQsLines();
+  var client = (document.getElementById('qsClient')||{}).value || '';
   document.getElementById('preProjectSurveyOverlay').style.display = 'none';
   document.getElementById('caspitOverlay').style.display = 'flex';
-  _quotePrefill = {};
+  _quotePrefill = { client: client, lines: lines };
   _caspitTab = 'quote';
   switchCaspitTab('quote');
 }
 
 function _analyzeForQuotation() {
   var client = (document.getElementById('qsClient')||{}).value || '';
-  var desc   = (document.getElementById('qsDesc')||{}).value || '';
+  var lines  = _getQsLines();
+  var desc   = lines[0] || '';
   var cat    = (document.getElementById('qsCat')||{}).value || '';
 
-  if (!desc.trim()) { showToast('הכנס תיאור פרויקט'); return; }
+  if (!desc.trim()) { showToast('הכנס לפחות שורה אחת'); return; }
 
-  _preSurveyPendingJob = { desc:desc, client:client, category:cat, id:'', _forQuotation:true };
+  _preSurveyPendingJob = { desc:desc, client:client, category:cat, id:'', _forQuotation:true, _lines:lines };
 
   var body = document.getElementById('preSurveyBody');
   body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;padding:40px 20px;gap:14px;">' +
@@ -6260,7 +6363,7 @@ function submitQuotationSurvey() {
   localStorage.setItem('preProjectSurveys', JSON.stringify(surveys));
   fetch(SHEETS_URL + '?action=savePreProjectSurvey', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(survey) }).catch(function(){});
   // Store prefill for quotation form
-  _quotePrefill = { client: p.client||'', desc: p.desc||'', steps: steps, materials: materials };
+  _quotePrefill = { client: p.client||'', lines: (p._lines && p._lines.length) ? p._lines : (p.desc ? [p.desc] : []), steps: steps, materials: materials };
   document.getElementById('preProjectSurveyOverlay').style.display = 'none';
   document.getElementById('caspitOverlay').style.display = 'flex';
   switchCaspitTab('quote');
