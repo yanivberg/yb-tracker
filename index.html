@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v600</title>
+<title>י.ב אחזקות — v601</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v600
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v601
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v600 · 17/05/2026
+v601 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v600</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v601</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -4956,7 +4956,20 @@ function _renderCaspitQuoteForm() {
 
   addCaspitQuoteRow();
 
-  // Populate Sheet Client dropdown from tab names (all clients with proper headers)
+  // Apply prefill from briefing (use setTimeout to let DOM settle after addCaspitQuoteRow)
+  setTimeout(function() {
+    var descs = document.querySelectorAll('#caspitQuoteRows .cq-desc');
+    if (_quotePrefill && _quotePrefill.desc && descs[0]) descs[0].value = _quotePrefill.desc;
+    var steps = (_quotePrefill && _quotePrefill.steps) ? _quotePrefill.steps.filter(Boolean) : [];
+    steps.forEach(function(step) {
+      addCaspitQuoteRow();
+      var allDescs = document.querySelectorAll('#caspitQuoteRows .cq-desc');
+      if (allDescs[allDescs.length-1]) allDescs[allDescs.length-1].value = step;
+    });
+    if (steps.length) calcCaspitTotal();
+  }, 80);
+
+  // Load sheet clients and auto-select from prefill
   fetch(SHEETS_URL + '?action=getClients')
     .then(function(r){ return r.json(); })
     .then(function(tabs) {
@@ -4965,6 +4978,17 @@ function _renderCaspitQuoteForm() {
       var sorted = (tabs||[]).sort(function(a,b){ return a.localeCompare(b); });
       sel.innerHTML = '<option value="">— Select sheet client —</option>';
       sorted.forEach(function(c){ sel.innerHTML += '<option value="' + c.replace(/"/g,'&quot;') + '">' + c + '</option>'; });
+      // Auto-select client from briefing
+      if (_quotePrefill && _quotePrefill.client) {
+        var pref = _quotePrefill.client.trim().toLowerCase();
+        for (var i = 0; i < sel.options.length; i++) {
+          if (sel.options[i].value.trim().toLowerCase() === pref) {
+            sel.value = sel.options[i].value;
+            _autoMatchCaspitClient();
+            break;
+          }
+        }
+      }
     })
     .catch(function() {
       var sel = document.getElementById('caspitQuoteSheetClient');
@@ -5841,6 +5865,7 @@ function skipProjectSurvey() {
 
 // ── Pre-Project Survey ────────────────────────────────
 var _preSurveyPendingJob = null;
+var _quotePrefill = {};
 var _preSurveyStepCount = 4;
 
 var SUCCESS_KEYS_BY_CAT = {
@@ -6157,8 +6182,10 @@ function openQuotationWithSurvey() {
 
 function _skipToQuotation() {
   document.getElementById('preProjectSurveyOverlay').style.display = 'none';
+  document.getElementById('caspitOverlay').style.display = 'flex';
+  _quotePrefill = {};
   _caspitTab = 'quote';
-  _renderCaspitBody();
+  switchCaspitTab('quote');
 }
 
 function _analyzeForQuotation() {
@@ -6203,11 +6230,19 @@ function _analyzeForQuotation() {
           desc, cat
         );
         body.querySelectorAll('[data-val]').forEach(function(el){ if(el.dataset.val) el.value = el.dataset.val; });
-        // Replace submit button with quotation-specific one
-        body.innerHTML = body.innerHTML.replace(
-          'onclick="submitPreProjectSurvey()"',
-          'onclick="submitQuotationSurvey()"'
-        );
+        // Fix submit button to go to quotation (use DOM, not innerHTML.replace)
+        var submitBtn = body.querySelector('button[onclick*="submitPreProjectSurvey"]');
+        if (submitBtn) {
+          submitBtn.textContent = '✓ שמור ועבור להצעת מחיר';
+          submitBtn.setAttribute('onclick', 'submitQuotationSurvey()');
+        } else {
+          // Append fallback button
+          var fb = document.createElement('button');
+          fb.textContent = '✓ עבור להצעת מחיר';
+          fb.setAttribute('onclick', 'submitQuotationSurvey()');
+          fb.style.cssText = 'width:100%;padding:13px;background:#0d47a1;border:none;border-radius:12px;font-size:15px;font-weight:900;color:#fff;cursor:pointer;font-family:Heebo,sans-serif;margin-top:10px;';
+          body.appendChild(fb);
+        }
       } catch(e) { _skipToQuotation(); }
     })
     .catch(function(){ clearTimeout(_qTimer); _skipToQuotation(); });
@@ -6224,9 +6259,11 @@ function submitQuotationSurvey() {
   surveys.push(survey);
   localStorage.setItem('preProjectSurveys', JSON.stringify(surveys));
   fetch(SHEETS_URL + '?action=savePreProjectSurvey', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(survey) }).catch(function(){});
+  // Store prefill for quotation form
+  _quotePrefill = { client: p.client||'', desc: p.desc||'', steps: steps, materials: materials };
   document.getElementById('preProjectSurveyOverlay').style.display = 'none';
-  _caspitTab = 'quote';
-  _renderCaspitBody();
+  document.getElementById('caspitOverlay').style.display = 'flex';
+  switchCaspitTab('quote');
   showToast('✓ Briefing saved — opening quotation');
 }
 
