@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v614</title>
+<title>י.ב אחזקות — v616</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v614
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v616
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v614 · 17/05/2026
+v616 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v614</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v616</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -5049,34 +5049,36 @@ function _renderCaspitQuoteForm() {
 
   addCaspitQuoteRow();
 
-  // Apply prefill from briefing (use setTimeout to let DOM settle after addCaspitQuoteRow)
-  setTimeout(function() {
+  // Apply prefill from briefing — runs after DOM settles, tolerant of slow contact load
+  function _applyQuotePrefill() {
     var prefillLines = (_quotePrefill && _quotePrefill.lines && _quotePrefill.lines.length)
       ? _quotePrefill.lines
       : (_quotePrefill && _quotePrefill.desc ? [_quotePrefill.desc] : []);
+    if (!prefillLines.length) return;
 
-    // Fill first row with first line
-    var descs = document.querySelectorAll('#caspitQuoteRows .cq-desc');
-    if (prefillLines[0] && descs[0]) descs[0].value = prefillLines[0];
-
-    // Add additional rows for remaining lines
-    for (var li = 1; li < prefillLines.length; li++) {
+    // Clear existing rows and rebuild from lines
+    var container = document.getElementById('caspitQuoteRows');
+    if (!container) return;
+    container.innerHTML = '';
+    prefillLines.forEach(function(line) {
       addCaspitQuoteRow();
-      var allDescs = document.querySelectorAll('#caspitQuoteRows .cq-desc');
-      if (allDescs[allDescs.length-1]) allDescs[allDescs.length-1].value = prefillLines[li];
-    }
-    if (prefillLines.length > 1) calcCaspitTotal();
+      var allDescs = container.querySelectorAll('.cq-desc');
+      if (allDescs[allDescs.length-1]) allDescs[allDescs.length-1].value = line;
+    });
+    calcCaspitTotal();
 
-    // Put AI steps into the Internal notes field as numbered list
+    // AI steps → internal notes
     var steps = (_quotePrefill && _quotePrefill.steps) ? _quotePrefill.steps.filter(Boolean) : [];
     if (steps.length) {
       var detailsEl = document.getElementById('caspitDetails');
-      if (detailsEl) {
-        var existing = detailsEl.value ? detailsEl.value + '\n' : '';
-        detailsEl.value = existing + steps.map(function(s, idx) { return (idx+1) + '. ' + s; }).join('\n');
+      if (detailsEl && !detailsEl.value) {
+        detailsEl.value = steps.map(function(s, idx) { return (idx+1) + '. ' + s; }).join('\n');
       }
     }
-  }, 80);
+
+    _quotePrefill = {}; // consume — prevent re-apply on re-render
+  }
+  setTimeout(_applyQuotePrefill, 150);
 
   // Load sheet clients and auto-select from prefill
   fetch(SHEETS_URL + '?action=getClients')
@@ -6332,54 +6334,64 @@ function _analyzeForQuotation() {
   _preSurveyPendingJob = { desc:desc, client:client, category:cat, id:'', _forQuotation:true, _lines:lines };
 
   var body = document.getElementById('preSurveyBody');
-  body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;padding:40px 20px;gap:14px;">' +
+  body.innerHTML =
+    '<div style="display:flex;flex-direction:column;align-items:center;padding:40px 20px;gap:14px;">' +
     '<div style="font-size:40px;">🤖</div>' +
     '<div style="font-size:14px;font-weight:700;color:#333;text-align:center;">מנתח את הפרויקט...</div>' +
     '<div style="width:100%;background:#e0e0e0;border-radius:4px;height:5px;overflow:hidden;"><div style="width:60%;height:100%;background:linear-gradient(90deg,#0d47a1,#1565c0);border-radius:4px;"></div></div>' +
     '<button onclick="_skipToQuotation()" style="margin-top:10px;padding:9px 20px;background:#f0f0f0;border:none;border-radius:8px;font-size:12px;font-weight:700;color:#555;cursor:pointer;font-family:Heebo,sans-serif;">Skip</button>' +
-  '</div>';
+    '</div>';
 
-  var _qTimer = setTimeout(function(){ _skipToQuotation(); showToast('AI timeout'); }, 15000);
+  var fallbackKeys  = SUCCESS_KEYS_BY_CAT[cat] || SUCCESS_KEYS_BY_CAT['default'];
+  var fallbackTools = (getCategoryTools()[cat]||[]).concat(getMyToolbox().slice(0,6))
+    .filter(function(t,i,a){ return a.indexOf(t)===i; }).slice(0,10);
 
-  var params = '?action=analyzeJobForPreSurvey' +
+  function _showAnalysisForm(ai, isError) {
+    var steps = (ai.steps && ai.steps.length) ? ai.steps : ['','','',''];
+    var keys   = (ai.keys  && ai.keys.length)  ? ai.keys  : fallbackKeys;
+    var tools  = (ai.tools && ai.tools.length)  ? ai.tools : fallbackTools;
+    var mats   = (ai.materials && ai.materials.length) ? ai.materials : [];
+    var errBanner = isError
+      ? '<div style="background:#fff3e0;border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#e65100;direction:rtl;">⚠️ AI לא הגיב — ערוך שלבים ידנית</div>'
+      : '';
+    try {
+      body.innerHTML = errBanner + _renderPreSurveyBodyAI(ai.descSummary||'', steps, keys, tools, mats, desc, cat);
+      body.querySelectorAll('[data-val]').forEach(function(el){ if(el.dataset.val) el.value = el.dataset.val; });
+      // Use .onclick assignment (more reliable than setAttribute in all browsers)
+      var submitBtn = body.querySelector('button[onclick*="submitPreProjectSurvey"]');
+      if (submitBtn) {
+        submitBtn.textContent = '✓ שמור ועבור להצעת מחיר';
+        submitBtn.onclick = function(){ submitQuotationSurvey(); };
+      } else {
+        var fb = document.createElement('button');
+        fb.textContent = '✓ עבור להצעת מחיר';
+        fb.onclick = function(){ submitQuotationSurvey(); };
+        fb.style.cssText = 'width:100%;padding:13px;background:#0d47a1;border:none;border-radius:12px;font-size:15px;font-weight:900;color:#fff;cursor:pointer;font-family:Heebo,sans-serif;margin-top:10px;';
+        body.appendChild(fb);
+      }
+    } catch(e2) {
+      body.innerHTML = '<div style="padding:16px;direction:rtl;">' +
+        '<div style="color:#c62828;font-size:13px;margin-bottom:12px;">⚠️ ' + (e2.message||'error') + '</div>' +
+        '<button onclick="submitQuotationSurvey()" style="width:100%;padding:13px;background:#0d47a1;border:none;border-radius:12px;font-size:15px;font-weight:900;color:#fff;cursor:pointer;font-family:Heebo,sans-serif;">עבור להצעת מחיר ←</button></div>';
+    }
+  }
+
+  var _qTimer = setTimeout(function(){ _showAnalysisForm({}, true); showToast('AI timeout'); }, 15000);
+
+  fetch(SHEETS_URL + '?action=analyzeJobForPreSurvey' +
     '&desc='   + encodeURIComponent(desc) +
     '&cat='    + encodeURIComponent(cat) +
     '&client=' + encodeURIComponent(client) +
-    '&notes=';
-
-  fetch(SHEETS_URL + params)
+    '&notes=')
     .then(function(r){ return r.json(); })
     .then(function(result) {
       clearTimeout(_qTimer);
-      var ai = result.parsed || {};
-      var fallbackKeys  = SUCCESS_KEYS_BY_CAT[cat] || SUCCESS_KEYS_BY_CAT['default'];
-      var fallbackTools = (getCategoryTools()[cat]||[]).concat(getMyToolbox().slice(0,6)).filter(function(t,i,a){ return a.indexOf(t)===i; }).slice(0,10);
-      try {
-        body.innerHTML = _renderPreSurveyBodyAI(
-          ai.descSummary||'',
-          (ai.steps && ai.steps.length) ? ai.steps : ['','','',''],
-          (ai.keys  && ai.keys.length)  ? ai.keys  : fallbackKeys,
-          (ai.tools && ai.tools.length) ? ai.tools : fallbackTools,
-          (ai.materials && ai.materials.length) ? ai.materials : [],
-          desc, cat
-        );
-        body.querySelectorAll('[data-val]').forEach(function(el){ if(el.dataset.val) el.value = el.dataset.val; });
-        // Fix submit button to go to quotation (use DOM, not innerHTML.replace)
-        var submitBtn = body.querySelector('button[onclick*="submitPreProjectSurvey"]');
-        if (submitBtn) {
-          submitBtn.textContent = '✓ שמור ועבור להצעת מחיר';
-          submitBtn.setAttribute('onclick', 'submitQuotationSurvey()');
-        } else {
-          // Append fallback button
-          var fb = document.createElement('button');
-          fb.textContent = '✓ עבור להצעת מחיר';
-          fb.setAttribute('onclick', 'submitQuotationSurvey()');
-          fb.style.cssText = 'width:100%;padding:13px;background:#0d47a1;border:none;border-radius:12px;font-size:15px;font-weight:900;color:#fff;cursor:pointer;font-family:Heebo,sans-serif;margin-top:10px;';
-          body.appendChild(fb);
-        }
-      } catch(e) { _skipToQuotation(); }
+      _showAnalysisForm(result.parsed || {}, !result.parsed);
     })
-    .catch(function(){ clearTimeout(_qTimer); _skipToQuotation(); });
+    .catch(function() {
+      clearTimeout(_qTimer);
+      _showAnalysisForm({}, true);
+    });
 }
 
 function submitQuotationSurvey() {
