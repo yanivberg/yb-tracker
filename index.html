@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v617</title>
+<title>י.ב אחזקות — v620</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v617
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v620
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v617 · 17/05/2026
+v620 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v617</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v620</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1980,9 +1980,9 @@ function init() {
     }
   } else { showScreen('setup'); renderSetup(); }
 
-  // Restore Caspit drawer if it was open before refresh
+  // Restore Caspit drawer only if user is on setup screen (not day/accumulation)
   var savedCaspitTab = localStorage.getItem('ybd_caspit_state');
-  if (savedCaspitTab) {
+  if (savedCaspitTab && !dayStartTime) {
     setTimeout(function() {
       openCaspitOverlay();
       if (savedCaspitTab === 'txlog') {
@@ -2033,7 +2033,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxqATUGQduaAQdoDUrfSkAm5sEtaTCTMO6RqW3JxZU6byOmHnTYhYD7Ki9LrEE7aFEgwQ/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzt2v678Smgyf_t3cAb6URvEWfx3SbVV4xRxHmid1UnB5c0HNsIb2BVBD_TPbubOgjgBw/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -7206,7 +7206,7 @@ function showToast(msg) {
 
 
 <!-- ── Per-Project AI Mini Overlay ───────────────────── -->
-<div id="projectAIOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10011;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+<div id="projectAIOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10017;align-items:flex-end;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:75vh;display:flex;flex-direction:column;">
     <div id="projectAIHeader" style="background:linear-gradient(135deg,#0d47a1,#1565c0);padding:14px 18px;border-radius:20px 20px 0 0;display:flex;align-items:center;gap:10px;flex-shrink:0;"></div>
     <div id="projectAIBody" style="flex:1;overflow-y:auto;padding:14px;background:#f8f9fa;"></div>
