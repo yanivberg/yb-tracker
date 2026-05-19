@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v611</title>
+<title>י.ב אחזקות — v614</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v611
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v614
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v611 · 17/05/2026
+v614 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v611</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v614</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1311,7 +1311,7 @@ SHEET SYNC
         <div style="font-weight:900;font-size:17px;color:#0d47a1;">💼 Caspit <span style="font-size:11px;font-weight:400;color:#aaa;">v300</span></div>
         <div style="display:flex;gap:8px;align-items:center;">
           <button onclick="testCaspitProxy()" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;color:#666;min-width:44px;min-height:44px;">🔌</button>
-          <button onclick="this.closest('#caspitOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+          <button onclick="this.closest('#caspitOverlay').style.display='none';localStorage.removeItem('ybd_caspit_state');" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
     </div>
@@ -1979,6 +1979,19 @@ function init() {
       }
     }
   } else { showScreen('setup'); renderSetup(); }
+
+  // Restore Caspit drawer if it was open before refresh
+  var savedCaspitTab = localStorage.getItem('ybd_caspit_state');
+  if (savedCaspitTab) {
+    setTimeout(function() {
+      openCaspitOverlay();
+      if (savedCaspitTab === 'txlog') {
+        _caspitTab = 'txlog'; _caspitAccordionVisuals('txlog'); _renderTransactionLogForm();
+      } else if (savedCaspitTab !== 'quote') {
+        switchCaspitTab(savedCaspitTab);
+      }
+    }, 400);
+  }
 }
 
 function checkURLProjectStart() { var params = new URLSearchParams(window.location.search); var startName = params.get('start'); if (!startName) return; window.history.replaceState({}, '', window.location.pathname); if (!dayStartTime) { showToast('Start work day first'); return; } var spoken = startName.toLowerCase().trim(); var matchedIdx = -1; var bestScore = -1; projects.forEach(function(p, i) { var pname = p.name.toLowerCase(); var score = 0; if (pname === spoken) score = 3; else if (pname.indexOf(spoken) !== -1 || spoken.indexOf(pname) !== -1) score = 2; else { var words = spoken.split(/\s+/); words.forEach(function(w) { if (w.length > 1 && pname.indexOf(w) !== -1) score += 1; }); } if (score > bestScore) { bestScore = score; matchedIdx = i; } }); if (bestScore > 0 && matchedIdx >= 0) { var proj = projects[matchedIdx]; if (proj.done) { showToast('Project "' + proj.name + '" is marked done'); return; } if (proj.active) { toggleProject(matchedIdx); showToast('⏸ ' + proj.name + ' — stopped'); } else { projects.forEach(function(p, i) { if (p.active) toggleProject(i); }); toggleProject(matchedIdx); showToast('▶ ' + proj.name + ' — started'); } } else { showToast('Project not found: ' + startName); } }
@@ -4432,6 +4445,11 @@ var _caspitJobList  = [];
 var _caspitContacts = [];
 var _caspitMatchMap = {};
 
+function _saveCaspitState() {
+  if (_caspitTab) localStorage.setItem('ybd_caspit_state', _caspitTab);
+  else localStorage.removeItem('ybd_caspit_state');
+}
+
 function getCaspitBody() {
   return _caspitTab ? document.getElementById('caspitBody-' + _caspitTab) : null;
 }
@@ -4458,14 +4476,14 @@ function _caspitAccordionVisuals(activeTab) {
 
 function toggleCaspitAccordion(tab) {
   if (tab === 'quote') {
-    // Quote has its own flow (pre-briefing overlay)
     if (_caspitTab === 'quote') {
-      // collapse
       _caspitTab = '';
       _caspitAccordionVisuals('');
+      _saveCaspitState();
     } else {
       _caspitTab = 'quote';
       _caspitAccordionVisuals('quote');
+      _saveCaspitState();
       openQuotationWithSurvey();
     }
     return;
@@ -4473,9 +4491,11 @@ function toggleCaspitAccordion(tab) {
   if (_caspitTab === tab) {
     _caspitTab = '';
     _caspitAccordionVisuals('');
+    _saveCaspitState();
   } else {
     _caspitTab = tab;
     _caspitAccordionVisuals(tab);
+    _saveCaspitState();
     if (tab === 'txlog') { _renderTransactionLogForm(); return; }
     _renderCaspitBody();
   }
@@ -4490,12 +4510,14 @@ function openCaspitOverlay(tab) {
   _caspitAccordionVisuals('');
   _caspitLoadData();
   if (tab) switchCaspitTab(tab);
+  _saveCaspitState();
 }
 
 function switchCaspitTab(tab) {
   _caspitTab = tab;
   _caspitAccordionVisuals(tab);
   _renderCaspitBody();
+  _saveCaspitState();
 }
 
 function _caspitLoadData() {
@@ -7162,7 +7184,7 @@ function showToast(msg) {
 
 
 <!-- ── Pre-Project Survey Overlay ────────────────────── -->
-<div id="preProjectSurveyOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.65);z-index:10010;align-items:flex-end;justify-content:center;">
+<div id="preProjectSurveyOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.65);z-index:10016;align-items:flex-end;justify-content:center;">
   <div style="background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:480px;max-height:94vh;display:flex;flex-direction:column;">
     <div id="preSurveyHeader" style="background:linear-gradient(135deg,#0d47a1,#1565c0);padding:16px 18px;border-radius:24px 24px 0 0;flex-shrink:0;"></div>
     <div id="preSurveyBody" style="flex:1;overflow-y:auto;padding:14px;background:#f8f9fa;"></div>
