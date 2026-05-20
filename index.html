@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v620</title>
+<title>י.ב אחזקות — v622</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v620
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v622
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v620 · 17/05/2026
+v622 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v620</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v622</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2033,7 +2033,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzt2v678Smgyf_t3cAb6URvEWfx3SbVV4xRxHmid1UnB5c0HNsIb2BVBD_TPbubOgjgBw/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw4lLwr0lL_-AFz--juCCkgoMfADo8SY-K6CLUMFOvS6KVEEgh3l1sHhKnQMzYqB8JGeg/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -4532,7 +4532,7 @@ function _caspitLoadData() {
     .then(function(data) {
       invoicesData = (data || []).map(function(j) {
         return { id: j.jobId||j.id||'', client: j.client||'', desc: j.description||j.desc||'',
-                 grossProfit: parseFloat(j.grossProfit)||0, income: parseFloat(j.income)||parseFloat(j.price)||parseFloat(j.grossProfit)||0,
+                 grossProfit: parseFloat(j.grossProfit)||0, income: parseFloat(j.income)||parseFloat(j.price)||0,
                  po: j.poNumber||j.po||'', hours: j.hours||0 };
       });
       _caspitInvoiceJobs = invoicesData; sheetDone = true; tryRender();
@@ -6578,25 +6578,30 @@ function openProjectAI(i) {
   var now = Date.now();
   var todayMs = (p.totalMs||0) + (p.active && p.activeStart ? (now - p.activeStart) : 0);
   var totalMs = todayMs + (parseFloat(p.hoursActual||0) * 3600000);
-  var cleanNotes = (p.notes||[]).join(' | ')
+  // Truncate notes to last 5 to avoid URL length limits
+  var recentNotes = (p.notes||[]).slice(-5);
+  var cleanNotes = recentNotes.join(' | ')
     .replace(/\(\d{1,2}:\d{2}[^)]*\)/g,'')
     .replace(/\d+:\d{2}:\d{2}/g,'')
-    .replace(/\s+/g,' ').trim();
+    .replace(/\s+/g,' ').trim()
+    .slice(0, 300); // hard cap 300 chars
 
   var preSurveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
   var jobSurvey = preSurveys.filter(function(s){ return s.jobId === (p.jobId||'') || s.desc === (p.title||p.name||''); }).pop() || {};
 
-  var params = '?action=getProjectTips' +
-    '&desc='      + encodeURIComponent(p.title||p.name||'') +
-    '&cat='       + encodeURIComponent(p.category||'') +
-    '&client='    + encodeURIComponent(p.client||'') +
-    '&notes='     + encodeURIComponent(cleanNotes) +
-    '&actualHrs=' + encodeURIComponent(Math.round(totalMs/3600000*100)/100) +
-    '&estHrs='    + encodeURIComponent(p.estHours||0) +
-    '&income='    + encodeURIComponent(p.jobIncome||p.jobPrice||0) +
-    '&materials=' + encodeURIComponent(JSON.stringify(jobSurvey.materials||[])) +
-    '&steps='     + encodeURIComponent(JSON.stringify(jobSurvey.steps||[])) +
-    '&done='      + encodeURIComponent(JSON.stringify(doneTipsList));
+  var payload = {
+    action:     'getProjectTips',
+    desc:       (p.title||p.name||'').slice(0,150),
+    cat:        p.category||'',
+    client:     p.client||'',
+    notes:      cleanNotes,
+    actualHrs:  Math.round(totalMs/3600000*100)/100,
+    estHrs:     p.estHours||0,
+    income:     p.jobIncome||p.jobPrice||0,
+    materials:  JSON.stringify((jobSurvey.materials||[]).slice(0,10)),
+    steps:      JSON.stringify((jobSurvey.steps||[]).slice(0,8)),
+    done:       JSON.stringify(doneTipsList.slice(0,10))
+  };
 
   var _timer = setTimeout(function(){
     ['חיזוק','לשיפור','טיפ_טכני','תנאי_עבודה'].forEach(function(c){
@@ -6605,7 +6610,7 @@ function openProjectAI(i) {
     });
   }, 18000);
 
-  fetch(SHEETS_URL + params)
+  fetch(SHEETS_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
     .then(function(r){ return r.json(); })
     .then(function(result) {
       clearTimeout(_timer);
