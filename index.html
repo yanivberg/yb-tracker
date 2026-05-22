@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v629</title>
+<title>י.ב אחזקות — v631</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v629
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v631
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v629 · 17/05/2026
+v631 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v629</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v631</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1347,6 +1347,14 @@ SHEET SYNC
           <span id="acc-arrow-txlog" style="font-size:13px;color:#aaa;">▼</span>
         </button>
         <div id="caspitBody-txlog" style="display:none;padding:0 20px 16px;direction:rtl;"></div>
+      </div>
+      <!-- Lessons Learned accordion -->
+      <div style="border-bottom:1px solid #f0f0f0;">
+        <button id="acc-hdr-lessons" onclick="toggleCaspitAccordion('lessons')" style="width:100%;padding:14px 20px;background:none;border:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">
+          <span style="font-size:14px;font-weight:900;color:inherit;">📚 Lessons Learned</span>
+          <span id="acc-arrow-lessons" style="font-size:13px;color:#aaa;">▼</span>
+        </button>
+        <div id="caspitBody-lessons" style="display:none;padding:0 20px 16px;direction:rtl;"></div>
       </div>
     </div>
     <div style="padding:8px 16px 0;border-top:1px solid #eee;flex-shrink:0;">
@@ -2033,7 +2041,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxamS-AAWrO8f0hVhPz2e1K3kAoTZtPdstRqeinDIaHPVRs4HBmKRxeyo7L0D1NK8Q2tA/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzU2wFgpvL-tezZmh6Vagx7108_WHXDD517xCUH69Y4vYZxt_ER0PvspR6oMXifE3gCJA/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -4455,7 +4463,7 @@ function getCaspitBody() {
 }
 
 function _caspitAccordionVisuals(activeTab) {
-  ['invoice','quote','invoicelist','txlog'].forEach(function(t) {
+  ['invoice','quote','invoicelist','txlog','lessons'].forEach(function(t) {
     var body  = document.getElementById('caspitBody-' + t);
     var arrow = document.getElementById('acc-arrow-' + t);
     var hdr   = document.getElementById('acc-hdr-' + t);
@@ -4466,7 +4474,7 @@ function _caspitAccordionVisuals(activeTab) {
   });
   var notesArea = document.getElementById('caspitNotesArea');
   var createBtn = document.getElementById('caspitCreateBtn');
-  var show = !!activeTab && activeTab !== 'invoicelist' && activeTab !== 'txlog';
+  var show = !!activeTab && activeTab !== 'invoicelist' && activeTab !== 'txlog' && activeTab !== 'lessons';
   if (notesArea) notesArea.style.display = show ? '' : 'none';
   if (createBtn) {
     createBtn.style.display  = show ? '' : 'none';
@@ -4497,6 +4505,7 @@ function toggleCaspitAccordion(tab) {
     _caspitAccordionVisuals(tab);
     _saveCaspitState();
     if (tab === 'txlog') { _renderTransactionLogForm(); return; }
+    if (tab === 'lessons') { _renderLessonsTab(); return; }
     _renderCaspitBody();
   }
 }
@@ -4599,6 +4608,7 @@ function _renderCaspitBody() {
   if (_caspitTab === 'invoice')      _renderCaspitInvoiceTab();
   else if (_caspitTab === 'invoicelist') _renderCaspitInvoiceListTab();
   else if (_caspitTab === 'txlog')   _renderTransactionLogForm();
+  else if (_caspitTab === 'lessons') _renderLessonsTab();
   else                               _renderCaspitQuoteTab();
 }
 
@@ -6248,6 +6258,12 @@ function submitPreProjectSurvey() {
     method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(survey)
   }).catch(function(){});
 
+  // Save lesson learned (async, non-blocking)
+  if (!job._forQuotation) {
+    var proj = projects.filter(function(p){ return (p.jobId||'') === (job.id||'') || (p.title||p.name||'') === (job.desc||''); })[0];
+    if (proj) _saveLessonFromSurvey(proj, survey, proj._totalMs||0);
+  }
+
   document.getElementById('preProjectSurveyOverlay').style.display = 'none';
   _doAddJobAsProject(job);
   showToast('✓ Briefing saved — project added');
@@ -6417,7 +6433,82 @@ function submitQuotationSurvey() {
 
 // ── end Pre-Project Survey ─────────────────────────────
 
-// ── יומן תנועות ────────────────────────────────────────────────────────────
+// ── Lessons Learned tab ───────────────────────────────────────────────────
+var _lessonsCache = null, _lessonsCat = '';
+
+function _renderLessonsTab(cat) {
+  var body = document.getElementById('caspitBody-lessons');
+  if (!body) return;
+  cat = cat || _lessonsCat || '';
+  _lessonsCat = cat;
+
+  var cats = ['','גגות','מסגרות','איטום','חשמל','אינסטלציה','צבע','תחזוקה כללית','נגרות'];
+  body.innerHTML =
+    '<div style="padding-top:10px;">' +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">' +
+      cats.map(function(c){
+        var active = c === cat;
+        return '<button onclick="_renderLessonsTab(\'' + c + '\')" style="padding:5px 12px;border-radius:20px;border:1.5px solid '+(active?'#0d47a1':'#ddd')+';background:'+(active?'#0d47a1':'#fff')+';color:'+(active?'#fff':'#555')+';font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">' + (c||'הכל') + '</button>';
+      }).join('') +
+    '</div>' +
+    '<div id="lessonsListBody"><div style="text-align:center;padding:20px;color:#aaa;">⏳ טוען...</div></div>' +
+    '</div>';
+
+  fetch(SHEETS_URL + '?action=getLessons&cat=' + encodeURIComponent(cat) + '&limit=20&_t=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(lessons) {
+      var lb = document.getElementById('lessonsListBody');
+      if (!lb) return;
+      if (!lessons.length) {
+        lb.innerHTML = '<div style="text-align:center;padding:20px;color:#aaa;">אין לקחים עדיין' + (cat ? ' בקטגוריה ' + cat : '') + '</div>';
+        return;
+      }
+      lb.innerHTML = '<div style="font-size:11px;color:#aaa;margin-bottom:8px;">' + lessons.length + ' לקחים</div>' +
+        lessons.map(function(l, idx) {
+          var outcomeColor = l.outcome === 'success' ? '#2e7d32' : l.outcome === 'issue' ? '#c62828' : '#e65100';
+          var outcomeIcon  = l.outcome === 'success' ? '✓' : l.outcome === 'issue' ? '✗' : '⚠';
+          var acc = l.accuracy ? l.accuracy + '%' : '';
+          return '<div style="background:#f8f9fa;border-radius:10px;padding:11px 13px;margin-bottom:8px;border-right:3px solid '+outcomeColor+';">' +
+            '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">' +
+              '<div style="font-size:13px;font-weight:900;color:#333;direction:rtl;flex:1;">' + (l.desc||'') + '</div>' +
+              '<div style="font-size:12px;font-weight:700;color:'+outcomeColor+';margin-right:8px;flex-shrink:0;">' + outcomeIcon + '</div>' +
+            '</div>' +
+            '<div style="font-size:11px;color:#888;margin-bottom:6px;direction:rtl;">' +
+              (l.client ? l.client + ' · ' : '') + l.category + (l.timestamp ? ' · ' + l.timestamp : '') +
+              (acc ? ' · ' + l.actualHrs + 'h/' + l.estHrs + 'h (' + acc + ')' : '') +
+            '</div>' +
+            (l.materials ? '<div style="font-size:11px;color:#555;direction:rtl;margin-bottom:3px;">🔧 ' + l.materials + '</div>' : '') +
+            (l.notes ? '<div style="font-size:12px;color:#0d47a1;direction:rtl;font-style:italic;">💡 ' + l.notes + '</div>' : '') +
+          '</div>';
+        }).join('');
+    })
+    .catch(function() {
+      var lb = document.getElementById('lessonsListBody');
+      if (lb) lb.innerHTML = '<div style="color:#c62828;padding:10px;">⚠️ שגיאת טעינה</div>';
+    });
+}
+
+// ── Auto-save lesson when project survey completes ───────────────────────
+function _saveLessonFromSurvey(p, survey, actualMs) {
+  if (!p || !survey) return;
+  var payload = {
+    jobId:       p.jobId || '',
+    client:      p.client || '',
+    category:    p.category || '',
+    desc:        (p.title || p.name || '').slice(0,100),
+    actualHrs:   Math.round((actualMs||0)/3600000*100)/100,
+    estHrs:      p.estHours || 0,
+    outcome:     'success',
+    materials:   (survey.materials||[]).join(', '),
+    steps:       (survey.steps||[]).join('; '),
+    successKeys: (survey.successKeys||[]).join(', '),
+    tools:       (survey.tools||[]).join(', '),
+    notes:       (survey.freeNote || '').slice(0,300)
+  };
+  fetch(SHEETS_URL + '?action=saveLessonLearned&' + Object.keys(payload).map(function(k){
+    return k + '=' + encodeURIComponent(payload[k]);
+  }).join('&')).catch(function(){});
+}
 function _renderTransactionLogForm() {
   var body = document.getElementById('caspitBody-txlog');
   if (!body) return;
