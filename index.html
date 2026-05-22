@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v627</title>
+<title>י.ב אחזקות — v628</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v627
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v628
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v627 · 17/05/2026
+v628 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v627</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v628</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6406,7 +6406,7 @@ function submitQuotationSurvey() {
   var surveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
   surveys.push(survey);
   localStorage.setItem('preProjectSurveys', JSON.stringify(surveys));
-  fetch(SHEETS_URL + '?action=savePreProjectSurvey', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(survey) }).catch(function(){});
+  fetch(SHEETS_URL + '?action=savePreProjectSurvey', { method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, body:JSON.stringify(survey) }).catch(function(){});
   // Store prefill for quotation form
   _quotePrefill = { client: p.client||'', lines: (p._lines && p._lines.length) ? p._lines : (p.desc ? [p.desc] : []), steps: steps, materials: materials };
   document.getElementById('preProjectSurveyOverlay').style.display = 'none';
@@ -6590,19 +6590,17 @@ function openProjectAI(i) {
   var preSurveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
   var jobSurvey = preSurveys.filter(function(s){ return s.jobId === (p.jobId||'') || s.desc === (p.title||p.name||''); }).pop() || {};
 
-  var payload = {
-    action:     'getProjectTips',
-    desc:       (p.title||p.name||'').slice(0,150),
-    cat:        p.category||'',
-    client:     p.client||'',
-    notes:      cleanNotes,
-    actualHrs:  Math.round(totalMs/3600000*100)/100,
-    estHrs:     p.estHours||0,
-    income:     p.jobIncome||p.jobPrice||0,
-    materials:  JSON.stringify((jobSurvey.materials||[]).slice(0,10)),
-    steps:      JSON.stringify((jobSurvey.steps||[]).slice(0,8)),
-    done:       JSON.stringify(doneTipsList.slice(0,10))
-  };
+  var params = '?action=getProjectTips' +
+    '&desc='      + encodeURIComponent((p.title||p.name||'').slice(0,120)) +
+    '&cat='       + encodeURIComponent(p.category||'') +
+    '&client='    + encodeURIComponent((p.client||'').slice(0,60)) +
+    '&notes='     + encodeURIComponent(cleanNotes.slice(0,200)) +
+    '&actualHrs=' + Math.round(totalMs/3600000*100)/100 +
+    '&estHrs='    + (p.estHours||0) +
+    '&income='    + (p.jobIncome||p.jobPrice||0) +
+    '&materials=' + encodeURIComponent(JSON.stringify((jobSurvey.materials||[]).slice(0,3).map(function(m){return String(m).slice(0,80);}))) +
+    '&steps='     + encodeURIComponent(JSON.stringify((jobSurvey.steps||[]).slice(0,5).map(function(s){return String(s).slice(0,80);}))) +
+    '&done='      + encodeURIComponent(JSON.stringify(doneTipsList.slice(0,5).map(function(d){return {cat:d.cat,body:(d.body||'').slice(0,60)};})));
 
   var _timer = setTimeout(function(){
     ['חיזוק','לשיפור','טיפ_טכני','תנאי_עבודה'].forEach(function(c){
@@ -6611,7 +6609,7 @@ function openProjectAI(i) {
     });
   }, 18000);
 
-  fetch(SHEETS_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
+  fetch(SHEETS_URL + params)
     .then(function(r){ return r.json(); })
     .then(function(result) {
       clearTimeout(_timer);
