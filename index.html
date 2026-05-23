@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v654</title>
+<title>י.ב אחזקות — v655</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v654
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v655
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v654 · 17/05/2026
+v655 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v654</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v655</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6478,8 +6478,18 @@ function _renderLessonsTab(cat) {
     .then(function(lessons) {
       var lb = document.getElementById('lessonsListBody');
       if (!lb) return;
+      if (!Array.isArray(lessons)) {
+        lb.innerHTML = '<div style="color:#c62828;padding:10px;direction:rtl;">⚠️ שגיאה: ' + (lessons.error||JSON.stringify(lessons).slice(0,100)) + '</div>';
+        return;
+      }
       if (!lessons.length) {
-        lb.innerHTML = '<div style="text-align:center;padding:20px;color:#aaa;">אין לקחים עדיין' + (cat ? ' בקטגוריה ' + cat : '') + '</div>';
+        lb.innerHTML =
+          '<div style="text-align:center;padding:24px 16px;direction:rtl;">' +
+          '<div style="font-size:32px;margin-bottom:8px;">📚</div>' +
+          '<div style="font-size:14px;font-weight:700;color:#555;margin-bottom:6px;">אין לקחים עדיין' + (cat ? ' בקטגוריה ' + cat : '') + '</div>' +
+          '<div style="font-size:12px;color:#aaa;line-height:1.5;">לקחים נשמרים אוטומטית לאחר השלמת פרויקט.<br>ניתן גם לשמור לקח ידנית:</div>' +
+          '<button onclick="_openAddLessonForm()" style="margin-top:12px;padding:9px 20px;background:#0d47a1;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">+ הוסף לקח ידנית</button>' +
+          '</div>';
         return;
       }
       lb.innerHTML = '<div style="font-size:11px;color:#aaa;margin-bottom:8px;">' + lessons.length + ' לקחים</div>' +
@@ -6507,7 +6517,44 @@ function _renderLessonsTab(cat) {
     });
 }
 
-// ── Auto-save lesson when project survey completes ───────────────────────
+// ── Manual lesson entry ───────────────────────────────────────────────────
+function _openAddLessonForm() {
+  var lb = document.getElementById('lessonsListBody');
+  if (!lb) return;
+  var cats = ['גגות','מסגרות','איטום','חשמל','אינסטלציה','צבע','תחזוקה כללית','נגרות'];
+  lb.innerHTML =
+    '<div style="direction:rtl;padding:8px 0;">' +
+    '<div style="font-size:13px;font-weight:700;color:#0d47a1;margin-bottom:10px;">הוסף לקח ידנית</div>' +
+    '<select id="llCat" style="width:100%;padding:9px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;margin-bottom:8px;">' +
+      cats.map(function(c){ return '<option>'+c+'</option>'; }).join('') +
+    '</select>' +
+    '<input id="llDesc" placeholder="תיאור הפרויקט" style="width:100%;padding:9px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;margin-bottom:8px;">' +
+    '<input id="llClient" placeholder="שם לקוח" style="width:100%;padding:9px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;margin-bottom:8px;">' +
+    '<input id="llNotes" placeholder="מה למדת מהפרויקט הזה?" style="width:100%;padding:9px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;margin-bottom:12px;">' +
+    '<button onclick="_saveManualLesson()" style="width:100%;padding:10px;background:#0d47a1;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">💾 שמור לקח</button>' +
+    '</div>';
+}
+
+function _saveManualLesson() {
+  var cat    = (document.getElementById('llCat')||{}).value||'';
+  var desc   = (document.getElementById('llDesc')||{}).value||'';
+  var client = (document.getElementById('llClient')||{}).value||'';
+  var notes  = (document.getElementById('llNotes')||{}).value||'';
+  if (!desc) { showToast('הכנס תיאור פרויקט'); return; }
+  var params = '?action=saveLessonLearned' +
+    '&category=' + encodeURIComponent(cat) +
+    '&desc='     + encodeURIComponent(desc.slice(0,100)) +
+    '&client='   + encodeURIComponent(client) +
+    '&notes='    + encodeURIComponent(notes.slice(0,300)) +
+    '&outcome=success&jobId=manual&actualHrs=0&estHrs=0';
+  fetch(SHEETS_URL + params)
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (d.ok) { showToast('✓ לקח נשמר'); _renderLessonsTab(''); }
+      else { showToast('⚠️ ' + (d.error||'שגיאה')); }
+    })
+    .catch(function() { showToast('⚠️ שגיאת חיבור'); });
+}
 function _saveLessonFromSurvey(p, survey, actualMs) {
   if (!p || !survey) return;
   var payload = {
