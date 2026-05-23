@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v641</title>
+<title>י.ב אחזקות — v643</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v641
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v643
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v641 · 17/05/2026
+v643 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v641</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v643</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2041,7 +2041,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwgfpaYP49kDNxfRYeEF04cKPzMCPDMX3ZkNKo7D-IlQPazE7W0Fn3UYojEDCQRwwulSw/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbygprOkRRv6WCUu83H8JwEbMkv2QxLj7Bl51_M3DR5n7NXR4jgAOwDvjxgwfeIXKCbYIA/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -5369,9 +5369,15 @@ function runAIQuickAnalysis() {
 
 function openAIDeepAnalysis() {
   var body = document.getElementById('aiAdvisorBody');
-  body.innerHTML = '<div style="text-align:center;padding:40px 0;"><div style="font-size:32px;margin-bottom:12px;">🔬</div><div style="color:#555;font-size:14px;font-weight:700;">קורא תיאורים והערות מהגיליון…</div><div style="color:#aaa;font-size:12px;margin-top:8px;">ניתוח מעמיק — עד 30 שניות</div></div>';
+  body.innerHTML = '<div style="text-align:center;padding:40px 0;"><div style="font-size:32px;margin-bottom:12px;">📊</div><div style="color:#555;font-size:14px;font-weight:700;">קורא נתונים מהגיליון…</div><div style="color:#aaa;font-size:12px;margin-top:8px;">שלב 1 מתוך 2</div></div>';
 
-  fetch(SHEETS_URL + '?action=getAIDeepAnalysis')
+  fetch(SHEETS_URL + '?action=getDeepAggregatedData&_t=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(aggData) {
+      if (aggData.error) { body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + aggData.error + '</div>'; return; }
+      body.innerHTML = '<div style="text-align:center;padding:40px 0;"><div style="font-size:32px;margin-bottom:12px;">🤖</div><div style="color:#555;font-size:14px;font-weight:700;">מנתח ' + (aggData.totalJobs||0) + ' עבודות עם AI…</div><div style="color:#aaa;font-size:12px;margin-top:8px;">שלב 2 מתוך 2 — עד 30 שניות</div></div>';
+
+      fetch(SHEETS_URL + '?action=getAIDeepAnalysis&data=' + encodeURIComponent(JSON.stringify(aggData)) + '&_t=' + Date.now())
     .then(function(r){ return r.json(); })
     .then(function(result) {
       if (result.error) { body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + result.error + '</div>'; return; }
@@ -5426,6 +5432,10 @@ function openAIDeepAnalysis() {
     })
     .catch(function(err) {
       body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;">⚠️ ' + err.message + '</div>';
+    });
+    })
+    .catch(function() {
+      body.innerHTML = '<div style="color:#e53935;padding:20px;text-align:center;direction:rtl;">⚠️ שגיאת חיבור — בדוק חיבור לאינטרנט ונסה שוב</div>';
     });
 }
 
