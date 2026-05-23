@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v635</title>
+<title>י.ב אחזקות — v638</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v635
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v638
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v635 · 17/05/2026
+v638 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v635</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v638</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2041,7 +2041,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxNuNMza1Mu23xuDywm764E-udD0XtjAKu5S4eV7gjA6q2GXV6iqyEMcwVP2BUKlse5ZQ/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycby2nzawUpbjC5cTFyI7xAMWyHFUXc68weR1k024r3gXcGvkRrK0XIzw6JF9K0C-Z6jwGA/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -5413,8 +5413,14 @@ function openAIDeepAnalysis() {
             '</div>';
         });
       } else {
-        // Fallback: plain text
-        html += '<div style="background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:14px;padding:14px;"><div style="font-size:13px;color:#fff;line-height:1.7;direction:rtl;white-space:pre-wrap;">' + (result.text||'').split('\n').join('<br>') + '</div></div>';
+        // Fallback: analysis incomplete — show retry, not raw JSON
+        var errText = result.error || 'הניתוח לא הושלם';
+        html += '<div style="background:#fff3e0;border-radius:14px;padding:20px;text-align:center;direction:rtl;">' +
+          '<div style="font-size:28px;margin-bottom:8px;">⚠️</div>' +
+          '<div style="font-size:14px;font-weight:700;color:#e65100;margin-bottom:6px;">' + errText + '</div>' +
+          '<div style="font-size:12px;color:#888;margin-bottom:14px;">לחץ לנסות שוב — הניתוח עשוי לקחת עד 60 שניות</div>' +
+          '<button onclick="runAIDeepAnalysis()" style="padding:10px 24px;background:#0d47a1;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">🔄 נסה שוב</button>' +
+        '</div>';
       }
       body.innerHTML = html;
     })
