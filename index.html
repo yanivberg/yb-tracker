@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v675</title>
+<title>י.ב אחזקות — v676</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v675
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v676
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v675 · 17/05/2026
+v676 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v675</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v676</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6685,7 +6685,7 @@ function _renderTransactionLogForm() {
     '</div>' +
     '<div style="font-size:12px;font-weight:900;color:#555;margin-bottom:8px;">סוגי מסמכים</div>' +
     '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">' +
-      [['1','חשבונית מס'],['2','קבלה'],['3','חש / קבלה'],['7','חשבונית זיכוי'],['16','הצעת מחיר']].map(function(t){
+      [['1','חשבונית מס'],['2','קבלה'],['7','חש / קבלה'],['9','חשבונית זיכוי'],['16','הצעת מחיר']].map(function(t){
         return '<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#f8f9fa;border-radius:8px;cursor:pointer;">' +
           '<input type="checkbox" class="txlog-type" value="'+t[0]+'" checked style="width:16px;height:16px;cursor:pointer;accent-color:#0d47a1;">' +
           '<span style="font-size:13px;font-weight:700;color:#333;">'+t[1]+'</span>' +
