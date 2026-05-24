@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v678</title>
+<title>י.ב אחזקות — v679</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -488,7 +488,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v678
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v679
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +497,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v678 · 17/05/2026
+v679 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1139,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v678</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v679</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6671,7 +6671,7 @@ function _renderTransactionLogForm() {
   var body = document.getElementById('caspitBody-txlog');
   if (!body) return;
   var today = new Date();
-  var firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  var firstOfYear = new Date(today.getFullYear(), 0, 1);
   function fmtDate(d) { return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2); }
   var savedEmail = localStorage.getItem('ybd_txlog_email') || '';
   body.innerHTML =
@@ -6679,7 +6679,7 @@ function _renderTransactionLogForm() {
     '<div style="font-size:12px;font-weight:900;color:#555;margin-bottom:5px;">טווח תאריכים</div>' +
     '<div style="display:flex;gap:8px;margin-bottom:12px;">' +
       '<div style="flex:1;"><div style="font-size:10px;color:#aaa;margin-bottom:3px;">מתאריך</div>' +
-      '<input type="date" id="txlogFrom" value="'+fmtDate(firstOfMonth)+'" style="width:100%;padding:9px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
+      '<input type="date" id="txlogFrom" value="'+fmtDate(firstOfYear)+'" style="width:100%;padding:9px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
       '<div style="flex:1;"><div style="font-size:10px;color:#aaa;margin-bottom:3px;">עד תאריך</div>' +
       '<input type="date" id="txlogTo" value="'+fmtDate(today)+'" style="width:100%;padding:9px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
     '</div>' +
@@ -6723,7 +6723,9 @@ function _sendTransactionLog() {
         status.innerHTML = '<div style="font-size:13px;color:#2e7d32;padding:10px;background:#e8f5e9;border-radius:8px;font-weight:700;">✓ נשלח! ' + d.count + ' תנועות ל-' + email + '</div>';
         btn.textContent = '📧 שלח שוב';
       } else {
-        status.innerHTML = '<div style="font-size:12px;color:#c62828;padding:8px;background:#fce4ec;border-radius:8px;">⚠️ ' + (d.error||'שגיאה') + '</div>';
+        status.innerHTML = '<div style="font-size:12px;color:#c62828;padding:8px;background:#fce4ec;border-radius:8px;">⚠️ ' + (d.error||'שגיאה') +
+          (d.debug ? '<br><small style="color:#888;word-break:break-all;">from:'+d.debug.from+' to:'+d.debug.to+' types:'+d.debug.types+
+          '<br>'+JSON.stringify(d.debug.sample||d.debug.errors||'').slice(0,300)+'</small>' : '') + '</div>';
         btn.textContent = '📧 שלח יומן למייל';
       }
       btn.disabled = false;
