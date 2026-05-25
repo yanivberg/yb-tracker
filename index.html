@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v688</title>
+<title>י.ב אחזקות — v692</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -463,6 +463,8 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <span style="font-size:24px;flex-shrink:0;">📋</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#555;">Previous Day Notes</span></div>
       <div onclick="closeSetupDrawer();openWorkLog();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📓</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Work Log</span></div>
+      <div onclick="closeSetupDrawer();_openWeeklyPlanningDrawer();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">📅</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1565c0;">Weekly Planning</div><div style="font-size:11px;color:#888;margin-top:1px;">תכנון שבועי</div></div></div>
       <div onclick="closeSetupDrawer();openCaspitOverlay();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">⚠️</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">Account Manager</span></div>
       <div onclick="closeSetupDrawer();openAIAdvisor();" style="background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;box-shadow:0 4px 12px rgba(13,71,161,0.3);">
@@ -479,6 +481,15 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     </div>
   </div>
 
+  <div id="weeklyPlanBackdrop" onclick="closeWeeklyPlanning()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:10002;"></div>
+  <div id="weeklyPlanDrawer" style="display:none;position:fixed;top:0;right:0;bottom:0;width:100%;max-width:480px;z-index:10003;flex-direction:column;background:var(--color-background-primary,#fff);overflow:hidden;">
+    <div style="padding:14px 16px;border-bottom:0.5px solid var(--color-border-tertiary,#e0e0e0);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+      <span style="font-size:16px;font-weight:700;color:var(--color-text-primary,#111);">📅 Weekly Planning</span>
+      <button onclick="closeWeeklyPlanning()" style="border:none;background:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+    </div>
+    <div id="caspitBody-weekly" style="flex:1;overflow-y:auto;padding:0 14px 16px;direction:rtl;"></div>
+  </div>
+
   <div id="appInfoOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:20000;align-items:flex-end;justify-content:center;">
     <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:85vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;">
       <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
@@ -488,7 +499,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v688
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v692
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -497,7 +508,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v688 · 17/05/2026
+v692 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1139,7 +1150,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v688</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v692</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1355,14 +1366,6 @@ SHEET SYNC
           <span id="acc-arrow-lessons" style="font-size:13px;color:#aaa;">▼</span>
         </button>
         <div id="caspitBody-lessons" style="display:none;padding:0 20px 16px;direction:rtl;"></div>
-      </div>
-      <!-- Weekly Planning accordion -->
-      <div style="border-bottom:1px solid #f0f0f0;">
-        <button id="acc-hdr-weekly" onclick="toggleCaspitAccordion('weekly')" style="width:100%;padding:14px 20px;background:none;border:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">
-          <span style="font-size:14px;font-weight:900;color:inherit;">📅 Weekly Planning</span>
-          <span id="acc-arrow-weekly" style="font-size:13px;color:#aaa;">▼</span>
-        </button>
-        <div id="caspitBody-weekly" style="display:none;padding:0 14px 16px;direction:rtl;"></div>
       </div>
     </div>
     <div style="padding:8px 16px 0;border-top:1px solid #eee;flex-shrink:0;">
@@ -2049,7 +2052,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbztXJjHpwtcD0m2wdYM01AtlMmK2Q_BcNgunvcYYVjE47jmJFbfOx314H6ntNjgobzHuQ/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyxa0iz4AWXp2gYjH814sOcyIhGlz1QYsX0xilwz001JV6DpRHClb2SYecjP-KiAo4pvQ/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2728,6 +2731,15 @@ function silentSaveProjectsShortcut() {
 }
 function callSaveProjectsShortcut() { var active = projects.filter(function(p) { return !p.done; }); var list = active.length > 0 ? active.map(function(p) { var num = p.sessionNum || (projects.indexOf(p) + 1); var parts = [num + '.']; if (p.client) parts.push(p.client); parts.push(p.name); return parts.join(' '); }).join('. . . . . . ') : 'No active projects'; localStorage.setItem('yb_pendingToast', '✓ Siri list saved'); localStorage.setItem('yb_sessBackup', '1'); localStorage.setItem('yb_sessBackupTs', Date.now().toString()); var returnUrl = window.location.origin + window.location.pathname; var url = 'shortcuts://run-shortcut?name=Save%20Projects&input=text&text=' + encodeURIComponent(list) + '&x-success=' + encodeURIComponent(returnUrl); window.location.href = url; }
 
+function _openWeeklyPlanningDrawer() {
+  document.getElementById('weeklyPlanDrawer').style.display = 'flex';
+  document.getElementById('weeklyPlanBackdrop').style.display = 'block';
+  _renderWeeklyPlanTab();
+}
+function closeWeeklyPlanning() {
+  document.getElementById('weeklyPlanDrawer').style.display = 'none';
+  document.getElementById('weeklyPlanBackdrop').style.display = 'none';
+}
 function openSetupDrawer() { document.getElementById('setupDrawer').style.display = 'flex'; document.getElementById('setupDrawerBackdrop').style.display = 'block'; updateDrawerClock(); }
 function closeSetupDrawer() { document.getElementById('setupDrawer').style.display = 'none'; document.getElementById('setupDrawerBackdrop').style.display = 'none'; }
 function updateDrawerClock() { var d = new Date(); var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; var dateEl = document.getElementById('drawerDate'); if (dateEl) dateEl.textContent = days[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth()+1) + '.' + d.getFullYear(); var clockEl = document.getElementById('drawerClock'); if (clockEl) clockEl.textContent = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0'); }
@@ -4471,7 +4483,7 @@ function getCaspitBody() {
 }
 
 function _caspitAccordionVisuals(activeTab) {
-  ['invoice','quote','invoicelist','txlog','lessons','weekly'].forEach(function(t) {
+  ['invoice','quote','invoicelist','txlog','lessons'].forEach(function(t) {
     var body  = document.getElementById('caspitBody-' + t);
     var arrow = document.getElementById('acc-arrow-' + t);
     var hdr   = document.getElementById('acc-hdr-' + t);
@@ -4482,7 +4494,7 @@ function _caspitAccordionVisuals(activeTab) {
   });
   var notesArea = document.getElementById('caspitNotesArea');
   var createBtn = document.getElementById('caspitCreateBtn');
-  var show = !!activeTab && activeTab !== 'invoicelist' && activeTab !== 'txlog' && activeTab !== 'lessons' && activeTab !== 'weekly';
+  var show = !!activeTab && activeTab !== 'invoicelist' && activeTab !== 'txlog' && activeTab !== 'lessons';
   if (notesArea) notesArea.style.display = show ? '' : 'none';
   if (createBtn) {
     createBtn.style.display  = show ? '' : 'none';
@@ -4514,7 +4526,6 @@ function toggleCaspitAccordion(tab) {
     _saveCaspitState();
     if (tab === 'txlog') { _renderTransactionLogForm(); return; }
     if (tab === 'lessons') { _renderLessonsTab(); return; }
-    if (tab === 'weekly') { _renderWeeklyPlanTab(); return; }
     _renderCaspitBody();
   }
 }
@@ -4618,7 +4629,6 @@ function _renderCaspitBody() {
   else if (_caspitTab === 'invoicelist') _renderCaspitInvoiceListTab();
   else if (_caspitTab === 'txlog')   _renderTransactionLogForm();
   else if (_caspitTab === 'lessons') _renderLessonsTab();
-  else if (_caspitTab === 'weekly')  _renderWeeklyPlanTab();
   else                               _renderCaspitQuoteTab();
 }
 
@@ -6585,87 +6595,11 @@ function _saveLessonFromSurvey(p, survey, actualMs) {
     return k + '=' + encodeURIComponent(payload[k]);
   }).join('&')).catch(function(){});
 }
-// ── Weekly Planning ────────────────────────────────────────────────────────
-var _weeklyOffset = 0, _weeklyPlan = [], _weeklyTasks = [], _weeklySelectedTask = null;
+// ── Weekly Planning v2 — Board + Drag + Photo ─────────────────────────────
+var _weeklyOffset = 0, _weeklyPlan = [], _weeklyTasks = [], _weeklySelectedTask = null, _weeklyDragState = null;
 function _getWeekSunday(o){var d=new Date();d.setDate(d.getDate()-d.getDay()+((o||0)*7));d.setHours(0,0,0,0);return d;}
 function _weekKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function _weekLabel(d){var e=new Date(d);e.setDate(d.getDate()+4);var mo=['ינו','פבר','מרץ','אפר','מאי','יונ','יול','אוג','ספט','אוק','נוב','דצמ'];return d.getDate()+'–'+e.getDate()+' '+mo[d.getMonth()];}
-function _renderWeeklyPlanTab(offset){
-  var body=document.getElementById('caspitBody-weekly'); if(!body) return;
-  if(offset!==undefined) _weeklyOffset=offset;
-  var sun=_getWeekSunday(_weeklyOffset), wk=_weekKey(sun);
-  body.innerHTML='<div style="padding:20px;text-align:center;color:#888;font-size:13px;">⏳ טוען...</div>';
-  var tp=_weeklyTasks.length?Promise.resolve(_weeklyTasks):fetch(SHEETS_URL+'?action=getOpenTasksForWeekly&_t='+Date.now()).then(function(r){return r.json();});
-  Promise.all([fetch(SHEETS_URL+'?action=getWeeklyPlan&weekKey='+wk+'&_t='+Date.now()).then(function(r){return r.json();}),tp])
-  .then(function(res){
-    _weeklyPlan=Array.isArray(res[0])?res[0]:[];
-    if(res[1]&&!res[1].error)_weeklyTasks=Array.isArray(res[1])?res[1]:[];
-    _weeklySelectedTask=null; _buildWeeklyUI(body,wk,sun);
-  }).catch(function(e){body.innerHTML='<div style="color:#c00;padding:10px;font-size:12px;">⚠️ '+(e.message||'שגיאה')+'</div>';});
-}
-function _buildWeeklyUI(body,weekKey,sun){
-  var DN=['ראשון','שני','שלישי','רביעי','חמישי'],today=new Date(),isTW=_weeklyOffset===0,tDow=today.getDay();
-  var calCols=DN.map(function(name,i){
-    var dn=(function(){var d=new Date(sun);d.setDate(sun.getDate()+i);return d.getDate();})();
-    var isT=isTW&&tDow===i;
-    var blocks=_weeklyPlan.filter(function(e){return e.dayIndex===i;}).map(function(en){
-      var sc=en.status==='בתהליך ביצוע'?'#2e7d32':'#1565c0';
-      return '<div style="background:var(--color-background-secondary);border-right:2px solid '+sc+';border-radius:0 4px 4px 0;padding:3px 4px 3px 14px;margin-bottom:3px;position:relative;">'+
-        '<button onclick="_removeWeeklyEntry(\''+weekKey+'\','+i+',\''+en.jobId.replace(/'/g,'').replace(/"/g,'')+'\')\" style="position:absolute;top:50%;left:2px;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:#ffcdd2;color:#c62828;border:none;font-size:7px;cursor:pointer;padding:0;line-height:10px;text-align:center;">✕</button>'+
-        '<div style="font-size:9px;color:var(--color-text-secondary);">'+en.jobId+'</div>'+
-        '<div style="font-size:10px;font-weight:500;color:var(--color-text-primary);direction:rtl;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'+(en.desc||'').slice(0,16)+'</div></div>';
-    }).join('');
-    var act=!!_weeklySelectedTask;
-    var addBtn='<button onclick="_weeklyDayTap('+i+',\''+weekKey+'\')" style="width:100%;border:0.5px dashed '+(act?'#1565c0':'#ccc')+';border-radius:5px;background:'+(act?'rgba(21,101,192,0.06)':'none')+';padding:4px 0;font-size:13px;color:'+(act?'#1565c0':'#bbb')+';cursor:pointer;margin-top:2px;">'+(act?'+':'·')+'</button>';
-    return '<div style="flex:1;min-width:0;'+(i<4?'border-right:0.5px solid var(--color-border-tertiary);':'')+' padding:0 3px;">'+
-      '<div style="font-size:9px;font-weight:500;color:'+(isT?'#1565c0':'var(--color-text-secondary)')+';text-align:center;padding-bottom:3px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:4px;">'+name.slice(0,3)+'</div>'+
-      '<div style="text-align:center;font-size:'+(isT?'13px':'12px')+';font-weight:500;color:'+(isT?'#fff':'var(--color-text-primary)')+';background:'+(isT?'#1565c0':'none')+';border-radius:50%;width:'+(isT?'22px':'auto')+';height:'+(isT?'22px':'auto')+';line-height:'+(isT?'22px':'auto')+';margin:0 auto 4px;">'+dn+'</div>'+
-      blocks+addBtn+'</div>';
-  }).join('');
-  var hint=_weeklySelectedTask
-    ?'<div style="background:rgba(21,101,192,0.08);border-radius:8px;padding:7px 10px;font-size:11px;color:#1565c0;direction:rtl;text-align:center;margin-bottom:8px;">בחרת: <strong>'+(_weeklySelectedTask.desc||'').slice(0,28)+'</strong> — לחץ + ביום המתאים</div>'
-    :'<div style="font-size:11px;color:var(--color-text-secondary);direction:rtl;padding:4px 0;margin-bottom:6px;text-align:center;">בחר משימה למטה → לחץ + ביום המתאים ↑</div>';
-  var chips=_weeklyTasks.map(function(t,idx){
-    var cnt=_weeklyPlan.filter(function(e){return e.jobId===t.jobId;}).length;
-    var sel=_weeklySelectedTask&&_weeklySelectedTask.jobId===t.jobId;
-    var busy=t.status==='בתהליך ביצוע';
-    return '<div onclick="_weeklySelectTask('+idx+')" style="background:'+(sel?'rgba(21,101,192,0.1)':'var(--color-background-secondary)')+';border:1.5px solid '+(sel?'#1565c0':'var(--color-border-tertiary)')+';border-radius:8px;padding:7px 8px;cursor:pointer;">'+
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px;"><span style="font-size:9px;color:var(--color-text-secondary);">'+t.jobId+'</span><span style="font-size:9px;padding:1px 5px;border-radius:20px;font-weight:500;background:'+(busy?'#e8f5e9':'#fff3e0')+';color:'+(busy?'#2e7d32':'#e65100')+';">'+(busy?'בביצוע':'ממתין')+'</span></div>'+
-      '<div style="font-size:11px;font-weight:500;color:var(--color-text-primary);direction:rtl;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'+(t.desc||'').slice(0,28)+'</div>'+
-      '<div style="font-size:9px;color:var(--color-text-secondary);">'+t.client+(cnt?' · '+cnt+'✓':'')+'</div></div>';
-  }).join('');
-  body.innerHTML='<div style="padding-top:8px;">'+
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'+
-      '<button onclick="_renderWeeklyPlanTab('+(_weeklyOffset-1)+')" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--color-text-secondary);padding:0 8px;">‹</button>'+
-      '<span style="font-size:13px;font-weight:500;color:var(--color-text-primary);">'+_weekLabel(sun)+'</span>'+
-      '<button onclick="_renderWeeklyPlanTab('+(_weeklyOffset+1)+')" style="border:none;background:none;font-size:20px;cursor:pointer;color:var(--color-text-secondary);padding:0 8px;">›</button>'+
-    '</div>'+
-    '<div style="display:flex;border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:6px 4px;margin-bottom:10px;">'+calCols+'</div>'+
-    hint+
-    '<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:6px;">'+_weeklyTasks.length+' משימות פתוחות</div>'+
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">'+chips+'</div></div>';
-}
-function _weeklySelectTask(idx){
-  var t=_weeklyTasks[idx];
-  _weeklySelectedTask=(_weeklySelectedTask&&_weeklySelectedTask.jobId===t.jobId)?null:t;
-  _buildWeeklyUI(document.getElementById('caspitBody-weekly'),_weekKey(_getWeekSunday(_weeklyOffset)),_getWeekSunday(_weeklyOffset));
-}
-function _weeklyDayTap(di,wk){
-  if(!_weeklySelectedTask){showToast('בחר משימה תחילה');return;}
-  var t=_weeklySelectedTask;
-  fetch(SHEETS_URL+'?action=saveWeeklyEntry&weekKey='+encodeURIComponent(wk)+'&dayIndex='+di+'&jobId='+encodeURIComponent(t.jobId)+'&client='+encodeURIComponent(t.client)+'&desc='+encodeURIComponent((t.desc||'').slice(0,100))+'&status='+encodeURIComponent(t.status))
-  .then(function(r){return r.json();}).then(function(d){
-    if(!d||!d.error){_weeklyPlan.push({dayIndex:di,jobId:t.jobId,client:t.client,desc:t.desc,status:t.status});_buildWeeklyUI(document.getElementById('caspitBody-weekly'),wk,_getWeekSunday(_weeklyOffset));}
-    else showToast('⚠️ '+d.error);
-  }).catch(function(){showToast('⚠️ שגיאת חיבור');});
-}
-function _removeWeeklyEntry(wk,di,jid){
-  fetch(SHEETS_URL+'?action=removeWeeklyEntry&weekKey='+encodeURIComponent(wk)+'&dayIndex='+di+'&jobId='+encodeURIComponent(jid))
-  .then(function(r){return r.json();}).then(function(){
-    for(var i=_weeklyPlan.length-1;i>=0;i--){if(_weeklyPlan[i].dayIndex===di&&_weeklyPlan[i].jobId===jid){_weeklyPlan.splice(i,1);break;}}
-    _buildWeeklyUI(document.getElementById('caspitBody-weekly'),wk,_getWeekSunday(_weeklyOffset));
-  }).catch(function(){showToast('⚠️ שגיאת חיבור');});
-}
+function _weekLabel(d){var e=new Date(d);e.setDate(d.getDate()+4);var mo=['ינו','פבר','מרץ','אפר','מאי','יונ','יול','אוג','ספט','אוק','נוב','דצמ'];return d.getDate()+'–'+e.getDate()+' '+mo[d.getMonth()]+' '+d.getFullYear();}
 
 function _renderTransactionLogForm() {
   var body = document.getElementById('caspitBody-txlog');
