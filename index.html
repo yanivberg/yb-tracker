@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v700</title>
+<title>י.ב אחזקות — v702</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v700
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v702
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v700 · 17/05/2026
+v702 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v700</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v702</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2050,7 +2050,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzMM9uxX1RdcCp1W9NkCGr3YcxRV3i9H_2zhJs2hyEbZeN1tZtQgljSgZBTUe4U3a3g/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwy2spQtnDxjQNrlfSt4TqwVrNPPOVYlR5XcN_uKVerUUjBmcAaAAj9ila_6W3QtOAXYQ/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -4177,8 +4177,13 @@ function runPOImportScan() {
   _poAttachData = []; _poAttachThreadIds = []; _poAttachSelections = {}; _poAttachPendingJobs = [];
 
   Promise.all([
-    fetch(SHEETS_URL + '?action=scanPOEmails').then(function(r) { return r.json(); }),
-    fetch(SHEETS_URL + '?action=getPendingQuote').then(function(r) { return r.json(); })
+    fetch(SHEETS_URL + '?action=scanPOEmails&_t=' + Date.now()).then(function(r) {
+      return r.text().then(function(txt) {
+        try { return JSON.parse(txt); }
+        catch(e) { return { error: 'Parse error: ' + txt.slice(0,200) }; }
+      });
+    }),
+    fetch(SHEETS_URL + '?action=getPendingQuote&_t=' + Date.now()).then(function(r) { return r.json(); }).catch(function(){ return []; })
   ]).then(function(results) {
     var scanData = results[0];
     var pendingJobs = results[1] || [];
@@ -4194,7 +4199,7 @@ function runPOImportScan() {
     _poAttachData.forEach(function(po, idx) { _poAttachSelections[idx] = ''; });
     renderPOAttachList();
     document.getElementById('poAttachConfirmBtn').style.display = 'block';
-  }).catch(function() { list.innerHTML = '<div style="padding:32px;text-align:center;color:#c62828;">Network error</div>'; });
+  }).catch(function(err) { list.innerHTML = '<div style="padding:32px;text-align:center;color:#c62828;font-family:Heebo,sans-serif;"><div style="font-size:22px;margin-bottom:8px;">⚠️</div><div style="font-size:13px;font-weight:700;">שגיאת רשת</div><div style="font-size:11px;margin-top:4px;color:#888;">' + (err && err.message ? err.message : 'Network error') + '</div></div>'; });
 }
 
 function setBulkPOChoice(val) {
