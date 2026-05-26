@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v697</title>
+<title>י.ב אחזקות — v699</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v697
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v699
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v697 · 17/05/2026
+v699 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v697</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v699</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2050,7 +2050,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbySAaAPbL8aZ6HETeEOGejI_l8KzvnXy1OGZoA9Bwfa52qsVGex-cs4H-Fcd2icEeoa7w/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw79pk_bS_4LUMvdMPwZHeFU5vVP8hIKGafq0-xc0OL-7WLujsSCYXJcSrPV9sIHA_tVw/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -5068,6 +5068,54 @@ function _matchCaspitContact(sheetName, contacts) {
   return null;
 }
 
+var _aiPriceMat = 1, _aiPriceWorkers = 2;
+function _aiPriceSetMat(v) {
+  _aiPriceMat = v;
+  var y = document.getElementById('aiMatYes'), n = document.getElementById('aiMatNo');
+  if (!y || !n) return;
+  if (v) { y.style.cssText='padding:4px 14px;border-radius:20px;border:1px solid #1565c0;background:#e3f2fd;color:#1565c0;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;'; n.style.cssText='padding:4px 14px;border-radius:20px;border:1px solid #ccc;background:#f5f5f5;color:#888;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;'; }
+  else { n.style.cssText='padding:4px 14px;border-radius:20px;border:1px solid #1565c0;background:#e3f2fd;color:#1565c0;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;'; y.style.cssText='padding:4px 14px;border-radius:20px;border:1px solid #ccc;background:#f5f5f5;color:#888;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;'; }
+}
+function _aiPriceSetW(w) {
+  _aiPriceWorkers = w;
+  document.querySelectorAll('.aiW').forEach(function(b) {
+    var sel = parseInt(b.getAttribute('data-w')) === w;
+    b.style.cssText = 'padding:4px 12px;border-radius:20px;border:1px solid '+(sel?'#1565c0':'#ccc')+';background:'+(sel?'#e3f2fd':'#f5f5f5')+';color:'+(sel?'#1565c0':'#888')+';font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;';
+  });
+}
+function _getAIPriceSuggestion() {
+  var res = document.getElementById('aiPriceResult'); if (!res) return;
+  var descEl = document.querySelector('.cq-desc');
+  var desc = descEl ? descEl.value.trim() : '';
+  var client = (document.getElementById('caspitQuoteSheetClient')||{}).value || '';
+  var hours = (_quotePrefill && _quotePrefill.hours) ? _quotePrefill.hours : 0;
+  if (!desc && !client) { res.innerHTML = '<div style="color:#c62828;font-size:12px;">הכנס תיאור עבודה תחילה</div>'; return; }
+  res.innerHTML = '<div style="font-size:12px;color:#888;padding:8px 0;direction:rtl;">⏳ מחשב מחיר... (10-20 שניות)</div>';
+  fetch(SHEETS_URL + '?action=getAIPriceSuggestion' +
+    '&desc=' + encodeURIComponent(desc) +
+    '&client=' + encodeURIComponent(client) +
+    '&hours=' + encodeURIComponent(hours) +
+    '&workers=' + _aiPriceWorkers +
+    '&materials=' + _aiPriceMat +
+    '&_t=' + Date.now()
+  ).then(function(r){return r.json();}).then(function(d) {
+    if (d.error) { res.innerHTML = '<div style="color:#c62828;font-size:12px;">⚠️ ' + d.error + '</div>'; return; }
+    var min = (d.min||0).toLocaleString(), max = (d.max||0).toLocaleString();
+    res.innerHTML =
+      '<div style="background:#e8f5e9;border-radius:10px;padding:12px 14px;direction:rtl;">' +
+        '<div style="font-size:11px;color:#2e7d32;margin-bottom:4px;">המלצת AI (' + (_aiPriceMat?'כולל חומרים':'עבודה בלבד') + ' · ' + _aiPriceWorkers + ' פועלים' + (d.similar_count?' · '+d.similar_count+' עבודות דומות':'') + ')</div>' +
+        '<div style="font-size:22px;font-weight:700;color:#1b5e20;margin-bottom:8px;">₪' + min + ' – ₪' + max + '</div>' +
+        '<div style="font-size:11px;color:#388e3c;border-top:0.5px solid rgba(0,100,0,0.2);padding-top:6px;">' +
+          (d.materials_est ? '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>חומרים מוערכים</span><span>₪'+(d.materials_est||0).toLocaleString()+'</span></div>' : '') +
+          (d.labor_est     ? '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>עבודה</span><span>₪'+(d.labor_est||0).toLocaleString()+'</span></div>' : '') +
+          (d.market_range  ? '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>שוק</span><span>'+d.market_range+'</span></div>' : '') +
+          '<div style="display:flex;justify-content:space-between;padding:3px 0;font-weight:700;margin-top:2px;"><span>לא פחות מ-</span><span>₪'+min+'</span></div>' +
+        '</div>' +
+        (d.reasoning ? '<div style="font-size:10px;color:#555;margin-top:6px;direction:rtl;">' + d.reasoning + '</div>' : '') +
+      '</div>';
+  }).catch(function(e) { res.innerHTML = '<div style="color:#c62828;font-size:12px;">⚠️ ' + e.message + '</div>'; });
+}
+
 function _renderCaspitQuoteForm() {
   var body = getCaspitBody();
   var sorted = _caspitContacts.slice().sort(function(a,b){ return (a.Name||'').localeCompare(b.Name||''); });
@@ -5102,6 +5150,30 @@ function _renderCaspitQuoteForm() {
       '<div id="caspitQuoteTotal" style="font-size:22px;font-weight:900;color:#1b5e20;">₪0</div>' +
     '</div>' +
     '<div id="caspitStatusHint" style="font-size:11px;color:#888;text-align:center;margin-bottom:10px;">Status after sending: <strong style="color:#e65100;">Waiting for Quote</strong></div>' +
+    '<div id="aiPriceSuggestBox" style="border:2px solid #1565c0;border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fff;">' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">' +
+        '<span style="font-size:16px;">💡</span>' +
+        '<span style="font-size:13px;font-weight:700;color:#1565c0;">הצעת מחיר AI — לא פחות מ...</span>' +
+      '</div>' +
+      '<div style="margin-bottom:8px;">' +
+        '<div style="font-size:11px;color:#555;margin-bottom:5px;">האם המחיר כולל חומרים?</div>' +
+        '<div style="display:flex;gap:6px;">' +
+          '<button id="aiMatYes" onclick="_aiPriceSetMat(1)" style="padding:4px 14px;border-radius:20px;border:1px solid #1565c0;background:#e3f2fd;color:#1565c0;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">כן</button>' +
+          '<button id="aiMatNo"  onclick="_aiPriceSetMat(0)" style="padding:4px 14px;border-radius:20px;border:1px solid #ccc;background:#f5f5f5;color:#888;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">עבודה בלבד</button>' +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-bottom:10px;">' +
+        '<div style="font-size:11px;color:#555;margin-bottom:5px;">כמה פועלים?</div>' +
+        '<div style="display:flex;gap:5px;">' +
+          '<button class="aiW" data-w="1" onclick="_aiPriceSetW(1)" style="padding:4px 12px;border-radius:20px;border:1px solid #ccc;background:#f5f5f5;color:#888;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">1</button>' +
+          '<button class="aiW" data-w="2" onclick="_aiPriceSetW(2)" style="padding:4px 12px;border-radius:20px;border:1px solid #1565c0;background:#e3f2fd;color:#1565c0;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">2</button>' +
+          '<button class="aiW" data-w="3" onclick="_aiPriceSetW(3)" style="padding:4px 12px;border-radius:20px;border:1px solid #ccc;background:#f5f5f5;color:#888;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">3</button>' +
+          '<button class="aiW" data-w="4" onclick="_aiPriceSetW(4)" style="padding:4px 12px;border-radius:20px;border:1px solid #ccc;background:#f5f5f5;color:#888;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">4+</button>' +
+        '</div>' +
+      '</div>' +
+      '<button onclick="_getAIPriceSuggestion()" style="width:100%;padding:10px;background:#1565c0;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;margin-bottom:8px;">💡 הצע מחיר</button>' +
+      '<div id="aiPriceResult"></div>' +
+    '</div>' +
     '<div style="background:#e8f0fe;border-radius:8px;padding:10px 12px;font-size:12px;color:#0d47a1;margin-bottom:2px;">1. Saves job to sheet (Waiting for Quote)<br>2. Sends all line items to Caspit<br>3. Total &gt; 0 → status: Quote Given &nbsp;|&nbsp; Total = 0 → status: Waiting for Quote</div>';
 
   addCaspitQuoteRow();
