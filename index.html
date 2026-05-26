@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v694</title>
+<title>י.ב אחזקות — v697</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v694
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v697
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v694 · 17/05/2026
+v697 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v694</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v697</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2050,7 +2050,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyrEadkz-iqxviRXyrD5SyiLrtv0s22KvKn1-tgKW4R3eHtvSS9trR0VbKWcDoN199s_w/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbySAaAPbL8aZ6HETeEOGejI_l8KzvnXy1OGZoA9Bwfa52qsVGex-cs4H-Fcd2icEeoa7w/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2943,7 +2943,11 @@ function renderProjectBtns() {
       var pausedOpen = !!p._notesOpen;
       var pausedNotesList = pausedNotes.length > 0
         ? pausedNotes.map(function(n, ni) {
-            return '<div style="font-size:12px;font-weight:700;color:#000;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:flex-start;"><span>' + n + '</span><button onclick="event.stopPropagation();deleteNote('+i+','+ni+')" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;padding:0 0 0 6px;flex-shrink:0;">✕</button></div>';
+            return '<div style="font-size:12px;font-weight:700;color:#000;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;align-items:flex-start;gap:6px;">' +
+              '<button onclick="event.stopPropagation();toggleNoteCheck('+i+','+ni+')" style="flex-shrink:0;width:16px;height:16px;border:1.5px solid '+((/^\[DONE:[^\]]+\]/.test(n))?'#2e7d32':'rgba(0,0,0,0.3)')+';border-radius:3px;background:'+( (/^\[DONE:[^\]]+\]/.test(n))?'#e8f5e9':'transparent')+';cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;margin-top:1px;">'+( (/^\[DONE:[^\]]+\]/.test(n))?'<span style="color:#2e7d32;font-size:9px;line-height:1;">✓</span>':''  )+'</button>' +
+              '<div style="flex:1;"><span style="'+( (/^\[DONE:[^\]]+\]/.test(n))?'text-decoration:line-through;color:rgba(0,0,0,0.4);':'')+'">'+ n.replace(/^\[DONE:[^\]]+\]/,'') +'</span>'+
+              ( (/^\[DONE:([^\]]+)\]/.test(n)) ? '<div style="font-size:9px;color:#2e7d32;">✓ בוצע '+(function(){var d=new Date(n.match(/^\[DONE:([^\]]+)\]/)[1]);return d.getDate()+'/'+(d.getMonth()+1)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');})()+'</div>' : '' )+'</div>'+
+              '<button onclick="event.stopPropagation();deleteNote('+i+','+ni+')" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;padding:0 0 0 4px;flex-shrink:0;">✕</button></div>';
           }).join('')
         : '<div style="font-size:12px;color:rgba(0,0,0,0.3);padding:3px 0 4px;">אין הערות</div>';
       var pausedPanel = pausedOpen
@@ -3147,6 +3151,21 @@ function addNoteToSheet(project, fullNote) {
     .then(function(res) { if (res === 'OK') showToast('✓ Note synced to sheet'); })
     .catch(function() {});
 }
+function toggleNoteCheck(i, ni) {
+  var p = projects[i]; if (!p || !p.notes || ni >= p.notes.length) return;
+  var note = p.notes[ni];
+  var isDone = /^\[DONE:[^\]]+\]/.test(note);
+  var stripped = note.replace(/^\[DONE:[^\]]+\]/, '');
+  p.notes[ni] = isDone ? stripped : '[DONE:' + new Date().toISOString() + ']' + stripped;
+  saveState(); reRender();
+  if (SHEETS_URL && p.jobId) {
+    fetch(SHEETS_URL + '?action=toggleNoteCheck&jobId=' + encodeURIComponent(p.jobId) +
+      '&client=' + encodeURIComponent(p.jobClient || p.client) +
+      '&noteIdx=' + ni + '&done=' + (isDone ? '0' : '1')
+    ).catch(function() {});
+  }
+}
+
 function deleteNote(i, n) {
   if (!projects[i].notes) return;
   var noteText = projects[i].notes[n];
@@ -3673,8 +3692,16 @@ function renderSetup() {
     var actualFmt = actualMs > 0 ? formatMsHHMM(actualMs) : '';
 
     var notesListHtml = notes.length > 0
-      ? notes.map((n, ni) => `<div style="font-size:13px;font-weight:700;color:#000;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:flex-start;"><span>${n}</span><button onclick="event.stopPropagation();deleteNote(${i},${ni})" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;padding:0 0 0 8px;flex-shrink:0;">✕</button></div>`).join('')
-      : `<div style="font-size:12px;color:rgba(0,0,0,0.35);padding:3px 0 5px;">אין הערות</div>`;
+      ? notes.map(function(n, ni) {
+          var isDone = /^\[DONE:[^\]]+\]/.test(n);
+          var noteText = n.replace(/^\[DONE:[^\]]+\]/, '');
+          var doneFmt = isDone ? (function(){var d=new Date(n.match(/^\[DONE:([^\]]+)\]/)[1]);return d.getDate()+'/'+(d.getMonth()+1)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');})() : '';
+          return '<div style="font-size:13px;font-weight:700;color:#000;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;align-items:flex-start;gap:8px;">' +
+            '<button onclick="event.stopPropagation();toggleNoteCheck('+i+','+ni+')" style="flex-shrink:0;width:18px;height:18px;border:1.5px solid '+(isDone?'#2e7d32':'rgba(0,0,0,0.3)')+';border-radius:4px;background:'+(isDone?'#e8f5e9':'transparent')+';cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;margin-top:1px;">'+(isDone?'<span style="color:#2e7d32;font-size:11px;line-height:1;">✓</span>':'')+'</button>' +
+            '<div style="flex:1;"><span style="'+(isDone?'text-decoration:line-through;color:rgba(0,0,0,0.4);':'')+'">'+noteText+'</span>'+(isDone?'<div style="font-size:10px;color:#2e7d32;margin-top:1px;">✓ בוצע '+doneFmt+'</div>':'')+'</div>' +
+            '<button onclick="event.stopPropagation();deleteNote('+i+','+ni+')" style="background:none;border:none;color:#888;font-size:12px;cursor:pointer;padding:0 0 0 6px;flex-shrink:0;">✕</button></div>';
+        }).join('')
+      : '<div style="font-size:12px;color:rgba(0,0,0,0.35);padding:3px 0 5px;">אין הערות</div>';
 
     var notesPanel = notesOpen ? `
       <div style="padding-top:8px;">
