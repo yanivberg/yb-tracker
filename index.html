@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v713</title>
+<title>י.ב אחזקות — v715</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v713
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v715
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v713 · 17/05/2026
+v715 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v713</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v715</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3063,6 +3063,24 @@ function renderProjectBtns() {
         '</div>' +
         (!p.done ? '<button onclick="openProjectSurvey('+i+')" style="width:100%;margin-top:10px;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#c62828;">✓ End Project</button>' : '') +
       '</div>' +
+      '<div style="border-top:2px solid rgba(0,0,0,0.12);padding-top:10px;margin-top:4px;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
+          '<span style="font-size:11px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">💰 הוצאות</span>' +
+          '<button onclick="event.stopPropagation();toggleExpensePanel('+i+')" style="background:rgba(0,0,0,0.1);border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;">פתח ▾</button>' +
+        '</div>' +
+        '<div id="expPanel-'+i+'" style="display:none;">' +
+          '<div id="expList-'+i+'"><div style="font-size:11px;color:rgba(0,0,0,0.4);padding:4px 0;">⏳ טוען...</div></div>' +
+          '<div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;">' +
+            '<select id="expCat-'+i+'" style="padding:6px 8px;border:1.5px solid rgba(0,0,0,0.2);border-radius:7px;font-size:12px;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.7);flex:1;">' +
+              '<option value="חומרים">🔩 חומרים</option>' +
+              '<option value="כוח אדם">👷 כוח אדם</option>' +
+            '</select>' +
+            '<input id="expDesc-'+i+'" type="text" placeholder="תיאור..." style="flex:2;padding:6px 8px;border:1.5px solid rgba(0,0,0,0.2);border-radius:7px;font-size:12px;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.7);direction:rtl;">' +
+            '<input id="expAmt-'+i+'" type="number" placeholder="₪" style="width:70px;padding:6px 8px;border:1.5px solid rgba(0,0,0,0.2);border-radius:7px;font-size:12px;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.7);">' +
+            '<button onclick="event.stopPropagation();addExpense('+i+')" style="padding:6px 12px;background:rgba(0,0,0,0.7);color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:900;cursor:pointer;">+</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
     '</div>';
 
     html += '<div style="' + cardStyle + '">' +
@@ -3151,6 +3169,95 @@ function addNoteToSheet(project, fullNote) {
     .then(function(res) { if (res === 'OK') showToast('✓ Note synced to sheet'); })
     .catch(function() {});
 }
+// ── Project Expenses ──────────────────────────────────────────────────────
+var _expCache = {}; // jobId → [{row,category,desc,amount,date}]
+
+function toggleExpensePanel(i) {
+  var panel = document.getElementById('expPanel-'+i);
+  var btn   = panel ? panel.previousElementSibling.querySelector('button') : null;
+  if (!panel) return;
+  if (panel.style.display === 'none') {
+    panel.style.display = 'block';
+    if (btn) btn.textContent = 'סגור ▴';
+    _loadExpenses(i);
+  } else {
+    panel.style.display = 'none';
+    if (btn) btn.textContent = 'פתח ▾';
+  }
+}
+
+function _loadExpenses(i) {
+  var p = projects[i]; if (!p) return;
+  var list = document.getElementById('expList-'+i); if (!list) return;
+  if (_expCache[p.jobId]) { _renderExpenses(i, _expCache[p.jobId]); return; }
+  fetch(SHEETS_URL + '?action=getExpenses&jobId=' + encodeURIComponent(p.jobId) + '&_t=' + Date.now())
+  .then(function(r){return r.json();}).then(function(d){
+    var exps = Array.isArray(d) ? d : [];
+    _expCache[p.jobId] = exps;
+    _renderExpenses(i, exps);
+  }).catch(function(){ list.innerHTML = '<div style="font-size:11px;color:#c00;">⚠️ שגיאה</div>'; });
+}
+
+function _renderExpenses(i, exps) {
+  var p = projects[i]; if (!p) return;
+  var list = document.getElementById('expList-'+i); if (!list) return;
+  var totalExp = exps.reduce(function(s,e){return s+(e.amount||0);},0);
+  var income   = parseFloat(p.jobIncome||p.jobPrice||p.income||0);
+  var gp       = parseFloat(p.grossProfit||0);
+  var netProfit = (income||gp) - totalExp;
+
+  var rows = exps.map(function(ex) {
+    var catIcon = ex.category==='חומרים'?'🔩':'👷';
+    return '<div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:0.5px solid rgba(0,0,0,0.1);font-size:11px;">' +
+      '<span style="flex-shrink:0;">' + catIcon + '</span>' +
+      '<span style="flex:1;direction:rtl;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">' + (ex.desc||'') + '</span>' +
+      '<span style="font-weight:700;color:#c62828;flex-shrink:0;">₪' + (ex.amount||0).toLocaleString() + '</span>' +
+      '<button onclick="event.stopPropagation();deleteExpense('+i+','+ex.row+')" style="background:none;border:none;color:#888;font-size:11px;cursor:pointer;padding:0 2px;">✕</button>' +
+    '</div>';
+  }).join('');
+
+  var summaryColor = netProfit >= 0 ? '#2e7d32' : '#c62828';
+  list.innerHTML =
+    (rows || '<div style="font-size:11px;color:rgba(0,0,0,0.35);padding:3px 0;">אין הוצאות</div>') +
+    '<div style="margin-top:6px;padding:6px 8px;background:rgba(0,0,0,0.06);border-radius:8px;font-size:11px;">' +
+      '<div style="display:flex;justify-content:space-between;"><span>סה"כ הוצאות:</span><span style="font-weight:700;color:#c62828;">₪' + totalExp.toLocaleString() + '</span></div>' +
+      (income||gp ? '<div style="display:flex;justify-content:space-between;margin-top:3px;"><span>רווח נטו:</span><span style="font-weight:700;color:'+summaryColor+';">₪' + netProfit.toLocaleString() + '</span></div>' : '') +
+    '</div>';
+}
+
+function addExpense(i) {
+  var p   = projects[i]; if (!p) return;
+  var cat = (document.getElementById('expCat-'+i)||{}).value || 'חומרים';
+  var desc= (document.getElementById('expDesc-'+i)||{}).value.trim();
+  var amt = parseFloat((document.getElementById('expAmt-'+i)||{}).value||0);
+  if (!amt) { showToast('הכנס סכום'); return; }
+  var today = new Date().toISOString().slice(0,10);
+  fetch(SHEETS_URL + '?action=addExpense&jobId=' + encodeURIComponent(p.jobId) +
+    '&client=' + encodeURIComponent(p.jobClient||p.client||'') +
+    '&date=' + today + '&category=' + encodeURIComponent(cat) +
+    '&desc=' + encodeURIComponent(desc) + '&amount=' + amt)
+  .then(function(r){return r.json();}).then(function(d){
+    if (d.ok) {
+      _expCache[p.jobId] = null; // invalidate cache
+      var descEl = document.getElementById('expDesc-'+i);
+      var amtEl  = document.getElementById('expAmt-'+i);
+      if (descEl) descEl.value=''; if (amtEl) amtEl.value='';
+      _loadExpenses(i);
+      showToast('✓ הוצאה נוספה');
+    } else showToast('⚠️ '+(d.error||'שגיאה'));
+  }).catch(function(){showToast('⚠️ שגיאת חיבור');});
+}
+
+function deleteExpense(i, row) {
+  var p = projects[i]; if (!p) return;
+  fetch(SHEETS_URL + '?action=deleteExpense&row=' + row)
+  .then(function(r){return r.json();}).then(function(){
+    _expCache[p.jobId] = null;
+    _loadExpenses(i);
+  });
+}
+// ── End Project Expenses ──────────────────────────────────────────────────
+
 function toggleNoteCheck(i, ni) {
   var p = projects[i]; if (!p || !p.notes || ni >= p.notes.length) return;
   var note = p.notes[ni];
@@ -6958,7 +7065,10 @@ function _sendTransactionLog() {
       if (d.ok) {
         var msg = d.mailSent
           ? '✓ ' + d.count + ' תנועות — ' + d.pdfAttached + ' PDF נשלחו ל-' + (d.toEmail||email)
-          : '✓ ' + d.count + ' תנועות — פותח דוח ↗' + (d.pdfError ? ' (שגיאת PDF: ' + d.pdfError.slice(0,80) + ')' : '') + (d.pdfAttempted===0?' (לא נמצאו DocumentId)':'');
+          : '✓ ' + d.count + ' תנועות — פותח דוח ↗' +
+            (d.pdfError ? '\n⚠️ PDF: ' + d.pdfError.slice(0,120) : '') +
+            (d.debugFirstDoc ? '\n🔍 DocumentId=' + JSON.stringify(d.debugFirstDoc) : '') +
+            (d.pdfAttempted===0 ? ' (אין DocumentId)' : '');
         status.innerHTML = '<div style="font-size:13px;color:#2e7d32;padding:10px;background:#e8f5e9;border-radius:8px;font-weight:700;">' + msg + '</div>';
         btn.textContent = '📧 שלח שוב';
         btn.disabled = false;
