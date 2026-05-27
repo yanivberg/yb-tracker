@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v727</title>
+<title>י.ב אחזקות — v728</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v727
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v728
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v727 · 17/05/2026
+v728 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v727</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v728</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -5275,26 +5275,12 @@ function _renderQuoteList(docs, filter) {
 
 function _selectQuoteByIdx(idx) {
   var d = _quoteSearchResults[idx]; if (!d) return;
-  // TrxCode = accounting category (e.g. "הכנסות/מכירות") — NOT the doc path id
-  // DocumentId is the numeric id → path format is "doc" + DocumentId
-  var rawDocId = d.DocumentId || '';
-  var docId = rawDocId ? 'doc' + rawDocId : '';
-  var number = d.Number || '';
-  var loadingEl = document.getElementById('editQuoteFormArea');
-  if (loadingEl) loadingEl.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary);padding:8px 0;">⏳ טוען '+(number||'')+'...</div>';
-  // Pass docId (doc+DocumentId) and number — Worker tries all formats + Number fallback
-  fetch(SHEETS_URL + '?action=getQuoteDetail&docId=' + encodeURIComponent(docId) + '&number=' + encodeURIComponent(number) + '&_t=' + Date.now())
-  .then(function(r){return r.json();}).then(function(resp){
-    var doc = (resp && resp.rawResponse) ? resp.rawResponse : (resp && !resp.error && !resp.ok === false ? resp : null);
-    if (!doc) doc = d; // fallback to list data
-    _editQuoteDoc = doc;
-    _renderQuoteList(_recentQuotes||[], (document.getElementById('editQuoteSearch')||{}).value||'');
-    _renderEditForm(doc);
-  }).catch(function(){
-    _editQuoteDoc = d;
-    _renderQuoteList(_recentQuotes||[], '');
-    _renderEditForm(d);
-  });
+  // Use list data directly — no secondary fetch.
+  // DocumentId in list = Caspit accounting code, NOT a usable path ID.
+  // For identification we rely on Number when sending PUT update.
+  _editQuoteDoc = d;
+  _renderQuoteList(_recentQuotes||[], (document.getElementById('editQuoteSearch')||{}).value||'');
+  _renderEditForm(d);
 }
 
 function _setQuoteMode(mode) {
@@ -5329,7 +5315,7 @@ function _renderQuoteList(docs, filter) {
     var tot = Math.round(d.Total||0).toLocaleString();
     var lines = (d.DocumentLines||[]).map(function(l){return l.ProductName||l.Details||'';}).filter(Boolean).join(', ');
     var sel = _editQuoteDoc && _editQuoteDoc.DocumentId && _editQuoteDoc.DocumentId === d.DocumentId;
-    return '<div onclick="event.stopPropagation();_selectQuoteRow(\''+d.TrxCode+'\',\''+d.Number+'\')" style="padding:10px 12px;border:'+(sel?'2px solid var(--color-border-info)':'0.5px solid var(--color-border-tertiary)')+';border-radius:var(--border-radius-md);margin-bottom:6px;cursor:pointer;background:'+(sel?'var(--color-background-info)':'var(--color-background-primary)')+';">'+
+    return '<div onclick="event.stopPropagation();_selectQuoteByNumber(\''+d.Number+'\')" style="padding:10px 12px;border:'+(sel?'2px solid var(--color-border-info)':'0.5px solid var(--color-border-tertiary)')+';border-radius:var(--border-radius-md);margin-bottom:6px;cursor:pointer;background:'+(sel?'var(--color-background-info)':'var(--color-background-primary)')+';">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;">'+
         '<span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">'+d.Number+'</span>'+
         '<span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">₪'+tot+'</span>'+
@@ -5339,26 +5325,18 @@ function _renderQuoteList(docs, filter) {
   }).join('');
 }
 
-function _selectQuoteRow(trcCode, number) {
-  var loadingEl = document.getElementById('editQuoteFormArea');
-  if (loadingEl) loadingEl.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary);padding:8px 0;">⏳ טוען פרטי הצעה...</div>';
-  fetch(SHEETS_URL + '?action=getQuoteDetail&docId=' + encodeURIComponent(trcCode) + '&_t=' + Date.now())
-  .then(function(r){return r.json();}).then(function(d){
-    var doc = d.rawResponse || d;
-    if (!doc || doc.error || doc.ok === false) {
-      if(loadingEl) loadingEl.innerHTML='<div style="font-size:12px;color:var(--color-text-danger);">⚠️ לא נמצא: '+JSON.stringify(doc).slice(0,100)+'</div>';
-      return;
-    }
-    _editQuoteDoc = doc;
-    // Re-render list to highlight selected row
-    if (_recentQuotes) _renderQuoteList(_recentQuotes, (document.getElementById('editQuoteSearch')||{}).value||'');
-    _renderEditForm(doc);
-  }).catch(function(e){if(loadingEl) loadingEl.innerHTML='<div style="font-size:12px;color:var(--color-text-danger);">⚠️ '+e.message+'</div>';});
+function _selectQuoteByNumber(num) {
+  // Find by Number in full list — no secondary fetch needed
+  var d = (_recentQuotes||[]).filter(function(x){ return x.Number === num; })[0];
+  if (!d) { showToast('הצעה לא נמצאה: '+num); return; }
+  _editQuoteDoc = d;
+  _renderQuoteList(_recentQuotes||[], (document.getElementById('editQuoteSearch')||{}).value||'');
+  _renderEditForm(d);
 }
 
 function _renderEditForm(d) {
   var area = document.getElementById('editQuoteFormArea'); if (!area) return;
-  var dLines = (d.DocumentLines||[{Number:1,ProductName:'',Qty:1,UnitPrice:0,ExtendedPrice:0}]);
+  var dLines = (d.DocumentLines && d.DocumentLines.length) ? d.DocumentLines : [{Number:1, ProductName:d.Details||d.Comments||'', Qty:1, UnitPrice:d.TotalBeforeVAT||d.Total||0, ExtendedPrice:d.TotalBeforeVAT||d.Total||0}];
   var lineRows = dLines.map(function(l,i){
     return '<div class="eq-row" style="display:grid;grid-template-columns:1fr 48px 76px;gap:5px;margin-bottom:5px;">' +
       '<input class="eq-name" value="'+(l.ProductName||l.Details||'').replace(/"/g,'&quot;')+'" placeholder="תיאור..." style="padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;direction:rtl;">' +
