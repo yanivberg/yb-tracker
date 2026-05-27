@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v715</title>
+<title>י.ב אחזקות — v718</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v715
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v718
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v715 · 17/05/2026
+v718 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v715</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v718</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2050,7 +2050,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxi_QHGv6BXV3id9Sjhz9cM_2htnnkvb0dYUfkd0Rl3xrLpHtTHY_mAkUZ55kB1uvstcw/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw60mYx1WRGYO0YYsMSMX6Vny_mtcHWpLD1QFioPZlX2y4VXwLVWbSoia1Xx5hgQZ76Og/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -5228,8 +5228,156 @@ function _getAIPriceSuggestion() {
   }).catch(function(e) { res.innerHTML = '<div style="color:#c62828;font-size:12px;">⚠️ ' + e.message + '</div>'; });
 }
 
+var _quoteMode = 'new'; // 'new' or 'edit'
+var _editQuoteDoc = null; // full Caspit document being edited
+
+function _setQuoteMode(mode) {
+  _quoteMode = mode;
+  _editQuoteDoc = null;
+  _renderCaspitQuoteTab();
+}
+
+function _searchQuoteForEdit() {
+  var inp = document.getElementById('editQuoteSearch');
+  var res = document.getElementById('editQuoteResults');
+  if (!inp || !res) return;
+  var val = inp.value.trim();
+  if (!val) return;
+  res.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary);padding:6px 0;">⏳ מחפש...</div>';
+  // Detect: if starts with digit or contains slash → number search, else → description
+  var isNum = /^[\d\/]/.test(val);
+  var qs = isNum ? 'number=' + encodeURIComponent(val) : 'query=' + encodeURIComponent(val);
+  fetch(SHEETS_URL + '?action=searchQuotes&' + qs + '&_t=' + Date.now())
+  .then(function(r){return r.json();}).then(function(docs) {
+    if (!docs.length) { res.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary);padding:6px 0;">לא נמצאו הצעות</div>'; return; }
+    res.innerHTML = docs.map(function(d, i) {
+      var lines = (d.DocumentLines||[]).map(function(l){return l.ProductName||l.Details||'';}).join(', ');
+      var tot = (d.Total||0).toLocaleString();
+      return '<div onclick="_loadQuoteForEdit(\''+d.TrxCode+'\',\''+d.Number+'\')" style="padding:8px 10px;border:0.5px solid var(--color-border-tertiary);border-radius:8px;margin-bottom:5px;cursor:pointer;background:var(--color-background-secondary);">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;">'+
+          '<span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">'+d.Number+'</span>'+
+          '<span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">₪'+tot+'</span>'+
+        '</div>'+
+        '<div style="font-size:11px;color:var(--color-text-secondary);direction:rtl;">'+d.CustomerBusinessName+' · '+(lines.slice(0,40)||'...')+'</div>'+
+      '</div>';
+    }).join('');
+  }).catch(function(e){res.innerHTML='<div style="font-size:12px;color:var(--color-text-danger);">⚠️ '+e.message+'</div>';});
+}
+
+function _loadQuoteForEdit(trcCode, number) {
+  var res = document.getElementById('editQuoteResults');
+  if (res) res.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary);padding:6px 0;">⏳ טוען פרטי הצעה...</div>';
+  fetch(SHEETS_URL + '?action=getQuoteDetail&docId=' + encodeURIComponent(trcCode) + '&_t=' + Date.now())
+  .then(function(r){return r.json();}).then(function(d) {
+    var doc = d.rawResponse || d;
+    if (!doc || doc.error) { if(res) res.innerHTML='<div style="font-size:12px;color:var(--color-text-danger);">⚠️ לא נמצא</div>'; return; }
+    _editQuoteDoc = doc;
+    _renderCaspitQuoteForm();
+  }).catch(function(e){if(res) res.innerHTML='<div style="font-size:12px;color:var(--color-text-danger);">⚠️ '+e.message+'</div>';});
+}
+
+function _saveEditedQuote() {
+  if (!_editQuoteDoc) { showToast('אין הצעה לשמירה'); return; }
+  var btn = document.getElementById('editSaveBtn');
+  if (btn) { btn.disabled=true; btn.textContent='⏳ שומר...'; }
+  // Collect edited values
+  var newLines = [];
+  document.querySelectorAll('.eq-row').forEach(function(row, i) {
+    var name = (row.querySelector('.eq-name')||{}).value||'';
+    var qty  = parseFloat((row.querySelector('.eq-qty')||{}).value||1);
+    var price= parseFloat((row.querySelector('.eq-price')||{}).value||0);
+    if (name || price) newLines.push({Number:i+1, ProductName:name, Qty:qty, UnitPrice:price, ExtendedPrice:qty*price, ChargeVAT:true});
+  });
+  var custId  = (document.getElementById('eqContact')||{}).value||'';
+  var details = (document.getElementById('eqDetails')||{}).value||'';
+  var comments= (document.getElementById('eqComments')||{}).value||'';
+  var date    = (document.getElementById('eqDate')||{}).value||'';
+  var totalAmt= newLines.reduce(function(s,l){return s+l.ExtendedPrice;},0);
+  // Build updated CaspitDoc
+  var updDoc = Object.assign({}, _editQuoteDoc, {
+    DocumentLines: newLines,
+    Details: details,
+    Comments: comments,
+    CustomerId: custId || _editQuoteDoc.CustomerId,
+    TotalLinesChargeVAT: totalAmt,
+    TotalBeforeVAT: totalAmt,
+    Total: totalAmt
+  });
+  if (date) updDoc.Date = new Date(date).toISOString();
+  var firstLine = newLines[0]||{};
+  fetch(SHEETS_URL, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      action:'updateQuote',
+      caspitDoc: updDoc,
+      client: (document.getElementById('caspitQuoteSheetClient')||{}).value||'',
+      desc: firstLine.ProductName||'',
+      price: totalAmt
+    })
+  }).then(function(r){return r.json();}).then(function(d){
+    if (btn) { btn.disabled=false; btn.textContent='💾 שמור ושלח PDF'; }
+    if (d.ok) {
+      showToast(d.mailSent ? '✓ עודכן ונשלח PDF' : '✓ עודכן בכספית');
+      _editQuoteDoc = null; _quoteMode = 'new';
+      _renderCaspitQuoteTab();
+    } else showToast('⚠️ '+(d.error||'שגיאה'));
+  }).catch(function(e){ if(btn){btn.disabled=false;btn.textContent='💾 שמור ושלח PDF';} showToast('⚠️ '+e.message); });
+}
+
 function _renderCaspitQuoteForm() {
   var body = getCaspitBody();
+
+  // ── Mode toggle ────────────────────────────────────────────────────────
+  var toggleHtml = '<div style="display:flex;gap:6px;margin-bottom:12px;">' +
+    '<button onclick="_setQuoteMode(\'new\')" style="flex:1;padding:8px;border-radius:var(--border-radius-md);border:1.5px solid '+ (_quoteMode==='new'?'#0d47a1':'#ddd') +';background:'+ (_quoteMode==='new'?'#e3f2fd':'#fff') +';color:'+ (_quoteMode==='new'?'#0d47a1':'#888') +';font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">+ חדש</button>' +
+    '<button onclick="_setQuoteMode(\'edit\')" style="flex:1;padding:8px;border-radius:var(--border-radius-md);border:1.5px solid '+ (_quoteMode==='edit'?'#0d47a1':'#ddd') +';background:'+ (_quoteMode==='edit'?'#e3f2fd':'#fff') +';color:'+ (_quoteMode==='edit'?'#0d47a1':'#888') +';font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">✏️ ערוך קיים</button>' +
+  '</div>';
+
+  // ── Edit mode ──────────────────────────────────────────────────────────
+  if (_quoteMode === 'edit' && !_editQuoteDoc) {
+    body.innerHTML = toggleHtml +
+      '<div style="margin-bottom:8px;">' +
+        '<div style="font-size:11px;color:#555;margin-bottom:5px;direction:rtl;">הכנס מספר הצעה (01/900119) או 3 מילים מהתיאור</div>' +
+        '<div style="display:flex;gap:6px;">' +
+          '<input id="editQuoteSearch" type="text" placeholder=\'01/900119 או "תיקון גג"\' style="flex:1;padding:10px;border:1.5px solid #ddd;border-radius:10px;font-size:13px;font-family:Heebo,sans-serif;direction:rtl;" onkeypress="if(event.key===\'Enter\')_searchQuoteForEdit()">' +
+          '<button onclick="_searchQuoteForEdit()" style="padding:10px 14px;background:#0d47a1;color:#fff;border:none;border-radius:10px;font-size:13px;cursor:pointer;font-family:Heebo,sans-serif;">חפש</button>' +
+        '</div>' +
+      '</div>' +
+      '<div id="editQuoteResults"></div>';
+    return;
+  }
+
+  // ── Edit mode — doc loaded, show pre-filled form ───────────────────────
+  if (_quoteMode === 'edit' && _editQuoteDoc) {
+    var d = _editQuoteDoc;
+    var dLines = (d.DocumentLines||[{Number:1,ProductName:'',Qty:1,UnitPrice:0,ExtendedPrice:0}]);
+    var lineRows = dLines.map(function(l,i){
+      return '<div class="eq-row" style="display:grid;grid-template-columns:1fr 52px 80px;gap:6px;margin-bottom:6px;">' +
+        '<input class="eq-name" value="'+(l.ProductName||l.Details||'').replace(/"/g,'&quot;')+'" placeholder="תיאור..." style="padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;direction:rtl;">' +
+        '<input class="eq-qty" type="number" value="'+(l.Qty||1)+'" style="padding:8px 6px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;">' +
+        '<input class="eq-price" type="number" value="'+(l.UnitPrice||l.ExtendedPrice||0)+'" style="padding:8px 6px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;">' +
+      '</div>';
+    }).join('');
+    var dateVal = d.Date ? d.Date.slice(0,10) : '';
+    body.innerHTML = toggleHtml +
+      '<div style="background:#e3f2fd;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#0d47a1;direction:rtl;">✏️ עריכת הצעה <strong>'+d.Number+'</strong> · '+d.CustomerBusinessName+'</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">' +
+        '<div><div style="font-size:11px;color:#888;margin-bottom:3px;">לקוח (Caspit ID)</div><input id="eqContact" value="'+(d.CustomerId||'')+'" placeholder="CustomerId" style="width:100%;padding:8px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
+        '<div><div style="font-size:11px;color:#888;margin-bottom:3px;">תאריך</div><input id="eqDate" type="date" value="'+dateVal+'" style="width:100%;padding:8px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;box-sizing:border-box;"></div>' +
+      '</div>' +
+      '<div style="font-size:11px;color:#888;margin-bottom:5px;">שורות:</div>' +
+      lineRows +
+      '<button onclick="var c=document.querySelector(\'.eq-row:last-child\');if(c){var n=c.cloneNode(true);n.querySelectorAll(\'input\').forEach(function(i){i.value=\'\'});c.parentNode.insertBefore(n,c.nextSibling);}" style="width:100%;padding:8px;background:none;border:2px dashed #0d47a1;border-radius:8px;color:#0d47a1;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px;">+ שורה</button>' +
+      '<div style="margin-bottom:8px;"><div style="font-size:11px;color:#888;margin-bottom:3px;">פרטים (Details)</div><input id="eqDetails" value="'+(d.Details||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:8px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;direction:rtl;box-sizing:border-box;"></div>' +
+      '<div style="margin-bottom:12px;"><div style="font-size:11px;color:#888;margin-bottom:3px;">הערות (Comments)</div><input id="eqComments" value="'+(d.Comments||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:8px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;direction:rtl;box-sizing:border-box;"></div>' +
+      '<button id="editSaveBtn" onclick="_saveEditedQuote()" style="width:100%;padding:13px;background:#0d47a1;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">💾 שמור ושלח PDF</button>' +
+      '<div style="font-size:10px;color:#888;text-align:center;margin-top:5px;">עדכון כספית + גיליון → PDF ל-yanivberg@icloud.com</div>';
+    return;
+  }
+
+  // ── New quote mode (existing form) ─────────────────────────────────────
+  var quoteToggle = toggleHtml;
   var sorted = _caspitContacts.slice().sort(function(a,b){ return (a.Name||'').localeCompare(b.Name||''); });
   var opts = '<option value="">— Select Caspit contact —</option>';
   sorted.forEach(function(c) {
@@ -5238,7 +5386,7 @@ function _renderCaspitQuoteForm() {
 
   // Load all clients from Clients sheet via getClients&full=1
   var clientOpts = '<option value="">⏳ Loading…</option>';
-  body.innerHTML =
+  body.innerHTML = quoteToggle +
     '<div style="margin-bottom:10px;">' +
       '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">Sheet Client</label>' +
       '<select id="caspitQuoteSheetClient" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;box-sizing:border-box;" onchange="_autoMatchCaspitClient()">' + clientOpts + '</select>' +
