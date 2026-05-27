@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v721</title>
+<title>י.ב אחזקות — v724</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v721
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v724
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v721 · 17/05/2026
+v724 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v721</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v724</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2050,7 +2050,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw60mYx1WRGYO0YYsMSMX6Vny_mtcHWpLD1QFioPZlX2y4VXwLVWbSoia1Xx5hgQZ76Og/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbygtx2in8TBmF4BmsXjx-4M7Ut68PbkIEwT5Atskom5z9Igs4eM0vC-5CUUuBtBZqlfoQ/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -3066,9 +3066,9 @@ function renderProjectBtns() {
       '<div style="border-top:2px solid rgba(0,0,0,0.12);padding-top:10px;margin-top:4px;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
           '<span style="font-size:11px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">💰 הוצאות</span>' +
-          '<button onclick="event.stopPropagation();toggleExpensePanel('+i+')" style="background:rgba(0,0,0,0.1);border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;">פתח ▾</button>' +
+          '<button onclick="event.stopPropagation();toggleExpensePanel('+i+')" style="background:rgba(0,0,0,0.1);border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;">'+(p._expOpen?'סגור ▴':'פתח ▾')+'</button>' +
         '</div>' +
-        '<div id="expPanel-'+i+'" style="display:none;">' +
+        '<div id="expPanel-'+i+'" style="display:'+(p._expOpen?'block':'none')+';">' +
           '<div id="expList-'+i+'"><div style="font-size:11px;color:rgba(0,0,0,0.4);padding:4px 0;">⏳ טוען...</div></div>' +
           '<div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;">' +
             '<select id="expCat-'+i+'" style="padding:6px 8px;border:1.5px solid rgba(0,0,0,0.2);border-radius:7px;font-size:12px;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.7);flex:1;">' +
@@ -3100,6 +3100,10 @@ function renderProjectBtns() {
     '</div>';
   }
   container.innerHTML = html;
+  // Restore open expense panels
+  projects.forEach(function(p, idx) {
+    if (p._expOpen) _loadExpenses(idx);
+  });
 }
 
 function toggleNote(i) { projects[i].noteOpen = !projects[i].noteOpen; reRender(); if (projects[i].noteOpen) setTimeout(function() { var el = document.getElementById('noteInp-'+i); if(el) el.focus(); }, 60); }
@@ -3176,7 +3180,9 @@ function toggleExpensePanel(i) {
   var panel = document.getElementById('expPanel-'+i);
   var btn   = panel ? panel.previousElementSibling.querySelector('button') : null;
   if (!panel) return;
-  if (panel.style.display === 'none') {
+  var isOpen = panel.style.display !== 'none';
+  if (projects[i]) projects[i]._expOpen = !isOpen;
+  if (!isOpen) {
     panel.style.display = 'block';
     if (btn) btn.textContent = 'סגור ▴';
     _loadExpenses(i);
@@ -5270,18 +5276,14 @@ function _renderQuoteList(docs, filter) {
 function _selectQuoteByIdx(idx) {
   var d = _quoteSearchResults[idx]; if (!d) return;
   var trcCode = d.TrxCode || d.DocumentId || '';
+  var number  = d.Number  || '';
   var loadingEl = document.getElementById('editQuoteFormArea');
-  if (loadingEl) loadingEl.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary);padding:8px 0;">⏳ טוען '+(d.Number||'')+'...</div>';
-  if (!trcCode) {
-    _editQuoteDoc = d;
-    _renderQuoteList(_quoteSearchResults.concat(_recentQuotes||[]).filter(function(x,i,a){return a.indexOf(x)===i;}), (document.getElementById('editQuoteSearch')||{}).value||'');
-    _renderEditForm(d);
-    return;
-  }
-  fetch(SHEETS_URL + '?action=getQuoteDetail&docId=' + encodeURIComponent(trcCode) + '&_t=' + Date.now())
+  if (loadingEl) loadingEl.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary);padding:8px 0;">⏳ טוען '+(number||'')+'...</div>';
+  // Always pass both docId AND number — Worker tries all id formats then Number fallback
+  fetch(SHEETS_URL + '?action=getQuoteDetail&docId=' + encodeURIComponent(trcCode) + '&number=' + encodeURIComponent(number) + '&_t=' + Date.now())
   .then(function(r){return r.json();}).then(function(resp){
-    var doc = (resp && resp.rawResponse) ? resp.rawResponse : resp;
-    if (!doc || doc.ok === false || doc.error) doc = d; // fallback to list data
+    var doc = (resp && resp.rawResponse) ? resp.rawResponse : (resp && !resp.error && !resp.ok === false ? resp : null);
+    if (!doc) doc = d; // fallback to list data
     _editQuoteDoc = doc;
     _renderQuoteList(_recentQuotes||[], (document.getElementById('editQuoteSearch')||{}).value||'');
     _renderEditForm(doc);
