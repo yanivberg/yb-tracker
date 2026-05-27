@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v725</title>
+<title>י.ב אחזקות — v727</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v725
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v727
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v725 · 17/05/2026
+v727 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v725</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v727</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2050,7 +2050,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbySTVnIVVgKpVSoU7kN4VZxIjA0M0i923mrRKptcxFrETUHuH1MkF2M12I9qoQMInxAAA/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwab0p-Bv0zGYE86kBqnbA5MiOvJ3uxeMC-VdVyuJgLs3Nz63wXS5ZwriV3P8NXzeZTXw/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -5275,12 +5275,15 @@ function _renderQuoteList(docs, filter) {
 
 function _selectQuoteByIdx(idx) {
   var d = _quoteSearchResults[idx]; if (!d) return;
-  var trcCode = d.TrxCode || d.DocumentId || '';
-  var number  = d.Number  || '';
+  // TrxCode = accounting category (e.g. "הכנסות/מכירות") — NOT the doc path id
+  // DocumentId is the numeric id → path format is "doc" + DocumentId
+  var rawDocId = d.DocumentId || '';
+  var docId = rawDocId ? 'doc' + rawDocId : '';
+  var number = d.Number || '';
   var loadingEl = document.getElementById('editQuoteFormArea');
   if (loadingEl) loadingEl.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary);padding:8px 0;">⏳ טוען '+(number||'')+'...</div>';
-  // Always pass both docId AND number — Worker tries all id formats then Number fallback
-  fetch(SHEETS_URL + '?action=getQuoteDetail&docId=' + encodeURIComponent(trcCode) + '&number=' + encodeURIComponent(number) + '&_t=' + Date.now())
+  // Pass docId (doc+DocumentId) and number — Worker tries all formats + Number fallback
+  fetch(SHEETS_URL + '?action=getQuoteDetail&docId=' + encodeURIComponent(docId) + '&number=' + encodeURIComponent(number) + '&_t=' + Date.now())
   .then(function(r){return r.json();}).then(function(resp){
     var doc = (resp && resp.rawResponse) ? resp.rawResponse : (resp && !resp.error && !resp.ok === false ? resp : null);
     if (!doc) doc = d; // fallback to list data
@@ -5325,7 +5328,7 @@ function _renderQuoteList(docs, filter) {
     var dt = d.Date ? d.Date.slice(0,10).split('-').reverse().join('/') : '';
     var tot = Math.round(d.Total||0).toLocaleString();
     var lines = (d.DocumentLines||[]).map(function(l){return l.ProductName||l.Details||'';}).filter(Boolean).join(', ');
-    var sel = _editQuoteDoc && _editQuoteDoc.TrxCode === d.TrxCode;
+    var sel = _editQuoteDoc && _editQuoteDoc.DocumentId && _editQuoteDoc.DocumentId === d.DocumentId;
     return '<div onclick="event.stopPropagation();_selectQuoteRow(\''+d.TrxCode+'\',\''+d.Number+'\')" style="padding:10px 12px;border:'+(sel?'2px solid var(--color-border-info)':'0.5px solid var(--color-border-tertiary)')+';border-radius:var(--border-radius-md);margin-bottom:6px;cursor:pointer;background:'+(sel?'var(--color-background-info)':'var(--color-background-primary)')+';">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;">'+
         '<span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">'+d.Number+'</span>'+
