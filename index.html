@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v729</title>
+<title>י.ב אחזקות — v730</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v729
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v730
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v729 · 17/05/2026
+v730 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v729</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v730</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -5349,7 +5349,7 @@ function _renderEditForm(d) {
   area.innerHTML =
     '<div style="background:var(--color-background-info);border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--color-text-info);">✏️ <strong>'+d.Number+'</strong> · '+(d.CustomerBusinessName||'')+'</div>' +
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">' +
-      '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">לקוח</div><input id="eqContact" value="'+(d.CustomerId||'')+'" style="width:100%;padding:8px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
+      '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">לקוח</div><input id="eqContact" value="'+(d.CustomerBusinessName||d.CustomerId||'')+'" style="width:100%;padding:8px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;box-sizing:border-box;"><input type="hidden" id="eqContactId" value="'+(d.CustomerId||'')+'"></div>' +
       '<div><div style="font-size:10px;color:#888;margin-bottom:3px;">תאריך</div><input id="eqDate" type="date" value="'+dateVal+'" style="width:100%;padding:8px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;box-sizing:border-box;"></div>' +
     '</div>' +
     '<div style="font-size:10px;color:#888;margin-bottom:5px;">שורות (תיאור · כמות · מחיר)</div>' +
@@ -5372,7 +5372,7 @@ function _saveEditedQuote() {
     var price= parseFloat((row.querySelector('.eq-price')||{}).value||0);
     if (name || price) newLines.push({Number:i+1, ProductName:name, Qty:qty, UnitPrice:price, ExtendedPrice:Math.round(qty*price*100)/100, ChargeVAT:true});
   });
-  var custId   = (document.getElementById('eqContact')||{}).value||'';
+  var custId   = (document.getElementById('eqContactId')||{}).value || (document.getElementById('eqContact')||{}).value||'';
   var details  = (document.getElementById('eqDetails')||{}).value||'';
   var comments = (document.getElementById('eqComments')||{}).value||'';
   var date     = (document.getElementById('eqDate')||{}).value||'';
