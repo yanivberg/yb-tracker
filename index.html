@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v728</title>
+<title>י.ב אחזקות — v729</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v728
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v729
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v728 · 17/05/2026
+v729 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v728</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v729</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2874,10 +2874,11 @@ function tick() {
   if (drivingEl) drivingEl.textContent = formatMs(dispDriving);
   var drivingRow = document.getElementById('drivingRow');
   if (drivingRow) drivingRow.style.display = (dispDriving > 0 || drivingStart) ? 'flex' : 'none';
-  // Don't re-render if user is typing in a note input
+  // Don't re-render if user is typing in a note or expense input
   var focusedEl = document.activeElement;
   var isTypingNote = focusedEl && focusedEl.id && focusedEl.id.indexOf('noteInp-') === 0;
-  if (isTypingNote) {
+  var isTypingExpense = focusedEl && focusedEl.closest && !!focusedEl.closest('[id^="expPanel-"]');
+  if (isTypingNote || isTypingExpense) {
     for (var i = 0; i < projects.length; i++) {
       var p = projects[i]; var ms = p.totalMs;
       if (p.active && p.activeStart) ms += now - p.activeStart;
