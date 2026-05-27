@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v735</title>
+<title>י.ב אחזקות — v736</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v735
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v736
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v735 · 17/05/2026
+v736 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v735</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v736</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -4939,10 +4939,14 @@ function _renderCaspitInvoiceTab() {
       '</div>';
     groups[client].forEach(function(job) {
       var sel = !!_caspitSelected[job.id];
+      var jobInc = job.income || 0;
+      var priceTag = jobInc > 0
+        ? '<span style="color:#2e7d32;font-weight:700;">₪' + Math.round(jobInc).toLocaleString() + '</span>'
+        : '<input id="cprice' + job._idx + '" type="number" onclick="event.stopPropagation()" placeholder="₪ הזן מחיר" style="width:90px;padding:3px 6px;border:1.5px solid #e53935;border-radius:6px;font-size:12px;font-family:Heebo,sans-serif;color:#111;background:#fff5f5;">';
       html += '<div id="cjr' + job._idx + '" onclick="_caspitTap(' + job._idx + ')" style="padding:12px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:12px;cursor:pointer;background:' + (sel?'#e8f0fe':'#fff') + ';">' +
         '<div id="cdot' + job._idx + '" style="width:24px;height:24px;border-radius:50%;border:2px solid ' + (sel?'#0d47a1':'#ccc') + ';background:' + (sel?'#0d47a1':'#fff') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;color:#fff;font-weight:700;">' + (sel?'✓':'') + '</div>' +
         '<div style="flex:1;"><div style="font-size:14px;font-weight:700;color:#111;">' + (job.desc||job.id) + '</div>' +
-        '<div style="font-size:12px;color:#888;">' + (job.po?'מ.רכש: '+job.po+' · ':'') + '₪' + job.gp.toLocaleString() + '</div></div></div>';
+        '<div style="font-size:12px;color:#888;margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">' + (job.po?'<span>מ.רכש: '+job.po+'</span>':'') + priceTag + '</div></div></div>';
     });
     html += '</div>';
   });
@@ -4969,6 +4973,23 @@ function _caspitTap(idx) {
 function createCaspitInvoice() {
   var selectedJobs = Object.values(_caspitSelected);
   if (!selectedJobs.length) { showToast('בחר לפחות עבודה אחת'); return; }
+
+  // Apply any manually-entered prices (for jobs with income=0)
+  selectedJobs.forEach(function(job) {
+    if (!job.income) {
+      var inp = document.getElementById('cprice' + job._idx);
+      if (inp) {
+        var v = parseFloat(inp.value) || 0;
+        if (v > 0) job.income = v;
+      }
+    }
+  });
+  // Validate: warn if any selected job still has no price
+  var zeroPriceJobs = selectedJobs.filter(function(j){ return !j.income; });
+  if (zeroPriceJobs.length) {
+    showToast('⚠️ הזן מחיר ל: ' + zeroPriceJobs.map(function(j){ return j.id; }).join(', '));
+    return;
+  }
 
   var btn = document.getElementById('caspitCreateBtn');
   btn.textContent = '⏳ יוצר…'; btn.disabled = true;
