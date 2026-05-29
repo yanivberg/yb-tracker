@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v743</title>
+<title>י.ב אחזקות — v744</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v743
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v744
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v743 · 17/05/2026
+v744 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v743</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v744</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6722,8 +6722,10 @@ function submitPreProjectSurvey() {
 
   // Save lesson learned (async, non-blocking)
   if (!job._forQuotation) {
-    var proj = projects.filter(function(p){ return (p.jobId||'') === (job.id||'') || (p.title||p.name||'') === (job.desc||''); })[0];
-    if (proj) _saveLessonFromSurvey(proj, survey, proj._totalMs||0);
+    // Use job directly — project not yet in projects[] at this point
+    var lessonJob = { jobId:job.id||'', client:job.client||'', category:job.category||'',
+      title:job.desc||'', name:job.desc||'', estHours:parseFloat(job.hours||0) };
+    _saveLessonFromSurvey(lessonJob, survey, 0);
   }
 
   document.getElementById('preProjectSurveyOverlay').style.display = 'none';
