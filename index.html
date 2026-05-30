@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v753</title>
+<title>י.ב אחזקות — v754</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v753
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v754
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v753 · 17/05/2026
+v754 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v753</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v754</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2964,6 +2964,7 @@ function renderProjectBtns() {
         '<div style="border-radius:14px;overflow:hidden;margin-bottom:10px;box-shadow:0 3px 12px rgba(0,0,0,0.15);filter:grayscale(1);opacity:0.75;">' +
           '<div style="background:' + headerBg + ';padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">' +
             '<span style="font-size:13px;font-weight:900;color:#fff;">' + (p.client||'—') + '</span>' +
+            (jobId ? '<span style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.65);background:rgba(0,0,0,0.2);padding:2px 7px;border-radius:6px;">' + jobId + '</span>' : '') +
           '</div>' +
           '<div style="background:' + bodyBg + ';padding:8px 12px;">' +
             '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
@@ -3088,6 +3089,7 @@ function renderProjectBtns() {
       '<div style="background:' + headerBg + ';padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">' +
         '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0;">' +
           '<span style="font-size:18px;font-weight:900;color:#fff;letter-spacing:0.03em;white-space:nowrap;">' + (p.active ? '● ' : '') + (p.client || '—') + '</span>' +
+            (jobId ? '<span style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.65);background:rgba(0,0,0,0.2);padding:2px 7px;border-radius:6px;flex-shrink:0;">' + jobId + '</span>' : '') +
           (po ? '<span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.85);background:rgba(0,0,0,0.2);border-radius:6px;padding:2px 8px;white-space:nowrap;">' + po + '</span>' : '') +
           (isMin ? '<span style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.9);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:4px;">' + displayName + '</span>' : '') +
           (isMin ? '<span style="font-size:13px;font-weight:900;color:#fff;background:rgba(0,0,0,0.25);border-radius:6px;padding:2px 8px;white-space:nowrap;" id="ptime-'+i+'">' + formatMs(todayMs) + '</span>' : '') +
