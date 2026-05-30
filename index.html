@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v759</title>
+<title>י.ב אחזקות — v761</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -496,7 +496,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v759
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v761
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -505,7 +505,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v759 · 17/05/2026
+v761 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1147,7 +1147,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v759</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v761</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1318,13 +1318,22 @@ SHEET SYNC
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <div style="font-weight:900;font-size:17px;color:#0d47a1;">💼 Caspit <span style="font-size:11px;font-weight:400;color:#aaa;">v300</span></div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <button onclick="openNewClientModal()" style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;color:#2e7d32;font-weight:700;min-width:44px;min-height:44px;">🏢 +</button>
-          <button onclick="testCaspitProxy()" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;color:#666;min-width:44px;min-height:44px;">🔌</button>
+<button onclick="testCaspitProxy()" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;color:#666;min-width:44px;min-height:44px;">🔌</button>
           <button onclick="this.closest('#caspitOverlay').style.display='none';localStorage.removeItem('ybd_caspit_state');" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
     </div>
     <div style="overflow-y:auto;flex:1;">
+      <!-- New Client -->
+      <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;">
+        <button onclick="openNewClientModal()" style="width:100%;background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">
+          <span style="font-size:22px;flex-shrink:0;">🏢</span>
+          <div style="text-align:right;">
+            <div style="font-size:14px;font-weight:900;color:#2e7d32;">Create New Client</div>
+            <div style="font-size:11px;color:#4caf50;margin-top:1px;">לקוח חדש</div>
+          </div>
+        </button>
+      </div>
       <!-- Invoice / Receipt accordion -->
       <div style="border-bottom:1px solid #f0f0f0;">
         <button id="acc-hdr-invoice" onclick="toggleCaspitAccordion('invoice')" style="width:100%;padding:14px 20px;background:none;border:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">
@@ -1357,14 +1366,7 @@ SHEET SYNC
         </button>
         <div id="caspitBody-txlog" style="display:none;padding:0 20px 16px;direction:rtl;"></div>
       </div>
-      <!-- Lessons Learned accordion -->
-      <div style="border-bottom:1px solid #f0f0f0;">
-        <button id="acc-hdr-lessons" onclick="toggleCaspitAccordion('lessons')" style="width:100%;padding:14px 20px;background:none;border:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">
-          <span style="font-size:14px;font-weight:900;color:inherit;">📚 Lessons Learned</span>
-          <span id="acc-arrow-lessons" style="font-size:13px;color:#aaa;">▼</span>
-        </button>
-        <div id="caspitBody-lessons" style="display:none;padding:0 20px 16px;direction:rtl;"></div>
-      </div>
+
     </div>
     <div style="padding:8px 16px 0;border-top:1px solid #eee;flex-shrink:0;">
       <div id="caspitNotesArea" style="margin-bottom:8px;">
