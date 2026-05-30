@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v761</title>
+<title>י.ב אחזקות — v763</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -460,7 +460,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <span style="font-size:24px;flex-shrink:0;">📓</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Work Log</span></div>
       <div onclick="closeSetupDrawer();_openWeeklyPlanningDrawer();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📅</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1565c0;">Weekly Planning</div><div style="font-size:11px;color:#888;margin-top:1px;">תכנון שבועי</div></div></div>
-      <div onclick="closeSetupDrawer();openCaspitOverlay('lessons');" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+      <div onclick="closeSetupDrawer();openLessonsOverlay();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📚</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#333;">Lessons Learned</div><div style="font-size:11px;color:#888;margin-top:1px;">לקחים מפרויקטים</div></div></div>
       <div onclick="closeSetupDrawer();openCaspitOverlay();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">⚠️</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">Account Manager</span></div>
@@ -496,7 +496,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v761
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v763
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -505,7 +505,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v761 · 17/05/2026
+v763 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1147,7 +1147,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v761</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v763</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -5293,11 +5293,15 @@ function _aiPriceSetW(w) {
 }
 function _getAIPriceSuggestion() {
   var res = document.getElementById('aiPriceResult'); if (!res) return;
-  var descEl = document.querySelector('.cq-desc');
-  var desc = descEl ? descEl.value.trim() : '';
+  // Collect desc from all .cq-desc fields (concatenate non-empty ones)
+  var descEls = document.querySelectorAll('.cq-desc');
+  var desc = '';
+  descEls.forEach(function(el){ var v=(el.value||'').trim(); if(v) desc += (desc?', ':'')+v; });
+  // Fallback: use prefill description
+  if (!desc && _quotePrefill && _quotePrefill.desc) desc = _quotePrefill.desc;
   var client = (document.getElementById('caspitQuoteSheetClient')||{}).value || '';
   var hours = (_quotePrefill && _quotePrefill.hours) ? _quotePrefill.hours : 0;
-  if (!desc && !client) { res.innerHTML = '<div style="color:#c62828;font-size:12px;">הכנס תיאור עבודה תחילה</div>'; return; }
+  if (!desc) { res.innerHTML = '<div style="color:#c62828;font-size:12px;">⚠️ הכנס תיאור עבודה בשורות הפרויקט תחילה</div>'; return; }
   res.innerHTML = '<div style="font-size:12px;color:#888;padding:8px 0;direction:rtl;">⏳ מחשב מחיר... (10-20 שניות)</div>';
   fetch(SHEETS_URL + '?action=getAIPriceSuggestion' +
     '&desc=' + encodeURIComponent(desc) +
@@ -6989,6 +6993,53 @@ function submitQuotationSurvey() {
 // ── Lessons Learned tab ───────────────────────────────────────────────────
 var _lessonsCache = null, _lessonsCat = '';
 
+function openLessonsOverlay() {
+  var ov = document.getElementById('lessonsOverlay');
+  if (!ov) return;
+  ov.style.display = 'flex';
+  _renderLessonsInOverlay('');
+}
+
+function _renderLessonsInOverlay(cat) {
+  var body = document.getElementById('lessonsOverlayBody');
+  if (!body) return;
+  cat = cat || _lessonsCat || '';
+  _lessonsCat = cat;
+
+  var cats = ['','גגות','מסגרות','איטום','חשמל','אינסטלציה','צבע','תחזוקה כללית','נגרות'];
+  body.innerHTML =
+    '<div style="padding:12px 10px;">' +
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">' +
+      cats.map(function(c){
+        var active = c === cat;
+        return '<button onclick="_renderLessonsInOverlay(\'' + c + '\')" style="padding:5px 12px;border-radius:20px;border:1.5px solid '+(active?'#0d47a1':'#ddd')+';background:'+(active?'#0d47a1':'#fff')+';color:'+(active?'#fff':'#555')+';font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">' + (c||'הכל') + '</button>';
+      }).join('') +
+    '</div>' +
+    '<div id="lessonsOverlayList"><div style="text-align:center;padding:20px;color:#aaa;">⏳ טוען...</div></div>' +
+    '</div>';
+
+  fetch(SHEETS_URL + '?action=getLessons&cat=' + encodeURIComponent(cat) + '&limit=30&_t=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(lessons) {
+      var lb = document.getElementById('lessonsOverlayList');
+      if (!lb) return;
+      if (!Array.isArray(lessons) || !lessons.length) {
+        lb.innerHTML = '<div style="color:#888;padding:20px;text-align:center;direction:rtl;">אין לקחים עדיין</div>'; return;
+      }
+      lb.innerHTML = lessons.map(function(l){
+        return '<div style="background:#f8f9fa;border-radius:12px;padding:12px 14px;margin-bottom:8px;direction:rtl;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">' +
+            '<span style="font-size:12px;font-weight:900;color:#0d47a1;">' + (l.client||'') + '</span>' +
+            '<span style="font-size:10px;color:#aaa;">' + (l.date||'') + '</span>' +
+          '</div>' +
+          '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:4px;">' + (l.title||l.desc||'') + '</div>' +
+          (l.note ? '<div style="font-size:11px;color:#555;">' + l.note + '</div>' : '') +
+          (l.category ? '<div style="margin-top:4px;"><span style="font-size:10px;background:#e3f2fd;color:#0d47a1;padding:2px 8px;border-radius:10px;">' + l.category + '</span></div>' : '') +
+        '</div>';
+      }).join('');
+    }).catch(function(){ var lb=document.getElementById('lessonsOverlayList'); if(lb) lb.innerHTML='<div style="color:#c62828;padding:10px;">שגיאה בטעינה</div>'; });
+}
+
 function _renderLessonsTab(cat) {
   var body = document.getElementById('caspitBody-lessons');
   if (!body) return;
@@ -8159,6 +8210,18 @@ function showToast(msg) {
       <button onclick="submitLogin()" id="loginBtn" style="width:100%;padding:14px;background:#0d47a1;border:none;border-radius:12px;font-size:16px;font-weight:900;color:#fff;cursor:pointer;font-family:Heebo,sans-serif;box-shadow:0 4px 12px rgba(13,71,161,0.35);">Sign In</button>
     </div>
     <div style="text-align:center;margin-top:16px;font-size:11px;color:#aaa;">YB Tracker Admin Portal</div>
+  </div>
+</div>
+
+
+<!-- ── Lessons Learned Overlay ────────────────────────────────────── -->
+<div id="lessonsOverlay" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10015;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:22px 22px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,12px);">
+    <div style="padding:14px 16px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:1;border-radius:22px 22px 0 0;">
+      <div style="font-size:17px;font-weight:900;color:#0d47a1;">📚 Lessons Learned</div>
+      <button onclick="document.getElementById('lessonsOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+    </div>
+    <div id="lessonsOverlayBody" style="padding:0 4px;direction:rtl;"></div>
   </div>
 </div>
 
