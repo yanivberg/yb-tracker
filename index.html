@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v758</title>
+<title>י.ב אחזקות — v759</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -440,8 +440,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   <div id="setupDrawerBackdrop" onclick="closeSetupDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:10000;"></div>
   <div id="setupDrawer" style="display:none;position:fixed;top:0;left:0;bottom:0;width:100%;max-width:100%;z-index:10001;flex-direction:column;background:#fff;border-radius:0;overflow:hidden;">
     <div style="flex:1;overflow-y:auto;padding:12px 12px 0;">
-      <div onclick="closeSetupDrawer();openAddJobModal();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
-        <span style="font-size:24px;flex-shrink:0;">+</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#111;">Add Project to Sheet</span></div>
+
       <div id="drawerPreTimerItem" onclick="closeSetupDrawer();openPreTimerPicker();" style="background:#f8f9fa;border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;justify-content:flex-start;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <svg width="52" height="52" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="44" r="28" stroke="#111" stroke-width="5"/><line x1="40" y1="44" x2="40" y2="24" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="44" x2="54" y2="54" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="34" y1="8" x2="46" y2="8" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="8" x2="40" y2="16" stroke="#111" stroke-width="5" stroke-linecap="round"/></svg>
         <span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">Timer</span>
@@ -450,8 +449,6 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <span style="font-size:24px;flex-shrink:0;">📋</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a56db;">Pick from Open Tasks</span></div>
       <div onclick="closeSetupDrawer();fetchPendingQuote();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📋</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#b07d00;">Pending Quote Projects</span></div>
-      <div onclick="closeSetupDrawer();openNewClientModal();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
-        <span style="font-size:24px;flex-shrink:0;">➕</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#555;">Create New Client</span></div>
 
       <div onclick="closeSetupDrawer();fetchGrossProfitSummary();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">💰</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#2e7d32;">Gross Profit — To Invoice</span></div>
@@ -463,6 +460,8 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         <span style="font-size:24px;flex-shrink:0;">📓</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Work Log</span></div>
       <div onclick="closeSetupDrawer();_openWeeklyPlanningDrawer();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📅</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1565c0;">Weekly Planning</div><div style="font-size:11px;color:#888;margin-top:1px;">תכנון שבועי</div></div></div>
+      <div onclick="closeSetupDrawer();openCaspitOverlay('lessons');" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">📚</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#333;">Lessons Learned</div><div style="font-size:11px;color:#888;margin-top:1px;">לקחים מפרויקטים</div></div></div>
       <div onclick="closeSetupDrawer();openCaspitOverlay();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">⚠️</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">Account Manager</span></div>
       <div onclick="closeSetupDrawer();openAIAdvisor();" style="background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;box-shadow:0 4px 12px rgba(13,71,161,0.3);">
@@ -497,7 +496,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v758
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v759
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +505,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v758 · 17/05/2026
+v759 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1147,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v758</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v759</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1319,6 +1318,7 @@ SHEET SYNC
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <div style="font-weight:900;font-size:17px;color:#0d47a1;">💼 Caspit <span style="font-size:11px;font-weight:400;color:#aaa;">v300</span></div>
         <div style="display:flex;gap:8px;align-items:center;">
+          <button onclick="openNewClientModal()" style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;color:#2e7d32;font-weight:700;min-width:44px;min-height:44px;">🏢 +</button>
           <button onclick="testCaspitProxy()" style="background:#f5f5f5;border:1px solid #ddd;border-radius:6px;padding:8px 12px;font-size:12px;cursor:pointer;color:#666;min-width:44px;min-height:44px;">🔌</button>
           <button onclick="this.closest('#caspitOverlay').style.display='none';localStorage.removeItem('ybd_caspit_state');" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
