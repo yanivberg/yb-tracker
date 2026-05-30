@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v756</title>
+<title>י.ב אחזקות — v758</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v756
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v758
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v756 · 17/05/2026
+v758 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v756</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v758</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1577,7 +1577,7 @@ SHEET SYNC
     </div>
     <div style="margin-bottom:14px;">
       <div style="font-size:13px;color:#888;margin-bottom:6px;">Short Description</div>
-      <input id="addJobDesc" type="text" placeholder="Project description..." maxlength="100" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;">
+      <input id="addJobDesc" type="text" placeholder="Project description..." maxlength="100" oninput="_guessCategory(this.value)" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;">
     </div>
     <div style="margin-bottom:14px;">
       <div style="font-size:13px;color:#888;margin-bottom:6px;">Status</div>
@@ -2702,6 +2702,36 @@ function calcAddJobIncome() {
   if (totalEl) totalEl.textContent = '₪' + total.toLocaleString();
   var formulaEl = document.getElementById('addJobIncomeFormula');
   if (formulaEl) formulaEl.textContent = formula;
+}
+
+function _guessCategory(desc) {
+  if (!desc || desc.length < 3) return;
+  var d = desc.toLowerCase();
+  var rules = [
+    ['גגות',           ['גג','פח','אטימה','גגון','גגון','רעפ','מרזב']],
+    ['מסגרות',         ['מסגר','ברזל','פלדה','קונסטרוקצ','מתכת','סורג','שער','גדר','מעקה','פרופיל','קולב','כן','מדף','ריתוך','ריתכ']],
+    ['איטום',          ['איטום','אטימה','נזילה','רטיבות','הדבקה','ממברנ']],
+    ['חשמל',           ['חשמל','תאורה','שקע','לוח','כבל','חיווט','נורה','מצלמ','אזעק','מיזוג','מזגן']],
+    ['אינסטלציה',      ['אינסטל','צנרת','ביוב','מים','שפכ','ניקוז','שסתום','ברז','ברכה','שירותים','כיור','אסלה']],
+    ['צבע',            ['צבע','צביעה','טיח','סיוד','גב']],
+    ['נגרות',          ['נגר','דלת','חלון','ארון','ריצוף','פרקט','ענף','ארונ']],
+    ['תחזוקה כללית',  ['תיקון','החלפ','שבור','תחזוק','ניקוי','פינוי','הזזה','ריסוס','הרכב','פירוק','בניה','בנייה','קיר','רצפ','תקרה','מחיצ','גבס']]
+  ];
+  var sel = document.getElementById('addJobCategory');
+  if (!sel || sel.value) return; // don't overwrite if already set
+  for (var i = 0; i < rules.length; i++) {
+    var cat = rules[i][0], words = rules[i][1];
+    for (var j = 0; j < words.length; j++) {
+      if (d.indexOf(words[j]) !== -1) {
+        sel.value = cat;
+        sel.style.background = '#e8f5e9';
+        sel.style.border = '1.5px solid #4caf50';
+        setTimeout(function(){ sel.style.background=''; sel.style.border=''; }, 1500);
+        updateAddJobBtn();
+        return;
+      }
+    }
+  }
 }
 
 function updateAddJobBtn() { var category = document.getElementById('addJobCategory').value; var price = document.getElementById('addJobPrice').value; var qty = document.getElementById('addJobQty').value; var hours = document.getElementById('addJobHours').value; var po = document.getElementById('addJobPO').value.trim(); var allFilled = category && price && qty && hours && po; var anyFilled = category || price || qty || hours || po; var btn = document.getElementById('addJobSubmitBtn'); var msg = document.getElementById('addJobStatusMsg'); var hint = document.getElementById('addJobStatusHint'); var sel = document.getElementById('addJobStatus'); var restrictedStatuses = ['ממתין לביצוע', 'בתהליך ביצוע', 'בוצע']; for (var i = 0; i < sel.options.length; i++) { var opt = sel.options[i]; if (restrictedStatuses.indexOf(opt.value) !== -1) { opt.disabled = !allFilled; } } if (!allFilled && restrictedStatuses.indexOf(sel.value) !== -1) { sel.value = 'ממתין להצעה'; } if (hint) hint.style.display = allFilled ? 'none' : 'block'; if (allFilled) { btn.textContent = '✓ Add to Sheet & Day'; btn.style.background = '#111'; msg.style.display = 'none'; } else if (anyFilled) { btn.textContent = '💾 Save to Sheet Only'; btn.style.background = '#555'; msg.style.display = 'block'; msg.style.background = '#fff8e1'; msg.style.border = '1px solid #f0c040'; msg.style.color = '#7a5c00'; msg.textContent = '⚠️ Some fields missing — project will be saved to sheet but not added to day. Fill all fields to add to day.'; } else { btn.textContent = '💾 Save to Sheet Only'; btn.style.background = '#555'; msg.style.display = 'block'; msg.style.background = '#f5f5f5'; msg.style.border = '1px solid #ddd'; msg.style.color = '#888'; msg.textContent = 'Fill category, price, quantity, estimated hours and PO number to add the project to day.'; } }
