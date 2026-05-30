@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v754</title>
+<title>י.ב אחזקות — v756</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -497,7 +497,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v754
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v756
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -506,7 +506,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v754 · 17/05/2026
+v756 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1148,7 +1148,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v754</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v756</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2050,7 +2050,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbx3eqzuj2IEW_VP9aYC2sKAwutrmlzpUgtmtL225PCJQnAq07LCIPnr5sSefzrgaEfMLw/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwZrzePG-XXJCvUTurLoCSwRVScSxIR4YzOkwcIERU4-zoh0u03vVVri8JFdStDgUI/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2201,10 +2201,10 @@ function promptProjectTitles(jobs, callback) {
 function addJobAsProject(job) {
   _doAddJobAsProject(job);
 }
-function _doAddJobAsProject(job) {
+function _doAddJobAsProject(job, expensesOn) {
   var name = job.desc;
   if (projects.find(function(p) { return p.jobId === job.id; })) { showToast('Job already added'); return; }
-  var proj = { name: name, title: job.title || name, client: job.client, jobId: job.id, jobClient: job.client, jobDateStart: null, estHours: job.hours || 0, jobPO: job.poNumber || job.po || '', jobPrice: job.price || 0, jobIncome: parseFloat(job.income) || 0, sessionNum: projects.length + 1, totalMs: 0, prevMs: 0, active: false, activeStart: null, done: false, notes: [], noteOpen: false, editOpen: false };
+  var proj = { name: name, title: job.title || name, client: job.client, jobId: job.id, jobClient: job.client, jobDateStart: null, estHours: job.hours || 0, jobPO: job.poNumber || job.po || '', jobPrice: job.price || 0, jobIncome: parseFloat(job.income) || 0, sessionNum: projects.length + 1, totalMs: 0, prevMs: 0, active: false, activeStart: null, done: false, notes: [], noteOpen: false, editOpen: false, _expensesOn: expensesOn || 'me' };
   projects.push(proj);
   saveClient(job.client);
   saveState();
@@ -2713,7 +2713,38 @@ function revertInvoiceStatus(project) { if (!SHEETS_URL || !project.jobId) retur
 function setJobStatus(project, status) { if (!SHEETS_URL || !project.jobId) return; fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client) + '&status=' + encodeURIComponent(status)).catch(function() {}); }
 
 function syncJobToSheets(project) { if (!SHEETS_URL || !project.jobId) return; var totalMs = project.totalMs + (project.prevMs || 0); if (project.active && project.activeStart) totalMs += Date.now() - project.activeStart; var hours = totalMs / 3600000; var today = new Date().toLocaleDateString('he-IL'); fetch(SHEETS_URL + '?action=getJobHours&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client)).then(function(r) { return r.text(); }).then(function(existing) { var existingHours = parseFloat(existing) || 0; var finalHours = Math.max(hours, existingHours); fetch(SHEETS_URL + '?action=updateJob&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client) + '&hours=' + finalHours.toFixed(4) + '&dateStart=' + encodeURIComponent(project.jobDateStart || today)).catch(function() {}); }).catch(function() { fetch(SHEETS_URL + '?action=updateJob&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client) + '&hours=' + hours.toFixed(4) + '&dateStart=' + encodeURIComponent(project.jobDateStart || today)).catch(function() {}); }); }
-function syncDoneJobToSheets(project) { if (!SHEETS_URL || !project.jobId) return; var hours = (project.totalMs + (project.prevMs || 0)) / 3600000; var today = new Date().toLocaleDateString('he-IL'); fetch(SHEETS_URL + '?action=getJobHours&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client)).then(function(r) { return r.text(); }).then(function(existing) { var existingHours = parseFloat(existing) || 0; var finalHours = Math.max(hours, existingHours); fetch(SHEETS_URL + '?action=updateJob&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client) + '&hours=' + finalHours.toFixed(4) + '&dateStart=' + encodeURIComponent(project.jobDateStart || today) + '&dateDone=' + encodeURIComponent(today)).catch(function() {}); }).catch(function() { fetch(SHEETS_URL + '?action=updateJob&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client) + '&hours=' + hours.toFixed(4) + '&dateStart=' + encodeURIComponent(project.jobDateStart || today) + '&dateDone=' + encodeURIComponent(today)).catch(function() {}); }); setJobStatus(project, 'בוצע'); }
+function syncDoneJobToSheets(project) {
+  if (!SHEETS_URL || !project.jobId) return;
+  var hours = (project.totalMs + (project.prevMs || 0)) / 3600000;
+  var today = new Date().toLocaleDateString('he-IL');
+  fetch(SHEETS_URL + '?action=getJobHours&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client))
+    .then(function(r) { return r.text(); })
+    .then(function(existing) {
+      var existingHours = parseFloat(existing) || 0;
+      var finalHours = Math.max(hours, existingHours);
+      fetch(SHEETS_URL + '?action=updateJob&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client) + '&hours=' + finalHours.toFixed(4) + '&dateStart=' + encodeURIComponent(project.jobDateStart || today) + '&dateDone=' + encodeURIComponent(today)).catch(function() {});
+    }).catch(function() {
+      fetch(SHEETS_URL + '?action=updateJob&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client) + '&hours=' + hours.toFixed(4) + '&dateStart=' + encodeURIComponent(project.jobDateStart || today) + '&dateDone=' + encodeURIComponent(today)).catch(function() {});
+    });
+  setJobStatus(project, 'בוצע');
+  // If expenses are on client — create separate expenses billing row
+  if (project._expensesOn === 'client' && project.jobId) {
+    _createClientExpenseRow(project);
+  }
+}
+
+function _createClientExpenseRow(project) {
+  fetch(SHEETS_URL + '?action=createExpenseRow' +
+    '&jobId=' + encodeURIComponent(project.jobId) +
+    '&client=' + encodeURIComponent(project.jobClient || project.client) +
+    '&title=' + encodeURIComponent(project.title || project.name || '') +
+    '&po=' + encodeURIComponent(project.jobPO || ''))
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if (d.ok && d.newJobId) showToast('✓ שורת הוצאות נוצרה: ' + d.newJobId);
+    else if (d.skipped) {} // no expenses, skip silently
+  }).catch(function(){});
+}
 
 function silentSaveProjectsShortcut() {
   var active = projects.filter(function(p) { return !p.done; });
@@ -2976,6 +3007,7 @@ function renderProjectBtns() {
               '<button onclick="event.stopPropagation();toggleProject('+i+')" style="background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:14px;font-weight:900;flex-shrink:0;cursor:pointer;-webkit-tap-highlight-color:transparent;">▶</button>' +
             '</div>' +
             (po ? '<div style="margin-bottom:6px;"><span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">' + po + '</span></div>' : '') +
+            (p._expensesOn === 'client' ? '<div style="margin-bottom:5px;"><span style="font-size:10px;font-weight:700;background:#ffebee;color:#c62828;padding:3px 8px;border-radius:6px;border:1px solid #ef9a9a;">💰 הוצאות → לקוח</span></div>' : (p._expensesOn === 'me' ? '<div style="margin-bottom:5px;"><span style="font-size:10px;font-weight:700;background:#e8f5e9;color:#2e7d32;padding:3px 8px;border-radius:6px;border:1px solid #a5d6a7;">💸 הוצאות → עלי</span></div>' : '')) +
             '<div style="border-top:1.5px solid rgba(0,0,0,0.12);padding-top:4px;">' +
               '<button onclick="event.stopPropagation();toggleSetupNotes('+i+')" style="background:none;border:none;width:100%;display:flex;align-items:center;justify-content:space-between;padding:4px 0;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
                 '<span style="font-size:10px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">📝 Notes' + (pausedNotes.length ? ' (' + pausedNotes.length + ')' : '') + '</span>' +
@@ -3044,8 +3076,9 @@ function renderProjectBtns() {
         chips += '</div>';
         return chips;
       })() +
-      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">' +
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">' +
         '<div style="font-size:32px;font-weight:900;color:#000;line-height:1.1;flex:1;">' + displayName + (p.done ? ' ✓' : '') + '</div>' +
+      (p._expensesOn === 'client' ? '<div style="margin-bottom:6px;"><span style="font-size:10px;font-weight:700;background:#ffebee;color:#c62828;padding:3px 8px;border-radius:6px;border:1px solid #ef9a9a;">💰 הוצאות → לקוח</span></div>' : (p._expensesOn === 'me' ? '<div style="margin-bottom:6px;"><span style="font-size:10px;font-weight:700;background:#e8f5e9;color:#2e7d32;padding:3px 8px;border-radius:6px;border:1px solid #a5d6a7;">💸 הוצאות → עלי</span></div>' : '')) +
         (!p.done ? '<button onclick="event.stopPropagation();openProjectAI('+i+')" style="background:#0d47a1;color:#fff;border:none;border-radius:10px;padding:5px 11px;font-size:11px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;white-space:nowrap;-webkit-tap-highlight-color:transparent;">💫 AI</button>' : '') +
       '</div>' +
       '<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px;">' +
@@ -3244,7 +3277,8 @@ function addExpense(i) {
   fetch(SHEETS_URL + '?action=addExpense&jobId=' + encodeURIComponent(p.jobId) +
     '&client=' + encodeURIComponent(p.jobClient||p.client||'') +
     '&date=' + today + '&category=' + encodeURIComponent(cat) +
-    '&desc=' + encodeURIComponent(desc) + '&amount=' + amt)
+    '&desc=' + encodeURIComponent(desc) + '&amount=' + amt +
+    '&expensesOn=' + encodeURIComponent(p._expensesOn||'me'))
   .then(function(r){return r.json();}).then(function(d){
     if (d.ok) {
       _expCache[p.jobId] = null; // invalidate cache
@@ -6649,6 +6683,14 @@ function _renderPreSurveyBodyAI(descSummary, aiSteps, successKeys, suggestedTool
 
       '</div>' +
     '</div>' +
+    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;border:2px solid #e0e0e0;">' +
+      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:10px;">💰 הוצאות הפרויקט — על מי?</div>' +
+      '<div style="display:flex;gap:8px;">' +
+        '<button id="expBtn_client" onclick="_setExpensesOn(\'client\')" style="flex:1;padding:10px 6px;border-radius:10px;border:2px solid #e0e0e0;background:#fff;color:#555;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;transition:all 0.15s;">🏢 על הלקוח<br><span style=\'font-size:9px;font-weight:400;color:#999;\'>חשבונית נפרדת</span></button>' +
+        '<button id="expBtn_me" onclick="_setExpensesOn(\'me\')" style="flex:1;padding:10px 6px;border-radius:10px;border:2px solid #e0e0e0;background:#fff;color:#555;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;transition:all 0.15s;">👤 עלי<br><span style=\'font-size:9px;font-weight:400;color:#999;\'>לרווח גולמי בלבד</span></button>' +
+      '</div>' +
+      '<div id="expOnNote" style="font-size:10px;color:#aaa;margin-top:6px;text-align:center;">⚠️ לא ניתן לשנות לאחר תחילת הפרויקט</div>' +
+    '</div>' +
     '<button onclick="submitPreProjectSurvey()" style="width:100%;padding:14px;background:#f0c020;border:none;border-radius:12px;font-size:16px;font-weight:900;color:#111;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);font-family:Heebo,sans-serif;margin-bottom:8px;">✓ Ready — Add to Today</button>';
 
   return html;
@@ -6691,6 +6733,18 @@ function _addPreMaterial() {
   inp.value = '';
 }
 
+var _expensesOnChoice = 'me'; // default
+
+function _setExpensesOn(val) {
+  _expensesOnChoice = val;
+  var bc = document.getElementById('expBtn_client');
+  var bm = document.getElementById('expBtn_me');
+  var note = document.getElementById('expOnNote');
+  if (bc) { bc.style.border = val==='client' ? '2px solid #e53935' : '2px solid #e0e0e0'; bc.style.background = val==='client' ? '#ffebee' : '#fff'; bc.style.color = val==='client' ? '#c62828' : '#555'; }
+  if (bm) { bm.style.border = val==='me'     ? '2px solid #2e7d32' : '2px solid #e0e0e0'; bm.style.background = val==='me'     ? '#e8f5e9' : '#fff'; bm.style.color = val==='me'     ? '#2e7d32' : '#555'; }
+  if (note) note.style.color = val==='client' ? '#e65100' : val==='me' ? '#2e7d32' : '#aaa';
+}
+
 function submitPreProjectSurvey() {
   var job = _preSurveyPendingJob;
   if (!job) return;
@@ -6706,7 +6760,7 @@ function submitPreProjectSurvey() {
   var needAgreement = (document.getElementById('agreementYes')||{}).checked ? 'yes' : 'no';
   var heightDocs  = heightWork === 'yes' ? ((document.getElementById('heightDocsYes')||{}).checked ? 'yes' : 'no') : 'n/a';
 
-  var survey = { jobId:job.id||'', client:job.client||'', desc:job.desc||'', cat:job.category||'', date:new Date().toLocaleDateString('he-IL'), steps:steps, keys:keys, tools:tools, materials:materials, heightWork:heightWork, workers:workerCount, location:jobLocation, powerSupply:powerSupply, needAgreement:needAgreement, heightDocs:heightDocs };
+  var survey = { jobId:job.id||'', client:job.client||'', desc:job.desc||'', cat:job.category||'', date:new Date().toLocaleDateString('he-IL'), steps:steps, keys:keys, tools:tools, materials:materials, heightWork:heightWork, workers:workerCount, location:jobLocation, powerSupply:powerSupply, needAgreement:needAgreement, heightDocs:heightDocs, expensesOn:_expensesOnChoice||'me' };
 
   // Save to localStorage
   var surveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
@@ -6731,7 +6785,8 @@ function submitPreProjectSurvey() {
   }
 
   document.getElementById('preProjectSurveyOverlay').style.display = 'none';
-  _doAddJobAsProject(job);
+  _doAddJobAsProject(job, survey.expensesOn);
+  _expensesOnChoice = 'me'; // reset for next survey
   showToast('✓ Briefing saved — project added');
 }
 
