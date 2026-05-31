@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v770</title>
+<title>י.ב אחזקות — v771</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -496,7 +496,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v770
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v771
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -505,7 +505,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v770 · 17/05/2026
+v771 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1147,7 +1147,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v770</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v771</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3333,16 +3333,23 @@ function toggleExpensePanel(i) {
   }
 }
 
-function _loadExpenses(i) {
+function _loadExpenses(i, _attempt) {
   var p = projects[i]; if (!p) return;
   var list = document.getElementById('expList-'+i); if (!list) return;
   if (_expCache[p.jobId]) { _renderExpenses(i, _expCache[p.jobId]); return; }
+  _attempt = _attempt || 0;
+  list.innerHTML = '<div style="font-size:11px;color:rgba(0,0,0,0.4);padding:4px 0;">⏳ טוען...</div>';
   fetch(SHEETS_URL + '?action=getExpenses&jobId=' + encodeURIComponent(p.jobId) + '&_t=' + Date.now())
-  .then(function(r){return r.json();}).then(function(d){
+  .then(function(r){ if(!r.ok) throw new Error('http'); return r.json(); })
+  .then(function(d){
     var exps = Array.isArray(d) ? d : [];
     _expCache[p.jobId] = exps;
     _renderExpenses(i, exps);
-  }).catch(function(){ list.innerHTML = '<div style="font-size:11px;color:#c00;">⚠️ שגיאה</div>'; });
+  }).catch(function(){
+    if (_attempt < 2) { setTimeout(function(){ _loadExpenses(i, _attempt+1); }, 800); return; }
+    var l = document.getElementById('expList-'+i);
+    if (l) l.innerHTML = '<div style="font-size:11px;color:#c00;padding:4px 0;">⚠️ טעינה נכשלה — <span onclick="event.stopPropagation();delete _expCache[projects['+i+'].jobId];_loadExpenses('+i+')" style="text-decoration:underline;cursor:pointer;">נסה שוב</span></div>';
+  });
 }
 
 function _renderExpenses(i, exps) {
