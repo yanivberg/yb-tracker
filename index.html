@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v768</title>
+<title>י.ב אחזקות — v769</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -496,7 +496,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v768
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v769
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -505,7 +505,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v768 · 17/05/2026
+v769 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1147,7 +1147,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v768</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v769</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3296,6 +3296,27 @@ function addNoteToSheet(project, fullNote) {
 // ── Project Expenses ──────────────────────────────────────────────────────
 var _expCache = {}; // jobId → [{row,category,desc,amount,date}]
 
+function _setProjectExpensesOn(i, val) {
+  var p = projects[i]; if (!p) return;
+  if (p._expensesOn === val) return;
+  p._expensesOn = val;
+  p._expOpen = true; // keep panel open after re-render
+  saveState();
+  // Recalc costs in the sheet: 'me' counts expenses toward רווח גולמי, 'client' does not
+  if (p.jobId && SHEETS_URL) {
+    fetch(SHEETS_URL + '?action=recalcJobCosts' +
+      '&jobId=' + encodeURIComponent(p.jobId) +
+      '&client=' + encodeURIComponent(p.jobClient || p.client || '') +
+      '&expensesOn=' + encodeURIComponent(val))
+      .then(function(r){ return r.text(); })
+      .then(function(){ showToast(val==='client' ? '🏢 הוצאות → על הלקוח' : '👤 הוצאות → עלי'); })
+      .catch(function(){ showToast(val==='client' ? '🏢 הוצאות → על הלקוח' : '👤 הוצאות → עלי'); });
+  } else {
+    showToast(val==='client' ? '🏢 הוצאות → על הלקוח' : '👤 הוצאות → עלי');
+  }
+  reRender();
+}
+
 function toggleExpensePanel(i) {
   var panel = document.getElementById('expPanel-'+i);
   var btn   = panel ? panel.previousElementSibling.querySelector('button') : null;
@@ -3974,6 +3995,10 @@ function renderSetup() {
             <span style="font-size:13px;color:#555;font-weight:700;">${p._expOpen ? '▲' : '▼'}</span>
           </button>
           <div id="expPanel-${i}" style="display:${p._expOpen?'block':'none'};padding-top:4px;">
+            <div style="display:flex;gap:5px;margin-bottom:7px;">
+              <button onclick="event.stopPropagation();_setProjectExpensesOn(${i},'client')" style="flex:1;padding:6px;border-radius:7px;border:1.5px solid ${p._expensesOn==='client'?'#e53935':'rgba(0,0,0,0.15)'};background:${p._expensesOn==='client'?'#ffebee':'rgba(255,255,255,0.5)'};color:${p._expensesOn==='client'?'#c62828':'#666'};font-size:11px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">🏢 על הלקוח</button>
+              <button onclick="event.stopPropagation();_setProjectExpensesOn(${i},'me')" style="flex:1;padding:6px;border-radius:7px;border:1.5px solid ${p._expensesOn==='me'?'#2e7d32':'rgba(0,0,0,0.15)'};background:${p._expensesOn==='me'?'#e8f5e9':'rgba(255,255,255,0.5)'};color:${p._expensesOn==='me'?'#2e7d32':'#666'};font-size:11px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">👤 עלי</button>
+            </div>
             <div id="expList-${i}"><div style="font-size:11px;color:rgba(0,0,0,0.4);padding:4px 0;">⏳ טוען...</div></div>
             <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;">
               <select id="expCat-${i}" style="padding:6px 8px;border:1.5px solid rgba(0,0,0,0.2);border-radius:7px;font-size:12px;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.7);flex:1;">
