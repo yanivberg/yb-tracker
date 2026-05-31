@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v771</title>
+<title>י.ב אחזקות — v773</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -496,7 +496,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v771
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v773
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -505,7 +505,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v771 · 17/05/2026
+v773 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1147,7 +1147,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v771</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v773</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3358,7 +3358,9 @@ function _renderExpenses(i, exps) {
   var totalExp = exps.reduce(function(s,e){return s+(e.amount||0);},0);
   var income   = parseFloat(p.jobIncome||p.jobPrice||p.income||0);
   var gp       = parseFloat(p.grossProfit||0);
-  var netProfit = (income||gp) - totalExp;
+  var onClient = (p._expensesOn === 'client');
+  // On client: expenses don't reduce profit (billed separately). On me: subtract.
+  var netProfit = onClient ? (income||gp) : ((income||gp) - totalExp);
 
   var rows = exps.map(function(ex) {
     var catIcon = ex.category==='חומרים'?'🔩':'👷';
@@ -3375,7 +3377,11 @@ function _renderExpenses(i, exps) {
     (rows || '<div style="font-size:11px;color:rgba(0,0,0,0.35);padding:3px 0;">אין הוצאות</div>') +
     '<div style="margin-top:6px;padding:6px 8px;background:rgba(0,0,0,0.06);border-radius:8px;font-size:11px;">' +
       '<div style="display:flex;justify-content:space-between;"><span>סה"כ הוצאות:</span><span style="font-weight:700;color:#c62828;">₪' + totalExp.toLocaleString() + '</span></div>' +
-      (income||gp ? '<div style="display:flex;justify-content:space-between;margin-top:3px;"><span>רווח נטו:</span><span style="font-weight:700;color:'+summaryColor+';">₪' + netProfit.toLocaleString() + '</span></div>' : '') +
+      (onClient
+        ? '<div style="display:flex;justify-content:space-between;margin-top:3px;"><span style="color:#c62828;">🏢 יחויב ללקוח בנפרד</span><span style="font-weight:700;color:#c62828;">₪' + totalExp.toLocaleString() + '</span></div>' +
+          (income||gp ? '<div style="display:flex;justify-content:space-between;margin-top:3px;"><span>רווח (לא מושפע):</span><span style="font-weight:700;color:#2e7d32;">₪' + netProfit.toLocaleString() + '</span></div>' : '')
+        : (income||gp ? '<div style="display:flex;justify-content:space-between;margin-top:3px;"><span>רווח נטו:</span><span style="font-weight:700;color:'+summaryColor+';">₪' + netProfit.toLocaleString() + '</span></div>' : '')
+      ) +
     '</div>';
 }
 
@@ -5435,52 +5441,6 @@ function _getAIPriceSuggestion() {
 var _quoteMode = 'new'; // 'new' or 'edit'
 var _editQuoteDoc = null; // full Caspit document being edited
 var _recentQuotes = null;
-var _quoteSearchResults = [];
-
-function _setQuoteMode(mode) {
-  _quoteMode = mode;
-  _editQuoteDoc = null;
-  _recentQuotes = null;
-  _renderCaspitQuoteTab();
-  if (mode === 'edit') _loadRecentQuotes();
-}
-
-
-function _renderQuoteList(docs, filter) {
-  var listEl = document.getElementById('editQuoteList'); if (!listEl) return;
-  var f = (filter||'').toLowerCase();
-  var filtered = f ? docs.filter(function(d){
-    return [d.Number||'', d.CustomerBusinessName||'', d.Details||'',
-      (d.DocumentLines||[]).map(function(l){return l.ProductName||'';}).join(' ')
-    ].join(' ').toLowerCase().indexOf(f) !== -1;
-  }) : docs;
-  _quoteSearchResults = filtered;
-  if (!filtered.length) { listEl.innerHTML = '<div style="font-size:12px;color:var(--color-text-secondary);padding:8px 0;">לא נמצאו הצעות</div>'; return; }
-  listEl.innerHTML = filtered.map(function(d, idx) {
-    var dt = d.Date ? d.Date.slice(0,10).split('-').reverse().join('/') : '';
-    var tot = Math.round(d.Total||0).toLocaleString();
-    var lines = (d.DocumentLines||[]).map(function(l){return l.ProductName||l.Details||'';}).filter(Boolean).join(', ');
-    var sel = _editQuoteDoc && _editQuoteDoc.Number === d.Number;
-    return '<div onclick="event.stopPropagation();_selectQuoteByIdx('+idx+')" style="padding:10px 12px;border:'+(sel?'2px solid var(--color-border-info)':'0.5px solid var(--color-border-tertiary)')+';border-radius:var(--border-radius-md);margin-bottom:6px;cursor:pointer;background:'+(sel?'var(--color-background-info)':'var(--color-background-primary)')+';">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;">'+
-        '<span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">'+(d.Number||'—')+'</span>'+
-        '<span style="font-size:12px;font-weight:500;color:var(--color-text-primary);">₪'+tot+'</span>'+
-      '</div>'+
-      '<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px;">'+(d.CustomerBusinessName||'')+(lines?' · '+lines.slice(0,30):'')+(dt?' · '+dt:'')+'</div>'+
-    '</div>';
-  }).join('');
-}
-
-function _selectQuoteByIdx(idx) {
-  var d = _quoteSearchResults[idx]; if (!d) return;
-  // Use list data directly — no secondary fetch.
-  // DocumentId in list = Caspit accounting code, NOT a usable path ID.
-  // For identification we rely on Number when sending PUT update.
-  _editQuoteDoc = d;
-  _renderQuoteList(_recentQuotes||[], (document.getElementById('editQuoteSearch')||{}).value||'');
-  _renderEditForm(d);
-}
-
 function _setQuoteMode(mode) {
   _quoteMode = mode;
   _editQuoteDoc = null;
