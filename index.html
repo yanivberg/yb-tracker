@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v773</title>
+<title>י.ב אחזקות — v775</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -496,7 +496,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v773
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v775
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -505,7 +505,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v773 · 17/05/2026
+v775 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1147,7 +1147,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v773</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v775</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2337,6 +2337,11 @@ function openCompleteForm(idx) {
   ]).then(function(results) {
     var d = results[0];
     var cats = results[1] || [];
+    // Reflect existing expense attribution (from opening survey / local project) on the toggle
+    try {
+      var _lp = projects.find(function(p){ return p.jobId === j.id; });
+      if (_lp && _lp._expensesOn) { d._expensesOn = _lp._expensesOn; j._expensesOn = _lp._expensesOn; }
+    } catch(e){}
     // Merge with master list from add-project form
     var masterCats = ['אחר','איטום','אינסטלציה','אספקת חומרים','הובלות','הנדימן','מסגרות','נגרות','עיצוב','פיקוח','פיתוח מוצר','צבע','קבלנות'];
     masterCats.forEach(function(c){ if (cats.indexOf(c) === -1) cats.push(c); });
@@ -2366,6 +2371,11 @@ function openCompleteForm(idx) {
         '<div><div style="font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:3px;">Est. Hours</div>' +
           '<input id="cf_eh_'+idx+'" type="number" value="'+(d.hours||0.5)+'" step="0.5" style="width:100%;padding:8px;border:1.5px solid rgba(255,255,255,0.3);border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.1);color:#fff;box-sizing:border-box;"></div>' +
       '</div>' +
+      '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">💰 הוצאות הפרויקט — על מי?</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">' +
+        '<button id="cf_expClient_'+idx+'" onclick="_setCompleteExpensesOn('+idx+',\'client\')" style="padding:9px;border-radius:8px;border:2px solid '+(d._expensesOn==='client'?'#ff5252':'rgba(255,255,255,0.25)')+';background:'+(d._expensesOn==='client'?'rgba(255,82,82,0.25)':'rgba(255,255,255,0.08)')+';color:#fff;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">🏢 על הלקוח</button>' +
+        '<button id="cf_expMe_'+idx+'" onclick="_setCompleteExpensesOn('+idx+',\'me\')" style="padding:9px;border-radius:8px;border:2px solid '+(d._expensesOn==='me'?'#69f0ae':'rgba(255,255,255,0.25)')+';background:'+(d._expensesOn==='me'?'rgba(105,240,174,0.2)':'rgba(255,255,255,0.08)')+';color:#fff;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">👤 עלי</button>' +
+      '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">' +
         '<button onclick="saveCompleteForm('+idx+',\'ממתין לביצוע\')" id="cf_btn_waiting_'+idx+'" style="padding:10px;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">💾 ממתין לביצוע</button>' +
         '<button onclick="saveCompleteForm('+idx+',\'בתהליך ביצוע\')" id="cf_btn_progress_'+idx+'" style="padding:10px;background:rgba(0,80,160,0.5);color:#fff;border:1px solid rgba(100,180,255,0.4);border-radius:8px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">💾 בתהליך ביצוע</button>' +
@@ -2374,6 +2384,15 @@ function openCompleteForm(idx) {
       '<div id="cf_hint_'+idx+'" style="font-size:11px;color:rgba(255,200,0,0.8);margin-top:6px;text-align:center;display:none;">⚠️ Fill PO + Category to change status</div>';
     rowEl.appendChild(form);
   }).catch(function(){ showToast('Failed to load job details'); });
+}
+
+function _setCompleteExpensesOn(idx, val) {
+  var j = pendingQuoteJobs[idx]; if (!j) return;
+  j._expensesOn = val;
+  var bc = document.getElementById('cf_expClient_'+idx);
+  var bm = document.getElementById('cf_expMe_'+idx);
+  if (bc) { bc.style.border = '2px solid ' + (val==='client'?'#ff5252':'rgba(255,255,255,0.25)'); bc.style.background = val==='client'?'rgba(255,82,82,0.25)':'rgba(255,255,255,0.08)'; }
+  if (bm) { bm.style.border = '2px solid ' + (val==='me'?'#69f0ae':'rgba(255,255,255,0.25)'); bm.style.background = val==='me'?'rgba(105,240,174,0.2)':'rgba(255,255,255,0.08)'; }
 }
 
 function saveCompleteForm(idx, newStatus) {
@@ -2401,12 +2420,22 @@ function saveCompleteForm(idx, newStatus) {
   var btn = document.querySelector('#completeForm_'+idx+' button:last-child');
   if (btn) { btn.textContent = '⏳…'; btn.disabled = true; }
 
+  var expensesOn = j._expensesOn || '';
   var calls = [
     fetch(SHEETS_URL + '?action=updateJobFields&jobId=' + encodeURIComponent(j.id) + '&client=' + encodeURIComponent(j.client) +
       '&po=' + encodeURIComponent(po) + '&category=' + encodeURIComponent(category) +
       '&price=' + encodeURIComponent(price) + '&qty=' + encodeURIComponent(qty) +
       '&hours=' + encodeURIComponent(hours)).then(function(r){return r.text();})
   ];
+  // Persist expense attribution: recalc costs in sheet + sync to local project if present
+  if (expensesOn) {
+    calls.push(fetch(SHEETS_URL + '?action=recalcJobCosts&jobId=' + encodeURIComponent(j.id) +
+      '&client=' + encodeURIComponent(j.client) + '&expensesOn=' + encodeURIComponent(expensesOn)).then(function(r){return r.text();}));
+    try {
+      var lp = projects.find(function(p){ return p.jobId === j.id; });
+      if (lp) { lp._expensesOn = expensesOn; saveState(); }
+    } catch(e){}
+  }
   if (newStatus) {
     calls.push(fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(j.id) +
       '&client=' + encodeURIComponent(j.client) + '&status=' + encodeURIComponent(newStatus)).then(function(r){return r.text();}));
