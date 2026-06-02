@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v776</title>
+<title>י.ב אחזקות — v777</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -496,7 +496,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v776
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v777
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -505,7 +505,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v776 · 17/05/2026
+v777 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1147,7 +1147,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v776</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v777</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -4380,6 +4380,7 @@ function fetchGrossProfitSummary() {
       if (clients.length > 0) {
         html += '<div style="border-top:1px solid #f0f0f0;padding-top:14px;">';
         clients.forEach(function(client) {
+          if (data.clients[client] === 0) return; // hide customers with exactly 0 gross profit
           var cc = clientColor(client);
           var pct = data.total > 0 ? Math.round(data.clients[client] / data.total * 100) : 0;
           html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f8f8f8;">' +
@@ -4407,7 +4408,7 @@ function copyGP() {
   var clients = Object.keys(_gpData.clients).sort(function(a,b) { return _gpData.clients[b] - _gpData.clients[a]; });
   var text = '💰 Gross Profit — To Invoice\n';
   text += '─────────────────\n';
-  clients.forEach(function(c) { text += c + '\t₪' + _gpData.clients[c].toLocaleString() + '\n'; });
+  clients.forEach(function(c) { if (_gpData.clients[c] === 0) return; text += c + '\t₪' + _gpData.clients[c].toLocaleString() + '\n'; });
   text += '─────────────────\n';
   text += 'סה״כ\t₪' + _gpData.total.toLocaleString();
   var btn = document.getElementById('gpCopyBtn');
