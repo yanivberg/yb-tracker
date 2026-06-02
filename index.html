@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v780</title>
+<title>י.ב אחזקות — v782</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -518,7 +518,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v780
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v782
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -527,7 +527,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v780 · 17/05/2026
+v782 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1169,7 +1169,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v780</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v782</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2814,11 +2814,59 @@ function syncDoneJobToSheets(project) {
   if (project._expensesOn === 'client' && project.jobId) {
     _createClientExpenseRow(project);
   }
-  // Save a Lesson Learned with REAL hours (looks up the opening survey)
-  _saveLessonOnComplete(project);
+  // Lesson is saved after the closing-capture form (see _showClosingCapture) so it carries rich data.
+}
+
+var _closingCaptureIdx = -1;
+
+function _showClosingCapture(i) {
+  var p = projects[i]; if (!p || !p.jobId) return;
+  _closingCaptureIdx = i;
+  var ov = document.getElementById('closingCaptureOverlay'); if (!ov) { _saveLessonOnComplete(p); return; }
+  var actualMs = (p.totalMs||0) + (p.prevMs||0);
+  var actualHrs = Math.round((actualMs/3600000)*100)/100;
+  var estHrs = parseFloat(p.estHours || p.jobHours || p.hours || 0);
+  // prefill
+  var sub = document.getElementById('cc_sub'); if (sub) sub.textContent = (p.title || p.name || '') + ' · ' + (p.jobClient || p.client || '');
+  var hEl = document.getElementById('cc_hours'); if (hEl) hEl.value = actualHrs || '';
+  var hint = document.getElementById('cc_hours_hint');
+  if (hint) hint.textContent = estHrs > 0 ? ('מוערך היה: ' + estHrs + ' שעות') : '';
+  // clear text fields
+  ['cc_materials','cc_success','cc_gotcha'].forEach(function(id){ var e=document.getElementById(id); if(e) e.value=''; });
+  ov.style.display = 'flex';
+}
+
+function _submitClosingCapture() {
+  var i = _closingCaptureIdx; var p = projects[i];
+  if (!p) { _closeClosingCapture(); return; }
+  var hrs = parseFloat((document.getElementById('cc_hours')||{}).value);
+  var materials = (document.getElementById('cc_materials')||{}).value || '';
+  var success = (document.getElementById('cc_success')||{}).value || '';
+  var gotcha = (document.getElementById('cc_gotcha')||{}).value || '';
+  // stash on project so _saveLessonOnComplete picks it up
+  p._closing = {
+    materials: materials,
+    successKeys: success,
+    gotcha: gotcha,
+    hours: (!isNaN(hrs) && hrs > 0) ? hrs : null
+  };
+  _closeClosingCapture();
+  _saveLessonOnComplete(p);
+}
+
+function _skipClosingCapture() {
+  var p = projects[_closingCaptureIdx];
+  _closeClosingCapture();
+  if (p) _saveLessonOnComplete(p);
+}
+
+function _closeClosingCapture() {
+  var ov = document.getElementById('closingCaptureOverlay'); if (ov) ov.style.display = 'none';
+  _closingCaptureIdx = -1;
 }
 
 function _saveLessonOnComplete(project) {
+  if (!project || !project.jobId) return;
   if (!project || !project.jobId) return;
   // Find the matching opening survey saved at briefing time
   var surveys = [];
@@ -2829,6 +2877,11 @@ function _saveLessonOnComplete(project) {
   }
   var actualMs = (project.totalMs||0) + (project.prevMs||0);
   var actualHrs = Math.round((actualMs/3600000)*100)/100;
+  var cc = project._closing || {};
+  if (cc.hours != null && cc.hours > 0) actualHrs = cc.hours; // user-confirmed hours from closing form
+  // Guard: don't save a hollow lesson (no real hours AND no closing notes/materials)
+  var hasClosingContent = !!(cc.materials || cc.successKeys || cc.gotcha);
+  if (actualHrs < 0.05 && !hasClosingContent) { project._closing = null; return; }
   var estHrs = project.estHours || 0;
   // Build progress-learning data: snapshot trail + pace accuracy
   var snaps = project._progressSnapshots || [];
@@ -2853,11 +2906,23 @@ function _saveLessonOnComplete(project) {
     actualHrs:   actualHrs,
     estHrs:      estHrs,
     outcome:     'success',
-    materials:   survey ? (survey.materials||[]).join(', ') : '',
+    materials:   [ (cc.materials||''), (survey ? (survey.materials||[]).join(', ') : '') ].filter(Boolean).join(', ').slice(0,250),
     steps:       survey ? (survey.steps||[]).join('; ') : '',
-    successKeys: survey ? (survey.successKeys||[]).join(', ') : '',
+    successKeys: [ (cc.successKeys||''), (survey ? (survey.successKeys||[]).join(', ') : '') ].filter(Boolean).join(', ').slice(0,250),
     tools:       survey ? (survey.tools||[]).join(', ') : '',
-    notes:       survey ? (survey.freeNote||'').slice(0,300) : '',
+    notes:       (function(){
+                   var parts = [];
+                   if (cc.gotcha) parts.push('⚠️ ' + cc.gotcha);
+                   if (project.notes && project.notes.length) {
+                     // strip leading numbering/timestamps for cleaner learning text
+                     var cleaned = project.notes.map(function(n){
+                       return String(n).replace(/^\d+\.\s*/, '').replace(/^\([^)]*\)\s*/, '').replace(/^\[DONE:[^\]]*\]/, '').trim();
+                     }).filter(Boolean);
+                     if (cleaned.length) parts.push(cleaned.join(' | '));
+                   }
+                   if (survey && survey.freeNote) parts.push(survey.freeNote);
+                   return parts.join(' || ').slice(0,500);
+                 })(),
     progressSnapshots: snapStr,
     paceAccuracy: paceAccuracy,
     hrsAccuracy: hrsAccuracy
@@ -2868,6 +2933,7 @@ function _saveLessonOnComplete(project) {
   .then(function(r){ return r.json(); })
   .then(function(d){ if (d && d.ok) showToast('📚 לקח נשמר'); })
   .catch(function(){});
+  project._closing = null;
 }
 
 function _createClientExpenseRow(project) {
@@ -3599,7 +3665,7 @@ function deleteNote(i, n) {
 function toggleDone(i) {
   var p = projects[i]; p.done = !p.done;
   if (p.done && p.active) { p.totalMs += Date.now() - p.activeStart; p.active = false; p.activeStart = null; arrangementStart = Date.now(); localStorage.setItem('yb_arrangementStart', arrangementStart); document.getElementById('statusValue').innerHTML = '<span class="status-dot"></span>Setup'; }
-  if (p.done) { showToast('✓ ' + p.name + ' — ' + formatMs(p.totalMs)); if (p.jobId) { syncDoneJobToSheets(p); setInvoiceStatusOnDone(p); } silentSaveProjectsShortcut(); }
+  if (p.done) { showToast('✓ ' + p.name + ' — ' + formatMs(p.totalMs)); if (p.jobId) { syncDoneJobToSheets(p); setInvoiceStatusOnDone(p); _showClosingCapture(i); } silentSaveProjectsShortcut(); }
   else { showToast('↩ ' + p.name + ' — Restored'); if (p.jobId) revertInvoiceStatus(p); silentSaveProjectsShortcut(); }
   saveState(); renderProjectBtns();
 }
@@ -8507,5 +8573,44 @@ function showToast(msg) {
   </div>
 </div>
 
+
+<!-- ── Closing Capture (lesson enrichment on Done) ──────────────────── -->
+<div id="closingCaptureOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:10030;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:22px 22px 0 0;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,14px);">
+    <div style="padding:16px 18px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;border-radius:22px 22px 0 0;z-index:1;">
+      <div style="font-size:17px;font-weight:900;color:#0d47a1;">📚 רגע לפני שסיימת</div>
+      <div id="cc_sub" style="font-size:12px;color:#888;margin-top:2px;"></div>
+    </div>
+    <div style="padding:14px 18px;direction:rtl;">
+      <div style="font-size:11px;color:#999;margin-bottom:14px;line-height:1.5;">30 שניות שיהפכו את הפרויקט הזה ללקח שה-AI ילמד ממנו לפרויקטים דומים. אפשר גם לדלג.</div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">⏱️ שעות בפועל</label>
+        <input id="cc_hours" type="number" step="0.25" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;">
+        <div id="cc_hours_hint" style="font-size:10px;color:#aaa;margin-top:3px;"></div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">🔩 חומרים שהשתמשת בהם</label>
+        <input id="cc_materials" type="text" placeholder="לדוגמה: 4 פאנלים, אטם PU, ברגים..." style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;direction:rtl;">
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">✅ מה עבד טוב / מפתח להצלחה</label>
+        <input id="cc_success" type="text" placeholder="לדוגמה: גישה מהצד הצפוני חסכה זמן" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;direction:rtl;">
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">⚠️ תקלות / מה לשים לב בפעם הבאה</label>
+        <input id="cc_gotcha" type="text" placeholder="לדוגמה: הלקוח ביקש מעיל נוסף בסוף" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;direction:rtl;">
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button onclick="_skipClosingCapture()" style="flex:1;padding:13px;background:#f5f5f5;color:#555;border:none;border-radius:12px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">דלג</button>
+        <button onclick="_submitClosingCapture()" style="flex:2;padding:13px;background:#0d47a1;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:900;font-family:Heebo,sans-serif;cursor:pointer;">💾 שמור לקח</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
