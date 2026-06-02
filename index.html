@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v777</title>
+<title>י.ב אחזקות — v779</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -428,6 +428,28 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   animation: spinRing 0.75s linear infinite;
   flex-shrink: 0;
 }
+
+/* Progress meter slider */
+input[type=range].progSlider, input[id^="progSlider-"] {
+  -webkit-appearance: none; appearance: none; background: transparent; outline: none;
+}
+input[id^="progSlider-"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: #fff; border: 3px solid #0d47a1;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.35); cursor: pointer; margin-top: -8px;
+}
+input[id^="progSlider-"]::-moz-range-thumb {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: #fff; border: 3px solid #0d47a1;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.35); cursor: pointer;
+}
+input[id^="progSlider-"]::-webkit-slider-runnable-track {
+  height: 8px; border-radius: 4px; background: transparent;
+}
+input[id^="progSlider-"]::-moz-range-track {
+  height: 8px; border-radius: 4px; background: transparent;
+}
 </style>
 
 </head>
@@ -496,7 +518,7 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v777
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v779
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -505,7 +527,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v777 · 17/05/2026
+v779 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1147,7 +1169,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v777</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v779</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2052,7 +2074,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzkWby4F1Vv7w2Te8nj1d7XbDdg133-BX8sRZTRMCdSy2JtH7iD-6KMnEAU93V_BBR_ag/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzHc7jeqAYre_QhqxzmcHmf2A2cZN5Vgi7rTX_d9R8s-jH_u45ejQOAwWmuyWaPRiT9nQ/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -2806,19 +2828,39 @@ function _saveLessonOnComplete(project) {
     if (surveys[s] && surveys[s].jobId === project.jobId) { survey = surveys[s]; break; }
   }
   var actualMs = (project.totalMs||0) + (project.prevMs||0);
+  var actualHrs = Math.round((actualMs/3600000)*100)/100;
+  var estHrs = project.estHours || 0;
+  // Build progress-learning data: snapshot trail + pace accuracy
+  var snaps = project._progressSnapshots || [];
+  var snapStr = snaps.map(function(s){ return s.progress + '%@' + s.actualHrs + 'h'; }).join(' | ');
+  // Pace accuracy: at each snapshot, how close was reported progress% to time-used%?
+  var paceAccuracy = '';
+  if (estHrs > 0 && snaps.length) {
+    var devs = snaps.map(function(s){
+      var timePct = (s.actualHrs / estHrs) * 100;
+      return Math.abs(timePct - s.progress);
+    });
+    var avgDev = devs.reduce(function(a,b){return a+b;},0) / devs.length;
+    paceAccuracy = Math.max(0, Math.round(100 - avgDev)) + '%'; // 100% = progress tracked time perfectly
+  }
+  // Final estimate-vs-actual
+  var hrsAccuracy = (estHrs > 0) ? Math.round((estHrs / actualHrs) * 100) + '%' : '';
   var payload = {
     jobId:       project.jobId || '',
     client:      project.jobClient || project.client || '',
     category:    project.category || (survey && survey.cat) || '',
     desc:        (project.title || project.name || (survey && survey.desc) || '').slice(0,100),
-    actualHrs:   Math.round((actualMs/3600000)*100)/100,
-    estHrs:      project.estHours || 0,
+    actualHrs:   actualHrs,
+    estHrs:      estHrs,
     outcome:     'success',
     materials:   survey ? (survey.materials||[]).join(', ') : '',
     steps:       survey ? (survey.steps||[]).join('; ') : '',
     successKeys: survey ? (survey.successKeys||[]).join(', ') : '',
     tools:       survey ? (survey.tools||[]).join(', ') : '',
-    notes:       survey ? (survey.freeNote||'').slice(0,300) : ''
+    notes:       survey ? (survey.freeNote||'').slice(0,300) : '',
+    progressSnapshots: snapStr,
+    paceAccuracy: paceAccuracy,
+    hrsAccuracy: hrsAccuracy
   };
   fetch(SHEETS_URL + '?action=saveLessonLearned&' + Object.keys(payload).map(function(k){
     return k + '=' + encodeURIComponent(payload[k]);
@@ -3324,6 +3366,80 @@ function addNoteToSheet(project, fullNote) {
 }
 // ── Project Expenses ──────────────────────────────────────────────────────
 var _expCache = {}; // jobId → [{row,category,desc,amount,date}]
+
+function _progressMeterHtml(p, i) {
+  var prog = (typeof p._progress === 'number') ? p._progress : 0;
+  // color by progress
+  var fillCls = prog < 34 ? 'low' : (prog < 67 ? 'mid' : 'high');
+  var fillBg = prog < 34 ? 'linear-gradient(90deg,#e53935,#ef5350)' :
+               (prog < 67 ? 'linear-gradient(90deg,#fb8c00,#ffa726)' : 'linear-gradient(90deg,#43a047,#66bb6a)');
+  var knobColor = prog < 34 ? '#e53935' : (prog < 67 ? '#fb8c00' : '#2e7d32');
+
+  // live comparison: % of estimated time used vs progress reported
+  var estHrs = parseFloat(p.estHours || p.jobHours || p.hours || 0);
+  var actualMs = (p.totalMs || 0) + (p.prevMs || 0);
+  var actualHrs = actualMs / 3600000;
+  var compareHtml = '';
+  if (estHrs > 0) {
+    var timePct = Math.round((actualHrs / estHrs) * 100);
+    var paceLabel, paceColor;
+    if (prog === 0) { paceLabel = '—'; paceColor = 'rgba(0,0,0,0.4)'; }
+    else if (timePct > prog + 12) { paceLabel = '⚠️ מאחר בקצב'; paceColor = '#e65100'; }
+    else if (timePct < prog - 12) { paceLabel = '⚡ מקדים'; paceColor = '#2e7d32'; }
+    else { paceLabel = '✓ קצב טוב'; paceColor = '#2e7d32'; }
+    compareHtml =
+      '<div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(0,0,0,0.55);margin-top:5px;padding:5px 8px;background:rgba(0,0,0,0.04);border-radius:7px;">' +
+        '<span>זמן שנוצל: <b style="color:#0d47a1;">' + timePct + '%</b> מהמוערך</span>' +
+        '<span style="color:' + paceColor + ';font-weight:700;">' + paceLabel + '</span>' +
+      '</div>';
+  }
+
+  var snapCount = (p._progressSnapshots || []).length;
+  var snapHtml = snapCount ? '<div style="font-size:9px;color:rgba(0,0,0,0.4);margin-top:4px;text-align:left;">' + snapCount + ' תמונות מצב נשמרו</div>' : '';
+
+  return '<div style="border-top:1.5px solid rgba(0,0,0,0.12);padding-top:8px;margin-top:6px;">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">' +
+      '<span style="font-size:10px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">📊 התקדמות</span>' +
+      '<span id="progPct-' + i + '" style="font-size:14px;font-weight:900;color:' + knobColor + ';">' + prog + '%</span>' +
+    '</div>' +
+    '<input id="progSlider-' + i + '" type="range" min="0" max="100" step="5" value="' + prog + '" ' +
+      'oninput="event.stopPropagation();_onProgressInput(' + i + ',this.value)" ' +
+      'onchange="event.stopPropagation();_setProgress(' + i + ',this.value)" ' +
+      'onclick="event.stopPropagation();" ' +
+      'style="width:100%;height:30px;-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;">' +
+    '<div style="position:relative;height:8px;background:rgba(0,0,0,0.08);border-radius:4px;margin-top:-18px;margin-bottom:6px;pointer-events:none;">' +
+      '<div id="progFill-' + i + '" style="position:absolute;top:0;right:0;height:100%;border-radius:4px;width:' + prog + '%;background:' + fillBg + ';"></div>' +
+    '</div>' +
+    compareHtml +
+    snapHtml +
+  '</div>';
+}
+
+function _onProgressInput(i, val) {
+  // live update label + fill while dragging (no save yet)
+  val = parseInt(val, 10) || 0;
+  var pct = document.getElementById('progPct-' + i);
+  var fill = document.getElementById('progFill-' + i);
+  var color = val < 34 ? '#e53935' : (val < 67 ? '#fb8c00' : '#2e7d32');
+  var bg = val < 34 ? 'linear-gradient(90deg,#e53935,#ef5350)' :
+           (val < 67 ? 'linear-gradient(90deg,#fb8c00,#ffa726)' : 'linear-gradient(90deg,#43a047,#66bb6a)');
+  if (pct) { pct.textContent = val + '%'; pct.style.color = color; }
+  if (fill) { fill.style.width = val + '%'; fill.style.background = bg; }
+}
+
+function _setProgress(i, val) {
+  var p = projects[i]; if (!p) return;
+  val = parseInt(val, 10) || 0;
+  p._progress = val;
+  // log a snapshot: progress%, actual hours at this moment, timestamp
+  if (!p._progressSnapshots) p._progressSnapshots = [];
+  var actualMs = (p.totalMs || 0) + (p.prevMs || 0);
+  p._progressSnapshots.push({ progress: val, actualHrs: Math.round((actualMs/3600000)*100)/100, ts: Date.now() });
+  // cap snapshot history to last 60 entries
+  if (p._progressSnapshots.length > 60) p._progressSnapshots = p._progressSnapshots.slice(-60);
+  saveState();
+  reRender();
+}
 
 function _setProjectExpensesOn(i, val) {
   var p = projects[i]; if (!p) return;
@@ -4053,6 +4169,7 @@ function renderSetup() {
             </div>
           </div>
         </div>
+        ${_progressMeterHtml(p, i)}
       </div>
     </div>`;
   }).join('');
