@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v779</title>
+<title>י.ב אחזקות — v780</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -518,7 +518,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v779
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v780
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -527,7 +527,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v779 · 17/05/2026
+v780 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1169,7 +1169,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v779</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v780</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -4271,6 +4271,63 @@ function renderDoneJobInfo(info) {
 
 var _editDoneJob = null;
 
+function _loadExpensesForEdit() {
+  var listEl = document.getElementById('editExpList');
+  if (!listEl || !_editDoneJob) return;
+  var jobId = _editDoneJob.id;
+  fetch(SHEETS_URL + '?action=getExpenses&jobId=' + encodeURIComponent(jobId) + '&_t=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var exps = Array.isArray(d) ? d : [];
+      if (!exps.length) { listEl.innerHTML = '<div style="font-size:12px;color:#aaa;">אין הוצאות לפרויקט זה</div>'; return; }
+      var total = exps.reduce(function(s,e){ return s + (e.amount||0); }, 0);
+      listEl.innerHTML = exps.map(function(ex){
+        var icon = ex.category==='חומרים' ? '🔩' : '👷';
+        return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid #eee;font-size:12px;">' +
+          '<span>' + icon + '</span>' +
+          '<span style="flex:1;direction:rtl;">' + (ex.desc||'') + '</span>' +
+          '<span style="font-weight:700;color:#c62828;">₪' + (ex.amount||0).toLocaleString() + '</span>' +
+          '<button onclick="_deleteExpenseFromEdit(' + ex.row + ')" style="background:none;border:none;color:#999;font-size:13px;cursor:pointer;padding:0 3px;">✕</button>' +
+        '</div>';
+      }).join('') +
+      '<div style="display:flex;justify-content:space-between;margin-top:7px;padding-top:6px;border-top:1.5px solid #ddd;font-size:13px;font-weight:900;"><span>סה"כ הוצאות:</span><span style="color:#c62828;">₪' + total.toLocaleString() + '</span></div>';
+    })
+    .catch(function(){ listEl.innerHTML = '<div style="font-size:12px;color:#c62828;">⚠️ שגיאה בטעינת הוצאות</div>'; });
+}
+
+function _addExpenseToDoneJob() {
+  if (!_editDoneJob) return;
+  var cat  = (document.getElementById('editExpCat')||{}).value || 'חומרים';
+  var desc = (document.getElementById('editExpDesc')||{}).value || '';
+  var amt  = parseFloat((document.getElementById('editExpAmt')||{}).value) || 0;
+  if (!amt) { showToast('הכנס סכום'); return; }
+  var jobId = _editDoneJob.id, client = _editDoneJob.client;
+  var expOn = _editDoneJob._expensesOn || '';
+  fetch(SHEETS_URL + '?action=addExpense&jobId=' + encodeURIComponent(jobId) +
+    '&client=' + encodeURIComponent(client) +
+    '&category=' + encodeURIComponent(cat) +
+    '&desc=' + encodeURIComponent(desc) +
+    '&amount=' + encodeURIComponent(amt) +
+    (expOn ? '&expensesOn=' + encodeURIComponent(expOn) : ''))
+    .then(function(r){ return r.text(); })
+    .then(function(){
+      var de = document.getElementById('editExpDesc'); if (de) de.value = '';
+      var ae = document.getElementById('editExpAmt');  if (ae) ae.value = '';
+      showToast('✓ הוצאה נוספה');
+      _loadExpensesForEdit();
+    })
+    .catch(function(){ showToast('שמירת הוצאה נכשלה'); });
+}
+
+function _deleteExpenseFromEdit(row) {
+  if (!_editDoneJob) return;
+  fetch(SHEETS_URL + '?action=deleteExpense&jobId=' + encodeURIComponent(_editDoneJob.id) +
+    '&client=' + encodeURIComponent(_editDoneJob.client) + '&row=' + encodeURIComponent(row))
+    .then(function(r){ return r.text(); })
+    .then(function(){ showToast('✓ הוצאה נמחקה'); _loadExpensesForEdit(); })
+    .catch(function(){ showToast('מחיקה נכשלה'); });
+}
+
 function openEditDoneJob(jobId, client) {
   _editDoneJob = { id: jobId, client: client };
   var body = document.getElementById('editDoneJobBody');
@@ -4305,7 +4362,21 @@ function openEditDoneJob(jobId, client) {
         field('qty', 'יחידות', info.qty || '', 'number') +
         field('po', 'מספר הזמנת רכש', info.po) +
         field('hours', 'שעות מוערכות', info.hours, 'number') +
-        field('hoursActual', 'שעות בפועל', info.hoursActual, 'number');
+        field('hoursActual', 'שעות בפועל', info.hoursActual, 'number') +
+        '<div style="border-top:1.5px solid #eee;margin-top:6px;padding-top:14px;">' +
+          '<div style="font-size:13px;font-weight:900;color:#0d47a1;margin-bottom:10px;">💰 הוצאות הפרויקט</div>' +
+          '<div id="editExpList" style="margin-bottom:10px;"><div style="font-size:12px;color:#aaa;">⏳ טוען...</div></div>' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+            '<select id="editExpCat" style="flex:1;min-width:90px;padding:9px;border:1.5px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;background:#fff;">' +
+              '<option value="חומרים">🔩 חומרים</option>' +
+              '<option value="כוח אדם">👷 כוח אדם</option>' +
+            '</select>' +
+            '<input id="editExpDesc" type="text" placeholder="תיאור..." style="flex:2;min-width:120px;padding:9px;border:1.5px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;direction:rtl;box-sizing:border-box;">' +
+            '<input id="editExpAmt" type="number" placeholder="₪" style="width:70px;padding:9px;border:1.5px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;">' +
+            '<button onclick="_addExpenseToDoneJob()" style="padding:9px 16px;background:#0d47a1;color:#fff;border:none;border-radius:9px;font-size:16px;font-weight:900;cursor:pointer;">+</button>' +
+          '</div>' +
+        '</div>';
+      _loadExpensesForEdit();
     })
     .catch(function() { showToast('⚠️ שגיאה בטעינת פרויקט'); document.getElementById('editDoneJobOverlay').style.display = 'none'; });
 }
