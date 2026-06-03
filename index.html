@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v782</title>
+<title>י.ב אחזקות — v783</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -518,7 +518,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v782
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v783
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -527,7 +527,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v782 · 17/05/2026
+v783 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1169,7 +1169,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v782</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v783</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2545,13 +2545,14 @@ function savePQEdit(idx, jobId, client, oldDocNumber) {
     // Step 2: Find matched Caspit contact for this client
     var contactId = _caspitMatchMap[client] || '';
     var matchedContact = _caspitContacts.filter(function(c){ return (c.Id||c.ContactId||'') === contactId; })[0];
-    var customerName = matchedContact ? (matchedContact.Name||'') : '';
+    // Always carry a customer name: matched Caspit contact name if available, else the client name picked in the app
+    var customerName = (matchedContact && matchedContact.Name) ? matchedContact.Name : (client || '');
 
     var newDocId = 'YB-Q-' + Date.now();
     var payload = {
       TrxTypeId: 16, DocumentId: newDocId, DocumentSource: 2,
       DocumentNumberBranch: 1, TrxCodeNumber: 3, ChargeVAT: true,
-      ContactId: contactId, CustomerBusinessName: customerName || undefined,
+      ContactId: contactId || undefined, CustomerBusinessName: customerName || undefined, CustomerName: customerName || undefined,
       DocumentLines: [{ ProductName: desc||'—', Details: desc||'—', Qty: qty, UnitPrice: price||1, ChargeVAT: true }]
     };
     return _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
