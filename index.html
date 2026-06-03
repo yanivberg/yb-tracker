@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v783</title>
+<title>י.ב אחזקות — v785</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -474,6 +474,8 @@ input[id^="progSlider-"]::-moz-range-track {
 
       <div onclick="closeSetupDrawer();fetchGrossProfitSummary();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">💰</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#2e7d32;">Gross Profit — To Invoice</span></div>
+      <div onclick="closeSetupDrawer();fetchActualPriceSummary();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">🧾</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1565c0;">Actual Price — To Invoice</span></div>
       <div onclick="closeSetupDrawer();openDayNote();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📝</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Day Note</span></div>
       <div onclick="closeSetupDrawer();openDayNotesList();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -518,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v783
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v785
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -527,7 +529,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v783 · 17/05/2026
+v785 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1169,7 +1171,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v783</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v785</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1261,6 +1263,20 @@ SHEET SYNC
     <div id="gpContent" style="overflow-y:auto;flex:1;padding:16px 20px;"></div>
     <div style="padding:14px 16px;border-top:1px solid #eee;flex-shrink:0;">
       <button id="gpCopyBtn" onclick="copyGP()" style="width:100%;padding:13px;background:#1a1a2e;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">📋 Copy to clipboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- Actual Price Overlay -->
+<div id="apOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10010;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:80vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+    <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+      <div style="font-weight:700;font-size:17px;">🧾 Actual Price — To Invoice</div>
+      <button onclick="document.getElementById('apOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+    </div>
+    <div id="apContent" style="overflow-y:auto;flex:1;padding:16px 20px;"></div>
+    <div style="padding:14px 16px;border-top:1px solid #eee;flex-shrink:0;">
+      <button id="apCopyBtn" onclick="copyAP()" style="width:100%;padding:13px;background:#1a1a2e;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">📋 Copy to clipboard</button>
     </div>
   </div>
 </div>
@@ -1784,7 +1800,7 @@ function _hideLoading() {
 var _SPINNER_ACTIONS = {
   getJobs: 1, getPendingQuote: 1, getCompletedJobs: 1, getInvoices: 1,
   runPOImport: 1, scanPOEmails: 1, attachPOToJob: 1, addPONewRow: 1, addJob: 1, createClient: 1,
-  getJobNotes: 1, getJobDetails: 1, addNote: 1, deleteNote: 1, addDayNote: 1, getGrossProfitSummary: 1
+  getJobNotes: 1, getJobDetails: 1, addNote: 1, deleteNote: 1, addDayNote: 1, getGrossProfitSummary: 1, getActualPriceSummary: 1
 };
 function _shouldShowSpinner(url) {
   if (typeof url !== 'string') return false;
@@ -2074,7 +2090,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzHc7jeqAYre_QhqxzmcHmf2A2cZN5Vgi7rTX_d9R8s-jH_u45ejQOAwWmuyWaPRiT9nQ/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwyfp3DUh2tFsCecSIUhrnwEGYr1tXe80JXWOlXDXESbl2npSHLac2mYwN8YyoVNQSdPQ/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -4667,6 +4683,66 @@ function copyGP() {
   text += '─────────────────\n';
   text += 'סה״כ\t₪' + _gpData.total.toLocaleString();
   var btn = document.getElementById('gpCopyBtn');
+  function onCopied() { btn.textContent = '✓ Copied!'; setTimeout(function() { btn.textContent = '📋 Copy to clipboard'; }, 2000); }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(onCopied).catch(function() { fallbackCopy(text, onCopied); });
+  } else { fallbackCopy(text, onCopied); }
+}
+
+// ── Actual Price Summary (הכנסה מתוכננת) ──────────────
+var _apData = null;
+
+function fetchActualPriceSummary() {
+  var overlay = document.getElementById('apOverlay');
+  var content = document.getElementById('apContent');
+  overlay.style.display = 'flex';
+  content.innerHTML = '<div style="text-align:center;padding:32px;color:#aaa;"><div style="font-size:28px;margin-bottom:10px;">⏳</div><div style="font-size:14px;">טוען נתונים…</div></div>';
+  _apData = null;
+
+  fetch(SHEETS_URL + '?action=getActualPriceSummary')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      _apData = data;
+      var clients = Object.keys(data.clients).sort(function(a,b) { return data.clients[b] - data.clients[a]; });
+      var html = '<div style="text-align:center;margin-bottom:20px;">' +
+        '<div style="font-size:13px;color:#888;margin-bottom:4px;">סה״כ מחיר בפועל · להוציא חש</div>' +
+        '<div style="font-size:36px;font-weight:900;color:#1565c0;">₪' + data.total.toLocaleString() + '</div>' +
+        '</div>';
+      if (clients.length > 0) {
+        html += '<div style="border-top:1px solid #f0f0f0;padding-top:14px;">';
+        clients.forEach(function(client) {
+          if (data.clients[client] === 0) return;
+          var cc = clientColor(client);
+          var pct = data.total > 0 ? Math.round(data.clients[client] / data.total * 100) : 0;
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f8f8f8;">' +
+            '<div style="display:flex;align-items:center;gap:8px;">' +
+            '<div style="width:10px;height:10px;border-radius:50%;background:' + cc.grad + ';flex-shrink:0;"></div>' +
+            '<div style="font-size:14px;font-weight:700;color:#111;">' + client + '</div>' +
+            '<div style="font-size:11px;color:#aaa;">(' + pct + '%)</div>' +
+            '</div>' +
+            '<div style="font-size:16px;font-weight:800;color:#1565c0;">₪' + data.clients[client].toLocaleString() + '</div>' +
+            '</div>';
+        });
+        html += '</div>';
+      } else {
+        html += '<div style="text-align:center;color:#aaa;font-size:14px;">אין פרויקטים עם סטטוס "להוציא חש"</div>';
+      }
+      content.innerHTML = html;
+    })
+    .catch(function() {
+      content.innerHTML = '<div style="text-align:center;padding:32px;color:#c62828;font-size:14px;">שגיאה בטעינת הנתונים</div>';
+    });
+}
+
+function copyAP() {
+  if (!_apData) return;
+  var clients = Object.keys(_apData.clients).sort(function(a,b) { return _apData.clients[b] - _apData.clients[a]; });
+  var text = '🧾 Actual Price — To Invoice\n';
+  text += '─────────────────\n';
+  clients.forEach(function(c) { if (_apData.clients[c] === 0) return; text += c + '\t₪' + _apData.clients[c].toLocaleString() + '\n'; });
+  text += '─────────────────\n';
+  text += 'סה״כ\t₪' + _apData.total.toLocaleString();
+  var btn = document.getElementById('apCopyBtn');
   function onCopied() { btn.textContent = '✓ Copied!'; setTimeout(function() { btn.textContent = '📋 Copy to clipboard'; }, 2000); }
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(onCopied).catch(function() { fallbackCopy(text, onCopied); });
