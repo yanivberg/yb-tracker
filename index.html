@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v788</title>
+<title>י.ב אחזקות — v789</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v788
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v789
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -529,7 +529,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v788 · 17/05/2026
+v789 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1171,7 +1171,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v788</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v789</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -5417,10 +5417,139 @@ function _openInvoiceEdit(jobId, client) {
 }
 
 // ── Invoice / Receipt tab ─────────────────────────────
+// ── Receipt (קבלה) flow: pick an open invoice → create a bank-transfer receipt ──
+var _openInvoices = [];
+var _selectedInvoiceIdx = -1;
+
+function _docTypeButtonsHtml() {
+  return '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
+    '<button onclick="_caspitSetDocType(1)" style="flex:1;padding:9px;border-radius:10px;border:2px solid ' + (_caspitDocType===1?'#0d47a1':'#ddd') + ';background:' + (_caspitDocType===1?'#e8f0fe':'#fff') + ';font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;color:' + (_caspitDocType===1?'#0d47a1':'#555') + ';">חשבונית מס</button>' +
+    '<button onclick="_caspitSetDocType(2)" style="flex:1;padding:9px;border-radius:10px;border:2px solid ' + (_caspitDocType===2?'#0d47a1':'#ddd') + ';background:' + (_caspitDocType===2?'#e8f0fe':'#fff') + ';font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;color:' + (_caspitDocType===2?'#0d47a1':'#555') + ';">קבלה</button>' +
+  '</div>';
+}
+
+function _renderReceiptPicker(body) {
+  var createBtn = document.getElementById('caspitCreateBtn');
+  if (createBtn) createBtn.style.display = 'none'; // receipts have their own create button
+  _selectedInvoiceIdx = -1;
+  body.innerHTML = _docTypeButtonsHtml() +
+    '<div style="font-size:13px;color:#555;margin-bottom:10px;font-weight:700;">בחר חשבונית פתוחה ליצירת קבלה</div>' +
+    '<input id="receiptSearch" type="text" placeholder="חיפוש לקוח / מספר..." oninput="_filterOpenInvoices(this.value)" style="width:100%;padding:10px;border:1.5px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;direction:rtl;box-sizing:border-box;margin-bottom:10px;">' +
+    '<div id="openInvList"><div style="text-align:center;padding:28px;color:#aaa;"><div style="font-size:24px;">⏳</div>טוען חשבוניות פתוחות...</div></div>';
+  _fetchOpenInvoices();
+}
+
+function _fetchOpenInvoices() {
+  var el = document.getElementById('openInvList');
+  if (el) el.innerHTML = '<div style="text-align:center;padding:28px;color:#aaa;"><div style="font-size:24px;">⏳</div>טוען חשבוניות פתוחות...</div>';
+  _caspitFetch(CASPIT_PROXY_URL + '?action=listOpenInvoices')
+    .then(function(r){ return r.json(); })
+    .then(function(list){
+      _openInvoices = Array.isArray(list) ? list : [];
+      _renderOpenInvoiceList(_openInvoices);
+    })
+    .catch(function(){
+      var e = document.getElementById('openInvList');
+      if (e) e.innerHTML = '<div style="text-align:center;padding:20px;color:#c62828;">שגיאה בטעינת חשבוניות. <span onclick="_fetchOpenInvoices()" style="color:#0d47a1;text-decoration:underline;cursor:pointer;">נסה שוב</span></div>';
+    });
+}
+
+function _filterOpenInvoices(q) {
+  q = (q||'').toLowerCase().trim();
+  if (!q) { _renderOpenInvoiceList(_openInvoices); return; }
+  var filtered = _openInvoices.filter(function(inv){
+    return [(inv.CustomerBusinessName||''), (inv.Number||''), String(inv.Total||'')].join(' ').toLowerCase().indexOf(q) !== -1;
+  });
+  _renderOpenInvoiceList(filtered);
+}
+
+function _renderOpenInvoiceList(list) {
+  var el = document.getElementById('openInvList'); if (!el) return;
+  if (!list.length) { el.innerHTML = '<div style="text-align:center;padding:24px;color:#aaa;">אין חשבוניות פתוחות</div>'; return; }
+  el.innerHTML = list.map(function(inv){
+    var realIdx = _openInvoices.indexOf(inv);
+    var dateStr = inv.Date ? new Date(inv.Date).toLocaleDateString('he-IL') : '';
+    var open = (inv.EffectiveTotal != null) ? inv.EffectiveTotal : inv.Total;
+    return '<div onclick="_selectInvoiceForReceipt(' + realIdx + ')" style="border:1.5px solid #e0e0e0;border-radius:11px;padding:11px 13px;margin-bottom:8px;cursor:pointer;background:#fff;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;">' +
+        '<div style="flex:1;">' +
+          '<div style="font-size:14px;font-weight:800;color:#111;">' + (inv.CustomerBusinessName||'—') + '</div>' +
+          '<div style="font-size:11px;color:#888;margin-top:2px;">' + (inv.Number||'') + (dateStr?' · '+dateStr:'') + '</div>' +
+        '</div>' +
+        '<div style="text-align:left;">' +
+          '<div style="font-size:15px;font-weight:900;color:#c62828;">₪' + Math.round(open).toLocaleString() + '</div>' +
+          '<div style="font-size:10px;color:#aaa;">פתוח לתשלום</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function _selectInvoiceForReceipt(idx) {
+  _selectedInvoiceIdx = idx;
+  var inv = _openInvoices[idx]; if (!inv) return;
+  var el = document.getElementById('openInvList'); if (!el) return;
+  var open = (inv.EffectiveTotal != null) ? inv.EffectiveTotal : inv.Total;
+  var dateStr = inv.Date ? new Date(inv.Date).toLocaleDateString('he-IL') : '';
+  var todayIso = new Date().toISOString().slice(0,10);
+  el.innerHTML = '<div style="border:2px solid #0d47a1;border-radius:13px;padding:15px;background:#f7faff;">' +
+    '<div style="font-size:15px;font-weight:900;color:#111;margin-bottom:3px;">' + (inv.CustomerBusinessName||'—') + '</div>' +
+    '<div style="font-size:11px;color:#888;margin-bottom:14px;">חשבונית ' + (inv.Number||'') + (dateStr?' · '+dateStr:'') + '</div>' +
+    '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:4px;">💵 סכום הקבלה (₪)</label>' +
+    '<input id="receiptAmt" type="number" value="' + Math.round(open) + '" style="width:100%;padding:11px;border:1.5px solid #0d47a1;border-radius:9px;font-size:16px;font-weight:700;text-align:center;font-family:Heebo,sans-serif;box-sizing:border-box;margin-bottom:12px;">' +
+    '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:4px;">📅 תאריך תשלום</label>' +
+    '<input id="receiptDate" type="date" value="' + todayIso + '" style="width:100%;padding:10px;border:1.5px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;margin-bottom:8px;">' +
+    '<div style="font-size:11px;color:#888;margin-bottom:14px;">אמצעי תשלום: העברה בנקאית</div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<button onclick="_renderOpenInvoiceList(_openInvoices)" style="flex:1;padding:12px;background:#f0f0f0;color:#444;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">חזור</button>' +
+      '<button id="receiptCreateBtn" onclick="_createReceiptForInvoice()" style="flex:2;padding:12px;background:#0d47a1;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">🧾 צור קבלה</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function _createReceiptForInvoice() {
+  var inv = _openInvoices[_selectedInvoiceIdx]; if (!inv) return;
+  var amt = parseFloat((document.getElementById('receiptAmt')||{}).value) || 0;
+  var pdate = (document.getElementById('receiptDate')||{}).value || new Date().toISOString().slice(0,10);
+  if (!amt || amt <= 0) { showToast('הכנס סכום תקין'); return; }
+  var btn = document.getElementById('receiptCreateBtn');
+  if (btn) { btn.textContent = '⏳ יוצר...'; btn.disabled = true; }
+  var payload = {
+    TrxTypeId: 2,
+    DocumentId: 'YB-R-' + Date.now(),
+    DocumentSource: 2,
+    DocumentNumberBranch: 1,
+    CustomerId: inv.CustomerId || undefined,
+    CustomerBusinessName: inv.CustomerBusinessName || undefined,
+    Details: 'קבלה עבור חשבונית ' + (inv.Number||''),
+    PaymentTypeId: 4,          // bank transfer (העברה בנקאית) — change here if Caspit uses a different id
+    Payment: amt,
+    PaymentDate: pdate
+  };
+  _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(result){
+    if (result && (result.number || result.DocumentNumber || result.documentId || result.Id) && result.status !== 'error') {
+      showToast('✓ קבלה נוצרה: ' + (result.number || ''));
+      _fetchOpenInvoices(); // refresh — the paid invoice should drop off
+    } else {
+      if (btn) { btn.textContent = '🧾 צור קבלה'; btn.disabled = false; }
+      showToast('⚠️ ' + (result.error || result.Message || 'שגיאה ביצירת קבלה'), 5000);
+    }
+  })
+  .catch(function(){
+    if (btn) { btn.textContent = '🧾 צור קבלה'; btn.disabled = false; }
+    showToast('שגיאת רשת ביצירת קבלה');
+  });
+}
+
 function _renderCaspitInvoiceTab() {
   var body = getCaspitBody(); if (!body) return;
   var createBtn = document.getElementById('caspitCreateBtn');
-  if (createBtn) createBtn.textContent = '💼 Create Document';
+  if (createBtn) { createBtn.textContent = '💼 Create Document'; createBtn.style.display = ''; }
+  if (_caspitDocType === 2) { _renderReceiptPicker(body); return; }
   if (!_caspitInvoiceJobs.length) { body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">אין עבודות להוציא חש</div>'; return; }
 
   _caspitJobList = _caspitInvoiceJobs.map(function(j) {
