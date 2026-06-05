@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v796</title>
+<title>י.ב אחזקות — v797</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v796
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v797
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -529,7 +529,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v796 · 17/05/2026
+v797 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1171,7 +1171,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v796</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v797</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -5364,11 +5364,11 @@ function _lastInvoicesHtml(order, groups) {
       var badge = paid
         ? '<span style="font-size:9px;font-weight:900;background:#2e7d32;color:#fff;padding:2px 7px;border-radius:5px;">שולמה</span>'
         : '<span style="font-size:9px;font-weight:900;background:#c62828;color:#fff;padding:2px 7px;border-radius:5px;">פתוחה ₪' + Math.round(open).toLocaleString() + '</span>';
-      html += '<div style="border:0.5px solid #e0e0e0;border-radius:10px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;gap:10px;">' +
+      html += '<div onclick="_showInvoiceInfo(\'' + String(inv.Number||'').replace(/'/g,"\\'") + '\')" style="border:0.5px solid #e0e0e0;border-radius:10px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;gap:10px;cursor:pointer;">' +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-size:12px;font-weight:700;color:#555;">' + (inv.Number||'') + (dateStr?' · '+dateStr:'') + '</div>' +
           (inv.Description ? '<div style="font-size:13px;font-weight:600;color:#111;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + inv.Description + '</div>' : '') +
-          '<div style="font-size:11px;margin-top:3px;">' + badge + '</div>' +
+          '<div style="font-size:11px;margin-top:3px;">' + badge + ' <span style="color:#bbb;">› לפרטים</span></div>' +
         '</div>' +
         '<div style="font-size:15px;font-weight:800;color:#111;flex-shrink:0;">₪' + Math.round(inv.Total||0).toLocaleString() + '</div>' +
       '</div>';
@@ -5389,6 +5389,56 @@ function _filterLastInvoices(q) {
   });
   var el = document.getElementById('lastInvList');
   if (el) el.innerHTML = order.length ? _lastInvoicesHtml(order, groups) : '<div style="padding:24px;text-align:center;color:#aaa;">אין תוצאות</div>';
+}
+
+function _showInvoiceInfo(number) {
+  var inv = _lastInvoicesCache.filter(function(x){ return String(x.Number||'') === String(number); })[0];
+  if (!inv) return;
+  var body = getCaspitBody(); if (!body) return;
+  var dateStr = inv.Date ? new Date(inv.Date).toLocaleDateString('he-IL') : '';
+  var open = (inv.EffectiveTotal != null) ? inv.EffectiveTotal : inv.Total;
+  var paid = !(open > 0.5);
+  function row(label, val) {
+    if (val === '' || val === null || val === undefined) return '';
+    return '<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f5f5f5;">' +
+      '<span style="font-size:13px;color:#888;flex-shrink:0;">' + label + '</span>' +
+      '<span style="font-size:13px;font-weight:600;color:#111;text-align:left;margin-right:12px;">' + val + '</span></div>';
+  }
+  body.innerHTML =
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">' +
+      '<button onclick="_renderCaspitInvoiceListTab()" style="background:#f0f0f0;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">← חזור</button>' +
+      '<span style="font-size:14px;font-weight:900;color:#111;">חשבונית ' + (inv.Number||'') + '</span>' +
+    '</div>' +
+    '<div style="direction:rtl;text-align:right;">' +
+      row('לקוח', inv.CustomerBusinessName) +
+      row('תאריך', dateStr) +
+      row('תיאור', inv.Description) +
+      row('סכום כולל', '₪' + Math.round(inv.Total||0).toLocaleString()) +
+      row('סטטוס', paid ? 'שולמה ✓' : 'פתוחה') +
+      (!paid ? row('יתרה פתוחה', '₪' + Math.round(open).toLocaleString()) : '') +
+    '</div>' +
+    '<div id="invFullDetail" style="margin-top:10px;font-size:12px;color:#aaa;direction:rtl;text-align:right;">⏳ טוען פירוט מלא…</div>';
+  // Enrich with line items + comments from the full Caspit document
+  _caspitFetch(CASPIT_PROXY_URL + '?action=getDocument&number=' + encodeURIComponent(inv.Number||'') + '&trxTypeId=1')
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      var elx = document.getElementById('invFullDetail'); if (!elx) return;
+      var doc = res && res.rawResponse ? res.rawResponse : null;
+      if (!doc) { elx.innerHTML = ''; return; }
+      var lines = doc.DocumentLines || [];
+      var linesHtml = lines.length ? '<div style="font-size:12px;font-weight:700;color:#888;margin:10px 0 4px;">פירוט שורות</div>' + lines.map(function(l){
+        var name = l.ProductName || l.Details || '';
+        var qty = (l.Qty != null) ? l.Qty : 1;
+        var up = (l.UnitPrice != null) ? l.UnitPrice : 0;
+        return '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f8f8f8;font-size:12px;">' +
+          '<span style="flex:1;color:#111;">' + name + '</span>' +
+          '<span style="color:#555;margin-right:8px;white-space:nowrap;">' + qty + ' × ₪' + Number(up).toLocaleString() + '</span></div>';
+      }).join('') : '';
+      var comments = doc.Comments ? '<div style="font-size:12px;font-weight:700;color:#888;margin:10px 0 4px;">הערות</div><div style="font-size:13px;color:#333;">' + doc.Comments + '</div>' : '';
+      var details = (doc.Details && doc.Details !== inv.Description) ? '<div style="font-size:12px;font-weight:700;color:#888;margin:10px 0 4px;">פרטים</div><div style="font-size:13px;color:#333;">' + doc.Details + '</div>' : '';
+      elx.innerHTML = linesHtml + details + comments;
+    })
+    .catch(function(){ var elx = document.getElementById('invFullDetail'); if (elx) elx.innerHTML = ''; });
 }
 
 function markInvoiceIssued(jobId, client) {
