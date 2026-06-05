@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v795</title>
+<title>י.ב אחזקות — v796</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v795
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v796
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -529,7 +529,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v795 · 17/05/2026
+v796 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1171,7 +1171,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v795</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v796</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -5367,6 +5367,7 @@ function _lastInvoicesHtml(order, groups) {
       html += '<div style="border:0.5px solid #e0e0e0;border-radius:10px;padding:10px 12px;margin-bottom:7px;display:flex;align-items:center;gap:10px;">' +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-size:12px;font-weight:700;color:#555;">' + (inv.Number||'') + (dateStr?' · '+dateStr:'') + '</div>' +
+          (inv.Description ? '<div style="font-size:13px;font-weight:600;color:#111;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + inv.Description + '</div>' : '') +
           '<div style="font-size:11px;margin-top:3px;">' + badge + '</div>' +
         '</div>' +
         '<div style="font-size:15px;font-weight:800;color:#111;flex-shrink:0;">₪' + Math.round(inv.Total||0).toLocaleString() + '</div>' +
