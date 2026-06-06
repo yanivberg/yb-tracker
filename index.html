@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v797</title>
+<title>י.ב אחזקות — v799</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v797
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v799
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxi3VPm…exec (v113)
@@ -529,7 +529,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v797 · 17/05/2026
+v799 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
 v487 · 09/05/2026
@@ -1171,7 +1171,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v797</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v799</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2090,7 +2090,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwyfp3DUh2tFsCecSIUhrnwEGYr1tXe80JXWOlXDXESbl2npSHLac2mYwN8YyoVNQSdPQ/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxnb70Bxqn7AS1932g-S8m9B4hotmD0gKkXpwlEvqUura1470UYwkkrt4MHgsrOWN9Y3Q/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -7836,26 +7836,31 @@ function _buildWeeklyUI(body,weekKey,sun){
   var DN=['ראשון','שני','שלישי','רביעי','חמישי'],today=new Date(),isTW=_weeklyOffset===0,tDow=today.getDay();
   var totalJobs=_weeklyPlan.length;
   var totalHrs=_weeklyPlan.reduce(function(acc,e){var t=_weeklyTasks.find(function(t){return t.jobId===e.jobId;});return acc+(t?parseFloat(t.hours||t.estHrs||0):0);},0);
+  function _wkTint(hex){ return (typeof hex==='string' && hex.charAt(0)==='#' && hex.length===7) ? hex+'22' : 'rgba(21,101,192,0.12)'; }
   var calCols=DN.map(function(name,i){
     var dn=(function(){var d=new Date(sun);d.setDate(sun.getDate()+i);return d.getDate();})();
     var isToday=isTW&&tDow===i;
     var blocks=_weeklyPlan.filter(function(e){return e.dayIndex===i;}).map(function(en){
-      var sc=en.status==='בתהליך ביצוע'?'#2e7d32':'#1565c0';
+      var cc=clientColor(en.client); var accent=(cc&&cc.solid)||'#1565c0';
       var t=_weeklyTasks.find(function(t){return t.jobId===en.jobId;});
-      var hrs=t?(t.hours||t.estHrs||0):0;
-      return '<div style="background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-right:2px solid '+sc+';border-radius:0 5px 5px 0;padding:3px 4px 3px 14px;margin-bottom:3px;position:relative;">'+
-        '<button onclick="_removeWeeklyEntry(\''+weekKey+'\','+i+',\''+en.jobId.replace(/['"]/g,'')+'\')\" style="position:absolute;top:50%;left:2px;transform:translateY(-50%);width:11px;height:11px;border-radius:50%;background:#ffcdd2;color:#c62828;border:none;font-size:7px;cursor:pointer;padding:0;line-height:11px;text-align:center;">✕</button>'+
-        '<div style="font-size:9px;color:var(--color-text-secondary);">'+en.client+'</div>'+
-        '<div style="font-size:10px;font-weight:500;color:var(--color-text-primary);direction:rtl;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'+(en.desc||'').slice(0,13)+'</div>'+
-        (hrs?'<div style="font-size:9px;color:var(--color-text-secondary);">'+hrs+'h</div>':'')+
+      var hrs=t?(t.hours||t.estHrs||0):(en.hours||0);
+      var statusTxt=en.status==='בתהליך ביצוע'?'בביצוע':'ממתין';
+      return '<div style="display:flex;align-items:center;gap:8px;background:#fafbfc;border-right:5px solid '+accent+';border-radius:0 10px 10px 0;padding:8px 11px;margin-bottom:6px;">'+
+        '<div style="flex:1;min-width:0;">'+
+          '<div style="font-size:13px;font-weight:600;color:#111;direction:rtl;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'+(en.desc||'').slice(0,28)+'</div>'+
+          '<div style="font-size:10px;color:#888;margin-top:2px;">'+(hrs?hrs+'h · ':'')+statusTxt+'</div>'+
+        '</div>'+
+        '<span style="background:'+_wkTint(accent)+';color:'+accent+';font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;flex-shrink:0;white-space:nowrap;">'+en.client+'</span>'+
+        '<button onclick="_removeWeeklyEntry(\''+weekKey+'\','+i+',\''+en.jobId.replace(/['"]/g,'')+'\')" style="width:18px;height:18px;border-radius:50%;background:#ffcdd2;color:#c62828;border:none;font-size:9px;cursor:pointer;padding:0;line-height:18px;text-align:center;flex-shrink:0;">✕</button>'+
       '</div>';
     }).join('');
     var act=!!_weeklySelectedTask;
-    var addBtn='<button id="wday-btn-'+i+'" onclick="_weeklyDayTap('+i+',\''+weekKey+'\')" style="width:100%;border:0.5px dashed '+(act?'#1565c0':'#ccc')+';border-radius:5px;background:'+(act?'rgba(21,101,192,0.08)':'none')+';padding:5px 0;font-size:14px;color:'+(act?'#1565c0':'#bbb')+';cursor:pointer;margin-top:2px;">'+(act?'+':'·')+'</button>';
-    return '<div id="wday-col-'+i+'" style="flex:1;min-width:0;'+(i<4?'border-right:0.5px solid var(--color-border-tertiary);':'')+'padding:0 3px;">'+
-      '<div style="font-size:9px;font-weight:500;color:'+(isToday?'#1565c0':'var(--color-text-secondary)')+';text-align:center;padding-bottom:3px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:4px;">'+name.slice(0,3)+'</div>'+
-      '<div style="text-align:center;font-size:'+(isToday?'13px':'12px')+';font-weight:500;color:'+(isToday?'#fff':'var(--color-text-primary)')+';background:'+(isToday?'#1565c0':'none')+';border-radius:50%;width:'+(isToday?'22px':'auto')+';height:'+(isToday?'22px':'auto')+';line-height:'+(isToday?'22px':'auto')+';margin:0 auto 4px;">'+dn+'</div>'+
-      blocks+addBtn+'</div>';
+    var addBtn='<button id="wday-btn-'+i+'" onclick="_weeklyDayTap('+i+',\''+weekKey+'\')" style="width:100%;border:1px dashed '+(act?'#1565c0':'#e0e0e0')+';border-radius:8px;background:'+(act?'rgba(21,101,192,0.07)':'none')+';padding:'+(act?'9px':'5px')+' 0;font-size:'+(act?'12px':'11px')+';color:'+(act?'#1565c0':'#ccc')+';cursor:pointer;font-family:Heebo,sans-serif;margin-top:'+(blocks?'2px':'0')+';">'+(act?'+ הוסף ליום זה':(blocks?'':'+'))+'</button>';
+    var dayHdr=isToday
+      ? '<div style="font-size:12px;font-weight:800;color:#1565c0;border-bottom:2px solid #1565c0;padding-bottom:3px;display:inline-block;margin-bottom:7px;">'+name+' '+dn+' · היום</div>'
+      : '<div style="font-size:12px;font-weight:800;color:'+(blocks?'#666':'#aaa')+';margin-bottom:7px;">'+name+' '+dn+'</div>';
+    return '<div id="wday-col-'+i+'" style="margin-bottom:11px;padding:6px;border-radius:10px;'+(isToday?'background:rgba(21,101,192,0.04);':'')+'">'+
+      dayHdr+blocks+addBtn+'</div>';
   }).join('');
   var chips=_weeklyTasks.map(function(t,idx){
     var cnt=_weeklyPlan.filter(function(e){return e.jobId===t.jobId;}).length;
@@ -7892,7 +7897,7 @@ function _buildWeeklyUI(body,weekKey,sun){
           '<div style="font-size:10px;color:var(--color-text-secondary);">שעות מוערכות</div>'+
           '<div style="font-size:18px;font-weight:500;color:var(--color-text-primary);">'+totalHrs.toFixed(1)+'</div></div>'+
       '</div>'+
-      '<div id="weekly-cal-grid" style="display:flex;border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:6px 4px;min-height:80px;">'+calCols+'</div>'+
+      '<div id="weekly-cal-grid" style="padding:2px;">'+calCols+'</div>'+
     '</div>'+
     hint+
     '<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:6px;">'+_weeklyTasks.length+' משימות פתוחות</div>'+
