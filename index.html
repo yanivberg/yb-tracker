@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v800</title>
+<title>י.ב אחזקות — v802</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,15 +520,22 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v800
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v802
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxi3VPm…exec (v113)
+Apps Script: AKfycbyxnZTW…exec (v190)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v802 · 07/06/2026
+• Updated SHEETS_URL to new Apps Script v190 deployment
+
+v801 · 07/06/2026
+• New: Weekly Planning estimated hours — per-card "הערכה Xh · status", per-day total in day header, week grand total "סה״כ הערכת שעות"
+• Requires Apps Script v190 (getOpenTasksForWeekly now returns הערכת שעות per task)
+
 v800 · 17/05/2026
 • Fix: Client prefix preview now shows 3-letter prefix matching Apps Script
 
@@ -1171,7 +1178,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v800</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v802</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2090,7 +2097,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbw9G8wpl_hOq-AdrVKvZYyUaJXF-nODFpn2-hknq4E-hihaM2NPziSkapRWAIl8Rz371A/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyxnZTW_luoHuSLjVnjb5gwWvh9hv5hjV_iCPwOgXsU9LBrorQPRuxMixxAkN6jHTfTXA/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -7837,10 +7844,13 @@ function _buildWeeklyUI(body,weekKey,sun){
   var totalJobs=_weeklyPlan.length;
   var totalHrs=_weeklyPlan.reduce(function(acc,e){var t=_weeklyTasks.find(function(t){return t.jobId===e.jobId;});return acc+(t?parseFloat(t.hours||t.estHrs||0):0);},0);
   function _wkTint(hex){ return (typeof hex==='string' && hex.charAt(0)==='#' && hex.length===7) ? hex+'22' : 'rgba(21,101,192,0.12)'; }
+  function _wkFmtHrs(n){ n=parseFloat(n)||0; return (Math.round(n*10)/10).toString(); }
   var calCols=DN.map(function(name,i){
     var dn=(function(){var d=new Date(sun);d.setDate(sun.getDate()+i);return d.getDate();})();
     var isToday=isTW&&tDow===i;
-    var blocks=_weeklyPlan.filter(function(e){return e.dayIndex===i;}).map(function(en){
+    var dayEntries=_weeklyPlan.filter(function(e){return e.dayIndex===i;});
+    var dayEst=dayEntries.reduce(function(acc,en){var t=_weeklyTasks.find(function(t){return t.jobId===en.jobId;});return acc+(t?(parseFloat(t.hours||t.estHrs||0)||0):(parseFloat(en.hours||0)||0));},0);
+    var blocks=dayEntries.map(function(en){
       var cc=clientColor(en.client); var accent=(cc&&cc.solid)||'#1565c0';
       var t=_weeklyTasks.find(function(t){return t.jobId===en.jobId;});
       var hrs=t?(t.hours||t.estHrs||0):(en.hours||0);
@@ -7848,7 +7858,7 @@ function _buildWeeklyUI(body,weekKey,sun){
       return '<div style="display:flex;align-items:center;gap:8px;background:#fafbfc;border-right:5px solid '+accent+';border-radius:0 10px 10px 0;padding:8px 11px;margin-bottom:6px;">'+
         '<div style="flex:1;min-width:0;">'+
           '<div style="font-size:13px;font-weight:600;color:#111;direction:rtl;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">'+(en.desc||'').slice(0,28)+'</div>'+
-          '<div style="font-size:10px;color:#888;margin-top:2px;">'+(hrs?hrs+'h · ':'')+statusTxt+'</div>'+
+          '<div style="font-size:10px;color:#888;margin-top:2px;">הערכה '+(hrs?_wkFmtHrs(hrs)+'h':'—')+' · '+statusTxt+'</div>'+
         '</div>'+
         '<span style="background:'+_wkTint(accent)+';color:'+accent+';font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;flex-shrink:0;white-space:nowrap;">'+en.client+'</span>'+
         '<button onclick="_removeWeeklyEntry(\''+weekKey+'\','+i+',\''+en.jobId.replace(/['"]/g,'')+'\')" style="width:18px;height:18px;border-radius:50%;background:#ffcdd2;color:#c62828;border:none;font-size:9px;cursor:pointer;padding:0;line-height:18px;text-align:center;flex-shrink:0;">✕</button>'+
@@ -7856,9 +7866,10 @@ function _buildWeeklyUI(body,weekKey,sun){
     }).join('');
     var act=!!_weeklySelectedTask;
     var addBtn='<button id="wday-btn-'+i+'" onclick="_weeklyDayTap('+i+',\''+weekKey+'\')" style="width:100%;border:1px dashed '+(act?'#1565c0':'#e0e0e0')+';border-radius:8px;background:'+(act?'rgba(21,101,192,0.07)':'none')+';padding:'+(act?'9px':'5px')+' 0;font-size:'+(act?'12px':'11px')+';color:'+(act?'#1565c0':'#ccc')+';cursor:pointer;font-family:Heebo,sans-serif;margin-top:'+(blocks?'2px':'0')+';">'+(act?'+ הוסף ליום זה':(blocks?'':'+'))+'</button>';
+    var dayTot=dayEntries.length?(' — '+_wkFmtHrs(dayEst)+'h'):'';
     var dayHdr=isToday
-      ? '<div style="font-size:12px;font-weight:800;color:#1565c0;border-bottom:2px solid #1565c0;padding-bottom:3px;display:inline-block;margin-bottom:7px;">'+name+' '+dn+' · היום</div>'
-      : '<div style="font-size:12px;font-weight:800;color:'+(blocks?'#666':'#aaa')+';margin-bottom:7px;">'+name+' '+dn+'</div>';
+      ? '<div style="font-size:12px;font-weight:800;color:#1565c0;border-bottom:2px solid #1565c0;padding-bottom:3px;display:inline-block;margin-bottom:7px;">'+name+' '+dn+' · היום'+dayTot+'</div>'
+      : '<div style="font-size:12px;font-weight:800;color:'+(blocks?'#666':'#aaa')+';margin-bottom:7px;">'+name+' '+dn+dayTot+'</div>';
     return '<div id="wday-col-'+i+'" style="margin-bottom:11px;padding:6px;border-radius:10px;'+(isToday?'background:rgba(21,101,192,0.04);':'')+'">'+
       dayHdr+blocks+addBtn+'</div>';
   }).join('');
@@ -7894,8 +7905,8 @@ function _buildWeeklyUI(body,weekKey,sun){
           '<div style="font-size:10px;color:var(--color-text-secondary);">משימות שבועיות</div>'+
           '<div style="font-size:18px;font-weight:500;color:var(--color-text-primary);">'+totalJobs+'</div></div>'+
         '<div style="flex:1;background:var(--color-background-secondary);border-radius:8px;padding:8px;text-align:center;">'+
-          '<div style="font-size:10px;color:var(--color-text-secondary);">שעות מוערכות</div>'+
-          '<div style="font-size:18px;font-weight:500;color:var(--color-text-primary);">'+totalHrs.toFixed(1)+'</div></div>'+
+          '<div style="font-size:10px;color:var(--color-text-secondary);">סה״כ הערכת שעות</div>'+
+          '<div style="font-size:18px;font-weight:500;color:var(--color-text-primary);">'+_wkFmtHrs(totalHrs)+'h</div></div>'+
       '</div>'+
       '<div id="weekly-cal-grid" style="padding:2px;">'+calCols+'</div>'+
     '</div>'+
