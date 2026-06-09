@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v803</title>
+<title>י.ב אחזקות — v804</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v803
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v804
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbyxnZTW…exec (v191)
@@ -528,6 +528,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v804 · 09/06/2026
+• Active stopwatch card: "✏️ פרטים + סטטוס" button — fill קטגוריה/מחיר/כמות/שעות/מספר רכש and set status בתהליך ביצוע (keeps running) or בוצע (stops + closes card). Frontend-only.
+
 ─────────────────
 v803 · 07/06/2026
 • Progress meter: saves while dragging (no longer lost on reload), now shown on day cards, and synced to the Sheet (needs Apps Script v191)
@@ -1181,7 +1185,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v803</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v804</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1549,6 +1553,55 @@ SHEET SYNC
     </div>
     <button id="completeJobBtn" onclick="submitCompleteJob()" disabled style="width:100%;padding:14px;background:#555;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;opacity:0.5;margin-bottom:10px;">Fill all fields</button>
     <button onclick="savePartialJobFields()" style="width:100%;padding:12px;background:transparent;color:#555;border:1.5px solid #ccc;border-radius:12px;font-size:14px;font-weight:600;font-family:Heebo,sans-serif;cursor:pointer;">💾 Save Filled Fields to Sheet</button>
+  </div>
+</div>
+
+<!-- Stopwatch: fill details + set status (active card) -->
+<div id="swDetailsOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10006;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;padding:20px;font-family:Heebo,sans-serif;direction:rtl;max-height:90vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div style="font-weight:700;font-size:17px;">מילוי פרטים</div>
+      <button onclick="closeSwDetails()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+    </div>
+    <div id="swName" style="font-size:13px;color:#888;margin-bottom:10px;"></div>
+    <div style="background:#e3f2fd;border:1px solid #90caf9;border-radius:10px;padding:8px 12px;margin-bottom:16px;font-size:12px;color:#0d47a1;font-weight:700;">⏱️ זמן בפועל בשעון: <span id="swActual">0:00</span> — לעיון בלבד</div>
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;color:#888;margin-bottom:6px;">קטגוריה</div>
+      <select id="swCat" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;">
+        <option value="">בחר קטגוריה…</option>
+        <option value="אחר">אחר</option>
+        <option value="איטום">איטום</option>
+        <option value="אינסטלציה">אינסטלציה</option>
+        <option value="אספקת חומרים">אספקת חומרים</option>
+        <option value="הובלות">הובלות</option>
+        <option value="הנדימן">הנדימן</option>
+        <option value="מסגרות">מסגרות</option>
+        <option value="נגרות">נגרות</option>
+        <option value="עיצוב">עיצוב</option>
+        <option value="פיקוח">פיקוח</option>
+        <option value="פיתוח מוצר">פיתוח מוצר</option>
+        <option value="צבע">צבע</option>
+        <option value="קבלנות">קבלנות</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:14px;">
+      <div style="flex:1;"><div style="font-size:13px;color:#888;margin-bottom:6px;">מחיר ליחידה</div>
+        <input id="swPrice" type="number" min="0" placeholder="0" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>
+      <div style="flex:1;"><div style="font-size:13px;color:#888;margin-bottom:6px;">כמות</div>
+        <input id="swQty" type="number" min="0" placeholder="0" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>
+    </div>
+    <div style="margin-bottom:14px;"><div style="font-size:13px;color:#888;margin-bottom:6px;">הערכת שעות</div>
+      <input id="swHours" type="number" min="0" step="0.5" placeholder="0" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>
+    <div style="margin-bottom:18px;"><div style="font-size:13px;color:#888;margin-bottom:6px;">מספר רכש</div>
+      <input id="swPO" type="text" maxlength="50" placeholder="מספר הזמנת רכש…" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>
+    <div style="border-top:1.5px solid #eee;padding-top:14px;">
+      <div style="font-size:13px;font-weight:900;margin-bottom:10px;">שנה סטטוס ל:</div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="swApplyStatus('progress')" style="flex:1;padding:15px 8px;border:none;border-radius:12px;font-size:15px;font-weight:900;font-family:Heebo,sans-serif;color:#fff;background:#ef6c00;line-height:1.3;">בתהליך ביצוע<span style="display:block;font-size:10px;font-weight:700;opacity:0.92;margin-top:3px;">שומר · השעון ממשיך</span></button>
+        <button onclick="swApplyStatus('done')" style="flex:1;padding:15px 8px;border:none;border-radius:12px;font-size:15px;font-weight:900;font-family:Heebo,sans-serif;color:#fff;background:#2e7d32;line-height:1.3;">בוצע<span style="display:block;font-size:10px;font-weight:700;opacity:0.92;margin-top:3px;">שומר · עוצר וסוגר</span></button>
+      </div>
+      <button onclick="swApplyStatus('saveonly')" style="width:100%;margin-top:12px;padding:11px;background:transparent;color:#555;border:1.5px solid #ccc;border-radius:12px;font-size:13.5px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">💾 שמור פרטים בלבד (בלי שינוי סטטוס)</button>
+    </div>
   </div>
 </div>
 
@@ -2626,6 +2679,47 @@ var _currentCompleteJob = null;
 function openCompleteJobModal(job, details, queue, idx) { _currentCompleteJob = { job: job, queue: queue, idx: idx }; document.getElementById('completeJobName').textContent = job.id + ' — ' + job.desc + ' (' + job.client + ')'; document.getElementById('cjCategory').value = details.category || ''; document.getElementById('cjPrice').value = details.price || ''; document.getElementById('cjQty').value = details.qty || ''; document.getElementById('cjHours').value = details.hours || ''; document.getElementById('cjPO').value = details.po || ''; updateCompleteJobBtn(); document.getElementById('completeJobOverlay').style.display = 'flex'; }
 function updateCompleteJobBtn() { var cat = document.getElementById('cjCategory').value; var price = document.getElementById('cjPrice').value; var qty = document.getElementById('cjQty').value; var hours = document.getElementById('cjHours').value; var po = document.getElementById('cjPO').value.trim(); var btn = document.getElementById('completeJobBtn'); var all = cat && price && qty && hours && po; btn.disabled = !all; btn.style.opacity = all ? '1' : '0.5'; btn.style.background = all ? '#111' : '#555'; btn.textContent = all ? '✓ Save Update — Ready for Execution' : '💾 Save Update'; }
 function submitCompleteJob() { if (!_currentCompleteJob) return; var job = _currentCompleteJob.job; var cat = document.getElementById('cjCategory').value; var price = document.getElementById('cjPrice').value; var qty = document.getElementById('cjQty').value; var hours = document.getElementById('cjHours').value; var po = document.getElementById('cjPO').value.trim(); var btn = document.getElementById('completeJobBtn'); btn.textContent = '⏳ שומר…'; btn.disabled = true; var params = '?action=updateJobFields&jobId=' + encodeURIComponent(job.id) + '&client=' + encodeURIComponent(job.client) + '&category=' + encodeURIComponent(cat) + '&price=' + encodeURIComponent(price) + '&qty=' + encodeURIComponent(qty) + '&hours=' + encodeURIComponent(hours) + '&po=' + encodeURIComponent(po); fetch(SHEETS_URL + params).then(function(r) { return r.text(); }).then(function() { var all = cat && price && qty && hours && po; if (all) { return fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(job.id) + '&client=' + encodeURIComponent(job.client) + '&status=' + encodeURIComponent('ממתין לביצוע')).then(function() { document.getElementById('completeJobOverlay').style.display = 'none'; showToast('✓ ' + job.id + ' → Ready for Execution'); fetchPendingQuote(); }); } else { document.getElementById('completeJobOverlay').style.display = 'none'; showToast('💾 ' + job.id + ' — Updated in Sheet'); fetchPendingQuote(); } }).catch(function() { btn.textContent = '💾 Save Update'; btn.disabled = false; showToast('Failed to save'); }); }
+var _swIdx = -1;
+function openSwDetails(i) {
+  var p = projects[i]; if (!p) return;
+  _swIdx = i;
+  document.getElementById('swName').textContent = (p.jobId ? p.jobId + ' — ' : '') + (p.name || '') + (p.client ? ' (' + p.client + ')' : '');
+  var act = (p.totalMs || 0) + (p.prevMs || 0); if (p.active && p.activeStart) act += Date.now() - p.activeStart;
+  document.getElementById('swActual').textContent = formatMs(act);
+  ['swCat','swPrice','swQty','swHours','swPO'].forEach(function(id){ var el = document.getElementById(id); if (el) el.value = ''; });
+  if (SHEETS_URL && p.jobId) {
+    fetch(SHEETS_URL + '?action=getJobDetails&jobId=' + encodeURIComponent(p.jobId) + '&client=' + encodeURIComponent(p.jobClient || p.client))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (_swIdx !== i) return;
+        if (d.category) document.getElementById('swCat').value = d.category;
+        if (d.price) document.getElementById('swPrice').value = d.price;
+        if (d.qty) document.getElementById('swQty').value = d.qty;
+        if (d.hours) document.getElementById('swHours').value = d.hours;
+        if (d.po) document.getElementById('swPO').value = d.po;
+      }).catch(function(){});
+  }
+  document.getElementById('swDetailsOverlay').style.display = 'flex';
+}
+function closeSwDetails() { document.getElementById('swDetailsOverlay').style.display = 'none'; }
+function _swSaveFields(p) {
+  if (!SHEETS_URL || !p.jobId) return;
+  var cat = document.getElementById('swCat').value;
+  var price = document.getElementById('swPrice').value;
+  var qty = document.getElementById('swQty').value;
+  var hours = document.getElementById('swHours').value;
+  var po = document.getElementById('swPO').value.trim();
+  fetch(SHEETS_URL + '?action=updateJobFields&jobId=' + encodeURIComponent(p.jobId) + '&client=' + encodeURIComponent(p.jobClient || p.client) + '&category=' + encodeURIComponent(cat) + '&price=' + encodeURIComponent(price) + '&qty=' + encodeURIComponent(qty) + '&hours=' + encodeURIComponent(hours) + '&po=' + encodeURIComponent(po)).catch(function(){});
+}
+function swApplyStatus(kind) {
+  var i = _swIdx; var p = projects[i];
+  closeSwDetails();
+  if (!p) return;
+  _swSaveFields(p);
+  if (kind === 'saveonly') { showToast('💾 ' + (p.jobId || p.name) + ' — נשמרו פרטים'); return; }
+  if (kind === 'progress') { setJobStatus(p, 'בתהליך ביצוע'); showToast('✓ ' + (p.name || p.jobId) + ' → בתהליך ביצוע'); return; }
+  if (kind === 'done') { if (!p.done) toggleDone(i); }
+}
 function savePartialJobFields() { if (!_currentCompleteJob) return; var job = _currentCompleteJob.job; var cat = document.getElementById('cjCategory').value; var price = document.getElementById('cjPrice').value; var qty = document.getElementById('cjQty').value; var hours = document.getElementById('cjHours').value; var po = document.getElementById('cjPO').value.trim(); if (!cat && !price && !qty && !hours && !po) { showToast('Nothing to save — fill at least one field'); return; } var params = '?action=updateJobFields&jobId=' + encodeURIComponent(job.id) + '&client=' + encodeURIComponent(job.client) + '&category=' + encodeURIComponent(cat) + '&price=' + encodeURIComponent(price) + '&qty=' + encodeURIComponent(qty) + '&hours=' + encodeURIComponent(hours) + '&po=' + encodeURIComponent(po); fetch(SHEETS_URL + params).then(function(r) { return r.text(); }).then(function() { document.getElementById('completeJobOverlay').style.display = 'none'; showToast('💾 ' + job.id + ' — Saved to Sheet'); fetchPendingQuote(); }).catch(function() { showToast('Failed to save'); }); }
 
 function openNewClientModal() {
@@ -3338,6 +3432,9 @@ function renderProjectBtns() {
       '<div style="margin-bottom:12px;">' +
         '<button onclick="toggleProject('+i+')" style="width:100%;padding:18px;border:none;border-radius:12px;font-size:22px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:' + (cc.solid||'#333') + ';color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.25);position:relative;z-index:2;">' +
           (p.done ? '↩ Restore' : (p.active ? '⏸ Pause' : '▶ Start')) + '</button>' +
+      '</div>' +
+      '<div style="margin-bottom:12px;">' +
+        '<button onclick="event.stopPropagation();openSwDetails('+i+')" style="width:100%;padding:13px;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#0d47a1;box-shadow:0 3px 10px rgba(0,0,0,0.12);position:relative;z-index:2;">✏️ פרטים + סטטוס</button>' +
       '</div>' +
       '<div style="border-top:2px solid rgba(0,0,0,0.15);padding-top:10px;">' +
         '<div style="font-size:11px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Notes</div>' +
