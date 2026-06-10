@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v812</title>
+<title>י.ב אחזקות — v813</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -524,7 +524,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v812
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v813
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxFJ6d…exec (v196)
@@ -532,6 +532,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v813 · 10/06/2026
+• FIX: invoice/receipt "undefined contacts loaded" — contact loaders now detect a non-array / error response from the proxy and show the real Caspit error instead of breaking the screen
+
 ─────────────────
 v812 · 10/06/2026
 • New 🎒 Pocket (הכיס) drawer screen — insurance (policy + expiry badges) and per-project signed documents, stored as Drive/URL links, synced across devices. Needs Apps Script v196.
@@ -1221,7 +1225,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v812</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v813</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -5814,8 +5818,10 @@ function _caspitLoadData() {
   _caspitFetch(CASPIT_PROXY_URL + '?action=getContacts')
     .then(function(r){ return r.json(); })
     .then(function(data) {
-      _caspitContacts = data || [];
-      showToast('✓ ' + _caspitContacts.length + ' contacts loaded', 3000);
+      var _cc = _coerceContacts(data);
+      _caspitContacts = _cc.arr;
+      if (_cc.err) showToast('⚠️ שגיאת אנשי קשר: ' + _cc.err, 6000);
+      else showToast('✓ ' + _caspitContacts.length + ' contacts loaded', 3000);
       contactsDone = true; tryRender();
     })
     .catch(function(err) {
@@ -6432,8 +6438,16 @@ function testCaspitProxy() {
   showToast('Testing proxy…');
   _caspitFetch(CASPIT_PROXY_URL + '?action=getContacts')
     .then(function(r){ return r.json(); })
-    .then(function(d){ showToast('✓ Proxy OK — ' + (d||[]).length + ' contacts', 4000); })
+    .then(function(d){ var _cc = _coerceContacts(d); if (_cc.err) showToast('✗ Proxy error: ' + _cc.err, 6000); else showToast('✓ Proxy OK — ' + _cc.arr.length + ' contacts', 4000); })
     .catch(function(e){ showToast('✗ Proxy FAILED: ' + e.message, 5000); });
+}
+
+function _coerceContacts(data) {
+  if (Array.isArray(data)) return { arr: data, err: '' };
+  if (data && Array.isArray(data.contacts)) return { arr: data.contacts, err: '' };
+  if (data && Array.isArray(data.Results)) return { arr: data.Results, err: '' };
+  var err = (data && (data.error || data.ExceptionMessage || data.Message)) || '';
+  return { arr: [], err: err || 'תשובה לא צפויה מהשרת' };
 }
 
 function _caspitFetch(url, options) {
@@ -6460,7 +6474,7 @@ function _renderCaspitQuoteTab() {
     body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ Loading Caspit contacts…</div>';
     _caspitFetch(CASPIT_PROXY_URL + '?action=getContacts')
       .then(function(r){ return r.json(); })
-      .then(function(data) { _caspitContacts = data || []; _renderCaspitQuoteForm(); })
+      .then(function(data) { _caspitContacts = _coerceContacts(data).arr; _renderCaspitQuoteForm(); })
       .catch(function() { _renderCaspitQuoteForm(); });
   } else {
     _renderCaspitQuoteForm();
