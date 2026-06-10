@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v809</title>
+<title>י.ב אחזקות — v810</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,14 +522,18 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v809
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v810
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbzB6jO8…exec (v193)
+Apps Script: AKfycbzB6jO8…exec (v194)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v810 · 10/06/2026
+• New Quotation: "הצע מחיר לכל השורות" — AI suggests ₪min–₪max + reasoning per line item, tap to apply. Whole-project box unchanged (needs Apps Script v194)
+
 ─────────────────
 v809 · 10/06/2026
 • יומן תנועות: client dropdown filters the monthly send — pick a client to email just their month docs to the accountant (needs Apps Script v193)
@@ -1207,7 +1211,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v809</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v810</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6400,6 +6404,69 @@ function _getAIPriceSuggestion() {
   }).catch(function(e) { res.innerHTML = '<div style="color:#c62828;font-size:12px;">⚠️ ' + e.message + '</div>'; });
 }
 
+// Per-row AI pricing: analyzes every line item separately, shows ₪min–₪max + reasoning under each row (tap to apply)
+function _getAIPriceRows() {
+  var container = document.getElementById('caspitQuoteRows');
+  var msg = document.getElementById('aiRowsMsg');
+  var btn = document.getElementById('aiRowsBtn');
+  if (!container) return;
+  var rowEls = container.children;
+  var lines = [], hoursArr = [];
+  for (var i = 0; i < rowEls.length; i++) {
+    var dEl = rowEls[i].querySelector('.cq-desc');
+    var hEl = rowEls[i].querySelector('.cq-hours');
+    lines.push(dEl ? (dEl.value || '').trim() : '');
+    hoursArr.push(hEl ? (parseFloat(hEl.value) || 0) : 0);
+  }
+  if (!lines.some(function(l){ return l; })) { if (msg) msg.innerHTML = '<div style="color:#c62828;font-size:12px;direction:rtl;">⚠️ הכנס תיאור לפחות לשורה אחת</div>'; return; }
+  var client = (document.getElementById('caspitQuoteSheetClient') || {}).value || '';
+  if (msg) msg.innerHTML = '<div style="font-size:12px;color:#888;direction:rtl;">⏳ מנתח כל שורה בנפרד... (10-30 שניות)</div>';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ מנתח...'; }
+  fetch(SHEETS_URL + '?action=getAIPriceRows' +
+    '&lines=' + encodeURIComponent(JSON.stringify(lines)) +
+    '&hours=' + encodeURIComponent(JSON.stringify(hoursArr)) +
+    '&client=' + encodeURIComponent(client) +
+    '&workers=' + _aiPriceWorkers +
+    '&materials=' + _aiPriceMat +
+    '&_t=' + Date.now()
+  ).then(function(r){ return r.json(); }).then(function(d) {
+    if (btn) { btn.disabled = false; btn.textContent = '💡 הצע מחיר לכל השורות'; }
+    if (d.error) { if (msg) msg.innerHTML = '<div style="color:#c62828;font-size:12px;direction:rtl;">⚠️ ' + d.error + '</div>'; return; }
+    if (msg) msg.innerHTML = '';
+    var out = d.rows || [];
+    var rows2 = container.children;
+    for (var k = 0; k < rows2.length; k++) { _renderRowSuggestion(rows2[k], out[k], lines[k]); }
+  }).catch(function(e) { if (btn) { btn.disabled = false; btn.textContent = '💡 הצע מחיר לכל השורות'; } if (msg) msg.innerHTML = '<div style="color:#c62828;font-size:12px;direction:rtl;">⚠️ ' + e.message + '</div>'; });
+}
+function _renderRowSuggestion(rowDiv, sugg, desc) {
+  if (!rowDiv) return;
+  var slot = rowDiv.querySelector('.cq-sugg');
+  if (!slot) { slot = document.createElement('div'); slot.className = 'cq-sugg'; rowDiv.appendChild(slot); }
+  if (!desc) { slot.innerHTML = ''; return; }
+  var min = sugg ? Math.round(sugg.min || 0) : 0;
+  var max = sugg ? Math.round(sugg.max || 0) : 0;
+  if (!(min > 0 || max > 0)) { slot.innerHTML = '<div style="font-size:10px;color:#aaa;direction:rtl;margin-top:8px;">אין הערכת AI לשורה זו</div>'; return; }
+  slot.innerHTML =
+    '<div style="border:1.5px solid #bbdefb;background:#f5faff;border-radius:9px;padding:8px 10px;margin-top:8px;direction:rtl;">' +
+      '<div style="font-size:10px;color:#1565c0;font-weight:700;margin-bottom:5px;">💡 המלצת AI — הקש מחיר כדי למלא</div>' +
+      '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
+        '<button type="button" class="cq-sg-min" style="font-size:14px;font-weight:900;color:#0d47a1;background:#e3f2fd;border:1px solid #90caf9;border-radius:8px;padding:4px 11px;cursor:pointer;font-family:Heebo,sans-serif;">₪' + min.toLocaleString() + '<span style="font-size:8px;font-weight:700;color:#1976d2;display:block;">לא פחות מ-</span></button>' +
+        '<span style="color:#90a4ae;font-weight:900;">–</span>' +
+        '<button type="button" class="cq-sg-max" style="font-size:14px;font-weight:900;color:#0d47a1;background:#e3f2fd;border:1px solid #90caf9;border-radius:8px;padding:4px 11px;cursor:pointer;font-family:Heebo,sans-serif;">₪' + max.toLocaleString() + '<span style="font-size:8px;font-weight:700;color:#1976d2;display:block;">תקרה</span></button>' +
+      '</div>' +
+      (sugg && sugg.reasoning ? '<div style="font-size:10px;color:#555;margin-top:6px;line-height:1.5;">' + sugg.reasoning + '</div>' : '') +
+      '<div class="cq-sg-applied" style="font-size:10px;color:#2e7d32;font-weight:700;margin-top:5px;display:none;">✓ הוחל על השורה</div>' +
+    '</div>';
+  var applied = slot.querySelector('.cq-sg-applied');
+  slot.querySelector('.cq-sg-min').addEventListener('click', function(){ _applyRowPrice(rowDiv, min, applied); });
+  slot.querySelector('.cq-sg-max').addEventListener('click', function(){ _applyRowPrice(rowDiv, max, applied); });
+}
+function _applyRowPrice(rowDiv, val, appliedEl) {
+  var p = rowDiv.querySelector('.cq-price'); if (p) p.value = val;
+  if (appliedEl) appliedEl.style.display = 'block';
+  calcCaspitTotal();
+}
+
 var _quoteMode = 'new'; // 'new' or 'edit'
 var _editQuoteDoc = null; // full Caspit document being edited
 var _recentQuotes = null;
@@ -6566,7 +6633,9 @@ function _renderCaspitQuoteForm() {
       '<span id="caspitRowCount" style="font-size:11px;color:#aaa;">1 row</span>' +
     '</div>' +
     '<div id="caspitQuoteRows"></div>' +
-    '<button onclick="addCaspitQuoteRow()" type="button" style="width:100%;padding:10px;background:none;border:2px dashed #0d47a1;border-radius:10px;color:#0d47a1;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;margin-bottom:12px;">+ Add Row</button>' +
+    '<button onclick="addCaspitQuoteRow()" type="button" style="width:100%;padding:10px;background:none;border:2px dashed #0d47a1;border-radius:10px;color:#0d47a1;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;margin-bottom:8px;">+ Add Row</button>' +
+    '<button onclick="_getAIPriceRows()" id="aiRowsBtn" type="button" style="width:100%;padding:11px;background:#1565c0;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;margin-bottom:6px;">💡 הצע מחיר לכל השורות</button>' +
+    '<div id="aiRowsMsg" style="margin-bottom:12px;"></div>' +
     '<div id="caspitQuoteTotalBox" style="border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;background:#e8f5e9;">' +
       '<div>' +
         '<div id="caspitTotalLabel" style="font-size:12px;font-weight:600;color:#2e7d32;">Total (excl. VAT)</div>' +
@@ -6688,8 +6757,8 @@ function delCaspitQuoteRow(btn) {
   var container = document.getElementById('caspitQuoteRows');
   if (!container || container.children.length <= 1) return;
   btn.closest('div[style]').remove();
-  var rows = container.querySelectorAll('div[style]');
-  rows.forEach(function(r, i) { var n = r.querySelector('div'); if(n) n.textContent = 'Row ' + (i+1); });
+  var rows = container.children;
+  for (var i = 0; i < rows.length; i++) { var n = rows[i].querySelector('div'); if (n) n.textContent = 'Row ' + (i+1); }
   calcCaspitTotal();
 }
 
