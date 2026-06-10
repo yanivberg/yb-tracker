@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v807</title>
+<title>י.ב אחזקות — v808</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,7 +522,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v807
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v808
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbzB6jO8…exec (v192)
@@ -530,6 +530,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v808 · 10/06/2026
+• Manage Jobs: filter bar — search (desc/ID), status, category, invoice status, start-date range. Client-side, no deploy.
+
 ─────────────────
 v807 · 10/06/2026
 • Updated SHEETS_URL to new Apps Script v192 deployment (fixes Manage Jobs load error)
@@ -1199,7 +1203,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v807</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v808</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1625,11 +1629,40 @@ SHEET SYNC
     <div style="font-size:18px;font-weight:900;">🗂️ ניהול עבודות</div>
     <button onclick="closeManageJobs()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:5px 12px;font-size:16px;font-weight:900;cursor:pointer;">✕</button>
   </div>
-  <div style="padding:14px 16px;flex-shrink:0;">
+  <div style="padding:14px 16px 8px;flex-shrink:0;">
     <select id="mjClient" onchange="mjRenderList()" style="width:100%;padding:13px;border:1.5px solid #b2dfdb;border-radius:12px;font-size:15px;font-family:Heebo,sans-serif;background:#fff;font-weight:700;color:#00695c;">
       <option value="">— בחר לקוח —</option>
     </select>
-    <div id="mjCount" style="font-size:11px;color:#7a8593;margin:8px 4px 0;font-weight:700;"></div>
+    <div style="background:#fff;border:1px solid #e0e7ec;border-radius:14px;padding:10px 12px;margin-top:10px;">
+      <div style="display:flex;align-items:center;gap:8px;border:1.5px solid #ddd;border-radius:10px;padding:8px 10px;">
+        <span>🔍</span><input id="mjQ" type="text" placeholder="חיפוש לפי תיאור או מספר עבודה…" oninput="mjApplyFilter()" style="border:none;outline:none;flex:1;font-size:14.5px;font-family:Heebo,sans-serif;background:transparent;">
+      </div>
+      <div onclick="mjToggleFilters()" style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;cursor:pointer;">
+        <span style="font-size:12.5px;font-weight:900;color:#00695c;">סינון מתקדם</span><span id="mjFArrow" style="color:#00695c;font-size:12px;">▾</span>
+      </div>
+      <div id="mjFBody" style="display:none;margin-top:10px;">
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <div style="flex:1;"><div style="font-size:10.5px;color:#90a4ae;font-weight:700;margin-bottom:3px;">סטטוס</div>
+            <select id="mjFStatus" onchange="mjApplyFilter()" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;background:#fff;"><option value="">הכול</option><option>ממתין להצעה</option><option>ניתנה הצעה</option><option>ממתין לביצוע</option><option>בתהליך ביצוע</option><option>בוצע</option></select></div>
+          <div style="flex:1;"><div style="font-size:10.5px;color:#90a4ae;font-weight:700;margin-bottom:3px;">קטגוריה</div>
+            <select id="mjFCat" onchange="mjApplyFilter()" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;background:#fff;"><option value="">הכול</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <div style="flex:1;"><div style="font-size:10.5px;color:#90a4ae;font-weight:700;margin-bottom:3px;">חשבונית</div>
+            <select id="mjFInv" onchange="mjApplyFilter()" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;background:#fff;"><option value="__all">הכול</option><option value="__none">ללא</option><option value="להוציא חש">להוציא חש</option><option value="הופקה">הופקה</option></select></div>
+          <div style="flex:1;"></div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div style="flex:1;"><div style="font-size:10.5px;color:#90a4ae;font-weight:700;margin-bottom:3px;">מתאריך התחלה</div><input id="mjFFrom" type="date" onchange="mjApplyFilter()" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;"></div>
+          <div style="flex:1;"><div style="font-size:10.5px;color:#90a4ae;font-weight:700;margin-bottom:3px;">עד תאריך התחלה</div><input id="mjFTo" type="date" onchange="mjApplyFilter()" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;"></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+        <span id="mjCount" style="font-size:11.5px;color:#607d8b;font-weight:700;"></span>
+        <button onclick="mjClearFilters()" style="font-size:12px;color:#c62828;font-weight:900;background:none;border:none;cursor:pointer;font-family:Heebo,sans-serif;">נקה סינון ✕</button>
+      </div>
+      <div id="mjChips" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;"></div>
+    </div>
   </div>
   <div id="mjList" style="flex:1;overflow-y:auto;padding:0 16px 24px;"></div>
 </div>
@@ -2758,21 +2791,75 @@ function _mjBadge(s) {
 }
 function mjRenderList() {
   _mjClient = document.getElementById('mjClient').value;
-  var list = document.getElementById('mjList'), cnt = document.getElementById('mjCount');
-  if (!_mjClient) { list.innerHTML = ''; cnt.textContent = ''; return; }
+  var list = document.getElementById('mjList');
+  if (!_mjClient) { _mjJobs = []; list.innerHTML = ''; document.getElementById('mjCount').textContent = ''; document.getElementById('mjChips').innerHTML = ''; return; }
   list.innerHTML = '<div style="text-align:center;color:#90a4ae;padding:30px;">⏳ טוען…</div>';
   fetch(SHEETS_URL + '?action=getClientJobs&client=' + encodeURIComponent(_mjClient)).then(function(r){ return r.json(); }).then(function(jobs){
     _mjJobs = jobs || [];
-    cnt.textContent = _mjJobs.length + ' עבודות';
-    if (!_mjJobs.length) { list.innerHTML = '<div style="text-align:center;color:#90a4ae;padding:30px;">אין עבודות ללקוח זה</div>'; return; }
-    list.innerHTML = _mjJobs.map(function(j, i){
-      return '<div onclick="mjOpenEdit('+i+')" style="background:#fff;border:1px solid #e3e8ee;border-radius:13px;padding:12px 14px;margin-bottom:9px;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.05);">'+
-        '<div style="flex:1;min-width:0;"><div style="font-size:10px;font-weight:700;color:#90a4ae;">'+j.id+'</div>'+
-        '<div style="font-size:15px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(j.desc||'—')+'</div>'+
-        '<div style="font-size:11px;color:#78909c;margin-top:2px;">'+(j.category||'—')+' · ₪'+(j.price||0)+' × '+(j.qty||0)+'</div></div>'+
-        _mjBadge(j.status)+'<span style="color:#cfd8dc;font-size:18px;flex-shrink:0;">‹</span></div>';
-    }).join('');
+    mjResetFilterControls();
+    mjPopulateCategories();
+    mjApplyFilter();
   }).catch(function(){ list.innerHTML = '<div style="text-align:center;color:#c62828;padding:30px;">שגיאה בטעינה</div>'; });
+}
+function mjResetFilterControls() {
+  ['mjQ','mjFStatus','mjFCat','mjFFrom','mjFTo'].forEach(function(id){ var el = document.getElementById(id); if (el) el.value = ''; });
+  var inv = document.getElementById('mjFInv'); if (inv) inv.value = '__all';
+}
+function mjPopulateCategories() {
+  var sel = document.getElementById('mjFCat'); if (!sel) return;
+  var seen = {}, cats = [];
+  _mjJobs.forEach(function(j){ var c = (j.category || '').trim(); if (c && !seen[c]) { seen[c] = 1; cats.push(c); } });
+  cats.sort();
+  sel.innerHTML = '<option value="">הכול</option>' + cats.map(function(c){ return '<option>' + c + '</option>'; }).join('');
+}
+function mjToggleFilters() {
+  var b = document.getElementById('mjFBody'), a = document.getElementById('mjFArrow');
+  var open = b.style.display === 'block';
+  b.style.display = open ? 'none' : 'block';
+  a.textContent = open ? '▾' : '▴';
+}
+function mjClearFilters() { mjResetFilterControls(); mjApplyFilter(); }
+function _mjDateISO(s) {
+  if (!s) return '';
+  s = String(s).trim();
+  var m = s.match(/^(\d{4})-(\d{2})-(\d{2})/); if (m) return m[1] + '-' + m[2] + '-' + m[3];
+  m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/);
+  if (m) { var y = m[3]; if (y.length === 2) y = '20' + y; return y + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[1]).slice(-2); }
+  var dt = new Date(s); if (!isNaN(dt.getTime())) return dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) + '-' + ('0' + dt.getDate()).slice(-2);
+  return '';
+}
+function mjApplyFilter() {
+  var list = document.getElementById('mjList');
+  if (!_mjJobs.length) { document.getElementById('mjCount').textContent = _mjClient ? '0 עבודות' : ''; document.getElementById('mjChips').innerHTML = ''; if (_mjClient) list.innerHTML = '<div style="text-align:center;color:#90a4ae;padding:30px;">אין עבודות ללקוח זה</div>'; return; }
+  var q = (document.getElementById('mjQ').value || '').toLowerCase().trim();
+  var st = document.getElementById('mjFStatus').value;
+  var cat = document.getElementById('mjFCat').value;
+  var inv = document.getElementById('mjFInv').value;
+  var from = document.getElementById('mjFFrom').value;
+  var to = document.getElementById('mjFTo').value;
+  var html = '', shown = 0;
+  _mjJobs.forEach(function(j, i){
+    if (q && ((j.desc || '') + ' ' + (j.id || '')).toLowerCase().indexOf(q) === -1) return;
+    if (st && j.status !== st) return;
+    if (cat && (j.category || '') !== cat) return;
+    if (inv === '__none') { if (j.invoice) return; } else if (inv !== '__all') { if ((j.invoice || '') !== inv) return; }
+    if (from || to) { var ds = _mjDateISO(j.dateStart); if (!ds) return; if (from && ds < from) return; if (to && ds > to) return; }
+    shown++;
+    html += '<div onclick="mjOpenEdit(' + i + ')" style="background:#fff;border:1px solid #e3e8ee;border-radius:13px;padding:12px 14px;margin-bottom:9px;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.05);">' +
+      '<div style="flex:1;min-width:0;"><div style="font-size:10px;font-weight:700;color:#90a4ae;">' + j.id + '</div>' +
+      '<div style="font-size:15px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (j.desc || '—') + '</div>' +
+      '<div style="font-size:11px;color:#78909c;margin-top:2px;">' + (j.category || '—') + ' · ₪' + (j.price || 0) + ' × ' + (j.qty || 0) + (j.dateStart ? (' · ' + j.dateStart) : '') + (j.invoice ? (' · ' + j.invoice) : '') + '</div></div>' +
+      _mjBadge(j.status) + '<span style="color:#cfd8dc;font-size:18px;flex-shrink:0;">‹</span></div>';
+  });
+  document.getElementById('mjCount').textContent = shown + ' מתוך ' + _mjJobs.length;
+  var ch = [];
+  if (q) ch.push('🔍 "' + q + '"');
+  if (st) ch.push(st);
+  if (cat) ch.push(cat);
+  if (inv === '__none') ch.push('ללא חשבונית'); else if (inv !== '__all') ch.push(inv);
+  if (from || to) ch.push('📅 ' + (from || '…') + ' → ' + (to || '…'));
+  document.getElementById('mjChips').innerHTML = ch.map(function(c){ return '<span style="font-size:10px;font-weight:700;background:#e0f2f1;color:#00695c;border-radius:20px;padding:3px 10px;">' + c + '</span>'; }).join('');
+  list.innerHTML = shown ? html : '<div style="text-align:center;color:#90a4ae;padding:30px;">אין עבודות שתואמות לסינון</div>';
 }
 function _mjEsc(v) { return v == null ? '' : String(v).replace(/"/g, '&quot;'); }
 function _mjInput(label, id, val, type) { return '<div style="flex:1;margin-bottom:13px;"><div style="font-size:12px;color:#888;margin-bottom:5px;font-weight:700;">'+label+'</div><input id="'+id+'" type="'+(type||'text')+'" value="'+_mjEsc(val)+'" style="width:100%;padding:11px;border:1px solid #ddd;border-radius:10px;font-size:14.5px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>'; }
