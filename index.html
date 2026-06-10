@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v811</title>
+<title>י.ב אחזקות — v812</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -473,6 +473,8 @@ input[id^="progSlider-"]::-moz-range-track {
         <span style="font-size:24px;flex-shrink:0;">📋</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#b07d00;">Pending Quote Projects</span></div>
       <div onclick="closeSetupDrawer();openManageJobs();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🗂️</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">Manage Jobs</div><div style="font-size:11px;color:#888;margin-top:1px;">ניהול עבודות — ערוך/מחק</div></div></div>
+      <div onclick="closeSetupDrawer();openPocket();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">🎒</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00838f;">Pocket</div><div style="font-size:11px;color:#888;margin-top:1px;">הכיס — ביטוח ומסמכים חתומים</div></div></div>
 
       <div onclick="closeSetupDrawer();fetchGrossProfitSummary();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">💰</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#2e7d32;">Gross Profit — To Invoice</span></div>
@@ -522,14 +524,18 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v811
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v812
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxFJ6d…exec (v195)
+Apps Script: AKfycbxFJ6d…exec (v196)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v812 · 10/06/2026
+• New 🎒 Pocket (הכיס) drawer screen — insurance (policy + expiry badges) and per-project signed documents, stored as Drive/URL links, synced across devices. Needs Apps Script v196.
+
 ─────────────────
 v811 · 10/06/2026
 • Pointed to new Apps Script deployment (v195: tolerant client match in monthly send + per-row AI pricing)
@@ -1215,7 +1221,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v811</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v812</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1632,6 +1638,23 @@ SHEET SYNC
       </div>
       <button onclick="swApplyStatus('saveonly')" style="width:100%;margin-top:12px;padding:11px;background:transparent;color:#555;border:1.5px solid #ccc;border-radius:12px;font-size:13.5px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">💾 שמור פרטים בלבד (בלי שינוי סטטוס)</button>
     </div>
+  </div>
+</div>
+
+<!-- Pocket -->
+<div id="pocketOverlay" style="display:none;position:fixed;inset:0;background:#f4f7f9;z-index:10015;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;">
+  <div style="background:#00838f;color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:10px;"><span style="font-size:24px;">🎒</span><div><div style="font-size:18px;font-weight:900;">הכיס</div><div style="font-size:10.5px;opacity:.85;">ביטוחים ומסמכים חתומים · מסונכרן</div></div></div>
+    <button onclick="closePocket()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:5px 12px;font-size:16px;font-weight:900;cursor:pointer;">✕</button>
+  </div>
+  <div style="display:flex;background:#fff;border-bottom:1px solid #e0e7ec;flex-shrink:0;">
+    <div id="pkTabIns" onclick="pkSetTab('insurance')" style="flex:1;text-align:center;padding:13px 6px;font-size:13.5px;font-weight:900;color:#00838f;cursor:pointer;border-bottom:3px solid #00838f;">🛡️ ביטוחים</div>
+    <div id="pkTabDoc" onclick="pkSetTab('doc')" style="flex:1;text-align:center;padding:13px 6px;font-size:13.5px;font-weight:900;color:#90a4ae;cursor:pointer;border-bottom:3px solid transparent;">📄 מסמכים לפרויקטים</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:14px 14px 30px;">
+    <button id="pkAddBtn" onclick="pkToggleForm()" style="width:100%;padding:12px;background:none;border:2px dashed #00838f;border-radius:12px;color:#00838f;font-size:14px;font-weight:900;font-family:Heebo,sans-serif;cursor:pointer;margin-bottom:12px;">+ הוסף</button>
+    <div id="pkForm" style="background:#fff;border:1.5px solid #b2dfdb;border-radius:14px;padding:14px;margin-bottom:12px;display:none;"></div>
+    <div id="pkList"></div>
   </div>
 </div>
 
@@ -2786,6 +2809,145 @@ var _mjClient = null, _mjJobs = [], _mjIdx = -1;
 var _MJ_CATS = ['אחר','איטום','אינסטלציה','אספקת חומרים','הובלות','הנדימן','מסגרות','נגרות','עיצוב','פיקוח','פיתוח מוצר','צבע','קבלנות'];
 var _MJ_STATS = ['ממתין להצעה','ניתנה הצעה','ממתין לביצוע','בתהליך ביצוע','בוצע'];
 var _MJ_INVS = ['','להוציא חש','הופקה'];
+// ── Pocket (insurance + project signed documents) ──────────
+var _pkItems = [];
+var _pkTab = 'insurance';
+var _pkEditId = null;
+var PK_CACHE = 'yb_pocket_cache';
+
+function openPocket() {
+  document.getElementById('pocketOverlay').style.display = 'flex';
+  _pkEditId = null;
+  pkSetTab('insurance');
+  try { var c = JSON.parse(localStorage.getItem(PK_CACHE) || '[]'); if (Array.isArray(c)) { _pkItems = c; pkRender(); } } catch(e) {}
+  pkLoad();
+}
+function closePocket() { document.getElementById('pocketOverlay').style.display = 'none'; }
+function pkLoad() {
+  fetch(SHEETS_URL + '?action=getPocket&_t=' + Date.now()).then(function(r){ return r.json(); }).then(function(d){
+    if (d && d.ok && Array.isArray(d.items)) { _pkItems = d.items; try { localStorage.setItem(PK_CACHE, JSON.stringify(_pkItems)); } catch(e) {} pkRender(); }
+  }).catch(function(){});
+}
+function _pkTabVisual(t) {
+  document.getElementById('pkTabIns').style.color = t === 'insurance' ? '#00838f' : '#90a4ae';
+  document.getElementById('pkTabIns').style.borderBottomColor = t === 'insurance' ? '#00838f' : 'transparent';
+  document.getElementById('pkTabDoc').style.color = t === 'doc' ? '#00838f' : '#90a4ae';
+  document.getElementById('pkTabDoc').style.borderBottomColor = t === 'doc' ? '#00838f' : 'transparent';
+}
+function pkSetTab(t) { _pkTab = t; _pkEditId = null; _pkTabVisual(t); document.getElementById('pkForm').style.display = 'none'; pkRender(); }
+function _pkFmt(iso) { if (!iso) return ''; var p = String(iso).split('-'); if (p.length === 3) return p[2].slice(0,2) + '/' + p[1] + '/' + p[0]; return iso; }
+function _pkExpBadge(iso) {
+  if (!iso) return {txt:'ללא תאריך', bg:'#eceff1', fg:'#607d8b'};
+  var d = new Date(iso); if (isNaN(d.getTime())) return {txt:iso, bg:'#eceff1', fg:'#607d8b'};
+  var days = Math.round((d - new Date(new Date().toISOString().slice(0,10))) / 86400000);
+  if (days < 0) return {txt:'⚠️ פג תוקף', bg:'#ffebee', fg:'#c62828'};
+  if (days <= 30) return {txt:'⏳ פג בעוד ' + days + ' ימים', bg:'#fff3e0', fg:'#e65100'};
+  return {txt:'✓ בתוקף עד ' + _pkFmt(iso), bg:'#e8f5e9', fg:'#2e7d32'};
+}
+function pkRender() {
+  document.getElementById('pkAddBtn').textContent = _pkTab === 'insurance' ? '+ הוסף ביטוח' : '+ הוסף מסמך';
+  var items = _pkItems.filter(function(it){ return it.type === _pkTab; });
+  var list = document.getElementById('pkList');
+  if (!items.length) { list.innerHTML = '<div style="text-align:center;color:#90a4ae;padding:30px;font-size:13px;">' + (_pkTab === 'insurance' ? 'אין ביטוחים עדיין' : 'אין מסמכים עדיין') + '</div>'; return; }
+  list.innerHTML = items.map(function(it){
+    var meta, badge = '';
+    if (_pkTab === 'insurance') {
+      var b = _pkExpBadge(it.expiry);
+      badge = '<span style="font-size:10px;font-weight:900;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;background:' + b.bg + ';color:' + b.fg + ';">' + b.txt + '</span>';
+      meta = 'פוליסה ' + (it.policy || '—');
+    } else {
+      meta = '📁 ' + (it.project || '—') + (it.date ? (' · ' + _pkFmt(it.date)) : '');
+    }
+    var safeLink = (it.link || '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    var dis = it.link ? '' : 'opacity:.45;';
+    return '<div style="background:#fff;border:1px solid #e3e8ee;border-radius:14px;padding:13px 14px;margin-bottom:10px;box-shadow:0 1px 5px rgba(0,0,0,.05);">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
+        '<div style="min-width:0;"><div style="font-size:15px;font-weight:900;">' + (it.name || '—') + '</div>' +
+        '<div style="font-size:11.5px;color:#78909c;margin-top:2px;">' + meta + '</div></div>' + badge + '</div>' +
+      '<div style="display:flex;gap:7px;margin-top:11px;">' +
+        '<button onclick="pkOpen(\'' + safeLink + '\')" style="flex:1;padding:8px;border-radius:9px;border:none;font-size:12.5px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:#00838f;color:#fff;' + dis + '">פתח</button>' +
+        '<button onclick="pkShare(\'' + safeLink + '\')" style="flex:1;padding:8px;border-radius:9px;border:none;font-size:12.5px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:#e0f2f1;color:#00695c;' + dis + '">שתף</button>' +
+        '<button onclick="pkEdit(\'' + it.id + '\')" style="flex:1;padding:8px;border-radius:9px;border:none;font-size:12.5px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:#f5f5f5;color:#666;">ערוך</button>' +
+      '</div></div>';
+  }).join('');
+}
+function pkOpen(l) { if (!l) { showToast('אין קישור לפריט הזה'); return; } window.open(l, '_blank'); }
+function pkShare(l) {
+  if (!l) { showToast('אין קישור לשיתוף'); return; }
+  if (navigator.share) { navigator.share({title:'מסמך — י.ב אחזקות', url:l}).catch(function(){}); }
+  else if (navigator.clipboard) { navigator.clipboard.writeText(l); showToast('✓ הקישור הועתק'); }
+  else { showToast(l); }
+}
+function pkToggleForm() {
+  var f = document.getElementById('pkForm');
+  if (f.style.display === 'block' && !_pkEditId) { f.style.display = 'none'; return; }
+  _pkEditId = null;
+  pkBuildForm(null);
+  f.style.display = 'block';
+}
+function _pkInput(id, val, ph, type) {
+  return '<input id="' + id + '"' + (type ? (' type="' + type + '"') : '') + ' value="' + String(val || '').replace(/"/g,'&quot;') + '" placeholder="' + (ph || '') + '" style="width:100%;padding:10px;border:1.5px solid #ddd;border-radius:9px;font-size:13.5px;font-family:Heebo,sans-serif;margin-bottom:9px;box-sizing:border-box;">';
+}
+function _pkLbl(t) { return '<div style="font-size:10.5px;color:#90a4ae;font-weight:700;margin:0 0 3px;">' + t + '</div>'; }
+function pkBuildForm(item) {
+  var f = document.getElementById('pkForm');
+  if (_pkTab === 'insurance') {
+    f.innerHTML =
+      _pkLbl('סוג ביטוח') + _pkInput('pkf_name', item && item.name, 'צד ג׳ / אחריות מקצועית / חבות מעבידים') +
+      _pkLbl('מספר פוליסה') + _pkInput('pkf_policy', item && item.policy, 'אופציונלי') +
+      _pkLbl('תאריך תפוגה') + _pkInput('pkf_expiry', item && item.expiry, '', 'date') +
+      _pkLbl('קישור (Google Drive / URL)') + _pkInput('pkf_link', item && item.link, 'https://drive.google.com/...') +
+      '<div style="font-size:10.5px;color:#aaa;margin:-4px 0 9px;">העלה את הקובץ ל-Drive והדבק כאן את קישור השיתוף.</div>' +
+      pkFormButtons(item);
+  } else {
+    f.innerHTML =
+      _pkLbl('שם המסמך') + _pkInput('pkf_name', item && item.name, 'הזמנת עבודה חתומה / אישור ביצוע / חוזה') +
+      _pkLbl('פרויקט / לקוח') + '<input id="pkf_project" list="pkClientList" value="' + String((item && item.project) || '').replace(/"/g,'&quot;') + '" placeholder="שם הלקוח / הפרויקט" style="width:100%;padding:10px;border:1.5px solid #ddd;border-radius:9px;font-size:13.5px;font-family:Heebo,sans-serif;margin-bottom:9px;box-sizing:border-box;"><datalist id="pkClientList"></datalist>' +
+      _pkLbl('תאריך') + _pkInput('pkf_date', item && item.date, '', 'date') +
+      _pkLbl('קישור (Google Drive / URL)') + _pkInput('pkf_link', item && item.link, 'https://drive.google.com/...') +
+      '<div style="font-size:10.5px;color:#aaa;margin:-4px 0 9px;">העלה את הקובץ החתום ל-Drive והדבק כאן את הקישור.</div>' +
+      pkFormButtons(item);
+    pkFillClientList();
+  }
+}
+function pkFormButtons(item) {
+  var del = (item && item.id) ? '<button onclick="pkDelete(\'' + item.id + '\')" style="padding:11px 14px;background:#ffebee;color:#c62828;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">מחק</button>' : '';
+  return '<div style="display:flex;gap:8px;"><button onclick="pkSave()" style="flex:1;padding:11px;background:#00838f;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">שמור</button>' + del + '</div>';
+}
+function pkFillClientList() {
+  var dl = document.getElementById('pkClientList'); if (!dl) return;
+  fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(cs){
+    dl.innerHTML = (cs || []).map(function(c){ return '<option value="' + String(c).replace(/"/g,'&quot;') + '">'; }).join('');
+  }).catch(function(){});
+}
+function pkEdit(id) {
+  var item = _pkItems.filter(function(x){ return x.id === id; })[0]; if (!item) return;
+  _pkEditId = id; _pkTab = item.type; _pkTabVisual(item.type); pkRender();
+  pkBuildForm(item);
+  var f = document.getElementById('pkForm'); f.style.display = 'block'; f.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function _pkv(id) { var e = document.getElementById(id); return e ? e.value.trim() : ''; }
+function pkSave() {
+  var name = _pkv('pkf_name'); if (!name) { showToast(_pkTab === 'insurance' ? 'הכנס סוג ביטוח' : 'הכנס שם מסמך'); return; }
+  var params = 'action=savePocketItem&type=' + encodeURIComponent(_pkTab) + '&name=' + encodeURIComponent(name) + '&link=' + encodeURIComponent(_pkv('pkf_link'));
+  if (_pkEditId) params += '&id=' + encodeURIComponent(_pkEditId);
+  if (_pkTab === 'insurance') params += '&policy=' + encodeURIComponent(_pkv('pkf_policy')) + '&expiry=' + encodeURIComponent(_pkv('pkf_expiry'));
+  else params += '&project=' + encodeURIComponent(_pkv('pkf_project')) + '&date=' + encodeURIComponent(_pkv('pkf_date'));
+  showToast('שומר…');
+  fetch(SHEETS_URL + '?' + params + '&_t=' + Date.now()).then(function(r){ return r.json(); }).then(function(d){
+    if (d && d.ok) { document.getElementById('pkForm').style.display = 'none'; _pkEditId = null; showToast('✓ נשמר'); pkLoad(); }
+    else { showToast('⚠️ ' + ((d && d.error) || 'שגיאה')); }
+  }).catch(function(e){ showToast('⚠️ ' + e.message); });
+}
+function pkDelete(id) {
+  if (!confirm('למחוק את הפריט? פעולה זו אינה הפיכה.')) return;
+  showToast('מוחק…');
+  fetch(SHEETS_URL + '?action=deletePocketItem&id=' + encodeURIComponent(id) + '&_t=' + Date.now()).then(function(r){ return r.json(); }).then(function(d){
+    if (d && d.ok) { document.getElementById('pkForm').style.display = 'none'; _pkEditId = null; showToast('✓ נמחק'); pkLoad(); }
+    else { showToast('⚠️ ' + ((d && d.error) || 'שגיאה')); }
+  }).catch(function(e){ showToast('⚠️ ' + e.message); });
+}
+
 function openManageJobs() {
   document.getElementById('manageJobsOverlay').style.display = 'flex';
   var sel = document.getElementById('mjClient');
