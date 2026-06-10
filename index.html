@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v808</title>
+<title>י.ב אחזקות — v809</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,14 +522,18 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v808
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v809
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbzB6jO8…exec (v192)
+Apps Script: AKfycbzB6jO8…exec (v193)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v809 · 10/06/2026
+• יומן תנועות: client dropdown filters the monthly send — pick a client to email just their month docs to the accountant (needs Apps Script v193)
+
 ─────────────────
 v808 · 10/06/2026
 • Manage Jobs: filter bar — search (desc/ID), status, category, invoice status, start-date range. Client-side, no deploy.
@@ -1203,7 +1207,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v808</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v809</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -8390,6 +8394,8 @@ function _renderTransactionLogForm() {
     '<div style="font-size:13px;font-weight:900;color:#0d47a1;margin-bottom:10px;direction:rtl;">📤 שליחת מסמכים חודשיים</div>' +
     '<div style="margin-bottom:10px;"><div style="font-size:10px;color:#aaa;margin-bottom:3px;direction:rtl;">בחר חודש</div>' +
     '<input type="month" id="bundleMonth" style="width:100%;padding:9px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;"></div>' +
+    '<div style="margin-bottom:10px;"><div style="font-size:10px;color:#aaa;margin-bottom:3px;direction:rtl;">לקוח (ריק = כל הלקוחות)</div>' +
+    '<select id="bundleClient" onchange="_bundleClientChanged()" style="width:100%;padding:9px 10px;border:1.5px solid #90caf9;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;color:#0d47a1;font-weight:700;"><option value="">— כל הלקוחות —</option></select></div>' +
     '<div style="font-size:11px;color:#555;margin-bottom:6px;direction:rtl;">סוגי מסמכים:</div>' +
     '<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px;">' +
       [['1','חשבונית מס'],['2','קבלה'],['7','חש / קבלה'],['9','חשבונית זיכוי'],['16','הצעת מחיר']].map(function(t){
@@ -8402,8 +8408,23 @@ function _renderTransactionLogForm() {
     '<button onclick="_sendMonthlyBundle()" style="width:100%;padding:13px;background:#1b5e20;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;" id="bundleSendBtn">📤 שלח מסמכי חודש</button>' +
     '<div id="bundleStatus" style="margin-top:8px;"></div>' +
     '</div>';
+  _populateBundleClients();
 }
 
+var _bundleClientsLoaded = false;
+function _populateBundleClients() {
+  var sel = document.getElementById('bundleClient'); if (!sel) return;
+  if (_bundleClientsLoaded || sel.options.length > 1) { _bundleClientChanged(); return; }
+  fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(cs){
+    (cs || []).forEach(function(c){ var o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
+    _bundleClientsLoaded = true;
+  }).catch(function(){});
+}
+function _bundleClientChanged() {
+  var client = (document.getElementById('bundleClient') || {}).value || '';
+  var btn = document.getElementById('bundleSendBtn');
+  if (btn) btn.textContent = client ? ('📤 שלח מסמכי ' + client) : '📤 שלח מסמכי חודש';
+}
 function _sendMonthlyBundle() {
   var monthEl = document.getElementById('bundleMonth');
   var btn = document.getElementById('bundleSendBtn');
@@ -8415,18 +8436,19 @@ function _sendMonthlyBundle() {
   var types = [];
   document.querySelectorAll('.bundle-type:checked').forEach(function(cb){ types.push(cb.value); });
   if (!types.length) { if(status) status.innerHTML='<div style="color:#c62828;font-size:12px;">בחר לפחות סוג מסמך אחד</div>'; return; }
+  var bundleClient = (document.getElementById('bundleClient') || {}).value || '';
   btn.disabled = true; btn.textContent = '⏳ מוריד ושולח...';
-  if (status) status.innerHTML = '<div style="font-size:12px;color:#888;direction:rtl;">⏳ מוריד PDF לכל מסמך... עשוי לקחת 30-60 שניות</div>';
-  fetch(SHEETS_URL + '?action=sendMonthlyBundle&month=' + encodeURIComponent(month) + '&types=' + encodeURIComponent(types.join(',')) + '&_t=' + Date.now())
+  if (status) status.innerHTML = '<div style="font-size:12px;color:#888;direction:rtl;">⏳ מוריד PDF לכל מסמך' + (bundleClient ? (' של ' + bundleClient) : '') + '... עשוי לקחת 30-60 שניות</div>';
+  fetch(SHEETS_URL + '?action=sendMonthlyBundle&month=' + encodeURIComponent(month) + '&types=' + encodeURIComponent(types.join(',')) + (bundleClient ? '&client=' + encodeURIComponent(bundleClient) : '') + '&_t=' + Date.now())
   .then(function(r){ return r.json(); })
   .then(function(d) {
-    btn.disabled = false; btn.textContent = '📤 שלח מסמכי חודש';
+    btn.disabled = false; _bundleClientChanged();
     if (d.ok) {
       status.innerHTML = '<div style="font-size:13px;color:#2e7d32;padding:10px;background:#e8f5e9;border-radius:8px;font-weight:700;direction:rtl;">✓ נשלח! '+d.sent+' מסמכים ל-yanivberg@icloud.com' + (d.errors&&d.errors.length?' · '+d.errors.length+' שגיאות':'') + '</div>';
     } else {
       status.innerHTML = '<div style="font-size:12px;color:#c62828;padding:8px;background:#fce4ec;border-radius:8px;direction:rtl;">⚠️ '+(d.error||'שגיאה')+'</div>';
     }
-  }).catch(function(e){ btn.disabled=false; btn.textContent='📤 שלח מסמכי חודש'; if(status) status.innerHTML='<div style="color:#c62828;font-size:12px;">⚠️ '+e.message+'</div>'; });
+  }).catch(function(e){ btn.disabled=false; _bundleClientChanged(); if(status) status.innerHTML='<div style="color:#c62828;font-size:12px;">⚠️ '+e.message+'</div>'; });
 }
 
 function _sendTransactionLog() {
