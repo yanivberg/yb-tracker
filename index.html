@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v812</title>
+<title>י.ב אחזקות — v813</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,7 +522,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v812
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v813
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwqFp0…exec (v195)
@@ -530,6 +530,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v813 · 13/06/2026
+• Manage Jobs: fully empty sheet rows (no desc, price, qty, hours, dates, docs) are hidden; counter counts visible rows only
+
 ─────────────────
 v812 · 11/06/2026
 • Pointed to new Apps Script deployment URL
@@ -1219,7 +1223,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v812</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v813</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2844,6 +2848,14 @@ function _mjDateISO(s) {
   var dt = new Date(s); if (!isNaN(dt.getTime())) return dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) + '-' + ('0' + dt.getDate()).slice(-2);
   return '';
 }
+function _mjIsEmpty(j) {
+  if ((j.desc || '').trim()) return false;
+  var nums = ['price','qty','hours','hoursActual','income','costs'];
+  for (var n = 0; n < nums.length; n++) { var v = parseFloat(j[nums[n]]); if (!isNaN(v) && v > 0) return false; }
+  var txts = ['dateStart','dateEnd','po','quote','invoice'];
+  for (var t = 0; t < txts.length; t++) { if (String(j[txts[t]] || '').trim()) return false; }
+  return true;
+}
 function mjApplyFilter() {
   var list = document.getElementById('mjList');
   if (!_mjJobs.length) { document.getElementById('mjCount').textContent = _mjClient ? '0 עבודות' : ''; document.getElementById('mjChips').innerHTML = ''; if (_mjClient) list.innerHTML = '<div style="text-align:center;color:#90a4ae;padding:30px;">אין עבודות ללקוח זה</div>'; return; }
@@ -2853,8 +2865,10 @@ function mjApplyFilter() {
   var inv = document.getElementById('mjFInv').value;
   var from = document.getElementById('mjFFrom').value;
   var to = document.getElementById('mjFTo').value;
-  var html = '', shown = 0;
+  var html = '', shown = 0, base = 0;
   _mjJobs.forEach(function(j, i){
+    if (_mjIsEmpty(j)) return;   // hide fully empty sheet rows
+    base++;
     if (q && ((j.desc || '') + ' ' + (j.id || '')).toLowerCase().indexOf(q) === -1) return;
     if (st && j.status !== st) return;
     if (cat && (j.category || '') !== cat) return;
@@ -2867,7 +2881,7 @@ function mjApplyFilter() {
       '<div style="font-size:11px;color:#78909c;margin-top:2px;">' + (j.category || '—') + ' · ₪' + (j.price || 0) + ' × ' + (j.qty || 0) + (j.dateStart ? (' · ' + j.dateStart) : '') + (j.invoice ? (' · ' + j.invoice) : '') + '</div></div>' +
       _mjBadge(j.status) + '<span style="color:#cfd8dc;font-size:18px;flex-shrink:0;">‹</span></div>';
   });
-  document.getElementById('mjCount').textContent = shown + ' מתוך ' + _mjJobs.length;
+  document.getElementById('mjCount').textContent = shown + ' מתוך ' + base;
   var ch = [];
   if (q) ch.push('🔍 "' + q + '"');
   if (st) ch.push(st);
