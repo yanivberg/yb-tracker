@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v819</title>
+<title>י.ב אחזקות — v820</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,7 +522,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v819
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v820
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwx3ys…exec (v197)
@@ -530,6 +530,12 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v820 · 13/06/2026
+• New Quotation AI: shows "המחיר שלי" (median+range from your history) beside market price — each pickable, applies to rows
+• Each quotation now appends its lines to מחירון כללי instantly (fast mode, no AI); AI re-clusters on manual rebuild
+  (needs Apps Script v198)
+
 ─────────────────
 v819 · 13/06/2026
 • Pointed to new Apps Script deployment (v197: buildPricebook — מחירון כללי tab, AI-grouped)
@@ -1243,7 +1249,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v819</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v820</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6422,6 +6428,7 @@ function _getAIPriceSuggestion() {
   fetch(SHEETS_URL + '?action=getAIPriceSuggestion' +
     '&desc=' + encodeURIComponent(desc) +
     '&client=' + encodeURIComponent(client) +
+    '&cat=' + encodeURIComponent((_quotePrefill && _quotePrefill.category) || (document.getElementById('caspitQuoteCat')||{}).value || '') +
     '&hours=' + encodeURIComponent(hours) +
     '&workers=' + _aiPriceWorkers +
     '&materials=' + _aiPriceMat +
@@ -6429,19 +6436,44 @@ function _getAIPriceSuggestion() {
   ).then(function(r){return r.json();}).then(function(d) {
     if (d.error) { res.innerHTML = '<div style="color:#c62828;font-size:12px;">⚠️ ' + d.error + '</div>'; return; }
     var min = (d.min||0).toLocaleString(), max = (d.max||0).toLocaleString();
+    var hasMine = (d.yb_med !== undefined && d.yb_med !== null);
+    var mineCard = hasMine ?
+      ('<div style="flex:1;border-radius:11px;padding:11px;border:1.5px solid #1565c0;background:#e3f2fd;">' +
+        '<div style="font-size:10.5px;font-weight:900;color:#1565c0;margin-bottom:3px;">📋 המחיר שלי</div>' +
+        '<div style="font-size:18px;font-weight:900;color:#0d47a1;margin-bottom:2px;">₪' + (d.yb_med||0).toLocaleString() + '</div>' +
+        '<div style="font-size:10px;color:#777;">חציון · ₪' + (d.yb_lo||0).toLocaleString() + '–₪' + (d.yb_hi||0).toLocaleString() + '<br>' + (d.yb_count||0) + ' עבודות' + (d.yb_basis==='category'?' (קטגוריה)':'') + '</div>' +
+        (d.yb_group ? '<div style="font-size:9.5px;color:#1565c0;background:#fff;border:1px dashed #90caf9;border-radius:6px;padding:2px 6px;display:inline-block;margin-top:4px;">▸ ' + d.yb_group + '</div>' : '') +
+        '<button type="button" onclick="_applyAIPriceAll(' + (d.yb_med||0) + ')" style="margin-top:8px;width:100%;border:none;border-radius:8px;padding:7px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;color:#fff;background:#1565c0;">בחר ₪' + (d.yb_med||0).toLocaleString() + ' ←</button>' +
+      '</div>') : '';
+    var marketCard =
+      '<div style="flex:1;border-radius:11px;padding:11px;border:1.5px solid #2e7d32;background:#e8f5e9;">' +
+        '<div style="font-size:10.5px;font-weight:900;color:#2e7d32;margin-bottom:3px;">🌐 מחיר שוק (AI)</div>' +
+        '<div style="font-size:18px;font-weight:900;color:#1b5e20;margin-bottom:2px;">₪' + min + '–₪' + max + '</div>' +
+        '<div style="font-size:10px;color:#777;">' + (_aiPriceMat?'כולל חומרים':'עבודה בלבד') + ' · ' + _aiPriceWorkers + ' פועלים' + (d.similar_count?' · '+d.similar_count+' דומות':'') + '</div>' +
+        (d.materials_est ? '<div style="font-size:9.5px;color:#388e3c;margin-top:4px;">חומרים ₪'+(d.materials_est||0).toLocaleString()+' · עבודה ₪'+(d.labor_est||0).toLocaleString()+'</div>' : '') +
+        '<button type="button" onclick="_applyAIPriceAll(' + (d.min||0) + ')" style="margin-top:8px;width:100%;border:none;border-radius:8px;padding:7px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;color:#fff;background:#2e7d32;">בחר ₪' + min + ' ←</button>' +
+      '</div>';
     res.innerHTML =
-      '<div style="background:#e8f5e9;border-radius:10px;padding:12px 14px;direction:rtl;">' +
-        '<div style="font-size:11px;color:#2e7d32;margin-bottom:4px;">המלצת AI (' + (_aiPriceMat?'כולל חומרים':'עבודה בלבד') + ' · ' + _aiPriceWorkers + ' פועלים' + (d.similar_count?' · '+d.similar_count+' עבודות דומות':'') + ')</div>' +
-        '<div style="font-size:22px;font-weight:700;color:#1b5e20;margin-bottom:8px;">₪' + min + ' – ₪' + max + '</div>' +
-        '<div style="font-size:11px;color:#388e3c;border-top:0.5px solid rgba(0,100,0,0.2);padding-top:6px;">' +
-          (d.materials_est ? '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>חומרים מוערכים</span><span>₪'+(d.materials_est||0).toLocaleString()+'</span></div>' : '') +
-          (d.labor_est     ? '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>עבודה</span><span>₪'+(d.labor_est||0).toLocaleString()+'</span></div>' : '') +
-          (d.market_range  ? '<div style="display:flex;justify-content:space-between;padding:2px 0;"><span>שוק</span><span>'+d.market_range+'</span></div>' : '') +
-          '<div style="display:flex;justify-content:space-between;padding:3px 0;font-weight:700;margin-top:2px;"><span>לא פחות מ-</span><span>₪'+min+'</span></div>' +
-        '</div>' +
-        (d.reasoning ? '<div style="font-size:10px;color:#555;margin-top:6px;direction:rtl;">' + d.reasoning + '</div>' : '') +
+      '<div style="direction:rtl;">' +
+        '<div style="display:flex;gap:8px;">' + mineCard + marketCard + '</div>' +
+        (hasMine && d.min ? '<div style="font-size:10px;color:#555;margin-top:6px;text-align:center;">פער מול שוק: ' + ((d.yb_med||0) >= (d.min||0) ? '+' : '') + '₪' + ((d.yb_med||0)-(d.min||0)).toLocaleString() + '</div>' : '') +
+        (d.reasoning ? '<div style="font-size:10px;color:#555;margin-top:6px;">' + d.reasoning + '</div>' : '') +
       '</div>';
   }).catch(function(e) { res.innerHTML = '<div style="color:#c62828;font-size:12px;">⚠️ ' + e.message + '</div>'; });
+}
+// Apply a chosen price to all quote rows that are still at 0 (or all if none set)
+function _applyAIPriceAll(val) {
+  if (!val) return;
+  var rows = document.querySelectorAll('#caspitQuoteRows > div');
+  var anySet = false;
+  rows.forEach(function(row){ var p = row.querySelector('.cq-price'); if (p && parseFloat(p.value) > 0) anySet = true; });
+  rows.forEach(function(row){ var p = row.querySelector('.cq-price'); if (p && (!anySet || parseFloat(p.value) === 0 || isNaN(parseFloat(p.value)))) p.value = val; });
+  if (typeof calcCaspitTotal === 'function') calcCaspitTotal();
+  showToast('✓ ₪' + val.toLocaleString() + ' הוחל על השורות');
+}
+// Fire-and-forget: refresh מחירון כללי (fast mode — no AI, preserves groups, slots new lines)
+function _pbFastRefresh() {
+  try { fetch(SHEETS_URL + '?action=buildPricebook&mode=fast&_t=' + Date.now()).catch(function(){}); } catch(_) {}
 }
 
 // Per-row AI pricing: analyzes every line item separately, shows ₪min–₪max + reasoning under each row (tap to apply)
@@ -6869,6 +6901,7 @@ function createCaspitQuote() {
 
   saveSequential.then(function() {
     if (!jobIds.length) { showToast('⚠️ Step 1 failed: sheet save returned no IDs'); btn.textContent = '💼 Save & Send to Caspit'; btn.disabled = false; return; }
+    _pbFastRefresh();   // accumulate these lines into מחירון כללי (fast, background)
     btn.textContent = '⏳ Sending to Caspit…';
     var lines = rowData.map(function(r) {
       return { ProductName: r.desc, Details: r.desc, Qty: r.qty, UnitPrice: r.price > 0 ? r.price : 0.01, ChargeVAT: true };
