@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v814</title>
+<title>י.ב אחזקות — v815</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,7 +522,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v814
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v815
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwqFp0…exec (v195)
@@ -530,6 +530,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v815 · 13/06/2026
+• Manage Jobs: filters now behind a prominent "🔧 סינון" button, open by default, with active-filter count badge
+
 ─────────────────
 v814 · 13/06/2026
 • Manage Jobs: rows without a description are hidden; counter counts visible rows only
@@ -1223,7 +1227,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v814</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v815</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1657,10 +1661,10 @@ SHEET SYNC
       <div style="display:flex;align-items:center;gap:8px;border:1.5px solid #ddd;border-radius:10px;padding:8px 10px;">
         <span>🔍</span><input id="mjQ" type="text" placeholder="חיפוש לפי תיאור או מספר עבודה…" oninput="mjApplyFilter()" style="border:none;outline:none;flex:1;font-size:14.5px;font-family:Heebo,sans-serif;background:transparent;">
       </div>
-      <div onclick="mjToggleFilters()" style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;cursor:pointer;">
-        <span style="font-size:12.5px;font-weight:900;color:#00695c;">סינון מתקדם</span><span id="mjFArrow" style="color:#00695c;font-size:12px;">▾</span>
+      <div onclick="mjToggleFilters()" style="display:flex;align-items:center;justify-content:center;gap:7px;margin-top:9px;background:#e0f2f1;border:1.5px solid #00897b;border-radius:11px;padding:10px;cursor:pointer;color:#00695c;font-weight:900;font-size:13.5px;">
+        🔧 סינון <span id="mjFBadge" style="display:none;background:#00897b;color:#fff;border-radius:999px;font-size:10px;padding:1px 7px;font-weight:900;"></span><span id="mjFArrow" style="margin-right:auto;color:#00695c;font-size:12px;">▴</span>
       </div>
-      <div id="mjFBody" style="display:none;margin-top:10px;">
+      <div id="mjFBody" style="display:block;margin-top:10px;">
         <div style="display:flex;gap:8px;margin-bottom:8px;">
           <div style="flex:1;"><div style="font-size:10.5px;color:#90a4ae;font-weight:700;margin-bottom:3px;">סטטוס</div>
             <select id="mjFStatus" onchange="mjApplyFilter()" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;background:#fff;"><option value="">הכול</option><option>ממתין להצעה</option><option>ניתנה הצעה</option><option>ממתין לביצוע</option><option>בתהליך ביצוע</option><option>בוצע</option></select></div>
@@ -2834,7 +2838,7 @@ function mjPopulateCategories() {
 }
 function mjToggleFilters() {
   var b = document.getElementById('mjFBody'), a = document.getElementById('mjFArrow');
-  var open = b.style.display === 'block';
+  var open = b.style.display !== 'none';
   b.style.display = open ? 'none' : 'block';
   a.textContent = open ? '▾' : '▴';
 }
@@ -2877,6 +2881,9 @@ function mjApplyFilter() {
       _mjBadge(j.status) + '<span style="color:#cfd8dc;font-size:18px;flex-shrink:0;">‹</span></div>';
   });
   document.getElementById('mjCount').textContent = shown + ' מתוך ' + base;
+  var _na = (st?1:0) + (cat?1:0) + (inv && inv !== '__all'?1:0) + (from?1:0) + (to?1:0);
+  var _bdg = document.getElementById('mjFBadge');
+  if (_bdg) { if (_na) { _bdg.style.display = 'inline-block'; _bdg.textContent = _na; } else { _bdg.style.display = 'none'; } }
   var ch = [];
   if (q) ch.push('🔍 "' + q + '"');
   if (st) ch.push(st);
