@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v818</title>
+<title>י.ב אחזקות — v819</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,14 +522,18 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v818
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v819
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxVOPX…exec (v196)
+Apps Script: AKfycbwx3ys…exec (v197)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v819 · 13/06/2026
+• Pointed to new Apps Script deployment (v197: buildPricebook — מחירון כללי tab, AI-grouped)
+
 ─────────────────
 v818 · 13/06/2026
 • Pointed to new Apps Script deployment (v196: tools return purpose)
@@ -1239,7 +1243,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v818</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v819</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2279,7 +2283,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxVOPXGFikOh8Hhdh81Zw7qoG0C3FzXAtE9Q0DxpB6klMsxlb8oDwZAechGgsbOZ1X1aA/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwx3ysCtf_UOiIDM_Co_g9kgSGg2YkfDAfau5TotrTWpvbY4tp2JhwLqUPl9J9LTHkE4w/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
