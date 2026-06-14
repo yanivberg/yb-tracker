@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v823</title>
+<title>י.ב אחזקות — v825</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -465,7 +465,7 @@ input[id^="progSlider-"]::-moz-range-track {
 
       <div id="drawerPreTimerItem" onclick="closeSetupDrawer();openPreTimerPicker();" style="background:#f8f9fa;border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;justify-content:flex-start;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <svg width="52" height="52" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="44" r="28" stroke="#111" stroke-width="5"/><line x1="40" y1="44" x2="40" y2="24" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="44" x2="54" y2="54" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="34" y1="8" x2="46" y2="8" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="8" x2="40" y2="16" stroke="#111" stroke-width="5" stroke-linecap="round"/></svg>
-        <span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">Instant Timer/Project</span>
+        <span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">Instant Timer — For Quotation</span>
       </div>
       <div onclick="closeSetupDrawer();fetchOpenJobs();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📋</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a56db;">Pick from Open Tasks</span></div>
@@ -522,7 +522,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v823
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v825
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwx3ys…exec (v198)
@@ -532,6 +532,14 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v825 · 14/06/2026
+• הוספת הערות לעבודות ממתינות להצעה: כפתור 📝 על כל עבודה — גם במסך "📋 פרוייקטים ממתינים להצעה" (מגירה) וגם ברשימת "ממתין להצעה" שבהצעה חדשה. ההערות הקיימות נטענות ומוצגות (כל אחת בשורה), ו-"➕ הוסף" מוסיף הערה חדשה בצבירה (addNote). ללא שינוי ב-Worker/Apps Script.
+
+─────────────────
+v824 · 14/06/2026
+• שינוי שם פריט במגירה: "Instant Timer/Project" → "Instant Timer — For Quotation".
+
 ─────────────────
 v823 · 14/06/2026
 • הצעה חדשה: מצב שלישי "📋 ממתין להצעה" (מקור: גיליון) לצד "+ חדש" ו-"✏️ ערוך קיים" (מקור: Caspit). בוחרים לקוח → רב-בחירה של עבודות בסטטוס "ממתין להצעה" → נכנסות כשורות הצעה (תיאור+כמות, מחיר ריק). לאחר שליחה הסטטוס בגיליון עולה אוטומטית ל-"ניתנה הצעה".
@@ -1263,7 +1271,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v823</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v825</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2552,20 +2560,22 @@ function showPendingQuotePicker(jobs) {
               '<div style="display:flex;gap:6px;">' +
                 '<button onclick="startPreTimerForJob(\'' + job.id + '\',\'' + job.client.replace(/'/g,"\\'") + '\',\'' + (job.desc||'').replace(/'/g,"\\'") + '\')" style="background:rgba(0,105,92,0.85);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">⏱</button>' +
                 '<button onclick="pendingQuoteEdit(' + idx + ')" style="background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">✏️</button>' +
+                '<button onclick="_toggleJobNotesByIdx(' + idx + ')" style="background:#ff9800;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">📝</button>' +
                 '<button onclick="openCompleteForm(' + idx + ')" style="background:rgba(0,100,0,0.7);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">✓ Complete</button>' +
               '</div>' +
             '</div>' +
-          '</div>';
+          '</div>' + _jobNotesPanelHtml('pq'+idx, true);
         } else {
           html += '<div id="pqRow_'+idx+'" style="padding:12px 16px;' + rowStyle + '">' +
             '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
               '<div style="flex:1;"><div style="font-weight:700;font-size:14px;color:#111;">' + job.desc + '</div><div style="font-size:11px;color:rgba(255,255,200,0.8);margin-top:2px;">⚠️ חסרים פרטים ' + dateBadge + '</div></div>' +
               '<div style="display:flex;gap:6px;">' +
                 '<button onclick="startPreTimerForJob(\'' + job.id + '\',\'' + job.client.replace(/'/g,"\\'") + '\',\'' + (job.desc||'').replace(/'/g,"\\'") + '\')" style="background:rgba(0,105,92,0.85);color:#fff;border:none;border-radius:8px;padding:8px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">⏱</button>' +
+                '<button onclick="_toggleJobNotesByIdx(' + idx + ')" style="background:#ff9800;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">📝</button>' +
                 '<button onclick="openCompleteForm(' + idx + ')" style="background:rgba(0,0,0,0.25);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;white-space:nowrap;">✓ Complete</button>' +
               '</div>' +
             '</div>' +
-          '</div>';
+          '</div>' + _jobNotesPanelHtml('pq'+idx, true);
         }
       });
     });
@@ -6636,18 +6646,38 @@ function _renderPendingPickList() {
     var picked = !!_pendingQuotePicks[j.id];
     var dt = j.dateStart ? String(j.dateStart).slice(0,10).split('-').reverse().join('/') : '';
     var safeId = (j.id||'').replace(/'/g,"\\'");
-    return '<div onclick="_togglePendingPick(\'' + safeId + '\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid ' + (picked?'#2e7d32':'#e3e8ee') + ';border-radius:10px;margin-bottom:7px;cursor:pointer;background:' + (picked?'#e8f5e9':'#fff') + ';">' +
-      '<div style="width:20px;height:20px;border:2px solid ' + (picked?'#2e7d32':'#bbb') + ';border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;background:' + (picked?'#2e7d32':'transparent') + ';">' + (picked?'✓':'') + '</div>' +
-      '<div style="flex:1;"><div style="font-size:10px;color:#90a4ae;">' + (j.id||'') + '</div><div style="font-size:13.5px;font-weight:700;color:#222;">' + (j.desc||'(ללא תיאור)') + '</div>' + (dt?'<span style="font-size:10.5px;color:#e65100;background:#fff3e0;border-radius:6px;padding:1px 7px;display:inline-block;margin-top:3px;">' + dt + '</span>':'') + '</div>' +
+    var safeClient = (j.client||'').replace(/'/g,"\\'");
+    var nkey = 'pend' + _keySafe(j.id);
+    return '<div style="margin-bottom:7px;">' +
+      '<div style="display:flex;align-items:center;gap:8px;">' +
+        '<div data-pickrow="' + _keySafe(j.id) + '" onclick="_togglePendingPick(\'' + safeId + '\')" style="flex:1;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid ' + (picked?'#2e7d32':'#e3e8ee') + ';border-radius:10px;cursor:pointer;background:' + (picked?'#e8f5e9':'#fff') + ';">' +
+          '<div class="pickbox" style="width:20px;height:20px;border:2px solid ' + (picked?'#2e7d32':'#bbb') + ';border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;background:' + (picked?'#2e7d32':'transparent') + ';">' + (picked?'✓':'') + '</div>' +
+          '<div style="flex:1;"><div style="font-size:10px;color:#90a4ae;">' + (j.id||'') + '</div><div style="font-size:13.5px;font-weight:700;color:#222;">' + (j.desc||'(ללא תיאור)') + '</div>' + (dt?'<span style="font-size:10.5px;color:#e65100;background:#fff3e0;border-radius:6px;padding:1px 7px;display:inline-block;margin-top:3px;">' + dt + '</span>':'') + '</div>' +
+        '</div>' +
+        '<button onclick="_toggleJobNotes(\'' + nkey + '\',\'' + safeId + '\',\'' + safeClient + '\',false)" style="background:#fff3e0;border:none;color:#e65100;border-radius:9px;padding:9px 11px;font-size:15px;cursor:pointer;font-family:Heebo,sans-serif;flex-shrink:0;">📝</button>' +
+      '</div>' +
+      _jobNotesPanelHtml(nkey, false) +
     '</div>';
   }).join('');
-  var bar = document.getElementById('pendingQuoteAddBar');
-  if (bar) { var n = Object.keys(_pendingQuotePicks).length; bar.innerHTML = n ? '<button onclick="_addPendingToQuote()" style="width:100%;background:#2e7d32;color:#fff;border:none;border-radius:11px;padding:12px;font-size:14px;font-weight:900;margin-top:4px;cursor:pointer;font-family:Heebo,sans-serif;">➕ הוסף ' + n + ' עבודות להצעה</button>' : ''; }
+  _renderPendingAddBar();
+}
+function _renderPendingAddBar() {
+  var bar = document.getElementById('pendingQuoteAddBar'); if (!bar) return;
+  var n = Object.keys(_pendingQuotePicks).length;
+  bar.innerHTML = n ? '<button onclick="_addPendingToQuote()" style="width:100%;background:#2e7d32;color:#fff;border:none;border-radius:11px;padding:12px;font-size:14px;font-weight:900;margin-top:4px;cursor:pointer;font-family:Heebo,sans-serif;">➕ הוסף ' + n + ' עבודות להצעה</button>' : '';
 }
 function _togglePendingPick(id) {
   if (_pendingQuotePicks[id]) delete _pendingQuotePicks[id];
   else _pendingQuotePicks[id] = _pendingQuoteJobsCache[id] || { id: id };
-  _renderPendingPickList();
+  var picked = !!_pendingQuotePicks[id];
+  var row = document.querySelector('[data-pickrow="' + _keySafe(id) + '"]');
+  if (row) {
+    row.style.borderColor = picked ? '#2e7d32' : '#e3e8ee';
+    row.style.background  = picked ? '#e8f5e9' : '#fff';
+    var box = row.querySelector('.pickbox');
+    if (box) { box.style.borderColor = picked?'#2e7d32':'#bbb'; box.style.background = picked?'#2e7d32':'transparent'; box.textContent = picked?'✓':''; }
+  }
+  _renderPendingAddBar();
 }
 function _addPendingToQuote() {
   var picks = Object.keys(_pendingQuotePicks).map(function(k){ return _pendingQuotePicks[k]; });
@@ -6655,6 +6685,57 @@ function _addPendingToQuote() {
   var client = (document.getElementById('pendingQuoteClient')||{}).value || (picks[0] && picks[0].client) || '';
   _quotePrefill = { client: client, lines: picks.map(function(p){ return p.desc || '—'; }), pendingIds: picks.map(function(p){ return p.id; }) };
   _setQuoteMode('new');
+}
+
+// ── Shared job-notes panel (append history) — used by pending-quote picker & New-Quotation pending list ──
+var _jobNotesCtx = {};
+function _keySafe(s){ return String(s).replace(/[^a-zA-Z0-9]/g,'_'); }
+function _escNote(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function _jobNotesPanelHtml(key, dark) {
+  return '<div id="notesPanel_' + key + '" style="display:none;background:' + (dark?'#004d40':'#fff') + ';border:1px solid ' + (dark?'#00695c':'#ffe0b2') + ';border-radius:10px;padding:11px 13px;margin:6px 0 2px;">' +
+    '<div style="font-size:11px;font-weight:800;color:' + (dark?'#ffcc80':'#e65100') + ';margin-bottom:6px;">📝 הערות</div>' +
+    '<div id="notesList_' + key + '" style="font-size:12px;">⏳…</div>' +
+    '<div style="display:flex;gap:6px;margin-top:7px;">' +
+      '<input id="notesInput_' + key + '" placeholder="הוסף הערה…" onkeydown="if(event.key===\'Enter\')_addJobNote(\'' + key + '\')" style="flex:1;padding:9px 11px;border:1.5px solid #ffcc80;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;direction:rtl;box-sizing:border-box;">' +
+      '<button onclick="_addJobNote(\'' + key + '\')" style="background:#e65100;color:#fff;border:none;border-radius:9px;padding:9px 14px;font-size:13px;font-weight:800;font-family:Heebo,sans-serif;cursor:pointer;white-space:nowrap;">➕ הוסף</button>' +
+    '</div>' +
+  '</div>';
+}
+function _toggleJobNotes(key, jobId, client, dark) {
+  _jobNotesCtx[key] = { jobId: jobId, client: client, dark: !!dark };
+  var panel = document.getElementById('notesPanel_' + key); if (!panel) return;
+  if (!panel.style.display || panel.style.display === 'none') { panel.style.display = 'block'; _loadJobNotes(key); }
+  else { panel.style.display = 'none'; }
+}
+function _loadJobNotes(key) {
+  var ctx = _jobNotesCtx[key]; if (!ctx) return;
+  var listEl = document.getElementById('notesList_' + key); if (!listEl) return;
+  listEl.innerHTML = '⏳…';
+  fetch(SHEETS_URL + '?action=getJobNotes&jobId=' + encodeURIComponent(ctx.jobId) + '&client=' + encodeURIComponent(ctx.client) + '&_t=' + Date.now())
+    .then(function(r){ return r.text(); })
+    .then(function(txt){
+      txt = (txt||'').trim();
+      if (!txt || txt === 'none') { listEl.innerHTML = '<div style="font-size:11.5px;color:#aaa;font-style:italic;">אין הערות עדיין.</div>'; return; }
+      var lines = txt.split('\n').filter(function(l){ return l.trim(); });
+      listEl.innerHTML = lines.map(function(l){
+        return '<div style="font-size:12px;background:' + (ctx.dark?'rgba(255,255,255,.1)':'#fafafa') + ';color:' + (ctx.dark?'#e0f2f1':'#37474f') + ';border-radius:7px;padding:6px 9px;margin-bottom:5px;border-right:3px solid #ffb74d;line-height:1.5;">' + _escNote(l) + '</div>';
+      }).join('');
+    })
+    .catch(function(e){ listEl.innerHTML = '<div style="font-size:11.5px;color:#c62828;">⚠️ ' + e.message + '</div>'; });
+}
+function _addJobNote(key) {
+  var ctx = _jobNotesCtx[key]; if (!ctx) return;
+  var inp = document.getElementById('notesInput_' + key); if (!inp) return;
+  var note = (inp.value||'').trim(); if (!note) return;
+  inp.disabled = true;
+  fetch(SHEETS_URL + '?action=addNote&jobId=' + encodeURIComponent(ctx.jobId) + '&client=' + encodeURIComponent(ctx.client) + '&note=' + encodeURIComponent(note))
+    .then(function(r){ return r.text(); })
+    .then(function(){ inp.value = ''; inp.disabled = false; _loadJobNotes(key); showToast('✓ הערה נוספה'); })
+    .catch(function(e){ inp.disabled = false; showToast('⚠️ ' + e.message); });
+}
+function _toggleJobNotesByIdx(idx) {
+  var j = pendingQuoteJobs[idx]; if (!j) return;
+  _toggleJobNotes('pq' + idx, j.id, j.client, true);
 }
 
 function _renderQuoteList(docs, filter) {
@@ -9106,7 +9187,7 @@ function _updatePreTimerUI() {
       drawerItem.style.background = '#e0f7fa';
       drawerItem.style.borderColor = '#4db6ac';
     } else {
-      drawerItem.innerHTML = svgHtml + '<span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">Instant Timer/Project</span>';
+      drawerItem.innerHTML = svgHtml + '<span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">Instant Timer — For Quotation</span>';
       drawerItem.style.background = '#f8f9fa';
       drawerItem.style.borderColor = '#e0e0e0';
     }
