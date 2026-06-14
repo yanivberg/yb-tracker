@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v820</title>
+<title>י.ב אחזקות — v821</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,7 +522,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v820
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v821
 Deployed: 09/05/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbwx3ys…exec (v197)
@@ -530,6 +530,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v821 · 13/06/2026
+• Fixed "undefined contacts loaded": contact loaders now validate the response is a list, surface the real error, and auto-retry once on a transient Caspit failure
+
 ─────────────────
 v820 · 13/06/2026
 • New Quotation AI: shows "המחיר שלי" (median+range from your history) beside market price — each pickable, applies to rows
@@ -1249,7 +1253,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v820</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v821</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -5694,14 +5698,42 @@ function _caspitLoadData() {
   _caspitFetch(CASPIT_PROXY_URL + '?action=getContacts')
     .then(function(r){ return r.json(); })
     .then(function(data) {
-      _caspitContacts = data || [];
+      var parsed = _parseContactsResp(data);
+      if (!parsed.ok) {
+        // transient worker/Caspit error → retry once after a short delay
+        setTimeout(function(){
+          _caspitFetch(CASPIT_PROXY_URL + '?action=getContacts&_t=' + Date.now())
+            .then(function(r){ return r.json(); })
+            .then(function(d2){
+              var p2 = _parseContactsResp(d2);
+              _caspitContacts = p2.ok ? p2.list : [];
+              showToast(p2.ok ? ('✓ ' + _caspitContacts.length + ' contacts loaded') : ('⚠️ Contacts error: ' + p2.error), p2.ok ? 3000 : 5000);
+              contactsDone = true; tryRender();
+            })
+            .catch(function(e2){ _caspitContacts = []; showToast('⚠️ Contacts error: ' + e2.message, 5000); contactsDone = true; tryRender(); });
+        }, 1200);
+        return;
+      }
+      _caspitContacts = parsed.list;
       showToast('✓ ' + _caspitContacts.length + ' contacts loaded', 3000);
       contactsDone = true; tryRender();
     })
     .catch(function(err) {
-      showToast('Contacts error: ' + err.message);
+      _caspitContacts = [];
+      showToast('⚠️ Contacts error: ' + err.message, 5000);
       contactsDone = true; tryRender();
     });
+}
+
+// Validate a getContacts response. Returns {ok, list, error}.
+// The worker returns an ARRAY of {Id,Name} on success, or an error OBJECT on failure —
+// guarding here prevents the "undefined contacts loaded" bug.
+function _parseContactsResp(data) {
+  if (Array.isArray(data)) return { ok: true, list: data };
+  var err = (data && (data.error || data.message)) ? (data.error || data.message)
+          : (data && data.status === 'error') ? 'Caspit returned an error'
+          : 'unexpected response (not a contact list)';
+  return { ok: false, list: [], error: String(err) };
 }
 
 var _caspitInvoiceJobs = [];
@@ -6312,7 +6344,7 @@ function testCaspitProxy() {
   showToast('Testing proxy…');
   _caspitFetch(CASPIT_PROXY_URL + '?action=getContacts')
     .then(function(r){ return r.json(); })
-    .then(function(d){ showToast('✓ Proxy OK — ' + (d||[]).length + ' contacts', 4000); })
+    .then(function(d){ var p = _parseContactsResp(d); showToast(p.ok ? ('✓ Proxy OK — ' + p.list.length + ' contacts') : ('✗ Proxy error: ' + p.error), 4000); })
     .catch(function(e){ showToast('✗ Proxy FAILED: ' + e.message, 5000); });
 }
 
@@ -6340,7 +6372,7 @@ function _renderCaspitQuoteTab() {
     body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ Loading Caspit contacts…</div>';
     _caspitFetch(CASPIT_PROXY_URL + '?action=getContacts')
       .then(function(r){ return r.json(); })
-      .then(function(data) { _caspitContacts = data || []; _renderCaspitQuoteForm(); })
+      .then(function(data) { var p = _parseContactsResp(data); _caspitContacts = p.ok ? p.list : []; if(!p.ok) showToast('⚠️ Contacts error: ' + p.error, 5000); _renderCaspitQuoteForm(); })
       .catch(function() { _renderCaspitQuoteForm(); });
   } else {
     _renderCaspitQuoteForm();
