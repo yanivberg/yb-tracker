@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v821</title>
+<title>י.ב אחזקות — v823</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,14 +522,24 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v821
-Deployed: 09/05/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v823
+Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbwx3ys…exec (v197)
-Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v8)
+Apps Script: AKfycbwx3ys…exec (v198)
+Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
+
+⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v823 · 14/06/2026
+• הצעה חדשה: מצב שלישי "📋 ממתין להצעה" (מקור: גיליון) לצד "+ חדש" ו-"✏️ ערוך קיים" (מקור: Caspit). בוחרים לקוח → רב-בחירה של עבודות בסטטוס "ממתין להצעה" → נכנסות כשורות הצעה (תיאור+כמות, מחיר ריק). לאחר שליחה הסטטוס בגיליון עולה אוטומטית ל-"ניתנה הצעה".
+
+─────────────────
+v822 · 14/06/2026
+• תיקון Caspit API (תקלה 240174 / Interhost 835587): קריאת הטוקן החזירה HTTP 500 ("An error has occurred") — אך ורק מ-Cloudflare. אבחון: הוכח שאותה קריאה בדיוק עובדת מדפדפן, מגלישה פרטית, ומשרת חיצוני (reqbin), ונכשלת רק מ-Cloudflare → חומת האש/LB של כספית חוסמת את טווחי ה-IP של Cloudflare Workers על app.caspit.biz. הפתרון: Worker v25 מנתב את כל קריאות Caspit דרך app1.caspit.biz שעוקפת את ה-FW/LB. בדרך גם שודרג ה-Worker: מעבר מ-POST JSON ל-GET לטוקן, headers דמויי דפדפן, trim לסודות, retry מעריכי (5 ניסיונות) על 429/5xx, ופעולת getLog לשליפת סיבת שגיאה אמיתית מכספית. (לא היה קשור לקוד/סיסמה — סיבה צד-כספית.)
+
 ─────────────────
 v821 · 13/06/2026
 • Fixed "undefined contacts loaded": contact loaders now validate the response is a list, surface the real error, and auto-retry once on a transient Caspit failure
@@ -1253,7 +1263,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v821</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v823</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6578,6 +6588,7 @@ function _setQuoteMode(mode) {
   _quoteMode = mode;
   _editQuoteDoc = null;
   _recentQuotes = null; // always re-fetch on open
+  _pendingQuoteIds = [];
   _renderCaspitQuoteTab();
   if (mode === 'edit') _loadRecentQuotes();
 }
@@ -6592,6 +6603,58 @@ function _loadRecentQuotes() {
     _recentQuotes = Array.isArray(docs) ? docs : [];
     _renderQuoteList(_recentQuotes);
   }).catch(function(e){ if(listEl) listEl.innerHTML='<div style="font-size:12px;color:var(--color-text-danger);">⚠️ '+e.message+'</div>'; });
+}
+
+// ── Pending-quote mode (spreadsheet: status "ממתין להצעה") ──────────────
+function _loadPendingQuoteClients() {
+  var sel = document.getElementById('pendingQuoteClient'); if (!sel) return;
+  fetch(SHEETS_URL + '?action=getClients').then(function(r){return r.json();}).then(function(tabs){
+    var sorted = (tabs||[]).slice().sort(function(a,b){ return a.localeCompare(b); });
+    sel.innerHTML = '<option value="">— בחר לקוח —</option>';
+    sorted.forEach(function(c){ sel.innerHTML += '<option value="' + c.replace(/"/g,'&quot;') + '">' + c + '</option>'; });
+  }).catch(function(){ sel.innerHTML = '<option value="">⚠️ שגיאה בטעינת לקוחות</option>'; });
+}
+function _loadPendingForQuote(client) {
+  _pendingQuotePicks = {}; _pendingQuoteJobsCache = {};
+  var list = document.getElementById('pendingQuoteList'), bar = document.getElementById('pendingQuoteAddBar');
+  if (bar) bar.innerHTML = '';
+  if (!list) return;
+  if (!client) { list.innerHTML = '<div style="font-size:12px;color:#90a4ae;padding:8px 0;">בחר לקוח כדי לראות עבודות בסטטוס "ממתין להצעה".</div>'; return; }
+  list.innerHTML = '<div style="font-size:12px;color:#90a4ae;padding:8px 0;">⏳ טוען עבודות…</div>';
+  fetch(SHEETS_URL + '?action=getPendingQuote&_t=' + Date.now()).then(function(r){return r.json();}).then(function(jobs){
+    var all = Array.isArray(jobs) ? jobs : [];
+    var mine = all.filter(function(j){ return (j.client||'') === client && (j.status||'') === 'ממתין להצעה'; });
+    mine.forEach(function(j){ _pendingQuoteJobsCache[j.id] = j; });
+    _renderPendingPickList();
+  }).catch(function(e){ list.innerHTML = '<div style="font-size:12px;color:#c62828;">⚠️ ' + e.message + '</div>'; });
+}
+function _renderPendingPickList() {
+  var list = document.getElementById('pendingQuoteList'); if (!list) return;
+  var jobs = Object.keys(_pendingQuoteJobsCache).map(function(k){ return _pendingQuoteJobsCache[k]; });
+  if (!jobs.length) { list.innerHTML = '<div style="font-size:12px;color:#90a4ae;padding:8px 0;">אין עבודות בסטטוס "ממתין להצעה" ללקוח זה.</div>'; var b=document.getElementById('pendingQuoteAddBar'); if(b)b.innerHTML=''; return; }
+  list.innerHTML = jobs.map(function(j){
+    var picked = !!_pendingQuotePicks[j.id];
+    var dt = j.dateStart ? String(j.dateStart).slice(0,10).split('-').reverse().join('/') : '';
+    var safeId = (j.id||'').replace(/'/g,"\\'");
+    return '<div onclick="_togglePendingPick(\'' + safeId + '\')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid ' + (picked?'#2e7d32':'#e3e8ee') + ';border-radius:10px;margin-bottom:7px;cursor:pointer;background:' + (picked?'#e8f5e9':'#fff') + ';">' +
+      '<div style="width:20px;height:20px;border:2px solid ' + (picked?'#2e7d32':'#bbb') + ';border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;background:' + (picked?'#2e7d32':'transparent') + ';">' + (picked?'✓':'') + '</div>' +
+      '<div style="flex:1;"><div style="font-size:10px;color:#90a4ae;">' + (j.id||'') + '</div><div style="font-size:13.5px;font-weight:700;color:#222;">' + (j.desc||'(ללא תיאור)') + '</div>' + (dt?'<span style="font-size:10.5px;color:#e65100;background:#fff3e0;border-radius:6px;padding:1px 7px;display:inline-block;margin-top:3px;">' + dt + '</span>':'') + '</div>' +
+    '</div>';
+  }).join('');
+  var bar = document.getElementById('pendingQuoteAddBar');
+  if (bar) { var n = Object.keys(_pendingQuotePicks).length; bar.innerHTML = n ? '<button onclick="_addPendingToQuote()" style="width:100%;background:#2e7d32;color:#fff;border:none;border-radius:11px;padding:12px;font-size:14px;font-weight:900;margin-top:4px;cursor:pointer;font-family:Heebo,sans-serif;">➕ הוסף ' + n + ' עבודות להצעה</button>' : ''; }
+}
+function _togglePendingPick(id) {
+  if (_pendingQuotePicks[id]) delete _pendingQuotePicks[id];
+  else _pendingQuotePicks[id] = _pendingQuoteJobsCache[id] || { id: id };
+  _renderPendingPickList();
+}
+function _addPendingToQuote() {
+  var picks = Object.keys(_pendingQuotePicks).map(function(k){ return _pendingQuotePicks[k]; });
+  if (!picks.length) return;
+  var client = (document.getElementById('pendingQuoteClient')||{}).value || (picks[0] && picks[0].client) || '';
+  _quotePrefill = { client: client, lines: picks.map(function(p){ return p.desc || '—'; }), pendingIds: picks.map(function(p){ return p.id; }) };
+  _setQuoteMode('new');
 }
 
 function _renderQuoteList(docs, filter) {
@@ -6692,11 +6755,38 @@ function _saveEditedQuote() {
 function _renderCaspitQuoteForm() {
   var body = getCaspitBody();
 
-  // ── Mode toggle ────────────────────────────────────────────────────────
-  var toggleHtml = '<div style="display:flex;gap:6px;margin-bottom:12px;">' +
-    '<button onclick="_setQuoteMode(\'new\')" style="flex:1;padding:8px;border-radius:var(--border-radius-md);border:1.5px solid '+ (_quoteMode==='new'?'#0d47a1':'#ddd') +';background:'+ (_quoteMode==='new'?'#e3f2fd':'#fff') +';color:'+ (_quoteMode==='new'?'#0d47a1':'#888') +';font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">+ חדש</button>' +
-    '<button onclick="_setQuoteMode(\'edit\')" style="flex:1;padding:8px;border-radius:var(--border-radius-md);border:1.5px solid '+ (_quoteMode==='edit'?'#0d47a1':'#ddd') +';background:'+ (_quoteMode==='edit'?'#e3f2fd':'#fff') +';color:'+ (_quoteMode==='edit'?'#0d47a1':'#888') +';font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">✏️ ערוך קיים</button>' +
+  // ── Mode toggle (grouped by source: Caspit vs spreadsheet) ─────────────
+  var _mBtn = function(m, label){
+    var on = _quoteMode === m;
+    var isSheet = (m === 'pending');
+    var col = isSheet ? (on?'#2e7d32':'#888') : (on?'#0d47a1':'#888');
+    var bg  = isSheet ? (on?'#e8f5e9':'#fff')  : (on?'#e3f2fd':'#fff');
+    var bd  = isSheet ? (on?'#2e7d32':'#ddd')  : (on?'#0d47a1':'#ddd');
+    return '<button onclick="_setQuoteMode(\'' + m + '\')" style="flex:1;padding:8px 6px;border-radius:8px;border:1.5px solid ' + bd + ';background:' + bg + ';color:' + col + ';font-size:11.5px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;white-space:nowrap;">' + label + '</button>';
+  };
+  var toggleHtml = '<div style="display:flex;gap:10px;margin-bottom:12px;align-items:stretch;">' +
+    '<div style="flex:2;border:1px dashed #cfd8dc;border-radius:11px;padding:7px;position:relative;">' +
+      '<span style="position:absolute;top:-8px;right:10px;background:#fff;font-size:9px;font-weight:900;color:#6a1b9a;padding:0 6px;">● Caspit</span>' +
+      '<div style="display:flex;gap:6px;">' + _mBtn('new','+ חדש') + _mBtn('edit','✏️ ערוך קיים') + '</div>' +
+    '</div>' +
+    '<div style="flex:1;border:1px dashed #cfd8dc;border-radius:11px;padding:7px;position:relative;">' +
+      '<span style="position:absolute;top:-8px;right:10px;background:#fff;font-size:9px;font-weight:900;color:#2e7d32;padding:0 6px;">● גיליון</span>' +
+      '<div style="display:flex;gap:6px;">' + _mBtn('pending','📋 ממתין להצעה') + '</div>' +
+    '</div>' +
   '</div>';
+
+  // ── Pending mode — pick "ממתין להצעה" sheet jobs for a client ──────────
+  if (_quoteMode === 'pending') {
+    body.innerHTML = toggleHtml +
+      '<div style="margin-bottom:10px;">' +
+        '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">לקוח (גיליון)</label>' +
+        '<select id="pendingQuoteClient" onchange="_loadPendingForQuote(this.value)" style="width:100%;padding:11px;border:1.5px solid #2e7d32;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;box-sizing:border-box;"><option value="">⏳ טוען…</option></select>' +
+      '</div>' +
+      '<div id="pendingQuoteList"><div style="font-size:12px;color:#90a4ae;padding:8px 0;">בחר לקוח כדי לראות עבודות בסטטוס "ממתין להצעה".</div></div>' +
+      '<div id="pendingQuoteAddBar"></div>';
+    _loadPendingQuoteClients();
+    return;
+  }
 
   // ── Edit mode — list + search ──────────────────────────────────────────
   if (_quoteMode === 'edit') {
@@ -6802,6 +6892,7 @@ function _renderCaspitQuoteForm() {
       }
     }
 
+    _pendingQuoteIds = (_quotePrefill && _quotePrefill.pendingIds) ? _quotePrefill.pendingIds.slice() : [];
     _quotePrefill = {}; // consume — prevent re-apply on re-render
   }
   setTimeout(_applyQuotePrefill, 150);
@@ -6961,6 +7052,14 @@ function createCaspitQuote() {
       })).then(function() {
         if (statusUpdates.length > 0) showToast('✓ ' + statusUpdates.length + ' rows → ' + finalStatus);
       }).catch(function(){});
+      // Advance the original "ממתין להצעה" sheet jobs that seeded this quote → ניתנה הצעה
+      if (_pendingQuoteIds && _pendingQuoteIds.length) {
+        var _pq = _pendingQuoteIds.slice(); _pendingQuoteIds = [];
+        Promise.all(_pq.map(function(pid){
+          return fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(pid) +
+            '&client=' + encodeURIComponent(sheetClient) + '&status=' + encodeURIComponent('ניתנה הצעה'));
+        })).then(function(){ showToast('✓ ' + _pq.length + ' עבודות ממתינות → ניתנה הצעה'); }).catch(function(){});
+      }
       btn.textContent = '💼 Save & Send to Caspit'; btn.disabled = false;
       showCaspitLog(result);
       if (result && (result.DocumentNumber || result.number || result.Id || result.documentId)) {
@@ -7725,6 +7824,7 @@ function skipProjectSurvey() {
 // ── Pre-Project Survey ────────────────────────────────
 var _preSurveyPendingJob = null;
 var _quotePrefill = {};
+var _pendingQuotePicks = {}, _pendingQuoteJobsCache = {}, _pendingQuoteIds = [];
 var _preSurveyStepCount = 4;
 
 var SUCCESS_KEYS_BY_CAT = {
