@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v829</title>
+<title>י.ב אחזקות — v831</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,16 +522,24 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v829
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v831
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxVOPX…exec (v200)
+Apps Script: AKfycbxVOPX…exec (v201)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v831 · 15/06/2026
+• יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
+
+─────────────────
+v830 · 15/06/2026
+• צ׳קבוקס בכרטיס היומן: סימון ✓ מסמן רשומה כבוצעה — בגיליון השורה מקבלת קו־חוצה ונשמרת (לא נמחקת) + חותמת זמן בעמודת "בוצע". באפליקציה: קו חוצה ל-~שנייה, הסתרה, והרשומה הבאה נכנסת. רשומות חצויות לא יופיעו שוב. (Apps Script v201: getYoman מדלג על חצויות ומחזיר מספר שורה + פעולה חדשה setYomanDone.)
+
 ─────────────────
 v829 · 15/06/2026
 • כרטיס המסך הראשי מציג כעת את 5 הרשומות האחרונות מלשונית "יומן" (תאריך · שעה · הערה), החדשות למעלה. רשומה ארוכה מקוצרת ל-3 שורות ונפתחת בלחיצה. ללא צ׳קבוקס. (Apps Script v200: פעולה חדשה getYoman.) כותרת הכרטיס: 📓 יומן.
@@ -1287,7 +1295,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v829</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v831</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6368,6 +6376,52 @@ function _caspitShowSuccess(result) {
   var status = result.status || 'created';
   showToast('✓ מסמך ' + docNum + ' | ' + status, 4000);
   showCaspitLog(result);
+  _renderAllocation(result);
+}
+
+function _allocBannerHtml(alloc9) {
+  return '<div id="allocBanner" style="border:2px solid #2e7d32;border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#0d3a1a;">' +
+    '<div style="font-size:11px;font-weight:800;color:#a5d6a7;margin-bottom:4px;">📋 מספר הקצאה</div>' +
+    '<div style="font-size:22px;font-weight:900;color:#fff;direction:ltr;text-align:right;font-family:monospace;letter-spacing:.05em;">' + alloc9 + '</div>' +
+  '</div>';
+}
+function _renderAllocation(result) {
+  var sum = document.getElementById('caspitLogSummary'); if (!sum) return;
+  var r = result.rawResponse || {};
+  var alloc = String(r.AllocationNumber || result.AllocationNumber || '').trim();
+  var trx = (r.TrxTypeId != null ? r.TrxTypeId : result.TrxTypeId);
+  var isInvoice = Number(trx) === 1 || _caspitDocType === 1;
+  var docId = result.documentId || r.DocumentId || result.DocumentId || result.Id || '';
+  var banner = '';
+  if (alloc) {
+    banner = _allocBannerHtml(alloc.slice(-9));
+  } else if (isInvoice) {
+    banner = '<div id="allocBanner" style="border:2px solid #ef6c00;border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#3a2410;">' +
+      '<div style="font-size:11px;font-weight:800;color:#ffb74d;margin-bottom:4px;">⚠️ לא הוקצה מספר הקצאה</div>' +
+      '<div style="font-size:11.5px;color:#ffcc80;line-height:1.6;">ייתכן שהסכום מתחת לסף (₪5,000) או שמודול "חשבוניות ישראל" אינו פעיל.</div>' +
+      (docId ? '<button onclick="_refreshAllocation(\'' + String(docId).replace(/'/g,"\\'") + '\',this)" style="margin-top:8px;background:#fff;border:1.5px solid #ef6c00;color:#ef6c00;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:800;font-family:Heebo,sans-serif;cursor:pointer;">🔄 בדוק שוב</button>' : '') +
+    '</div>';
+  }
+  if (banner) sum.innerHTML = banner + sum.innerHTML;
+}
+function _refreshAllocation(docId, btn) {
+  if (btn) { btn.textContent = '🔄 בודק…'; btn.disabled = true; }
+  showToast('🔄 בודק מספר הקצאה…');
+  _caspitFetch(CASPIT_PROXY_URL + '?action=getDocument&documentId=' + encodeURIComponent(docId) + '&trxTypeId=1&_t=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(resp){
+      var d = (resp && resp.rawResponse) ? resp.rawResponse : resp;
+      var alloc = String((d && d.AllocationNumber) || '').trim();
+      var banner = document.getElementById('allocBanner');
+      if (alloc) {
+        if (banner) banner.outerHTML = _allocBannerHtml(alloc.slice(-9));
+        showToast('📋 מספר הקצאה: ' + alloc.slice(-9), 6000);
+      } else {
+        showToast('עדיין לא הוקצה מספר הקצאה', 5000);
+        if (btn) { btn.textContent = '🔄 בדוק שוב'; btn.disabled = false; }
+      }
+    })
+    .catch(function(e){ showToast('⚠️ ' + e.message); if (btn) { btn.textContent = '🔄 בדוק שוב'; btn.disabled = false; } });
 }
 
 function _caspitAskManualContact(clientName, payload, callback) {
@@ -6764,9 +6818,9 @@ function _toggleJobNotesByIdx(idx) {
 }
 
 // ── Main-page "Latest Notes" card (latest 5 across all clients) ──
-function loadLatestNotes() {
+function loadLatestNotes(silent) {
   var list = document.getElementById('latestNotesList'); if (!list) return;
-  list.innerHTML = '<div style="font-size:12px;color:#90a4ae;padding:6px 0;">⏳ טוען…</div>';
+  if (!silent) list.innerHTML = '<div style="font-size:12px;color:#90a4ae;padding:6px 0;">⏳ טוען…</div>';
   function _applyNotesCollapse() {
     if (localStorage.getItem('ybNotesCollapsed') === '1') {
       list.style.display = 'none';
@@ -6782,16 +6836,33 @@ function loadLatestNotes() {
         list.innerHTML = '<div style="font-size:12px;color:#aaa;padding:6px 0;font-style:italic;">אין רשומות ביומן.</div>';
         _applyNotesCollapse(); return;
       }
+      var clampToggle = "var b=this.querySelector('.ybody'); b.style.webkitLineClamp=(b.style.webkitLineClamp==='unset'?'3':'unset');";
       list.innerHTML = items.map(function(n){
-        var clampToggle = "var b=this.querySelector('.ybody'); b.style.webkitLineClamp=(b.style.webkitLineClamp==='unset'?'3':'unset');";
-        return '<div onclick="' + clampToggle + '" style="padding:9px 2px;border-bottom:1px solid #eef2f6;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
-          '<div style="font-size:10.5px;font-weight:700;margin-bottom:3px;"><span style="color:#0d47a1;">' + _escNote(n.date||'') + '</span><span style="color:#e65100;margin-right:6px;">' + _escNote(n.time||'') + '</span></div>' +
-          '<div class="ybody" style="font-size:13px;color:#222;line-height:1.5;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">' + _escNote(n.note||'') + '</div>' +
+        return '<div class="yentry" style="display:flex;gap:11px;align-items:flex-start;padding:9px 2px;border-bottom:1px solid #eef2f6;overflow:hidden;max-height:500px;transition:opacity .35s ease,max-height .35s ease,padding .35s ease;">' +
+          '<div class="ycb" onclick="markYomanDone(this,' + (n.row||0) + ')" style="width:22px;height:22px;border:2px solid #bbb;border-radius:6px;flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;-webkit-tap-highlight-color:transparent;"></div>' +
+          '<div class="ytext" onclick="' + clampToggle + '" style="flex:1;cursor:pointer;">' +
+            '<div style="font-size:10.5px;font-weight:700;margin-bottom:3px;"><span style="color:#0d47a1;">' + _escNote(n.date||'') + '</span><span style="color:#e65100;margin-right:6px;">' + _escNote(n.time||'') + '</span></div>' +
+            '<div class="ybody" style="font-size:13px;color:#222;line-height:1.5;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">' + _escNote(n.note||'') + '</div>' +
+          '</div>' +
         '</div>';
       }).join('');
       _applyNotesCollapse();
     })
-    .catch(function(e){ list.innerHTML = '<div style="font-size:12px;color:#c62828;padding:6px 0;">⚠️ ' + e.message + '</div>'; });
+    .catch(function(e){ if (!silent) list.innerHTML = '<div style="font-size:12px;color:#c62828;padding:6px 0;">⚠️ ' + e.message + '</div>'; });
+}
+function markYomanDone(cb, row) {
+  var entry = cb.parentElement; if (!entry || entry.getAttribute('data-done')) return;
+  entry.setAttribute('data-done', '1');
+  cb.style.background = '#2e7d32'; cb.style.borderColor = '#2e7d32'; cb.textContent = '✓';
+  var txt = entry.querySelector('.ytext'); if (txt) { txt.style.textDecoration = 'line-through'; txt.style.color = '#9e9e9e'; }
+  if (row) fetch(SHEETS_URL + '?action=setYomanDone&row=' + encodeURIComponent(row) + '&_t=' + Date.now())
+    .then(function(r){ return r.text(); })
+    .then(function(){ showToast('✓ סומן ביומן'); })
+    .catch(function(e){ showToast('⚠️ ' + e.message); });
+  setTimeout(function(){   // strike ~1s, then collapse + pull next
+    entry.style.opacity = '0'; entry.style.maxHeight = '0'; entry.style.paddingTop = '0'; entry.style.paddingBottom = '0'; entry.style.borderBottom = 'none';
+    setTimeout(function(){ loadLatestNotes(true); }, 360);
+  }, 1000);
 }
 function toggleLatestNotes() {
   var list = document.getElementById('latestNotesList'); var chev = document.getElementById('latestNotesChev');
