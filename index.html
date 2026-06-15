@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v827</title>
+<title>י.ב אחזקות — v829</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,16 +522,24 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v827
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v829
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxVOPX…exec (v199)
+Apps Script: AKfycbxVOPX…exec (v200)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v829 · 15/06/2026
+• כרטיס המסך הראשי מציג כעת את 5 הרשומות האחרונות מלשונית "יומן" (תאריך · שעה · הערה), החדשות למעלה. רשומה ארוכה מקוצרת ל-3 שורות ונפתחת בלחיצה. ללא צ׳קבוקס. (Apps Script v200: פעולה חדשה getYoman.) כותרת הכרטיס: 📓 יומן.
+
+─────────────────
+v828 · 14/06/2026
+• כרטיס ההערות במסך הראשי מציג כעת את כל ההערות מהיום האחרון (היום עם הפעילות האחרונה), לא רק 5 — סינון לפי התאריך של ההערה האחרונה. כותרת: "הערות מהיום האחרון", תג מציג תאריך + כמות.
+
 ─────────────────
 v827 · 14/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v199 החדשה (AKfycbxVOPX…).
@@ -1279,7 +1287,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v827</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v829</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1291,7 +1299,7 @@ SHEET SYNC
     </div>
     <div id="latestNotesCard" style="background:#fff;border:1px solid #e8eef3;border-radius:14px;box-shadow:0 1px 5px rgba(0,0,0,.06);margin:0 8px 12px;overflow:hidden;">
       <div onclick="toggleLatestNotes()" style="display:flex;align-items:center;gap:7px;padding:11px 13px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;">
-        <span style="font-size:13px;font-weight:900;color:#0d47a1;">📝 הערות אחרונות</span>
+        <span style="font-size:13px;font-weight:900;color:#0d47a1;">📓 יומן</span>
         <span id="latestNotesCount" style="margin-right:auto;font-size:10.5px;font-weight:700;color:#90a4ae;"></span>
         <span id="latestNotesChev" style="font-size:12px;color:#90a4ae;transition:transform .2s;">▼</span>
       </div>
@@ -6747,7 +6755,7 @@ function _addJobNote(key) {
   inp.disabled = true;
   fetch(SHEETS_URL + '?action=addNote&jobId=' + encodeURIComponent(ctx.jobId) + '&client=' + encodeURIComponent(ctx.client) + '&note=' + encodeURIComponent(note))
     .then(function(r){ return r.text(); })
-    .then(function(){ inp.value = ''; inp.disabled = false; _loadJobNotes(key); showToast('✓ הערה נוספה'); if (document.getElementById('latestNotesList')) { try { loadLatestNotes(); } catch(e){} } })
+    .then(function(){ inp.value = ''; inp.disabled = false; _loadJobNotes(key); showToast('✓ הערה נוספה'); })
     .catch(function(e){ inp.disabled = false; showToast('⚠️ ' + e.message); });
 }
 function _toggleJobNotesByIdx(idx) {
@@ -6759,27 +6767,29 @@ function _toggleJobNotesByIdx(idx) {
 function loadLatestNotes() {
   var list = document.getElementById('latestNotesList'); if (!list) return;
   list.innerHTML = '<div style="font-size:12px;color:#90a4ae;padding:6px 0;">⏳ טוען…</div>';
-  fetch(SHEETS_URL + '?action=getRecentNotes&limit=5&_t=' + Date.now())
+  function _applyNotesCollapse() {
+    if (localStorage.getItem('ybNotesCollapsed') === '1') {
+      list.style.display = 'none';
+      var chev = document.getElementById('latestNotesChev'); if (chev) chev.style.transform = 'rotate(-90deg)';
+    }
+  }
+  fetch(SHEETS_URL + '?action=getYoman&limit=5&_t=' + Date.now())
     .then(function(r){ return r.json(); })
-    .then(function(notes){
-      notes = Array.isArray(notes) ? notes : [];
-      var cnt = document.getElementById('latestNotesCount'); if (cnt) cnt.textContent = notes.length ? (notes.length + ' אחרונות') : '';
-      if (!notes.length) { list.innerHTML = '<div style="font-size:12px;color:#aaa;padding:6px 0;font-style:italic;">אין הערות.</div>'; }
-      else {
-        list.innerHTML = notes.map(function(n, i){
-          var safeId = (n.id||'').replace(/'/g,"\\'"); var safeClient = (n.client||'').replace(/'/g,"\\'");
-          return '<div id="lnote_' + i + '" style="display:flex;gap:11px;padding:9px 2px;border-bottom:1px solid #eef2f6;align-items:flex-start;">' +
-            '<div class="lnoteCb" onclick="markNoteJobDone(\'' + safeId + '\',\'' + safeClient + '\',' + i + ')" style="width:22px;height:22px;border:2px solid #bbb;border-radius:6px;flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;-webkit-tap-highlight-color:transparent;"></div>' +
-            '<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#222;line-height:1.45;">' + _escNote(n.note||'') + '</div>' +
-            '<div style="font-size:10.5px;color:#90a4ae;margin-top:3px;"><b style="color:#00695c;">' + _escNote(n.client||'') + '</b>' + (n.desc?' · ' + _escNote(n.desc):'') + (n.ts?' · <span style="color:#e65100;">' + n.ts + '</span>':'') + '</div></div>' +
-          '</div>';
-        }).join('');
+    .then(function(items){
+      items = Array.isArray(items) ? items : [];
+      var cnt = document.getElementById('latestNotesCount'); if (cnt) cnt.textContent = items.length ? (items.length + ' אחרונות') : '';
+      if (!items.length) {
+        list.innerHTML = '<div style="font-size:12px;color:#aaa;padding:6px 0;font-style:italic;">אין רשומות ביומן.</div>';
+        _applyNotesCollapse(); return;
       }
-      // apply saved collapse state
-      if (localStorage.getItem('ybNotesCollapsed') === '1') {
-        list.style.display = 'none';
-        var chev = document.getElementById('latestNotesChev'); if (chev) chev.style.transform = 'rotate(-90deg)';
-      }
+      list.innerHTML = items.map(function(n){
+        var clampToggle = "var b=this.querySelector('.ybody'); b.style.webkitLineClamp=(b.style.webkitLineClamp==='unset'?'3':'unset');";
+        return '<div onclick="' + clampToggle + '" style="padding:9px 2px;border-bottom:1px solid #eef2f6;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+          '<div style="font-size:10.5px;font-weight:700;margin-bottom:3px;"><span style="color:#0d47a1;">' + _escNote(n.date||'') + '</span><span style="color:#e65100;margin-right:6px;">' + _escNote(n.time||'') + '</span></div>' +
+          '<div class="ybody" style="font-size:13px;color:#222;line-height:1.5;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">' + _escNote(n.note||'') + '</div>' +
+        '</div>';
+      }).join('');
+      _applyNotesCollapse();
     })
     .catch(function(e){ list.innerHTML = '<div style="font-size:12px;color:#c62828;padding:6px 0;">⚠️ ' + e.message + '</div>'; });
 }
