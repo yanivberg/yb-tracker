@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v825</title>
+<title>י.ב אחזקות — v827</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,16 +522,24 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v825
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v827
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbwx3ys…exec (v198)
+Apps Script: AKfycbxVOPX…exec (v199)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v827 · 14/06/2026
+• עדכון SHEETS_URL לפריסת Apps Script v199 החדשה (AKfycbxVOPX…).
+
+─────────────────
+v826 · 14/06/2026
+• מסך ראשי: כרטיס מתקפל "📝 הערות אחרונות" — 5 ההערות האחרונות מכל הלקוחות, ממוינות לפי תאריך/שעה. כל הערה חדשה נשמרת עם חותמת [dd/MM HH:mm]. צ׳קבוקס ✓ מסמן את העבודה כ"בוצע". (Apps Script v199: addNote עם חותמת זמן + פעולה חדשה getRecentNotes.)
+
 ─────────────────
 v825 · 14/06/2026
 • הוספת הערות לעבודות ממתינות להצעה: כפתור 📝 על כל עבודה — גם במסך "📋 פרוייקטים ממתינים להצעה" (מגירה) וגם ברשימת "ממתין להצעה" שבהצעה חדשה. ההערות הקיימות נטענות ומוצגות (כל אחת בשורה), ו-"➕ הוסף" מוסיף הערה חדשה בצבירה (addNote). ללא שינוי ב-Worker/Apps Script.
@@ -1271,7 +1279,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v825</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v827</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1280,6 +1288,14 @@ SHEET SYNC
         <span style="font-size:20px;font-weight:900;color:#111;letter-spacing:0.5px;pointer-events:none;flex:1;text-align:left;">Today's Projects</span>
         <span style="width:28px;height:28px;background:rgba(0,0,0,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#111;line-height:1;pointer-events:none;flex-shrink:0;margin-left:auto;">+</span>
       </button>
+    </div>
+    <div id="latestNotesCard" style="background:#fff;border:1px solid #e8eef3;border-radius:14px;box-shadow:0 1px 5px rgba(0,0,0,.06);margin:0 8px 12px;overflow:hidden;">
+      <div onclick="toggleLatestNotes()" style="display:flex;align-items:center;gap:7px;padding:11px 13px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;">
+        <span style="font-size:13px;font-weight:900;color:#0d47a1;">📝 הערות אחרונות</span>
+        <span id="latestNotesCount" style="margin-right:auto;font-size:10.5px;font-weight:700;color:#90a4ae;"></span>
+        <span id="latestNotesChev" style="font-size:12px;color:#90a4ae;transition:transform .2s;">▼</span>
+      </div>
+      <div id="latestNotesList" style="padding:0 13px 11px;"></div>
     </div>
     <div class="project-list-setup" id="setupList"></div>
     <div id="emptyMsg" style="display:none;"></div>
@@ -2257,6 +2273,7 @@ function init() {
       }
     }
   } else { showScreen('setup'); renderSetup(); }
+  try { loadLatestNotes(); } catch(e){}
 
   // Restore Caspit drawer only if user is on setup screen (not day/accumulation)
   var savedCaspitTab = localStorage.getItem('ybd_caspit_state');
@@ -2311,7 +2328,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwx3ysCtf_UOiIDM_Co_g9kgSGg2YkfDAfau5TotrTWpvbY4tp2JhwLqUPl9J9LTHkE4w/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxVOPXGFikOh8Hhdh81Zw7qoG0C3FzXAtE9Q0DxpB6klMsxlb8oDwZAechGgsbOZ1X1aA/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
@@ -6730,12 +6747,59 @@ function _addJobNote(key) {
   inp.disabled = true;
   fetch(SHEETS_URL + '?action=addNote&jobId=' + encodeURIComponent(ctx.jobId) + '&client=' + encodeURIComponent(ctx.client) + '&note=' + encodeURIComponent(note))
     .then(function(r){ return r.text(); })
-    .then(function(){ inp.value = ''; inp.disabled = false; _loadJobNotes(key); showToast('✓ הערה נוספה'); })
+    .then(function(){ inp.value = ''; inp.disabled = false; _loadJobNotes(key); showToast('✓ הערה נוספה'); if (document.getElementById('latestNotesList')) { try { loadLatestNotes(); } catch(e){} } })
     .catch(function(e){ inp.disabled = false; showToast('⚠️ ' + e.message); });
 }
 function _toggleJobNotesByIdx(idx) {
   var j = pendingQuoteJobs[idx]; if (!j) return;
   _toggleJobNotes('pq' + idx, j.id, j.client, true);
+}
+
+// ── Main-page "Latest Notes" card (latest 5 across all clients) ──
+function loadLatestNotes() {
+  var list = document.getElementById('latestNotesList'); if (!list) return;
+  list.innerHTML = '<div style="font-size:12px;color:#90a4ae;padding:6px 0;">⏳ טוען…</div>';
+  fetch(SHEETS_URL + '?action=getRecentNotes&limit=5&_t=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(notes){
+      notes = Array.isArray(notes) ? notes : [];
+      var cnt = document.getElementById('latestNotesCount'); if (cnt) cnt.textContent = notes.length ? (notes.length + ' אחרונות') : '';
+      if (!notes.length) { list.innerHTML = '<div style="font-size:12px;color:#aaa;padding:6px 0;font-style:italic;">אין הערות.</div>'; }
+      else {
+        list.innerHTML = notes.map(function(n, i){
+          var safeId = (n.id||'').replace(/'/g,"\\'"); var safeClient = (n.client||'').replace(/'/g,"\\'");
+          return '<div id="lnote_' + i + '" style="display:flex;gap:11px;padding:9px 2px;border-bottom:1px solid #eef2f6;align-items:flex-start;">' +
+            '<div class="lnoteCb" onclick="markNoteJobDone(\'' + safeId + '\',\'' + safeClient + '\',' + i + ')" style="width:22px;height:22px;border:2px solid #bbb;border-radius:6px;flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;-webkit-tap-highlight-color:transparent;"></div>' +
+            '<div style="flex:1;"><div style="font-size:13px;font-weight:600;color:#222;line-height:1.45;">' + _escNote(n.note||'') + '</div>' +
+            '<div style="font-size:10.5px;color:#90a4ae;margin-top:3px;"><b style="color:#00695c;">' + _escNote(n.client||'') + '</b>' + (n.desc?' · ' + _escNote(n.desc):'') + (n.ts?' · <span style="color:#e65100;">' + n.ts + '</span>':'') + '</div></div>' +
+          '</div>';
+        }).join('');
+      }
+      // apply saved collapse state
+      if (localStorage.getItem('ybNotesCollapsed') === '1') {
+        list.style.display = 'none';
+        var chev = document.getElementById('latestNotesChev'); if (chev) chev.style.transform = 'rotate(-90deg)';
+      }
+    })
+    .catch(function(e){ list.innerHTML = '<div style="font-size:12px;color:#c62828;padding:6px 0;">⚠️ ' + e.message + '</div>'; });
+}
+function toggleLatestNotes() {
+  var list = document.getElementById('latestNotesList'); var chev = document.getElementById('latestNotesChev');
+  if (!list) return;
+  var collapsing = list.style.display !== 'none';
+  list.style.display = collapsing ? 'none' : '';
+  if (chev) chev.style.transform = collapsing ? 'rotate(-90deg)' : '';
+  try { localStorage.setItem('ybNotesCollapsed', collapsing ? '1' : '0'); } catch(e){}
+}
+function markNoteJobDone(jobId, client, idx) {
+  var row = document.getElementById('lnote_' + idx); if (!row) return;
+  var cb = row.querySelector('.lnoteCb'); if (cb) { cb.style.background = '#2e7d32'; cb.style.borderColor = '#2e7d32'; cb.textContent = '✓'; }
+  fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(jobId) + '&client=' + encodeURIComponent(client) + '&status=' + encodeURIComponent('בוצע'))
+    .then(function(){
+      showToast('✓ ' + jobId + ' → בוצע');
+      setTimeout(function(){ if (row) { row.style.transition = 'opacity .3s'; row.style.opacity = '0'; setTimeout(function(){ if (row && row.parentNode) row.parentNode.removeChild(row); }, 300); } }, 400);
+    })
+    .catch(function(e){ if (cb) { cb.style.background = ''; cb.style.borderColor = '#bbb'; cb.textContent = ''; } showToast('⚠️ ' + e.message); });
 }
 
 function _renderQuoteList(docs, filter) {
