@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v833</title>
+<title>י.ב אחזקות — v834</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,7 +522,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v833
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v834
 Deployed: 17/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxXpxI…exec (v203)
@@ -532,6 +532,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v26 · multi-host fallba
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v834 · 18/06/2026
+• חשבונית מס: תיאור שורת המוצר כולל עכשיו Job ID | מספר רכש | תאריך סיום | תיאור. שדות ריקים נשארים ריקים (מפריד | נשמר).
+
 ─────────────────
 v833 · 17/06/2026
 • הצעה חדשה (ממתין להצעה): בעת הוספת עבודות מהגיליון להצעה — ההערות מועתקות אוטומטית לשדה Details (פנימי, לא מוצג ללקוח). ריבוי עבודות — הערות משורשרות עם שורה חדשה. מצריך Apps Script v196 (getPendingQuote מחזיר notes).
@@ -1303,7 +1307,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v833</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v834</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6321,11 +6325,7 @@ function createCaspitInvoice() {
         var unitPrice = parseFloat(job.income) || parseFloat(job.gp) || parseFloat(job.price) || 1;
         if (!unitPrice || isNaN(unitPrice) || unitPrice <= 0) unitPrice = 1;
         var qty = parseFloat(job.qty) || 1;
-        var parts = [job.client || ''];
-        if (job.po) parts.push(job.po);
-        parts.push(job.desc || '—');
-        if (job.dateEnd) parts.push(job.dateEnd);
-        var lineDesc = parts.join(' | ');
+        var lineDesc = (job.id || '') + ' | ' + (job.po || '') + ' | ' + (job.dateEnd || '') + ' | ' + (job.desc || '—');
         return { ProductName: lineDesc, Details: lineDesc, Qty: qty, UnitPrice: unitPrice, ChargeVAT: true };
       })
     };
