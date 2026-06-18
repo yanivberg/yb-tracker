@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v838</title>
+<title>י.ב אחזקות — v840</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,7 +522,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v838
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v840
 Deployed: 17/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxXpxI…exec (v203)
@@ -532,6 +532,14 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v26 · multi-host fallba
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v840 · 19/06/2026
+• ערוך הצעה קיימת: תיקון HTTP 400 בשמירת לכאשית — מסננים שדות מחושבים/readonly (סכומים, AllocationNumber וכו') מה-payload לפני שליחת PUT. Worker v29: whitelist שדות מותרים בלבד.
+
+─────────────────
+v839 · 19/06/2026
+• הצעה חדשה (ממתין להצעה): כמות ומחיר מועתקים אוטומטית לשורות ההצעה מהגיליון. מצריך Apps Script v197 (getPendingQuote מחזיר qty + price).
+
 ─────────────────
 v838 · 18/06/2026
 • חשבונית/הצעה: תיקון פרטי לקוח בכותרת המסמך — שליחת CustomerOsekMorshe, CustomerAddress, CustomerCity, CustomerPhone, CustomerEmail בפיילוד Caspit מ _caspitContacts. דורש Worker v28.
@@ -1323,7 +1331,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v838</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v840</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6814,7 +6822,7 @@ function _addPendingToQuote() {
   var picks = Object.keys(_pendingQuotePicks).map(function(k){ return _pendingQuotePicks[k]; });
   if (!picks.length) return;
   var client = (document.getElementById('pendingQuoteClient')||{}).value || (picks[0] && picks[0].client) || '';
-  _quotePrefill = { client: client, lines: picks.map(function(p){ return p.desc || '—'; }), pendingIds: picks.map(function(p){ return p.id; }), pendingNotes: picks.map(function(p){ return p.notes || ''; }) };
+  _quotePrefill = { client: client, lines: picks.map(function(p){ return p.desc || '—'; }), pendingIds: picks.map(function(p){ return p.id; }), pendingNotes: picks.map(function(p){ return p.notes || ''; }), pendingQtys: picks.map(function(p){ return parseFloat(p.qty) || 1; }), pendingPrices: picks.map(function(p){ return parseFloat(p.price) || 0; }) };
   _setQuoteMode('new');
 }
 
@@ -7010,9 +7018,12 @@ function _saveEditedQuote() {
   var totalAmt = newLines.reduce(function(s,l){return s+l.ExtendedPrice;},0);
   var updDoc = Object.assign({}, _editQuoteDoc, {
     DocumentLines: newLines, Details: details, Comments: comments,
-    CustomerId: custId || _editQuoteDoc.CustomerId,
-    TotalLinesChargeVAT: totalAmt, TotalBeforeVAT: totalAmt, Total: totalAmt
+    CustomerId: custId || _editQuoteDoc.CustomerId
   });
+  // Strip computed/readonly fields that cause Caspit PUT 400
+  ['TotalLinesChargeVAT','TotalBeforeVAT','Total','TotalWithVat','TotalPayment',
+   'AllocationNumber','EffectiveTotal','TrxTypeDesc','StatusDesc','IsCanceled',
+   'CreationDate','CreatedBy','UpdatedAt','UpdatedBy'].forEach(function(k){ delete updDoc[k]; });
   if (date) updDoc.Date = new Date(date).toISOString();
   var firstLine = newLines[0]||{};
   fetch(SHEETS_URL, {
@@ -7156,10 +7167,17 @@ function _renderCaspitQuoteForm() {
     var container = document.getElementById('caspitQuoteRows');
     if (!container) return;
     container.innerHTML = '';
-    prefillLines.forEach(function(line) {
+    prefillLines.forEach(function(line, li) {
       addCaspitQuoteRow();
-      var allDescs = container.querySelectorAll('.cq-desc');
-      if (allDescs[allDescs.length-1]) allDescs[allDescs.length-1].value = line;
+      var allDescs   = container.querySelectorAll('.cq-desc');
+      var allQtys    = container.querySelectorAll('.cq-qty');
+      var allPrices  = container.querySelectorAll('.cq-price');
+      var last = allDescs.length - 1;
+      if (allDescs[last])  allDescs[last].value  = line;
+      var pQty   = _quotePrefill.pendingQtys   && _quotePrefill.pendingQtys[li];
+      var pPrice = _quotePrefill.pendingPrices && _quotePrefill.pendingPrices[li];
+      if (allQtys[last]   && pQty)   allQtys[last].value   = pQty;
+      if (allPrices[last] && pPrice) allPrices[last].value = pPrice;
     });
     calcCaspitTotal();
 
