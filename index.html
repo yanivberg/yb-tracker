@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v836</title>
+<title>י.ב אחזקות — v837</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,7 +522,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v836
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v837
 Deployed: 17/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxXpxI…exec (v203)
@@ -532,6 +532,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v26 · multi-host fallba
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v837 · 18/06/2026
+• New Quotation: תיקון שורת פרטי הקשר — הוספה לטופס הצעה (New Quotation) בנוסף לטופס החשבונית. בנוסף: תיקון _autoMatchCaspitClient (לא היתה מוגדרת) — עכשיו מתאימה אוטומטית קשר כאשית כשמוחר לקוח מהגיליון.
+
 ─────────────────
 v836 · 18/06/2026
 • יצירת מסמך: כרטיס לקוח מציג עכשו פרטי קשר מכאשית: כתובת+עיר, טלפון, מספר עוסק/ח.פ., אימייל. מתעדכן בזמן אמתי כשהדרופדאון משתנה. דורש Worker v27 (שדות קשר מלאים מכאשית).
@@ -1315,7 +1319,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v836</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v837</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -7084,8 +7088,9 @@ function _renderCaspitQuoteForm() {
     '<div id="caspitMatchResult" style="margin-bottom:10px;display:none;"></div>' +
     '<div style="margin-bottom:10px;">' +
       '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">Caspit Contact <span style="font-size:10px;color:#aaa;font-weight:400;">(override if needed)</span></label>' +
-      '<select id="caspitQuoteContact" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;">' + opts + '</select>' +
+      '<select id="caspitQuoteContact" onchange="_updateQuoteContactInfo()" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;">' + opts + '</select>' +
       '<div style="font-size:11px;color:#aaa;margin-top:3px;">' + _caspitContacts.length + ' contacts</div>' +
+      '<div id="caspitQuoteContactInfo" style="padding:4px 0 2px;font-size:11px;color:#444;direction:rtl;min-height:14px;line-height:1.7;"></div>' +
     '</div>' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
       '<label style="font-size:12px;font-weight:700;color:#555;margin-bottom:0;">Line Items</label>' +
@@ -7129,6 +7134,7 @@ function _renderCaspitQuoteForm() {
     '<div style="background:#e8f0fe;border-radius:8px;padding:10px 12px;font-size:12px;color:#0d47a1;margin-bottom:2px;">1. Saves job to sheet (Waiting for Quote)<br>2. Sends all line items to Caspit<br>3. Total &gt; 0 → status: Quote Given &nbsp;|&nbsp; Total = 0 → status: Waiting for Quote</div>';
 
   addCaspitQuoteRow();
+  setTimeout(_updateQuoteContactInfo, 50);
 
   // Apply prefill from briefing — runs after DOM settles, tolerant of slow contact load
   function _applyQuotePrefill() {
@@ -7198,6 +7204,30 @@ function _renderCaspitQuoteForm() {
       var sel = document.getElementById('caspitQuoteSheetClient');
       if (sel) sel.innerHTML = '<option value="">— Error loading clients —</option>';
     });
+}
+
+function _autoMatchCaspitClient() {
+  var sheetSel = document.getElementById('caspitQuoteSheetClient');
+  var contactSel = document.getElementById('caspitQuoteContact');
+  if (!sheetSel || !contactSel) return;
+  var clientName = sheetSel.value;
+  if (!clientName) return;
+  // Try match map first, then fuzzy match
+  var contactId = _caspitMatchMap[clientName] || '';
+  if (!contactId) {
+    var m = _matchCaspitContact(clientName, _caspitContacts);
+    if (m && m.score >= 60) contactId = m.contact.Id || m.contact.ContactId || '';
+  }
+  if (contactId) contactSel.value = contactId;
+  _updateQuoteContactInfo();
+}
+
+function _updateQuoteContactInfo() {
+  var contactSel = document.getElementById('caspitQuoteContact');
+  var infoEl = document.getElementById('caspitQuoteContactInfo');
+  if (!infoEl) return;
+  var contactId = contactSel ? contactSel.value : '';
+  infoEl.innerHTML = _caspitContactInfoHtml(contactId);
 }
 
 function addCaspitQuoteRow() {
