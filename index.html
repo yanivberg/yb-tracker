@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v837</title>
+<title>י.ב אחזקות — v838</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,7 +522,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v837
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v838
 Deployed: 17/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxXpxI…exec (v203)
@@ -532,6 +532,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v26 · multi-host fallba
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v838 · 18/06/2026
+• חשבונית/הצעה: תיקון פרטי לקוח בכותרת המסמך — שליחת CustomerOsekMorshe, CustomerAddress, CustomerCity, CustomerPhone, CustomerEmail בפיילוד Caspit מ _caspitContacts. דורש Worker v28.
+
 ─────────────────
 v837 · 18/06/2026
 • New Quotation: תיקון שורת פרטי הקשר — הוספה לטופס הצעה (New Quotation) בנוסף לטופס החשבונית. בנוסף: תיקון _autoMatchCaspitClient (לא היתה מוגדרת) — עכשיו מתאימה אוטומטית קשר כאשית כשמוחר לקוח מהגיליון.
@@ -1319,7 +1323,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v837</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v838</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6354,6 +6358,11 @@ function createCaspitInvoice() {
       TrxTypeId: _caspitDocType, DocumentId: 'YB-' + Date.now() + '-' + i,
       DocumentSource: 2, DocumentNumberBranch: 1, TrxCodeNumber: _caspitDocType === 1 ? 3 : undefined, ChargeVAT: true, ContactId: contactId,
       CustomerBusinessName: customerName || undefined,
+      CustomerOsekMorshe: matchedContact ? (matchedContact.OsekMorshe || undefined) : undefined,
+      CustomerAddress:    matchedContact ? (matchedContact.Address  || undefined) : undefined,
+      CustomerCity:       matchedContact ? (matchedContact.City     || undefined) : undefined,
+      CustomerPhone:      matchedContact ? (matchedContact.Phone    || undefined) : undefined,
+      CustomerEmail:      matchedContact ? (matchedContact.Email    || undefined) : undefined,
       Comments: docComments || undefined,
       Details:  docDetails  || undefined,
       DocumentLines: g.jobs.map(function(job, li) {
@@ -7341,6 +7350,11 @@ function createCaspitQuote() {
       TrxTypeId: 16, DocumentId: 'YB-Q-' + Date.now(), DocumentSource: 2,
       DocumentNumberBranch: 1, TrxCodeNumber: 3, ChargeVAT: true, ContactId: contactId,
       CustomerBusinessName: customerName || undefined,
+      CustomerOsekMorshe: selectedContact ? (selectedContact.OsekMorshe || undefined) : undefined,
+      CustomerAddress:    selectedContact ? (selectedContact.Address  || undefined) : undefined,
+      CustomerCity:       selectedContact ? (selectedContact.City     || undefined) : undefined,
+      CustomerPhone:      selectedContact ? (selectedContact.Phone    || undefined) : undefined,
+      CustomerEmail:      selectedContact ? (selectedContact.Email    || undefined) : undefined,
       Comments: comments || undefined,
       Details:  details  || undefined,
       SendByEmail: true, Email: 'yanivberg@icloud.com',
