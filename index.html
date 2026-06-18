@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v835</title>
+<title>י.ב אחזקות — v836</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,7 +522,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v835
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v836
 Deployed: 17/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxXpxI…exec (v203)
@@ -532,6 +532,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v26 · multi-host fallba
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v836 · 18/06/2026
+• יצירת מסמך: כרטיס לקוח מציג עכשו פרטי קשר מכאשית: כתובת+עיר, טלפון, מספר עוסק/ח.פ., אימייל. מתעדכן בזמן אמתי כשהדרופדאון משתנה. דורש Worker v27 (שדות קשר מלאים מכאשית).
+
 ─────────────────
 v835 · 18/06/2026
 • חשבונית מס: תיקון שם לקוח בכותרת המסמך — כאשר אין התאמה אוטומטית לכאשית, נופל על שם איש הקשר מגיליון Clients, ואם גם אין — על שם לשונית הגיליון. בנוסף: הדרופדאון הידני כבר קיים, הבאג היה שה-customerName נשאר ריק.
@@ -1311,7 +1315,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v835</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v836</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6227,6 +6231,9 @@ function _renderCaspitInvoiceTab() {
         '<select onchange="_caspitSetManualContact(\'' + client.replace(/'/g,"\\'") + '\',this.value)" style="width:100%;padding:7px 10px;border:1.5px solid ' + (matched?'#2e7d32':'#e65100') + ';border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;background:#fff;">' +
           contactOpts +
         '</select>' +
+      '</div>' +
+      '<div id="cinfo_' + client.replace(/[^a-zA-Z0-9]/g,'_') + '" style="padding:4px 10px 6px;background:#f0f4ff;border-bottom:1px solid #eee;font-size:11px;color:#444;direction:rtl;min-height:14px;line-height:1.7;">' +
+        _caspitContactInfoHtml(_caspitMatchMap[client]||'') +
       '</div>';
     groups[client].forEach(function(job) {
       var sel = !!_caspitSelected[job.id];
@@ -6247,6 +6254,21 @@ function _renderCaspitInvoiceTab() {
 function _caspitSetManualContact(clientName, contactId) {
   if (contactId) _caspitMatchMap[clientName] = contactId;
   else delete _caspitMatchMap[clientName];
+  var infoEl = document.getElementById('cinfo_' + clientName.replace(/[^a-zA-Z0-9]/g,'_'));
+  if (infoEl) infoEl.innerHTML = _caspitContactInfoHtml(contactId || '');
+}
+
+function _caspitContactInfoHtml(contactId) {
+  if (!contactId) return '<span style="color:#bbb;">-- no contact selected --</span>';
+  var c = _caspitContacts.filter(function(x){ return (x.Id||x.ContactId||'') === contactId; })[0];
+  if (!c) return '';
+  var parts = [];
+  var addr = [c.Address, c.City].filter(Boolean).join(', ');
+  if (addr)         parts.push('&#128205; ' + addr);
+  if (c.Phone)      parts.push('&#128222; ' + c.Phone);
+  if (c.OsekMorshe) parts.push('&#128203; ' + c.OsekMorshe);
+  if (c.Email)      parts.push('&#9993; ' + c.Email);
+  return parts.join('&nbsp; &nbsp;');
 }
 
 function _caspitTap(idx) {
