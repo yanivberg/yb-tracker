@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v846</title>
+<title>י.ב אחזקות — v847</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -522,7 +522,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v846
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v847
 Deployed: 17/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxXpxI…exec (v203)
@@ -532,6 +532,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v26 · multi-host fallba
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v847 · 20/06/2026
+• הוסר כפתור AI WIZARD ממסך הבית — Start Work Session תופס למלא הרוחב. הפונקציה openAIBriefing נשארה מוגדרת (לא נמחקה — אין קריאה אליה מהמסך הראשי כרגע).
+
 ─────────────────
 v846 · 20/06/2026
 • תיקון שורת הכפתורים התחתונה (Start Work Session + AI Wizard) במסך רחב/מחשב: הדוק היה נמתח לכל רוחב המסך ויצא מגבולות האפליקציה. עכשיו מוגבל ל-420px וממורכז כמו שאר התוכן — הכפתורים שומרים על הפרופורציה.
@@ -1355,7 +1359,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v846</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v847</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1379,9 +1383,6 @@ SHEET SYNC
     <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;box-sizing:border-box;padding:4px 16px max(env(safe-area-inset-bottom,8px),8px);z-index:100;display:flex;gap:8px;">
       <button class="btn-start-day" id="btnStartDay" onclick="startDay()" disabled style="flex:1;font-size:20px;letter-spacing:0.5px;padding:14px 16px;border-radius:12px;">
         Start Work Session
-      </button>
-      <button onclick="openAIBriefing()" style="background:#0d47a1;border:none;border-radius:12px;padding:11px 13px;font-size:12px;font-weight:900;color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 12px rgba(13,71,161,0.4);display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.4;font-family:Heebo,sans-serif;">
-        <span style="font-size:18px;">💫</span><span>AI<br>WIZARD</span>
       </button>
     </div>
     <div style="height:120px;"></div>
