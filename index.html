@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v850</title>
+<title>י.ב אחזקות — v852</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -408,8 +408,8 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   left: 50%;
   width: 44px;
   height: 44px;
-  margin-top: -22px;   /* half of height — centers without using transform */
-  margin-left: -22px;  /* half of width  — transform stays free for the spin */
+  margin-top: -22px;
+  margin-left: -22px;
   border: 4px solid rgba(0,0,0,0.12);
   border-top-color: #1a1a2e;
   border-radius: 50%;
@@ -480,8 +480,6 @@ input[id^="progSlider-"]::-moz-range-track {
         <span style="font-size:24px;flex-shrink:0;">💰</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#2e7d32;">Gross Profit — To Invoice</span></div>
       <div onclick="closeSetupDrawer();fetchActualPriceSummary();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🧾</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1565c0;">Actual Price — To Invoice</span></div>
-      <div onclick="closeSetupDrawer();openDayNote();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
-        <span style="font-size:24px;flex-shrink:0;">📝</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Day Note</span></div>
       <div onclick="closeSetupDrawer();openWorkLog();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📓</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Work Log</span></div>
       <div onclick="closeSetupDrawer();_openWeeklyPlanningDrawer();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -520,94 +518,98 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v850
-Deployed: 17/06/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v852
+Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxXpxI…exec (v203)
-Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v26 · multi-host fallback)
+Apps Script: AKfycbxVOPX…exec (v201)
+Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v852 · 20/06/2026
+• הוסר "Day Note" מהמגירה — הדרך היחידה להוספת הערת יום כעת היא כפתור 📝 הערה בכרטיס 📓 יומן.
+
+─────────────────
+v851 · 20/06/2026
+• תיקון באג: New Client נפתח מתחת למסך Account Manager ולא מעליו — z-index של newClientOverlay היה 10002 מול מתחת caspitOverlay (10014). עולה ל-10020.
+
+─────────────────
 v850 · 20/06/2026
-• Account Manager: עיצוב "Create New Client" תואם לסטייל האחיד של שאר הפריטים (Invoice/Receipt, Edit/New Quotation וכו') — הוסר קופסה ירוקה/מסגרת, נשאר חץ ▼ לאחידות חזותית. התנהגות הלחיצה זהה — עדיין פותח openNewClientModal.
+• Account Manager: עיצוב "Create New Client" תואם לסטייל האחיד של שאר הפריטים — הוסר קופסה ירוקה, נשאר חץ ▼ לאחידות חזותית.
 
 ─────────────────
 v849 · 20/06/2026
-• Account Manager: שונה תווית האקורדיון "New Quotation" → "Edit/New Quotation" — שינוי תווית בלבד, אין שינוי תפקודי.
+• Account Manager: שונה תווית האקורדיון "New Quotation" → "Edit/New Quotation".
 
 ─────────────────
 v848 · 20/06/2026
-• הועבר רשומת Lessons Learned ממסך משנות הגדולה אל תוך מסך AI Business Advisor (כרטיס שלישי בצד Quick/Deep Analysis).
+• הועבר רשומת Lessons Learned ממסך משנות הגדולה אל תוך מסך AI Business Advisor (כרטיס שלישי).
 
 ─────────────────
 v847 · 20/06/2026
-• הוסר כפתור AI WIZARD ממסך הבית — Start Work Session תופס למלא הרוחב. הפונקציה openAIBriefing נשארה מוגדרת (לא נמחקה — אין קריאה אליה מהמסך הראשי כרגע).
+• הוסר כפתור AI WIZARD ממסך הבית — Start Work Session תופס למלא הרוחב.
 
 ─────────────────
 v846 · 20/06/2026
-• תיקון שורת הכפתורים התחתונה (Start Work Session + AI Wizard) במסך רחב/מחשב: הדוק היה נמתח לכל רוחב המסך ויצא מגבולות האפליקציה. עכשיו מוגבל ל-420px וממורכז כמו שאר התוכן — הכפתורים שומרים על הפרופורציה.
+• תיקון שורת הכפתורים במסך רחב/מחשב: הדוק עכשיו מוגבל ל-420px וממורכז.
 
 ─────────────────
 v845 · 19/06/2026
-• סמן טעינה (ספינר) הועבר מהפינה התחתונה-ימנית למרכז המסך, והוגדל מעט (44px) לנראות טובה יותר.
+• סמן טעינה (ספינר) עבר למרכז המסך, והוגדל ל-44px.
 
 ─────────────────
 v844 · 19/06/2026
-• פילטר משותף (בחירת עבודות/הצעות/בוצעו/חשבוניות): הוסרו כל אפשרויות הסינון פרט לסינון לפי לקוח — הוסרו היום/שבוע/חודש/טווח, ⏰ >2 שבועות, ומיון ↑↓. נשארו: צ'יפסי לקוח + כפתור נקה.
+• פילטר משותף: הוסרו היום/שבוע/חודש/טווח, ⏰ >2 שבועות, מיון ↑↓ — נשארו צ'יפסי לקוח + נקה.
 
 ─────────────────
 v843 · 19/06/2026
-• כפתור "📝 הערה" עבר מהמגירה לכותרת כרטיס יומן במסך הבית — לחיצה פותחת את חלון הוספת ההערה. לחיצה על שאר הכותרת — עדיין פותחת/סוגרת את הכרטיס.
+• כפתור "📝 הערה" עבר מהמגירה לכותרת כרטיס 📓 יומן.
 
 ─────────────────
 v842 · 19/06/2026
-• הסרת "Previous Day Notes" מהמגירה — הפריט, הפונקציה (openDayNotesList) וה-overlay הוסרו (ניקוי מלא). הוספת הערה (Day Note) נשארת.
+• הסרת "Previous Day Notes" מהמגירה (ניקוי מלא).
 
 ─────────────────
 v841 · 19/06/2026
-• ניהול עבודות: מחיקה קבוצתית — לחיצה ארוכה על שורה מכניסה למצב בחירה, טפיפה על שורות נוספות מוסיפה/מסירה. כפתור 'מחק נבחרים' בראש הרשימה (נעלם כשאין נבחרים) — מוחק ברצף עם אישור ואזהרה על עבודות עם חשבונית/הצעה מקושרת.
+• ניהול עבודות: מחיקה קבוצתית בלחיצה ארוכה.
 
 ─────────────────
 v840 · 19/06/2026
-• ערוך הצעה קיימת: תיקון HTTP 400 בשמירת לכאשית — מסננים שדות מחושבים/readonly (סכומים, AllocationNumber וכו') מה-payload לפני שליחת PUT. Worker v29: whitelist שדות מותרים בלבד.
+• ערוך הצעה: תיקון HTTP 400 בשמירה לכאשית.
 
 ─────────────────
-v839 · 19/06/2026
-• הצעה חדשה (ממתין להצעה): כמות ומחיר מועתקים אוטומטית לשורות ההצעה מהגיליון. מצריך Apps Script v197 (getPendingQuote מחזיר qty + price).
+v839 · 18/06/2026
+• כמות + מחיר מועתקים לשורות ההצעה מהגיליון.
 
 ─────────────────
 v838 · 18/06/2026
-• חשבונית/הצעה: תיקון פרטי לקוח בכותרת המסמך — שליחת CustomerOsekMorshe, CustomerAddress, CustomerCity, CustomerPhone, CustomerEmail בפיילוד Caspit מ _caspitContacts. דורש Worker v28.
+• תיקון פרטי לקוח בכותרת המסמך: שליחת CustomerOsekMorshe/Address/City/Phone/Email. דורש Worker v28.
 
 ─────────────────
 v837 · 18/06/2026
-• New Quotation: תיקון שורת פרטי הקשר — הוספה לטופס הצעה (New Quotation) בנוסף לטופס החשבונית. בנוסף: תיקון _autoMatchCaspitClient (לא היתה מוגדרת) — עכשיו מתאימה אוטומטית קשר כאשית כשמוחר לקוח מהגיליון.
+• פרטי קשר גם בהצעה חדשה. תיקון _autoMatchCaspitClient (לא היתה מוגדרת).
 
 ─────────────────
 v836 · 18/06/2026
-• יצירת מסמך: כרטיס לקוח מציג עכשו פרטי קשר מכאשית: כתובת+עיר, טלפון, מספר עוסק/ח.פ., אימייל. מתעדכן בזמן אמתי כשהדרופדאון משתנה. דורש Worker v27 (שדות קשר מלאים מכאשית).
+• כרטיס לקוח מציג עכשו פרטי קשר. הערות ממתין להצעה מועתקות ל-Details. דורש Worker v27.
 
 ─────────────────
 v835 · 18/06/2026
-• חשבונית מס: תיקון שם לקוח בכותרת המסמך — כאשר אין התאמה אוטומטית לכאשית, נופל על שם איש הקשר מגיליון Clients, ואם גם אין — על שם לשונית הגיליון. בנוסף: הדרופדאון הידני כבר קיים, הבאג היה שה-customerName נשאר ריק.
+• תיקון שם לקוח בכותרת המסמך — פולבק לשם איש קשר/שם לשונית כאשית לא נמצא.
 
 ─────────────────
 v834 · 18/06/2026
-• חשבונית מס: תיאור שורת המוצר כולל עכשיו Job ID | מספר רכש | תאריך סיום | תיאור. שדות ריקים נשארים ריקים (מפריד | נשמר).
+• חשבונית מס: תיאור שורת המוצר כולל עכשיו Job ID | מספר רכש | תאריך סיום | תיאור.
 
 ─────────────────
-v833 · 17/06/2026
-• הצעה חדשה (ממתין להצעה): בעת הוספת עבודות מהגיליון להצעה — ההערות מועתקות אוטומטית לשדה Details (פנימי, לא מוצג ללקוח). ריבוי עבודות — הערות משורשרות עם שורה חדשה. מצריך Apps Script v196 (getPendingQuote מחזיר notes).
-
-─────────────────
-v832 · 17/06/2026
+v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v831 · 15/06/2026
+v852 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1369,7 +1371,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v850</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v852</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1857,7 +1859,7 @@ SHEET SYNC
 </div>
 
 <!-- New Client Modal -->
-<div id="newClientOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10002;align-items:flex-end;justify-content:center;">
+<div id="newClientOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10020;align-items:flex-end;justify-content:center;">
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;padding:20px;font-family:Heebo,sans-serif;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
       <div style="font-weight:700;font-size:17px;">➕ New Client</div>
@@ -2956,7 +2958,7 @@ function _mjBadge(s) {
 function mjRenderList() {
   _mjClient = document.getElementById('mjClient').value;
   var list = document.getElementById('mjList');
-  _mjSelected = {}; mjUpdateBulkBar();   // clear selection on client switch
+  _mjSelected = {}; mjUpdateBulkBar();
   if (!_mjClient) { _mjJobs = []; list.innerHTML = ''; document.getElementById('mjCount').textContent = ''; document.getElementById('mjChips').innerHTML = ''; return; }
   list.innerHTML = '<div style="text-align:center;color:#90a4ae;padding:30px;">⏳ טוען…</div>';
   fetch(SHEETS_URL + '?action=getClientJobs&client=' + encodeURIComponent(_mjClient)).then(function(r){ return r.json(); }).then(function(jobs){
@@ -3087,7 +3089,7 @@ function mjSave() {
     mjRenderList();
   }).catch(function(){ showToast('⚠️ שמירה נכשלה'); });
 }
-var _mjSelected = {};   // jobId -> true
+var _mjSelected = {};
 var _mjLongPressTimer = null;
 var _mjLongPressFired = false;
 
@@ -3105,10 +3107,9 @@ function mjLongPressStart(i) {
 function mjLongPressEnd() { if (_mjLongPressTimer) { clearTimeout(_mjLongPressTimer); _mjLongPressTimer = null; } }
 
 function mjRowTap(i) {
-  if (_mjLongPressFired) { _mjLongPressFired = false; return; } // long-press already handled
+  if (_mjLongPressFired) { _mjLongPressFired = false; return; }
   var j = _mjJobs[i]; if (!j) return;
   if (Object.keys(_mjSelected).length > 0) {
-    // selection mode — toggle
     if (_mjSelected[j.id]) delete _mjSelected[j.id]; else _mjSelected[j.id] = true;
     mjApplyFilter();
     mjUpdateBulkBar();
@@ -6372,15 +6373,15 @@ function _caspitSetManualContact(clientName, contactId) {
 }
 
 function _caspitContactInfoHtml(contactId) {
-  if (!contactId) return '<span style="color:#bbb;">-- no contact selected --</span>';
+  if (!contactId) return '';
   var c = _caspitContacts.filter(function(x){ return (x.Id||x.ContactId||'') === contactId; })[0];
   if (!c) return '';
   var parts = [];
   var addr = [c.Address, c.City].filter(Boolean).join(', ');
-  if (addr)         parts.push('&#128205; ' + addr);
-  if (c.Phone)      parts.push('&#128222; ' + c.Phone);
-  if (c.OsekMorshe) parts.push('&#128203; ' + c.OsekMorshe);
-  if (c.Email)      parts.push('&#9993; ' + c.Email);
+  if (addr)         parts.push('📍 ' + addr);
+  if (c.Phone)      parts.push('📞 ' + c.Phone);
+  if (c.OsekMorshe) parts.push('📋 ' + c.OsekMorshe);
+  if (c.Email)      parts.push('✉ ' + c.Email);
   return parts.join('&nbsp; &nbsp;');
 }
 
@@ -6452,7 +6453,6 @@ function createCaspitInvoice() {
     var contactId = g.contactId || '';
     var matchedContact = _caspitContacts.filter(function(c){ return (c.Id||c.ContactId||'') === contactId; })[0];
     var customerName = matchedContact ? (matchedContact.Name || '') : '';
-    // Fallback: if no Caspit contact resolved, use full name from Clients sheet, then tab name
     if (!customerName) {
       var sheetClient = _sheetClientsData.filter(function(c){ return c.name === g.clientName; })[0];
       customerName = (sheetClient && sheetClient.contact) ? sheetClient.contact : g.clientName;
@@ -7117,7 +7117,6 @@ function _saveEditedQuote() {
     DocumentLines: newLines, Details: details, Comments: comments,
     CustomerId: custId || _editQuoteDoc.CustomerId
   });
-  // Strip computed/readonly fields that cause Caspit PUT 400
   ['TotalLinesChargeVAT','TotalBeforeVAT','Total','TotalWithVat','TotalPayment',
    'AllocationNumber','EffectiveTotal','TrxTypeDesc','StatusDesc','IsCanceled',
    'CreationDate','CreatedBy','UpdatedAt','UpdatedBy'].forEach(function(k){ delete updDoc[k]; });
@@ -7287,18 +7286,17 @@ function _renderCaspitQuoteForm() {
       }
     }
 
-    _pendingQuoteIds = (_quotePrefill && _quotePrefill.pendingIds) ? _quotePrefill.pendingIds.slice() : [];
-
-    // Append job notes (from sheet הערות) into Details field (internal, not shown to client)
-    var pendingNotes = (_quotePrefill && _quotePrefill.pendingNotes) ? _quotePrefill.pendingNotes.filter(function(n){ return n && n.trim(); }) : [];
+    // Job notes (from sheet, ממתין להצעה picker) -> internal Details, newline-joined
+    var pendingNotes = (_quotePrefill.pendingNotes || []).filter(Boolean);
     if (pendingNotes.length) {
-      var detailsEl = document.getElementById('caspitDetails');
-      if (detailsEl) {
-        var existing = detailsEl.value ? detailsEl.value.trimRight() + '\n\n' : '';
-        detailsEl.value = existing + pendingNotes.join('\n');
+      var detailsEl2 = document.getElementById('caspitDetails');
+      if (detailsEl2) {
+        var existing2 = detailsEl2.value ? detailsEl2.value + '\n\n' : '';
+        detailsEl2.value = existing2 + pendingNotes.join('\n');
       }
     }
 
+    _pendingQuoteIds = (_quotePrefill && _quotePrefill.pendingIds) ? _quotePrefill.pendingIds.slice() : [];
     _quotePrefill = {}; // consume — prevent re-apply on re-render
   }
   setTimeout(_applyQuotePrefill, 150);
@@ -7336,7 +7334,6 @@ function _autoMatchCaspitClient() {
   if (!sheetSel || !contactSel) return;
   var clientName = sheetSel.value;
   if (!clientName) return;
-  // Try match map first, then fuzzy match
   var contactId = _caspitMatchMap[clientName] || '';
   if (!contactId) {
     var m = _matchCaspitContact(clientName, _caspitContacts);
@@ -7418,6 +7415,7 @@ function createCaspitQuote() {
   var sheetClient = (document.getElementById('caspitQuoteSheetClient')||{}).value||'';
   if (!contactId)   { showToast('Select a Caspit contact'); return; }
   if (!sheetClient) { showToast('Select a sheet client'); return; }
+  var selectedContact = _caspitContacts.filter(function(x){ return (x.Id||x.ContactId||'') === contactId; })[0];
 
   // Collect rows
   var container = document.getElementById('caspitQuoteRows');
@@ -7558,7 +7556,7 @@ function openAIAdvisor() {
           '<span style="font-size:28px;">📚</span>' +
           '<div><div style="font-size:15px;font-weight:900;color:#0d47a1;">Lessons Learned</div><div style="font-size:11px;color:#888;">לקחים מפרויקטים</div></div>' +
         '</div>' +
-        '<div style="font-size:12px;color:#555;line-height:1.5;">סיכומים מעבודות שהושלמו — חומרים, צעדים, ומה עבד.</div>' +
+        '<div style="font-size:12px;color:#555;line-height:1.5;">Lessons from completed jobs</div>' +
       '</div>' +
     '</div>';
 }
@@ -9786,7 +9784,7 @@ function _fClear(key) {
 }
 function _fHasActive(key) {
   var f = _fGet(key);
-  return f.clients.length > 0; // only client filter remains in the bar
+  return f.clients.length > 0;
 }
 function _fParseDate(str) {
   if (!str) return null;
