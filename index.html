@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v852</title>
+<title>י.ב אחזקות — v853</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -518,16 +518,20 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v852
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v853
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxVOPX…exec (v201)
+Apps Script: AKfycbzHC9G…exec (v196)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v853 · 21/06/2026
+• עדכון SHEETS_URL לפריסת Apps Script v196 החדשה (AKfycbzHC9G…) — מכילה את שדות notes/qty/price ב-getPendingQuote. עודכן גם פאנל המידע (Apps Script גרסה).
+
 ─────────────────
 v852 · 20/06/2026
 • הוסר "Day Note" מהמגירה — הדרך היחידה להוספת הערת יום כעת היא כפתור 📝 הערה בכרטיס 📓 יומן.
@@ -609,7 +613,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v852 · 15/06/2026
+v853 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1371,7 +1375,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v852</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v853</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2407,7 +2411,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxXpxI9nLGSOtHGP5Q0ofyQ25B7jDkVS8_Ls4ErMxCqqtHDp0LjdFehzapjEoCty-fg-w/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzHC9GhOUiouO5qNF0b93tKlhZ1Rhp6fILGUq1VZSOZyzUYC4Sh0_st8iY1JYjyzoBUkA/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
