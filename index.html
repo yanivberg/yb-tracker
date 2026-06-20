@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v843</title>
+<title>י.ב אחזקות — v845</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -400,15 +400,17 @@ box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
-/* ── Global loading spinner (corner) ── */
+/* ── Global loading spinner (center) ── */
 #loadingBar {
   display: none;
   position: fixed;
-  bottom: 90px;
-  right: 16px;
-  width: 26px;
-  height: 26px;
-  border: 3px solid rgba(0,0,0,0.12);
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;   /* half of height — centers without using transform */
+  margin-left: -22px;  /* half of width  — transform stays free for the spin */
+  border: 4px solid rgba(0,0,0,0.12);
   border-top-color: #1a1a2e;
   border-radius: 50%;
   z-index: 999999;
@@ -520,7 +522,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v843
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v845
 Deployed: 17/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxXpxI…exec (v203)
@@ -530,6 +532,14 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v26 · multi-host fallba
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v845 · 19/06/2026
+• סמן טעינה (ספינר) הועבר מהפינה התחתונה-ימנית למרכז המסך, והוגדל מעט (44px) לנראות טובה יותר.
+
+─────────────────
+v844 · 19/06/2026
+• פילטר משותף (בחירת עבודות/הצעות/בוצעו/חשבוניות): הוסרו כל אפשרויות הסינון פרט לסינון לפי לקוח — הוסרו היום/שבוע/חודש/טווח, ⏰ >2 שבועות, ומיון ↑↓. נשארו: צ'יפסי לקוח + כפתור נקה.
+
 ─────────────────
 v843 · 19/06/2026
 • כפתור "📝 הערה" עבר מהמגירה לכותרת כרטיס יומן במסך הבית — לחיצה פותחת את חלון הוספת ההערה. לחיצה על שאר הכותרת — עדיין פותחת/סוגרת את הכרטיס.
@@ -1341,7 +1351,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v843</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v845</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -9757,7 +9767,7 @@ function _fClear(key) {
 }
 function _fHasActive(key) {
   var f = _fGet(key);
-  return f.clients.length > 0 || !!f.time || f.waiting || !!f.sort;
+  return f.clients.length > 0; // only client filter remains in the bar
 }
 function _fParseDate(str) {
   if (!str) return null;
@@ -9814,22 +9824,10 @@ function _fBarHtml(allJobs, key) {
     });
     html += '</div>';
   }
-  html += '<div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center;">';
-  [{k:'today',l:'היום'},{k:'week',l:'שבוע'},{k:'month',l:'חודש'},{k:'custom',l:'📅 טווח'}].forEach(function(tc) {
-    var active = f.time === tc.k;
-    html += '<span onclick="_fSetTime(\'' + key + '\',\'' + tc.k + '\')" style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;user-select:none;' + (active ? 'background:#1a1a2e;color:#fff;' : 'background:#efefef;color:#555;') + '">' + tc.l + '</span>';
-  });
-  html += '<span onclick="_fToggleWaiting(\'' + key + '\')" style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;user-select:none;' + (f.waiting ? 'background:#c62828;color:#fff;' : 'background:#efefef;color:#555;') + '">⏰ &gt;2 שבועות</span>';
-  html += '<span onclick="_fSetSort(\'' + key + '\',\'asc\')" style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;user-select:none;' + (f.sort==='asc' ? 'background:#00695c;color:#fff;' : 'background:#efefef;color:#555;') + '">↑ ישן→חדש</span>';
-  html += '<span onclick="_fSetSort(\'' + key + '\',\'desc\')" style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;user-select:none;' + (f.sort==='desc' ? 'background:#00695c;color:#fff;' : 'background:#efefef;color:#555;') + '">↓ חדש→ישן</span>';
-  if (hasActive) html += '<span onclick="_fClearAndRender(\'' + key + '\')" style="padding:3px 10px;border-radius:20px;font-size:11px;cursor:pointer;user-select:none;background:#fff;color:#bbb;border:1px solid #ddd;">✕ נקה</span>';
-  html += '</div>';
-  if (f.time === 'custom') {
-    html += '<div style="display:flex;gap:8px;margin-top:7px;align-items:center;">' +
-      '<input type="date" value="' + (f.cf||'') + '" onchange="_fSetCustomFrom(\'' + key + '\',this.value)" style="flex:1;padding:5px 7px;border:1px solid #ddd;border-radius:8px;font-size:12px;">' +
-      '<span style="font-size:11px;color:#aaa;flex-shrink:0;">עד</span>' +
-      '<input type="date" value="' + (f.ct||'') + '" onchange="_fSetCustomTo(\'' + key + '\',this.value)" style="flex:1;padding:5px 7px;border:1px solid #ddd;border-radius:8px;font-size:12px;">' +
-    '</div>';
+  if (hasActive) {
+    html += '<div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center;">';
+    html += '<span onclick="_fClearAndRender(\'' + key + '\')" style="padding:3px 10px;border-radius:20px;font-size:11px;cursor:pointer;user-select:none;background:#fff;color:#bbb;border:1px solid #ddd;">✕ נקה</span>';
+    html += '</div>';
   }
   html += '</div>';
   return html;
