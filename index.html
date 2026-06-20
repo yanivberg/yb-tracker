@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v849</title>
+<title>י.ב אחזקות — v850</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v849
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v850
 Deployed: 17/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxXpxI…exec (v203)
@@ -530,6 +530,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v26 · multi-host fallba
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v850 · 20/06/2026
+• Account Manager: עיצוב "Create New Client" תואם לסטייל האחיד של שאר הפריטים (Invoice/Receipt, Edit/New Quotation וכו') — הוסר קופסה ירוקה/מסגרת, נשאר חץ ▼ לאחידות חזותית. התנהגות הלחיצה זהה — עדיין פותח openNewClientModal.
+
 ─────────────────
 v849 · 20/06/2026
 • Account Manager: שונה תווית האקורדיון "New Quotation" → "Edit/New Quotation" — שינוי תווית בלבד, אין שינוי תפקודי.
@@ -1365,7 +1369,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v849</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v850</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1551,13 +1555,10 @@ SHEET SYNC
     </div>
     <div style="overflow-y:auto;flex:1;">
       <!-- New Client -->
-      <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;">
-        <button onclick="openNewClientModal()" style="width:100%;background:#e8f5e9;border:1.5px solid #a5d6a7;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">
-          <span style="font-size:22px;flex-shrink:0;">🏢</span>
-          <div style="text-align:right;">
-            <div style="font-size:14px;font-weight:900;color:#2e7d32;">Create New Client</div>
-            <div style="font-size:11px;color:#4caf50;margin-top:1px;">לקוח חדש</div>
-          </div>
+      <div style="border-bottom:1px solid #f0f0f0;">
+        <button onclick="openNewClientModal()" style="width:100%;padding:14px 20px;background:none;border:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">
+          <span style="font-size:14px;font-weight:900;color:inherit;">🏢 Create New Client</span>
+          <span style="font-size:13px;color:#aaa;">▼</span>
         </button>
       </div>
       <!-- Invoice / Receipt accordion -->
