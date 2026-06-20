@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v841</title>
+<title>י.ב אחזקות — v843</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -480,8 +480,6 @@ input[id^="progSlider-"]::-moz-range-track {
         <span style="font-size:24px;flex-shrink:0;">🧾</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1565c0;">Actual Price — To Invoice</span></div>
       <div onclick="closeSetupDrawer();openDayNote();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📝</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Day Note</span></div>
-      <div onclick="closeSetupDrawer();openDayNotesList();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
-        <span style="font-size:24px;flex-shrink:0;">📋</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#555;">Previous Day Notes</span></div>
       <div onclick="closeSetupDrawer();openWorkLog();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📓</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Work Log</span></div>
       <div onclick="closeSetupDrawer();_openWeeklyPlanningDrawer();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -522,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v841
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v843
 Deployed: 17/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxXpxI…exec (v203)
@@ -532,6 +530,14 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v26 · multi-host fallba
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v843 · 19/06/2026
+• כפתור "📝 הערה" עבר מהמגירה לכותרת כרטיס יומן במסך הבית — לחיצה פותחת את חלון הוספת ההערה. לחיצה על שאר הכותרת — עדיין פותחת/סוגרת את הכרטיס.
+
+─────────────────
+v842 · 19/06/2026
+• הסרת "Previous Day Notes" מהמגירה — הפריט, הפונקציה (openDayNotesList) וה-overlay הוסרו (ניקוי מלא). הוספת הערה (Day Note) נשארת.
+
 ─────────────────
 v841 · 19/06/2026
 • ניהול עבודות: מחיקה קבוצתית — לחיצה ארוכה על שורה מכניסה למצב בחירה, טפיפה על שורות נוספות מוסיפה/מסירה. כפתור 'מחק נבחרים' בראש הרשימה (נעלם כשאין נבחרים) — מוחק ברצף עם אישור ואזהרה על עבודות עם חשבונית/הצעה מקושרת.
@@ -1335,7 +1341,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v841</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v843</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1349,7 +1355,8 @@ SHEET SYNC
       <div onclick="toggleLatestNotes()" style="display:flex;align-items:center;gap:7px;padding:11px 13px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;">
         <span style="font-size:13px;font-weight:900;color:#0d47a1;">📓 יומן</span>
         <span id="latestNotesCount" style="margin-right:auto;font-size:10.5px;font-weight:700;color:#90a4ae;"></span>
-        <span id="latestNotesChev" style="font-size:12px;color:#90a4ae;transition:transform .2s;">▼</span>
+        <button onclick="event.stopPropagation();openDayNote();" style="display:inline-flex;align-items:center;gap:4px;background:#0d47a1;color:#fff;border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:900;font-family:Heebo,sans-serif;cursor:pointer;box-shadow:0 2px 6px rgba(13,71,161,0.3);-webkit-tap-highlight-color:transparent;">📝 הערה</button>
+        <span id="latestNotesChev" style="font-size:12px;color:#90a4ae;transition:transform .2s;margin-right:8px;">▼</span>
       </div>
       <div id="latestNotesList" style="padding:0 13px 11px;"></div>
     </div>
@@ -1467,18 +1474,6 @@ SHEET SYNC
 </div>
 
 <!-- Day Notes List Overlay -->
-<div id="dayNotesListOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10009;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:80vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
-    <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
-      <div style="font-weight:700;font-size:17px;">📝 הערות יום</div>
-      <button onclick="document.getElementById('dayNotesListOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
-    </div>
-    <div id="dayNotesList" style="overflow-y:auto;flex:1;padding:12px 16px;"></div>
-    <div style="padding:14px 16px;border-top:1px solid #eee;flex-shrink:0;">
-      <button onclick="openDayNote()" style="width:100%;padding:13px;background:#1a1a2e;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">+ הוסף הערה</button>
-    </div>
-  </div>
-</div>
 <div id="poAttachOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10008;align-items:flex-end;justify-content:center;">
   <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:88vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
@@ -5406,22 +5401,6 @@ function submitDayNote() {
   } else {
     btn.textContent = '💾 שמור הערה'; btn.disabled = false; closeDayNote(); showToast('✓ הערה נשמרה');
   }
-}
-
-function openDayNotesList() {
-  var list = document.getElementById('dayNotesList');
-  _dayNotes = JSON.parse(localStorage.getItem('yb_dayNotes') || '[]');
-  if (_dayNotes.length === 0) {
-    list.innerHTML = '<div style="padding:24px;text-align:center;color:#aaa;font-size:14px;">אין הערות עדיין</div>';
-  } else {
-    list.innerHTML = _dayNotes.map(function(n) {
-      return '<div style="padding:12px 0;border-bottom:1px solid #f0f0f0;">' +
-        '<div style="font-size:10px;color:#aaa;margin-bottom:4px;">' + n.date + ' · ' + n.time + (n.loc ? ' · 📍 ' + n.loc : '') + '</div>' +
-        '<div style="font-size:14px;color:#111;direction:rtl;text-align:right;line-height:1.4;">' + n.text + '</div>' +
-        '</div>';
-    }).join('');
-  }
-  document.getElementById('dayNotesListOverlay').style.display = 'flex';
 }
 
 // ── quicknote URL trigger (for Siri) ──────────────────
