@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v853</title>
+<title>י.ב אחזקות — v854</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -518,7 +518,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v853
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v854
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbzHC9G…exec (v196)
@@ -528,6 +528,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v854 · 21/06/2026
+• תיקון באג ב-Pre-Project Timer / New Project: רשימת הלקוחות היתה ריקה — היה race condition עם setTimeout(300) שגרם לרשימה להישאר ריקה לצמיתות אם המשתמש פתח את הדרופדון מהר מדי. עכשיו מביא לקוחות טריים בכל פתיחה (לא מותנית ל-cache ריק) ומעדכן את ה-select ברגע שה-fetch נפתר.
+
 ─────────────────
 v853 · 21/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v196 החדשה (AKfycbzHC9G…) — מכילה את שדות notes/qty/price ב-getPendingQuote. עודכן גם פאנל המידע (Apps Script גרסה).
@@ -613,7 +617,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v853 · 15/06/2026
+v854 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1375,7 +1379,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v853</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v854</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -9635,7 +9639,20 @@ function _renderPreTimerNewProject() {
       '<input id="ptNewTitle" type="text" placeholder="תיאור הפרויקט…" style="width:100%;padding:11px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;" onfocus="this.style.borderColor=\'#00695c\'" onblur="this.style.borderColor=\'#ddd\'">' +
     '</div>' +
     '<button onclick="_confirmPreTimerNew()" style="width:100%;padding:14px;background:#00695c;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">▶ Start Timer</button>';
-  setTimeout(function(){ var i = document.getElementById('ptNewClient'); if (_preTimerClients.length === 0 && SHEETS_URL) { fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(c){ _preTimerClients = c || []; var opts = '<option value="">— בחר לקוח —</option>'; _preTimerClients.forEach(function(cl){ opts += '<option value="' + cl + '">' + cl + '</option>'; }); if(i) i.innerHTML = opts; }).catch(function(){}); }}, 300);
+  // Always fetch fresh client list — never gate on a previous (possibly empty/stale) cache,
+  // and update the select the moment the fetch resolves instead of guessing with a fixed delay.
+  if (SHEETS_URL) {
+    fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(c){
+      _preTimerClients = c || [];
+      var i = document.getElementById('ptNewClient');
+      if (!i) return;
+      var prevVal = i.value;
+      var opts = '<option value="">— בחר לקוח —</option>';
+      _preTimerClients.forEach(function(cl){ opts += '<option value="' + cl + '">' + cl + '</option>'; });
+      i.innerHTML = opts;
+      if (prevVal && _preTimerClients.indexOf(prevVal) !== -1) i.value = prevVal;
+    }).catch(function(){ showToast('⚠️ טעינת לקוחות נכשלה — בדוק חיבור'); });
+  }
 }
 
 function _confirmPreTimerNew() {
