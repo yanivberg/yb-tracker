@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v855</title>
+<title>י.ב אחזקות — v856</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -518,7 +518,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v855
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v856
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbzHC9G…exec (v196)
@@ -528,6 +528,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v856 · 21/06/2026
+• Add Job: בחירת קטגוריה "פיקוח" מוסיפה אוטומטית " - עמלת התנהלות מול קבלן 10%" לתיאור (אם עדיין לא מופיע) — תיג טקסטואלי בלבד, מחיר/כמות/שעות לא משתנים.
+
 ─────────────────
 v855 · 21/06/2026
 • תיקון: Work Pattern Analysis נתקע לנצח עם סשנונים רבים (ללא הודעה למשתמש) כשה-fetch ל-Apps Script נתקע ללא תגובה. הוסף timeout צד-לקוח של 35 שניות (AbortController) — מעביר את ה-deadline של 30 שנ' ב-Apps Script. על תקלה מציג הודעת זמן קצוב ומשחרר את הכפתור מיד.
@@ -621,7 +625,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v855 · 15/06/2026
+v856 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1383,7 +1387,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v855</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v856</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1959,7 +1963,7 @@ SHEET SYNC
     </div>
     <div style="margin-bottom:14px;">
       <div style="font-size:13px;color:#888;margin-bottom:6px;">Category</div>
-      <select id="addJobCategory" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;" onchange="updateAddJobBtn()">
+      <select id="addJobCategory" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;" onchange="_checkPikuachCategory();updateAddJobBtn()">
         <option value="">Select category...</option>
         <option value="אחר">Other</option>
         <option value="איטום">Sealing</option>
@@ -3428,6 +3432,16 @@ function _guessCategory(desc) {
       }
     }
   }
+}
+
+function _checkPikuachCategory() {
+  var category = (document.getElementById('addJobCategory')||{}).value || '';
+  if (category !== 'פיקוח') return;
+  var descEl = document.getElementById('addJobDesc');
+  if (!descEl) return;
+  var desc = descEl.value || '';
+  if (desc.indexOf('עמלת התנהלות') !== -1) return; // already tagged — don't duplicate
+  descEl.value = desc ? (desc + ' - עמלת התנהלות מול קבלן 10%') : 'עמלת התנהלות מול קבלן 10%';
 }
 
 function updateAddJobBtn() { var category = document.getElementById('addJobCategory').value; var price = document.getElementById('addJobPrice').value; var qty = document.getElementById('addJobQty').value; var hours = document.getElementById('addJobHours').value; var po = document.getElementById('addJobPO').value.trim(); var allFilled = category && price && qty && hours && po; var anyFilled = category || price || qty || hours || po; var btn = document.getElementById('addJobSubmitBtn'); var msg = document.getElementById('addJobStatusMsg'); var hint = document.getElementById('addJobStatusHint'); var sel = document.getElementById('addJobStatus'); var restrictedStatuses = ['ממתין לביצוע', 'בתהליך ביצוע', 'בוצע']; for (var i = 0; i < sel.options.length; i++) { var opt = sel.options[i]; if (restrictedStatuses.indexOf(opt.value) !== -1) { opt.disabled = !allFilled; } } if (!allFilled && restrictedStatuses.indexOf(sel.value) !== -1) { sel.value = 'ממתין להצעה'; } if (hint) hint.style.display = allFilled ? 'none' : 'block'; if (allFilled) { btn.textContent = '✓ Add to Sheet & Day'; btn.style.background = '#111'; msg.style.display = 'none'; } else if (anyFilled) { btn.textContent = '💾 Save to Sheet Only'; btn.style.background = '#555'; msg.style.display = 'block'; msg.style.background = '#fff8e1'; msg.style.border = '1px solid #f0c040'; msg.style.color = '#7a5c00'; msg.textContent = '⚠️ Some fields missing — project will be saved to sheet but not added to day. Fill all fields to add to day.'; } else { btn.textContent = '💾 Save to Sheet Only'; btn.style.background = '#555'; msg.style.display = 'block'; msg.style.background = '#f5f5f5'; msg.style.border = '1px solid #ddd'; msg.style.color = '#888'; msg.textContent = 'Fill category, price, quantity, estimated hours and PO number to add the project to day.'; } }
