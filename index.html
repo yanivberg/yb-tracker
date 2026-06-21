@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v854</title>
+<title>י.ב אחזקות — v855</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -518,7 +518,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v854
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v855
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbzHC9G…exec (v196)
@@ -528,6 +528,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v855 · 21/06/2026
+• תיקון: Work Pattern Analysis נתקע לנצח עם סשנונים רבים (ללא הודעה למשתמש) כשה-fetch ל-Apps Script נתקע ללא תגובה. הוסף timeout צד-לקוח של 35 שניות (AbortController) — מעביר את ה-deadline של 30 שנ' ב-Apps Script. על תקלה מציג הודעת זמן קצוב ומשחרר את הכפתור מיד.
+
 ─────────────────
 v854 · 21/06/2026
 • תיקון באג ב-Pre-Project Timer / New Project: רשימת הלקוחות היתה ריקה — היה race condition עם setTimeout(300) שגרם לרשימה להישאר ריקה לצמיתות אם המשתמש פתח את הדרופדון מהר מדי. עכשיו מביא לקוחות טריים בכל פתיחה (לא מותנית ל-cache ריק) ומעדכן את ה-select ברגע שה-fetch נפתר.
@@ -617,7 +621,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v854 · 15/06/2026
+v855 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1379,7 +1383,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v854</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v855</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -4691,8 +4695,10 @@ function openWorkPatternAI() {
   if (btn) { btn.textContent = '⏳ מנתח…'; btn.disabled = true; }
   setTimeout(function() { var pb = document.getElementById('patternProgressBar'); if(pb) pb.style.width = '70%'; }, 200);
 
-  fetch(SHEETS_URL + '?action=getWorkPatternAnalysis&history=' + encodeURIComponent(JSON.stringify(realSessions)))
-    .then(function(r) { return r.json(); })
+  var _patternAbort = new AbortController();
+  var _patternTimeout = setTimeout(function(){ _patternAbort.abort(); }, 35000); // client-side safety timeout — AS/Gemini can hang with no feedback otherwise
+  fetch(SHEETS_URL + '?action=getWorkPatternAnalysis&history=' + encodeURIComponent(JSON.stringify(realSessions)), { signal: _patternAbort.signal })
+    .then(function(r) { clearTimeout(_patternTimeout); return r.json(); })
     .then(function(data) {
       if (btn) { btn.textContent = '🔄 רענן ניתוח'; btn.disabled = false; }
       if (data.error) { resultEl.innerHTML = '<div style="padding:16px;color:#c62828;font-size:13px;background:#fff;border-radius:12px;direction:rtl;">⚠️ ' + data.error + '</div>'; return; }
@@ -4772,8 +4778,10 @@ function openWorkPatternAI() {
       resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     })
     .catch(function(err) {
+      clearTimeout(_patternTimeout);
       if (btn) { btn.textContent = '🧠 Work Pattern Analysis'; btn.disabled = false; }
-      resultEl.innerHTML = '<div style="padding:16px;color:#c62828;font-size:14px;">⚠️ שגיאת חיבור</div>';
+      var msg = (err && err.name === 'AbortError') ? '⏱️ הניתוח לקח יותר מ-35 שניות — נסה שוב עם פחות סשנים' : '⚠️ שגיאת חיבור';
+      resultEl.innerHTML = '<div style="padding:16px;color:#c62828;font-size:14px;">' + msg + '</div>';
     });
 }
 
