@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v856</title>
+<title>י.ב אחזקות — v857</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -462,7 +462,7 @@ input[id^="progSlider-"]::-moz-range-track {
   
 
   <div id="setupDrawerBackdrop" onclick="closeSetupDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:10000;"></div>
-  <div id="setupDrawer" style="display:none;position:fixed;top:0;left:0;bottom:0;width:100%;max-width:100%;z-index:10001;flex-direction:column;background:#fff;border-radius:0;overflow:hidden;">
+  <div id="setupDrawer" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:420px;z-index:10001;flex-direction:column;background:#fff;border-radius:0;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,0.15);">
     <div style="flex:1;overflow-y:auto;padding:12px 12px 0;">
 
       <div id="drawerPreTimerItem" onclick="closeSetupDrawer();openPreTimerPicker();" style="background:#f8f9fa;border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;justify-content:flex-start;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -518,7 +518,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v856
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v857
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbzHC9G…exec (v196)
@@ -529,7 +529,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v856 · 21/06/2026
+v857 · 21/06/2026
 • Add Job: בחירת קטגוריה "פיקוח" מוסיפה אוטומטית " - עמלת התנהלות מול קבלן 10%" לתיאור (אם עדיין לא מופיע) — תיג טקסטואלי בלבד, מחיר/כמות/שעות לא משתנים.
 
 ─────────────────
@@ -625,7 +625,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v856 · 15/06/2026
+v857 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1387,7 +1387,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v856</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v857</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
