@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v857</title>
+<title>י.ב אחזקות — v858</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -510,7 +510,7 @@ input[id^="progSlider-"]::-moz-range-track {
   </div>
 
   <div id="appInfoOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:20000;align-items:flex-end;justify-content:center;">
-    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:85vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;">
+    <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:85vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;">
       <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
         <div style="font-weight:900;font-size:17px;">App Information</div>
         <div style="display:flex;gap:8px;align-items:center;">
@@ -518,7 +518,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v857
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v858
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbzHC9G…exec (v196)
@@ -529,7 +529,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v857 · 21/06/2026
+v858 · 21/06/2026
 • Add Job: בחירת קטגוריה "פיקוח" מוסיפה אוטומטית " - עמלת התנהלות מול קבלן 10%" לתיאור (אם עדיין לא מופיע) — תיג טקסטואלי בלבד, מחיר/כמות/שעות לא משתנים.
 
 ─────────────────
@@ -625,7 +625,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v857 · 15/06/2026
+v858 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1387,7 +1387,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v857</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v858</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1477,7 +1477,7 @@ SHEET SYNC
 </div>
 <!-- Gross Profit Overlay -->
 <div id="gpOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10010;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:80vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:80vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
       <div style="font-weight:700;font-size:17px;">💰 Gross Profit — To Invoice</div>
       <button onclick="document.getElementById('gpOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -1491,7 +1491,7 @@ SHEET SYNC
 
 <!-- Actual Price Overlay -->
 <div id="apOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10010;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:80vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:80vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
       <div style="font-weight:700;font-size:17px;">🧾 Actual Price — To Invoice</div>
       <button onclick="document.getElementById('apOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -1505,7 +1505,7 @@ SHEET SYNC
 
 <!-- Day Note Overlay -->
 <div id="dayNoteOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:10010;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;padding:24px 20px 36px;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:24px 20px 36px;font-family:Heebo,sans-serif;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
       <div style="font-size:18px;font-weight:900;color:#1a1a2e;">📝 Day Note</div>
       <button onclick="closeDayNote()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888;line-height:1;">✕</button>
@@ -1518,7 +1518,7 @@ SHEET SYNC
 
 <!-- Day Notes List Overlay -->
 <div id="poAttachOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10008;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:88vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:88vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
       <div style="font-weight:700;font-size:17px;">📌 Attach PO to Existing Project</div>
       <button onclick="document.getElementById('poAttachOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -1531,7 +1531,7 @@ SHEET SYNC
 </div>
 
 <div id="poImportOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10006;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:88vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:88vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
       <div style="font-weight:700;font-size:17px;">📧 PO Import</div>
       <button onclick="document.getElementById('poImportOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -1633,7 +1633,7 @@ SHEET SYNC
 
 <!-- Pre-Project Timer Picker -->
 <div id="preTimerPickerOverlay" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10013;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:90vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:90vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:18px 20px 12px;border-bottom:1px solid #eee;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;">
       <div style="font-size:17px;font-weight:900;color:#00695c;">⏱ Pre-Project Timer</div>
       <button onclick="document.getElementById('preTimerPickerOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -1644,7 +1644,7 @@ SHEET SYNC
 
 <!-- Pre-Project Timer Overlay -->
 <div id="preTimerOverlay" onclick="if(event.target===this)closePreTimerOverlay()" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10012;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;padding:24px 20px 36px;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:24px 20px 36px;font-family:Heebo,sans-serif;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <div style="font-size:18px;font-weight:900;color:#00695c;">⏱ Pre-Project Timer</div>
       <button onclick="closePreTimerOverlay()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#888;line-height:1;">✕</button>
@@ -1665,7 +1665,7 @@ SHEET SYNC
 
 <!-- Work Log Overlay -->
 <div id="workLogOverlay" onclick="if(event.target===this)this.style.display='none'" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10011;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px 12px;border-bottom:1px solid #eee;flex-shrink:0;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
         <div style="font-weight:900;font-size:17px;color:#1a1a2e;">📓 Work Log</div>
@@ -1687,7 +1687,7 @@ SHEET SYNC
 
 <!-- Pending Quote Picker Overlay -->
 <div id="pendingQuoteOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:80vh;display:flex;flex-direction:column;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:80vh;display:flex;flex-direction:column;">
     <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
       <div style="font-weight:700;font-size:17px;font-family:Heebo,sans-serif;">Pending Quote Projects</div>
       <button onclick="document.getElementById('pendingQuoteOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -1698,7 +1698,7 @@ SHEET SYNC
 
 <!-- Complete Job Fields Modal -->
 <div id="completeJobOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10005;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;padding:20px;font-family:Heebo,sans-serif;direction:rtl;max-height:90vh;overflow-y:auto;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:20px;font-family:Heebo,sans-serif;direction:rtl;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <div style="font-weight:700;font-size:17px;">Complete Details</div>
       <button onclick="document.getElementById('completeJobOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -1751,7 +1751,7 @@ SHEET SYNC
 
 <!-- Stopwatch: fill details + set status (active card) -->
 <div id="swDetailsOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10006;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;padding:20px;font-family:Heebo,sans-serif;direction:rtl;max-height:90vh;overflow-y:auto;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:20px;font-family:Heebo,sans-serif;direction:rtl;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <div style="font-weight:700;font-size:17px;">מילוי פרטים</div>
       <button onclick="closeSwDetails()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -1876,7 +1876,7 @@ SHEET SYNC
 
 <!-- New Client Modal -->
 <div id="newClientOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10020;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;padding:20px;font-family:Heebo,sans-serif;max-height:90vh;overflow-y:auto;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:20px;font-family:Heebo,sans-serif;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
       <div style="font-weight:700;font-size:17px;">➕ New Client</div>
       <button onclick="document.getElementById('newClientOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -1938,7 +1938,7 @@ SHEET SYNC
 
 <!-- Add Job to Sheet Modal -->
 <div id="addJobOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10001;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;padding:20px;font-family:Heebo,sans-serif;direction:rtl;max-height:90vh;overflow-y:auto;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;padding:20px;font-family:Heebo,sans-serif;direction:rtl;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
       <div style="font-weight:700;font-size:17px;">Add Project to Sheet</div>
       <button onclick="document.getElementById('addJobOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -2023,7 +2023,7 @@ SHEET SYNC
 
 <!-- Job Picker Overlay -->
 <div id="jobPickerOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:80vh;display:flex;flex-direction:column;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:80vh;display:flex;flex-direction:column;">
     <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
       <div style="font-weight:700;font-size:17px;font-family:Heebo,sans-serif;">Open Tasks</div>
       <button onclick="document.getElementById('jobPickerOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -2037,7 +2037,7 @@ SHEET SYNC
 
 <!-- Done Projects Overlay -->
 <div id="doneJobsOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10004;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:88vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:88vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
       <div style="font-weight:700;font-size:17px;">✅ Recent Done Projects</div>
       <button onclick="document.getElementById('doneJobsOverlay').style.display='none';document.getElementById('doneJobInfoOverlay').style.display='none';" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -2048,7 +2048,7 @@ SHEET SYNC
 
 <!-- Done Job Info Overlay -->
 <div id="doneJobInfoOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10005;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
       <div style="font-weight:700;font-size:17px;" id="doneJobInfoTitle">Project Info</div>
       <button onclick="document.getElementById('doneJobInfoOverlay').style.display='none';" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -2063,7 +2063,7 @@ SHEET SYNC
 
 <!-- Edit Completed Job Overlay -->
 <div id="editDoneJobOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:10020;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:95vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:95vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
       <div style="font-weight:700;font-size:17px;">✏️ עריכת פרויקט</div>
       <button onclick="document.getElementById('editDoneJobOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
@@ -2078,7 +2078,7 @@ SHEET SYNC
 
 <!-- Invoices Overlay -->
 <div id="invoicesOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10003;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:88vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:88vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
       <div style="font-weight:700;font-size:17px;">🧾 Invoices to issue</div>
       <button onclick="document.getElementById('invoicesOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
