@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v858</title>
+<title>י.ב אחזקות — v859</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -518,7 +518,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v858
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v859
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbzHC9G…exec (v196)
@@ -529,7 +529,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v858 · 21/06/2026
+v859 · 21/06/2026
 • Add Job: בחירת קטגוריה "פיקוח" מוסיפה אוטומטית " - עמלת התנהלות מול קבלן 10%" לתיאור (אם עדיין לא מופיע) — תיג טקסטואלי בלבד, מחיר/כמות/שעות לא משתנים.
 
 ─────────────────
@@ -625,7 +625,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v858 · 15/06/2026
+v859 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1387,7 +1387,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v858</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v859</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1799,7 +1799,7 @@ SHEET SYNC
 </div>
 
 <!-- Manage Jobs -->
-<div id="manageJobsOverlay" style="display:none;position:fixed;inset:0;background:#eef2f6;z-index:10014;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;">
+<div id="manageJobsOverlay" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:420px;background:#eef2f6;z-index:10014;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;box-shadow:0 0 40px rgba(0,0,0,0.15);">
   <div style="background:#00695c;color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
     <div style="font-size:18px;font-weight:900;">🗂️ ניהול עבודות</div>
     <button onclick="closeManageJobs()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:5px 12px;font-size:16px;font-weight:900;cursor:pointer;">✕</button>
