@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v861</title>
+<title>י.ב אחזקות — v863</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -486,8 +486,8 @@ input[id^="progSlider-"]::-moz-range-track {
         <span style="font-size:24px;flex-shrink:0;">📅</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1565c0;">Weekly Planning</div><div style="font-size:11px;color:#888;margin-top:1px;">תכנון שבועי</div></div></div>
       <div onclick="closeSetupDrawer();openCaspitOverlay();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">⚠️</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">Account Manager</span></div>
-      <div onclick="closeSetupDrawer();openAIAdvisor();" style="background:linear-gradient(135deg,#0d47a1,#1565c0);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;box-shadow:0 4px 12px rgba(13,71,161,0.3);">
-        <span style="font-size:24px;flex-shrink:0;">💫</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#fff;">AI Business Advisor</div><div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:1px;">Most Profitable Category</div></div></div>
+      <div onclick="closeSetupDrawer();openAIAdvisor();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">💫</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">AI Business Advisor</div><div style="font-size:11px;color:#888;margin-top:1px;">Most Profitable Category</div></div></div>
       <div onclick="closeSetupDrawer();openMyToolbox();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🧰</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#333;">My Toolbox</div><div style="font-size:11px;color:#888;margin-top:1px;">Manage your tools</div></div></div>
       <div onclick="closeSetupDrawer();runPOImportScan();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -518,10 +518,10 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v861
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v863
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbzHC9G…exec (v196)
+Apps Script: AKfycby0Rej…exec (v198)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
@@ -529,7 +529,11 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v861 · 21/06/2026
+v863 · 23/06/2026
+• עדכון SHEETS_URL לפריסת Apps Script v198 החדשה (AKfycby0Rej…) — מתקנת את הבאג הקריטי: addJobsBulk כבר היה מבצע את שטח התא המלא לפני כתיבת שדהות ידועים, ומחק נוסחה/דרס נוסחה קיימת בעמודת רווח גולמי על כל שורה שנוצרה מ New Quotation. עכשיו כותב תא-תא כמו addJob, לא נוגע בעמודות שהוא לא מנהל.
+
+─────────────────
+v862 · 21/06/2026
 • Add Job: בחירת קטגוריה "פיקוח" מוסיפה אוטומטית " - עמלת התנהלות מול קבלן 10%" לתיאור (אם עדיין לא מופיע) — תיג טקסטואלי בלבד, מחיר/כמות/שעות לא משתנים.
 
 ─────────────────
@@ -625,7 +629,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v861 · 15/06/2026
+v863 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1387,7 +1391,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v861</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v863</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2423,7 +2427,7 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 (function checkGetList() { var params = new URLSearchParams(window.location.search); if (params.get('getlist') === '1') { var list = localStorage.getItem('yb_projectsList') || 'No active projects'; document.open(); document.write(list); document.close(); } })();
 
 // ── Google Sheets Integration ─────────────────────────
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzHC9GhOUiouO5qNF0b93tKlhZ1Rhp6fILGUq1VZSOZyzUYC4Sh0_st8iY1JYjyzoBUkA/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycby0RejhnLQxqbr93SOInwdjehfSEhfqT_klCo_O9jR0LTg5OXzxRYPIf1Vqllq8C1LlVQ/exec';
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
