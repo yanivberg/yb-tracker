@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v863</title>
+<title>י.ב אחזקות — v869</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -518,7 +518,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v863
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v869
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycby0Rej…exec (v198)
@@ -528,6 +528,18 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v869 · 23/06/2026
+• Pre-Quotation Briefing / Pre-Project Survey: נוסף תיבת "+" להוספת כלי מותאם בסקצי֙ Suggested Tools (כמו שיש ב-Materials needed) — קודם היה רשימת צ'קבוקסים קבועה מ-AI בלבד, לא ניתן היה להוסיף כלי מותאם.
+
+─────────────────
+v866 · 23/06/2026
+• Pre-Quotation Briefing: תיבות התיאור (qs-line) לא היו מחוברות לניחוש הקטגוריה המקומי (בניגוד ל-Add Job, שלהן היה זה) — הקטגוריה נשארה תמיד ריקה. עכשיו מחוברות עם debounce 600ms; הניחוש מתבסס על תיאור שורה 1, ולא מדריך בחירה ידנית שבוצעה כבר בקטגוריה.
+
+─────────────────
+v865 · 23/06/2026
+• Pre-Quotation Briefing עריכת Working Strategy/Tools/Materials: (1) כל שורת הצעה מקבלת עכשיו את Working Strategy משלה בלבד (במקום שיתוף אחד לכל ההצעה) — נקרא בקריאה אחת מקובצת (analyzeQuotationLines, Apps Script v199). (2) כלי עבודה וחומרים מבוססים עתה על היסטוריה האמיתית של הלקוח הספציפי (עבודות קודמות + Job Surveys), לא רשימת קטגוריה מצטברת מ-localStorage המשתת על כל עבודה. Job Conditions לא שונה.
+
 ─────────────────
 v863 · 23/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v198 החדשה (AKfycby0Rej…) — מתקנת את הבאג הקריטי: addJobsBulk כבר היה מבצע את שטח התא המלא לפני כתיבת שדהות ידועים, ומחק נוסחה/דרס נוסחה קיימת בעמודת רווח גולמי על כל שורה שנוצרה מ New Quotation. עכשיו כותב תא-תא כמו addJob, לא נוגע בעמודות שהוא לא מנהל.
@@ -629,7 +641,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v863 · 15/06/2026
+v869 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1391,7 +1403,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v863</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v869</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2346,6 +2358,79 @@ updateClock();
 setInterval(updateClock, 1000);
 
 // ── Init ──────────────────────────────────────────────
+// ── Pre-Quotation Briefing persistence — survives accidental refresh ───────
+var PRE_SURVEY_SNAPSHOT_KEY = 'yb_preSurveySnapshot';
+
+function _savePreSurveySnapshot() {
+  try {
+    var overlay = document.getElementById('preProjectSurveyOverlay');
+    if (!overlay || overlay.style.display === 'none') { localStorage.removeItem(PRE_SURVEY_SNAPSHOT_KEY); return; }
+    var header = document.getElementById('preSurveyHeader');
+    var body   = document.getElementById('preSurveyBody');
+    if (!body) return;
+    // Capture every input/select/textarea's live value (innerHTML alone loses typed text
+    // that hasn't been reflected back into the markup, e.g. plain <input> values).
+    var fieldValues = {};
+    body.querySelectorAll('input, select, textarea').forEach(function(el, i) {
+      var key = el.id || ('_idx' + i);
+      if (el.type === 'checkbox' || el.type === 'radio') fieldValues[key] = el.checked;
+      else fieldValues[key] = el.value;
+    });
+    var snapshot = {
+      headerHtml: header ? header.innerHTML : '',
+      bodyHtml: body.innerHTML,
+      fieldValues: fieldValues,
+      pendingJob: _preSurveyPendingJob || null,
+      ts: Date.now()
+    };
+    localStorage.setItem(PRE_SURVEY_SNAPSHOT_KEY, JSON.stringify(snapshot));
+  } catch(e) {}
+}
+
+function _restorePreSurveySnapshotIfAny() {
+  try {
+    var raw = localStorage.getItem(PRE_SURVEY_SNAPSHOT_KEY);
+    if (!raw) return;
+    var snap = JSON.parse(raw);
+    // Discard stale snapshots (older than 6 hours) — avoid resurrecting something long-abandoned.
+    if (!snap || !snap.ts || (Date.now() - snap.ts) > 6*60*60*1000) { localStorage.removeItem(PRE_SURVEY_SNAPSHOT_KEY); return; }
+    var overlay = document.getElementById('preProjectSurveyOverlay');
+    var header  = document.getElementById('preSurveyHeader');
+    var body    = document.getElementById('preSurveyBody');
+    if (!overlay || !body) return;
+    _preSurveyPendingJob = snap.pendingJob || null;
+    if (header) header.innerHTML = snap.headerHtml || '';
+    body.innerHTML = snap.bodyHtml || '';
+    // Re-apply live field values that plain innerHTML restore can't carry (typed <input> text, checkbox state).
+    Object.keys(snap.fieldValues || {}).forEach(function(key) {
+      var el = document.getElementById(key);
+      if (!el) return;
+      var val = snap.fieldValues[key];
+      if (el.type === 'checkbox' || el.type === 'radio') el.checked = !!val;
+      else el.value = val;
+    });
+    overlay.style.display = 'flex';
+    showToast('↩️ שוחזר טופס שלא נשמר');
+  } catch(e) {}
+}
+
+function _clearPreSurveySnapshot() {
+  try { localStorage.removeItem(PRE_SURVEY_SNAPSHOT_KEY); } catch(e) {}
+  if (_preSurveyObserver) { _preSurveyObserver.disconnect(); _preSurveyObserver = null; }
+}
+
+var _preSurveyObserver = null;
+function _initPreSurveyPersistence() {
+  var body = document.getElementById('preSurveyBody');
+  if (!body || _preSurveyObserver) return;
+  var saveDebounced = (function(){ var t; return function(){ clearTimeout(t); t = setTimeout(_savePreSurveySnapshot, 400); }; })();
+  _preSurveyObserver = new MutationObserver(saveDebounced);
+  _preSurveyObserver.observe(body, { childList: true, subtree: true, characterData: true });
+  body.addEventListener('input', saveDebounced);
+  body.addEventListener('change', saveDebounced);
+}
+// ── End Pre-Quotation Briefing persistence ──────────────────────────────
+
 function init() {
   if (window.__ybIsDuplicate) return;
   if (!_checkAuth()) return;
@@ -2386,6 +2471,12 @@ function init() {
       }
     }, 400);
   }
+
+  // Restore an interrupted Pre-Quotation Briefing (e.g. accidental refresh) exactly as it was
+  setTimeout(function() {
+    _restorePreSurveySnapshotIfAny();
+    _initPreSurveyPersistence();
+  }, 450);
 }
 
 function checkURLProjectStart() { var params = new URLSearchParams(window.location.search); var startName = params.get('start'); if (!startName) return; window.history.replaceState({}, '', window.location.pathname); if (!dayStartTime) { showToast('Start work day first'); return; } var spoken = startName.toLowerCase().trim(); var matchedIdx = -1; var bestScore = -1; projects.forEach(function(p, i) { var pname = p.name.toLowerCase(); var score = 0; if (pname === spoken) score = 3; else if (pname.indexOf(spoken) !== -1 || spoken.indexOf(pname) !== -1) score = 2; else { var words = spoken.split(/\s+/); words.forEach(function(w) { if (w.length > 1 && pname.indexOf(w) !== -1) score += 1; }); } if (score > bestScore) { bestScore = score; matchedIdx = i; } }); if (bestScore > 0 && matchedIdx >= 0) { var proj = projects[matchedIdx]; if (proj.done) { showToast('Project "' + proj.name + '" is marked done'); return; } if (proj.active) { toggleProject(matchedIdx); showToast('⏸ ' + proj.name + ' — stopped'); } else { projects.forEach(function(p, i) { if (p.active) toggleProject(i); }); toggleProject(matchedIdx); showToast('▶ ' + proj.name + ' — started'); } } else { showToast('Project not found: ' + startName); } }
@@ -8052,7 +8143,8 @@ var TOOLBOX_CATEGORIES = [
   { name:'Electricity Tools', emoji:'🔌', color:'#f9a825', tools:['קולפן תיל','גוזז תיל','כלי הברגה חשמל','בודק כבלים','מד מתח','בודק פאזה','כופף צינור','חוט משיכה','מהדק כבלים','סרט בידוד','לוח מסוף','בודק מעגל','מכשיר תיוג','כלי הכנסה','בודק רציפות'] },
   { name:'Construction Tools', emoji:'🏗️', color:'#795548', tools:['מקדחת ערבול','מערבת בטון','פטיש כבד','פטיש אוויר','דוחס','מריצה','כף טיח','מגהץ טיח','אקדח מילוי','פלס חוט','גוזז בורגים','כופף ברזל בניה','ויברטור בטון','מפצל בלוקים','מגהץ גדול'] },
   { name:'Gardening Tools', emoji:'🌿', color:'#388e3c', tools:['מספריים לגיזום','וילת גן','את','גרדום','מעדר','את קטן','גלגלת צינור','מריצה','גוזז גדרות','מפוח עלים','דשאייה','מסור שרשרת','סכין אדמה','מעקר עשבים','ממטרה'] },
-  { name:'Cleaning Tools', emoji:'🧹', color:'#0288d1', tools:['מטאטא','יעה','מגב','שוטף לחץ','שואב אבק','מגב זכוכית','מברשת שפשוף','ספוג','דלי','בקבוק ריסוס','מסיר שומן','מגבונים תעשייתיים','מפוח אוויר','שואב אבק רטוב','מלטשת רצפה'] }
+  { name:'Cleaning Tools', emoji:'🧹', color:'#0288d1', tools:['מטאטא','יעה','מגב','שוטף לחץ','שואב אבק','מגב זכוכית','מברשת שפשוף','ספוג','דלי','בקבוק ריסוס','מסיר שומן','מגבונים תעשייתיים','מפוח אוויר','שואב אבק רטוב','מלטשת רצפה'] },
+  { name:'Other', emoji:'🧰', color:'#616161', tools:[] }
 ];
 
 function _getToolboxStorage() {
@@ -8465,7 +8557,7 @@ function openPreProjectSurvey(job) {
     });
 }
 
-function _renderPreSurveyBodyAI(descSummary, aiSteps, successKeys, suggestedTools, materials, rawDesc, cat) {
+function _renderPreSurveyBodyAI(descSummary, lineStepsOrAiSteps, successKeys, suggestedTools, materials, rawDesc, cat, lines) {
   var html = '';
 
   // Description reference
@@ -8477,20 +8569,32 @@ function _renderPreSurveyBodyAI(descSummary, aiSteps, successKeys, suggestedTool
     '</div>';
   }
 
-  var steps = aiSteps.length ? aiSteps : ['','','',''];
+  // lineSteps: array of arrays, one steps-array per quotation line. Falls back to the
+  // legacy single flat array (wrapped as one line) if called from old code paths.
+  var lineSteps = (lineStepsOrAiSteps.length && Array.isArray(lineStepsOrAiSteps[0]))
+    ? lineStepsOrAiSteps
+    : [lineStepsOrAiSteps.length ? lineStepsOrAiSteps : ['','','','']];
+  var lineLabels = (lines && lines.length === lineSteps.length) ? lines : null;
+
   html +=
-    // Working Strategy
+    // Working Strategy — grouped per quotation line
     '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
       '<div style="font-size:12px;font-weight:900;color:#0d47a1;margin-bottom:8px;">🗂 Working Strategy <span style=\"font-size:10px;background:#e3f2fd;color:#0d47a1;padding:1px 6px;border-radius:4px;\">AI ✨</span></div>' +
-      '<div id="strategySteps" style="display:flex;flex-direction:column;gap:6px;">' +
-        steps.map(function(stepVal,i){
-          return '<div style="display:flex;align-items:center;gap:8px;">' +
-            '<span style="font-size:11px;font-weight:900;color:#0d47a1;background:#e3f2fd;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + (i+1) + '</span>' +
-            '<input id="pstep_'+i+'" placeholder="שלב ' + (i+1) + '..." data-val="' + (stepVal||'').replace(/"/g,'') + '" style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;">' +
-          '</div>';
-        }).join('') +
-      '</div>' +
-      '<button onclick="_addPreSurveyStep()" style="margin-top:8px;width:100%;padding:8px;background:#e3f2fd;border:1px dashed #0d47a1;border-radius:8px;font-size:12px;font-weight:700;color:#0d47a1;cursor:pointer;font-family:Heebo,sans-serif;">+ Add Step</button>' +
+      lineSteps.map(function(steps, li) {
+        var stepsArr = (steps && steps.length) ? steps : ['','','',''];
+        return (lineSteps.length > 1
+          ? '<div style="font-size:11px;font-weight:700;color:#555;margin:' + (li>0?'12px':'0') + ' 0 6px;direction:rtl;">שורה ' + (li+1) + (lineLabels ? ': ' + lineLabels[li] : '') + '</div>'
+          : '') +
+        '<div class="strategySteps" data-line="' + li + '" style="display:flex;flex-direction:column;gap:6px;">' +
+          stepsArr.map(function(stepVal,i){
+            return '<div style="display:flex;align-items:center;gap:8px;">' +
+              '<span style="font-size:11px;font-weight:900;color:#0d47a1;background:#e3f2fd;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + (i+1) + '</span>' +
+              '<input id="pstep_'+li+'_'+i+'" placeholder="שלב ' + (i+1) + '..." data-val="' + (stepVal||'').replace(/"/g,'') + '" style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;">' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        '<button onclick="_addPreSurveyStep(' + li + ')" style="margin-top:8px;width:100%;padding:8px;background:#e3f2fd;border:1px dashed #0d47a1;border-radius:8px;font-size:12px;font-weight:700;color:#0d47a1;cursor:pointer;font-family:Heebo,sans-serif;">+ Add Step</button>';
+      }).join('') +
     '</div>' +
 
     // Key for Success
@@ -8503,11 +8607,17 @@ function _renderPreSurveyBodyAI(descSummary, aiSteps, successKeys, suggestedTool
     '</div>' +
 
     // Suggested Tools
-    (suggestedTools.length ? '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
-      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:6px;">🔧 Suggested Tools <span style=\"font-size:10px;background:#e8f5e9;color:#2e7d32;padding:1px 6px;border-radius:4px;margin-right:4px;\">AI ✨</span><span style="font-size:10px;color:#888;font-weight:400;">מבוסס היסטוריה</span></div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">' +
-        suggestedTools.map(function(t,ti){ return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:3px 0;"><input type="checkbox" id="ptool_'+ti+'" data-tool="'+t.replace(/"/g,'&quot;')+'"> '+t+'</label>'; }).join('') +
-      '</div></div>' : '') +
+    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
+      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:6px;">🔧 Suggested Tools ' + (suggestedTools.length ? '<span style=\"font-size:10px;background:#e8f5e9;color:#2e7d32;padding:1px 6px;border-radius:4px;margin-right:4px;\">AI ✨</span><span style="font-size:10px;color:#888;font-weight:400;">מבוסס היסטוריה</span>' : '') + '</div>' +
+      (suggestedTools.length ? '<div id="preToolsList" style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:6px;">' +
+        suggestedTools.map(function(t,ti){ return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:3px 0;"><input type="checkbox" id="ptool_'+ti+'" checked data-tool="'+t.replace(/"/g,'&quot;')+'"> '+t+'</label>'; }).join('') +
+      '</div>' : '<div id="preToolsList" style="margin-bottom:6px;"></div>') +
+      '<div id="preCustomToolsList" style="display:flex;flex-direction:column;gap:4px;margin-bottom:6px;"></div>' +
+      '<div style="display:flex;gap:6px;">' +
+        '<input id="preToolInp" placeholder="כלי נוסף..." style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;" onkeypress="if(event.key===\'Enter\')_addPreTool()">' +
+        '<button onclick="_addPreTool()" style="background:#0d47a1;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">+</button>' +
+      '</div>' +
+    '</div>' +
 
     // Materials
     '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
@@ -8586,14 +8696,15 @@ function _renderPreSurveyBodyAI(descSummary, aiSteps, successKeys, suggestedTool
   return html;
 }
 
-function _addPreSurveyStep() {
-  var container = document.getElementById('strategySteps');
+function _addPreSurveyStep(lineIdx) {
+  lineIdx = lineIdx || 0;
+  var container = document.querySelector('.strategySteps[data-line="' + lineIdx + '"]') || document.getElementById('strategySteps');
   if (!container) return;
   var n = container.querySelectorAll('input').length + 1;
   var div = document.createElement('div');
   div.style.cssText = 'display:flex;align-items:center;gap:8px;';
   div.innerHTML = '<span style="font-size:11px;font-weight:900;color:#0d47a1;background:#e3f2fd;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + n + '</span>' +
-    '<input id="pstep_' + (n-1) + '" placeholder="שלב ' + n + '..." style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;">';
+    '<input id="pstep_' + lineIdx + '_' + (n-1) + '" placeholder="שלב ' + n + '..." style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;">';
   container.appendChild(div);
 }
 
@@ -8608,6 +8719,41 @@ function _addPreSurveyKey() {
   lbl.innerHTML = '<input type="checkbox" id="pkey_c'+n+'" data-key="'+key.replace(/"/g,'&quot;')+'" checked> ' + key;
   container.appendChild(lbl);
   inp.value = '';
+}
+
+var _customToolCounter = 0;
+function _addPreTool() {
+  var inp = document.getElementById('preToolInp');
+  var tool = (inp?inp.value:'').trim();
+  if (!tool) return;
+  var list = document.getElementById('preCustomToolsList');
+  if (!list) return;
+  var id = 'ptool_custom_' + (_customToolCounter++);
+  var div = document.createElement('div');
+  div.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f5f5f5;';
+  div.innerHTML =
+    '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;flex:1;">' +
+      '<input type="checkbox" id="' + id + '" checked data-tool="' + tool.replace(/"/g,'&quot;') + '"> ' + tool +
+    '</label>' +
+    '<span onclick="this.parentElement.remove()" style="color:#e53935;font-size:14px;cursor:pointer;">×</span>';
+  list.appendChild(div);
+  inp.value = '';
+  // Also save into My Toolbox (drawer) so it's available everywhere going forward —
+  // filed under "Other" since we don't know which real category this tool belongs to.
+  _addToolToMyToolbox(tool, 'Other');
+}
+
+function _addToolToMyToolbox(name, category) {
+  try {
+    var data = _getToolboxStorage();
+    if (!data._custom) data._custom = [];
+    var alreadyCustom = data._custom.some(function(t){ return t.name === name; });
+    var alreadyBuiltIn = (data[category] || []).indexOf(name) !== -1;
+    var alreadyAnywhere = TOOLBOX_CATEGORIES.some(function(c){ return (data[c.name]||[]).indexOf(name) !== -1; }) || alreadyCustom;
+    if (alreadyAnywhere || alreadyBuiltIn) return;
+    data._custom.push({ name: name, category: category });
+    localStorage.setItem('myToolbox', JSON.stringify(data));
+  } catch(e) {}
 }
 
 function _addPreMaterial() {
@@ -8674,6 +8820,7 @@ function submitPreProjectSurvey() {
     _saveLessonFromSurvey(lessonJob, survey, 0);
   }
 
+  _clearPreSurveySnapshot();
   document.getElementById('preProjectSurveyOverlay').style.display = 'none';
   _doAddJobAsProject(job, survey.expensesOn);
   _expensesOnChoice = 'me'; // reset for next survey
@@ -8688,6 +8835,7 @@ function openQuotationWithSurvey() {
   var header  = document.getElementById('preSurveyHeader');
   var body    = document.getElementById('preSurveyBody');
   overlay.style.display = 'flex';
+  _initPreSurveyPersistence();
 
   header.innerHTML =
     '<div style="display:flex;align-items:center;gap:12px;">' +
@@ -8708,7 +8856,7 @@ function openQuotationWithSurvey() {
         '<div style="font-size:11px;color:#888;margin-bottom:4px;direction:rtl;">שורות להצעת מחיר <span style="color:#0d47a1;font-weight:700;">— כל שורה = פריט נפרד</span></div>' +
         '<div id="qsLinesList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px;">' +
           '<div style="display:flex;gap:6px;align-items:center;">' +
-            '<input class="qs-line" placeholder="תיאור שורה 1..." style="flex:1;padding:9px 10px;border:1.5px solid #0d47a1;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;">' +
+            '<input class="qs-line" placeholder="תיאור שורה 1..." oninput="_guessQsCategory()" style="flex:1;padding:9px 10px;border:1.5px solid #0d47a1;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;">' +
           '</div>' +
         '</div>' +
         '<button onclick="_addQsLine()" type="button" style="width:100%;padding:8px;background:none;border:1.5px dashed #0d47a1;border-radius:8px;color:#0d47a1;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">+ הוסף שורה</button>' +
@@ -8723,6 +8871,20 @@ function openQuotationWithSurvey() {
     '<button onclick="_skipToQuotation()" style="width:100%;padding:10px;background:transparent;border:none;font-size:13px;color:#aaa;cursor:pointer;font-family:Heebo,sans-serif;">Skip — Go straight to quotation</button>';
 }
 
+var _qsGuessTimer = null;
+function _guessQsCategory() {
+  clearTimeout(_qsGuessTimer);
+  _qsGuessTimer = setTimeout(function() {
+    var catSel = document.getElementById('qsCat');
+    if (!catSel || catSel.value) return; // don't override a manual choice
+    var lines = _getQsLines();
+    var firstLine = lines.length ? lines[0] : '';
+    if (!firstLine.trim()) return;
+    var guess = _guessCategory(firstLine);
+    if (guess) catSel.value = guess;
+  }, 600);
+}
+
 function _addQsLine() {
   var list = document.getElementById('qsLinesList');
   if (!list) return;
@@ -8730,7 +8892,7 @@ function _addQsLine() {
   var row = document.createElement('div');
   row.style.cssText = 'display:flex;gap:6px;align-items:center;';
   row.innerHTML =
-    '<input class="qs-line" placeholder="תיאור שורה ' + idx + '..." style="flex:1;padding:9px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;">' +
+    '<input class="qs-line" placeholder="תיאור שורה ' + idx + '..." oninput="_guessQsCategory()" style="flex:1;padding:9px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;">' +
     '<button onclick="this.parentNode.remove()" type="button" style="background:none;border:none;color:#ccc;font-size:16px;cursor:pointer;padding:0 4px;flex-shrink:0;">✕</button>';
   list.appendChild(row);
   row.querySelector('input').focus();
@@ -8745,6 +8907,7 @@ function _getQsLines() {
 function _skipToQuotation() {
   var lines = _getQsLines();
   var client = (document.getElementById('qsClient')||{}).value || '';
+  _clearPreSurveySnapshot();
   document.getElementById('preProjectSurveyOverlay').style.display = 'none';
   document.getElementById('caspitOverlay').style.display = 'flex';
   _quotePrefill = { client: client, lines: lines };
@@ -8755,12 +8918,11 @@ function _skipToQuotation() {
 function _analyzeForQuotation() {
   var client = (document.getElementById('qsClient')||{}).value || '';
   var lines  = _getQsLines();
-  var desc   = lines[0] || '';
   var cat    = (document.getElementById('qsCat')||{}).value || '';
 
-  if (!desc.trim()) { showToast('הכנס לפחות שורה אחת'); return; }
+  if (!lines.length || !lines[0].trim()) { showToast('הכנס לפחות שורה אחת'); return; }
 
-  _preSurveyPendingJob = { desc:desc, client:client, category:cat, id:'', _forQuotation:true, _lines:lines };
+  _preSurveyPendingJob = { desc: lines[0], client:client, category:cat, id:'', _forQuotation:true, _lines:lines };
 
   var body = document.getElementById('preSurveyBody');
   body.innerHTML =
@@ -8776,7 +8938,8 @@ function _analyzeForQuotation() {
     .filter(function(t,i,a){ return a.indexOf(t)===i; }).slice(0,10);
 
   function _showAnalysisForm(ai, isError) {
-    var steps = (ai.steps && ai.steps.length) ? ai.steps : ['','','',''];
+    // ai.lineSteps: array of arrays (one per quotation line). ai.keys/tools/materials: shared across the whole quote.
+    var lineSteps = (ai.lineSteps && ai.lineSteps.length) ? ai.lineSteps : lines.map(function(){ return ['','','','']; });
     var keys   = (ai.keys  && ai.keys.length)  ? ai.keys  : fallbackKeys;
     var tools  = (ai.tools && ai.tools.length)  ? ai.tools : fallbackTools;
     var mats   = (ai.materials && ai.materials.length) ? ai.materials : [];
@@ -8784,7 +8947,7 @@ function _analyzeForQuotation() {
       ? '<div style="background:#fff3e0;border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#e65100;direction:rtl;">⚠️ AI לא הגיב — ערוך שלבים ידנית</div>'
       : '';
     try {
-      body.innerHTML = errBanner + _renderPreSurveyBodyAI(ai.descSummary||'', steps, keys, tools, mats, desc, cat);
+      body.innerHTML = errBanner + _renderPreSurveyBodyAI(ai.descSummary||'', lineSteps, keys, tools, mats, lines.join(' | '), cat, lines);
       body.querySelectorAll('[data-val]').forEach(function(el){ if(el.dataset.val) el.value = el.dataset.val; });
       // Use .onclick assignment (more reliable than setAttribute in all browsers)
       var submitBtn = body.querySelector('button[onclick*="submitPreProjectSurvey"]');
@@ -8805,13 +8968,12 @@ function _analyzeForQuotation() {
     }
   }
 
-  var _qTimer = setTimeout(function(){ _showAnalysisForm({}, true); showToast('AI timeout'); }, 15000);
+  var _qTimer = setTimeout(function(){ _showAnalysisForm({}, true); showToast('AI timeout'); }, 18000);
 
-  fetch(SHEETS_URL + '?action=analyzeJobForPreSurvey' +
-    '&desc='   + encodeURIComponent(desc) +
+  fetch(SHEETS_URL + '?action=analyzeQuotationLines' +
+    '&lines='  + encodeURIComponent(JSON.stringify(lines)) +
     '&cat='    + encodeURIComponent(cat) +
-    '&client=' + encodeURIComponent(client) +
-    '&notes=')
+    '&client=' + encodeURIComponent(client))
     .then(function(r){ return r.json(); })
     .then(function(result) {
       clearTimeout(_qTimer);
@@ -8825,17 +8987,25 @@ function _analyzeForQuotation() {
 
 function submitQuotationSurvey() {
   var p = _preSurveyPendingJob || {};
-  var steps     = Array.from(document.querySelectorAll('[id^="pstep_"]')).map(function(i){ return i.value.trim(); }).filter(Boolean);
+  var lineCount = (p._lines && p._lines.length) ? p._lines.length : 1;
+  var stepsByLine = [];
+  for (var li = 0; li < lineCount; li++) {
+    stepsByLine.push(
+      Array.from(document.querySelectorAll('[id^="pstep_' + li + '_"]')).map(function(i){ return i.value.trim(); }).filter(Boolean)
+    );
+  }
+  var allSteps  = [].concat.apply([], stepsByLine); // flat list kept for the saved-survey record / Lessons history
   var keys      = Array.from(document.querySelectorAll('[id^="pkey_"]:checked')).map(function(cb){ return cb.dataset.key; });
   var tools     = Array.from(document.querySelectorAll('[id^="ptool_"]:checked')).map(function(cb){ return cb.dataset.tool; });
   var materials = Array.from(document.querySelectorAll('#preMaterialsList [data-mat]')).map(function(s){ return s.dataset.mat; });
-  var survey = { jobId:'', client:p.client||'', desc:p.desc||'', cat:p.category||'', date:new Date().toLocaleDateString('he-IL'), steps:steps, keys:keys, tools:tools, materials:materials, _forQuotation:true };
+  var survey = { jobId:'', client:p.client||'', desc:p.desc||'', cat:p.category||'', date:new Date().toLocaleDateString('he-IL'), steps:allSteps, keys:keys, tools:tools, materials:materials, _forQuotation:true };
   var surveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
   surveys.push(survey);
   localStorage.setItem('preProjectSurveys', JSON.stringify(surveys));
   fetch(SHEETS_URL + '?action=savePreProjectSurvey', { method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, body:JSON.stringify(survey) }).catch(function(){});
-  // Store prefill for quotation form
-  _quotePrefill = { client: p.client||'', lines: (p._lines && p._lines.length) ? p._lines : (p.desc ? [p.desc] : []), steps: steps, materials: materials };
+  // Store prefill for quotation form — stepsByLine keeps each line's own steps separate
+  _quotePrefill = { client: p.client||'', lines: (p._lines && p._lines.length) ? p._lines : (p.desc ? [p.desc] : []), stepsByLine: stepsByLine, materials: materials };
+  _clearPreSurveySnapshot();
   document.getElementById('preProjectSurveyOverlay').style.display = 'none';
   document.getElementById('caspitOverlay').style.display = 'flex';
   switchCaspitTab('quote');
