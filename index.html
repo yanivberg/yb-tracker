@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v871</title>
+<title>י.ב אחזקות — v873</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -518,7 +518,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v871
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v873
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycby0Rej…exec (v198)
@@ -529,7 +529,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v871 · 23/06/2026
+v873 · 23/06/2026
 • Pre-Quotation Briefing / Pre-Project Survey: נוסף תיבת "+" להוספת כלי מותאם בסקצי֙ Suggested Tools (כמו שיש ב-Materials needed) — קודם היה רשימת צ'קבוקסים קבועה מ-AI בלבד, לא ניתן היה להוסיף כלי מותאם.
 
 ─────────────────
@@ -641,7 +641,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v871 · 15/06/2026
+v873 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1403,7 +1403,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v871</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v873</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2672,7 +2672,7 @@ function addJobAsProject(job) {
 function _doAddJobAsProject(job, expensesOn) {
   var name = job.desc;
   if (projects.find(function(p) { return p.jobId === job.id; })) { showToast('Job already added'); return; }
-  var proj = { name: name, title: job.title || name, client: job.client, jobId: job.id, jobClient: job.client, jobDateStart: null, estHours: job.hours || 0, jobPO: job.poNumber || job.po || '', jobPrice: job.price || 0, jobIncome: parseFloat(job.income) || 0, sessionNum: projects.length + 1, totalMs: 0, prevMs: 0, active: false, activeStart: null, done: false, notes: [], noteOpen: false, editOpen: false, _expensesOn: expensesOn || 'me' };
+  var proj = { name: name, title: job.title || name, client: job.client, jobId: job.id, jobClient: job.client, jobDateStart: null, estHours: job.hours || 0, jobPO: job.poNumber || job.po || '', jobPrice: job.price || 0, jobIncome: parseFloat(job.income) || 0, sessionNum: projects.length + 1, totalMs: 0, prevMs: 0, active: false, activeStart: null, done: false, notes: [], noteOpen: false, editOpen: false, _expensesOn: expensesOn || 'client' };
   projects.push(proj);
   saveClient(job.client);
   saveState();
@@ -3000,7 +3000,7 @@ function savePQEdit(idx, jobId, client, oldDocNumber) {
       TrxTypeId: 16, DocumentId: newDocId, DocumentSource: 2,
       DocumentNumberBranch: 1, TrxCodeNumber: 3, ChargeVAT: true,
       ContactId: contactId || undefined, CustomerBusinessName: customerName || undefined, CustomerName: customerName || undefined,
-      DocumentLines: [{ ProductName: desc||'—', Details: desc||'—', Qty: qty, UnitPrice: price||1, ChargeVAT: true }]
+      DocumentLines: [{ ProductName: desc||'—', Details: '', Qty: qty, UnitPrice: price||1, ChargeVAT: true }]
     };
     return _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
       method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
@@ -6603,7 +6603,7 @@ function createCaspitInvoice() {
         if (!unitPrice || isNaN(unitPrice) || unitPrice <= 0) unitPrice = 1;
         var qty = parseFloat(job.qty) || 1;
         var lineDesc = (job.id || '') + ' | ' + (job.po || '') + ' | ' + (job.dateEnd || '') + ' | ' + (job.desc || '—');
-        return { ProductName: lineDesc, Details: lineDesc, Qty: qty, UnitPrice: unitPrice, ChargeVAT: true };
+        return { ProductName: lineDesc, Details: '', Qty: qty, UnitPrice: unitPrice, ChargeVAT: true };
       })
     };
     _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
@@ -7658,7 +7658,7 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
     _pbFastRefresh();   // accumulate these lines into מחירון כללי (fast, background)
     btn.textContent = '⏳ Sending to Caspit…';
     var lines = rowData.map(function(r) {
-      return { ProductName: r.desc, Details: r.desc, Qty: r.qty, UnitPrice: r.price > 0 ? r.price : 0.01, ChargeVAT: true };
+      return { ProductName: r.desc, Details: '', Qty: r.qty, UnitPrice: r.price > 0 ? r.price : 0.01, ChargeVAT: true };
     });
     var comments = (document.getElementById('caspitComments')||{}).value||'';
     var details  = (document.getElementById('caspitDetails')||{}).value||'';
@@ -8693,6 +8693,10 @@ function _renderPreSurveyBodyAI(descSummary, lineStepsOrAiSteps, successKeys, su
     '</div>' +
     '<button onclick="submitPreProjectSurvey()" style="width:100%;padding:14px;background:#f0c020;border:none;border-radius:12px;font-size:16px;font-weight:900;color:#111;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);font-family:Heebo,sans-serif;margin-bottom:8px;">✓ Ready — Add to Today</button>';
 
+  // Pre-highlight the default expenses-on choice once the buttons exist in the DOM
+  // (the markup above renders both buttons neutral; _setExpensesOn applies the actual styling).
+  setTimeout(function(){ _setExpensesOn(_expensesOnChoice); }, 0);
+
   return html;
 }
 
@@ -8769,7 +8773,7 @@ function _addPreMaterial() {
   inp.value = '';
 }
 
-var _expensesOnChoice = 'me'; // default
+var _expensesOnChoice = 'client'; // default
 
 function _setExpensesOn(val) {
   _expensesOnChoice = val;
@@ -8823,7 +8827,7 @@ function submitPreProjectSurvey() {
   _clearPreSurveySnapshot();
   document.getElementById('preProjectSurveyOverlay').style.display = 'none';
   _doAddJobAsProject(job, survey.expensesOn);
-  _expensesOnChoice = 'me'; // reset for next survey
+  _expensesOnChoice = 'client'; // reset for next survey
   showToast('✓ Briefing saved — project added');
 }
 
