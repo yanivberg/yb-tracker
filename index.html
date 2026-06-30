@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v874</title>
+<title>י.ב אחזקות — v875</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -518,7 +518,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v874
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v875
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -529,7 +529,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v874 · 23/06/2026
+v875 · 23/06/2026
 • Pre-Quotation Briefing / Pre-Project Survey: נוסף תיבת "+" להוספת כלי מותאם בסקצי֙ Suggested Tools (כמו שיש ב-Materials needed) — קודם היה רשימת צ'קבוקסים קבועה מ-AI בלבד, לא ניתן היה להוסיף כלי מותאם.
 
 ─────────────────
@@ -641,7 +641,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v874 · 15/06/2026
+v875 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1403,7 +1403,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v874</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v875</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1577,7 +1577,7 @@ SHEET SYNC
       <button onclick="var t=document.getElementById('caspitLogJson').textContent;navigator.clipboard.writeText(t).then(function(){var b=document.getElementById('caspitCopyBtn');b.textContent='✓ Copied!';b.style.background='#1b5e20';setTimeout(function(){b.textContent='📋 Copy Full Result';b.style.background='#0d47a1';},2000);});" id="caspitCopyBtn" style="width:calc(100% - 32px);margin:12px 16px;padding:12px;background:#0d47a1;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">📋 Copy Full Result</button>
     </div>
   </div>
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
     <div style="padding:16px 20px 0;border-bottom:1px solid #eee;flex-shrink:0;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <div style="font-weight:900;font-size:17px;color:#0d47a1;">💼 Caspit <span style="font-size:11px;font-weight:400;color:#aaa;">v300</span></div>
