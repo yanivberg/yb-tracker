@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v876</title>
+<title>י.ב אחזקות — v878</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -492,6 +492,8 @@ input[id^="progSlider-"]::-moz-range-track {
         <span style="font-size:24px;flex-shrink:0;">🧰</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#333;">My Toolbox</div><div style="font-size:11px;color:#888;margin-top:1px;">Manage your tools</div></div></div>
       <div onclick="closeSetupDrawer();runPOImportScan();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📧</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6a1b9a;">Import PO Emails</span></div>
+      <div onclick="closeSetupDrawer();openMonthlyExpenses();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">🧾</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#c62828;">Monthly Expenses</div><div style="font-size:11px;color:#888;margin-top:1px;">דוח הוצאות חודשי ללקוח</div></div></div>
       <div onclick="closeSetupDrawer();hardReset();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🗑</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#ccc;">Reset All</span></div>
     </div>
@@ -518,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v876
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v878
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -529,7 +531,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v876 · 23/06/2026
+v878 · 23/06/2026
 • Pre-Quotation Briefing / Pre-Project Survey: נוסף תיבת "+" להוספת כלי מותאם בסקצי֙ Suggested Tools (כמו שיש ב-Materials needed) — קודם היה רשימת צ'קבוקסים קבועה מ-AI בלבד, לא ניתן היה להוסיף כלי מותאם.
 
 ─────────────────
@@ -641,7 +643,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v876 · 15/06/2026
+v878 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1403,7 +1405,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v876</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v878</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2358,7 +2360,119 @@ updateClock();
 setInterval(updateClock, 1000);
 
 // ── Init ──────────────────────────────────────────────
-// ── Pre-Quotation Briefing persistence — survives accidental refresh ───────
+// ── Monthly Expenses Report ────────────────────────────────────────────────
+function openMonthlyExpenses() {
+  var overlay = document.getElementById('monthlyExpOverlay');
+  overlay.style.display = 'flex';
+  // Default month = current month
+  var now = new Date();
+  var monthStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  document.getElementById('meMonth').value = monthStr;
+  // Load clients
+  var sel = document.getElementById('meClient');
+  sel.innerHTML = '<option value="">⏳ טוען לקוחות…</option>';
+  fetch(SHEETS_URL + '?action=getClients&full=1').then(function(r){ return r.json(); }).then(function(clients) {
+    sel.innerHTML = '<option value="">בחר לקוח…</option>';
+    (clients||[]).forEach(function(c) {
+      var name = typeof c === 'string' ? c : (c.name||'');
+      if (!name) return;
+      var opt = document.createElement('option');
+      opt.value = name;
+      opt.dataset.email = typeof c === 'object' ? (c.email||'') : '';
+      opt.textContent = name;
+      sel.appendChild(opt);
+    });
+  }).catch(function(){ sel.innerHTML = '<option value="">⚠️ שגיאה</option>'; });
+}
+
+function _loadMonthlyExpenses() {
+  var client = document.getElementById('meClient').value;
+  var month  = document.getElementById('meMonth').value; // YYYY-MM
+  var body   = document.getElementById('meBody');
+  var sendBtn= document.getElementById('meSendBtn');
+  sendBtn.style.display = 'none';
+  if (!client || !month) { body.innerHTML = '<div style="color:#bbb;font-size:13px;text-align:center;padding:30px 0;">בחר לקוח וחודש</div>'; return; }
+  body.innerHTML = '<div style="color:#bbb;font-size:13px;text-align:center;padding:30px 0;">⏳ טוען…</div>';
+  fetch(SHEETS_URL + '?action=getExpenses&client=' + encodeURIComponent(client) + '&_t=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(exps) {
+      // Filter by selected month
+      var filtered = (exps||[]).filter(function(e) {
+        var d = String(e.date||'');
+        // date stored as YYYY-MM-DD or DD/MM/YYYY — handle both
+        var ym = '';
+        if (d.match(/^\d{4}-\d{2}/)) ym = d.slice(0,7);
+        else if (d.match(/^\d{2}\/\d{2}\/\d{4}/)) { var p=d.split('/'); ym = p[2]+'-'+p[1]; }
+        return ym === month;
+      });
+      if (!filtered.length) {
+        body.innerHTML = '<div style="color:#bbb;font-size:13px;text-align:center;padding:30px 0;">אין הוצאות לחודש ' + month + '</div>';
+        return;
+      }
+      // Group by jobId
+      var jobs = {};
+      filtered.forEach(function(e) {
+        var jid = e.jobId||'ללא פרויקט';
+        if (!jobs[jid]) jobs[jid] = [];
+        jobs[jid].push(e);
+      });
+      var total = filtered.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
+      var html = '';
+      Object.keys(jobs).forEach(function(jid) {
+        var rows = jobs[jid];
+        var jobTotal = rows.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
+        html += '<div style="margin-bottom:14px;">' +
+          '<div style="font-size:11px;font-weight:900;color:#0d47a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1.5px solid #e3f2fd;">' + jid + '</div>';
+        rows.forEach(function(e) {
+          var catIcon = e.category==='חומרים'?'🔩':'👷';
+          var dateStr = String(e.date||'').slice(0,10);
+          html += '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid #f0f0f0;font-size:12px;">' +
+            '<span>' + catIcon + '</span>' +
+            '<div style="flex:1;">' +
+              '<div style="direction:rtl;color:#333;">' + (e.desc||'—') + '</div>' +
+              '<div style="font-size:10px;color:#999;">' + dateStr + ' · ' + (e.category||'') + '</div>' +
+            '</div>' +
+            (e.link ? '<a href="'+e.link+'" target="_blank" style="font-size:15px;text-decoration:none;flex-shrink:0;" title="פתח מייל מקור">📧</a>' : '') +
+            '<span style="font-weight:700;color:#c62828;flex-shrink:0;">₪' + (parseFloat(e.amount)||0).toLocaleString() + '</span>' +
+          '</div>';
+        });
+        html += '<div style="text-align:left;font-size:11px;font-weight:700;color:#555;padding:4px 0;">סה"כ: ₪' + jobTotal.toLocaleString() + '</div>' +
+        '</div>';
+      });
+      html += '<div style="background:#fff3e0;border-radius:10px;padding:10px 14px;margin-top:8px;display:flex;justify-content:space-between;font-weight:900;font-size:14px;"><span>סה"כ הוצאות חודש ' + month + '</span><span style="color:#c62828;">₪' + total.toLocaleString() + '</span></div>';
+      body.innerHTML = html;
+      sendBtn.style.display = 'block';
+      sendBtn.dataset.client = client;
+      sendBtn.dataset.month  = month;
+      sendBtn.dataset.total  = total;
+    })
+    .catch(function(){ body.innerHTML = '<div style="color:#c62828;font-size:13px;text-align:center;padding:20px;">⚠️ שגיאה בטעינת הוצאות</div>'; });
+}
+
+function _sendMonthlyExpenseReport() {
+  var btn    = document.getElementById('meSendBtn');
+  var client = btn.dataset.client;
+  var month  = btn.dataset.month;
+  var total  = btn.dataset.total;
+  // Get client email from the dropdown's selected option
+  var sel    = document.getElementById('meClient');
+  var opt    = sel.options[sel.selectedIndex];
+  var email  = opt ? (opt.dataset.email||'') : '';
+  if (!email) { showToast('⚠️ אין כתובת מייל ללקוח זה בגיליון Clients'); return; }
+  btn.textContent = '⏳ שולח…'; btn.disabled = true;
+  fetch(SHEETS_URL + '?action=sendMonthlyExpenseReport' +
+    '&client=' + encodeURIComponent(client) +
+    '&month='  + encodeURIComponent(month)  +
+    '&email='  + encodeURIComponent(email)  +
+    '&total='  + encodeURIComponent(total))
+    .then(function(r){ return r.json(); })
+    .then(function(d) {
+      if (d.ok) { showToast('✅ דוח הוצאות נשלח ל-' + email); btn.textContent = '✅ נשלח!'; }
+      else { showToast('⚠️ ' + (d.error||'שגיאה')); btn.textContent = '📤 שלח דוח הוצאות ללקוח'; btn.disabled = false; }
+    })
+    .catch(function(){ showToast('⚠️ שגיאת חיבור'); btn.textContent = '📤 שלח דוח הוצאות ללקוח'; btn.disabled = false; });
+}
+// ── End Monthly Expenses Report ────────────────────────────────────────────
 var PRE_SURVEY_SNAPSHOT_KEY = 'yb_preSurveySnapshot';
 
 function _savePreSurveySnapshot() {
@@ -3986,6 +4100,7 @@ function renderProjectBtns() {
                   '<input id="expAmt-'+i+'" type="number" placeholder="₪" style="width:64px;padding:6px 8px;border:1.5px solid rgba(0,0,0,0.2);border-radius:7px;font-size:12px;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.7);">' +
                   '<button onclick="event.stopPropagation();addExpense('+i+')" style="padding:6px 12px;background:rgba(0,0,0,0.7);color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:900;cursor:pointer;">+</button>' +
                 '</div>' +
+                '<input id="expLink-'+i+'" type="url" placeholder="📧 Gmail link (אופציונלי)..." style="width:100%;margin-top:5px;padding:5px 8px;border:1.5px solid rgba(0,0,0,0.15);border-radius:7px;font-size:11px;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.6);box-sizing:border-box;">' +
               '</div>' +
             '</div>' +
           _progressMeterHtml(p, i) +
@@ -4091,6 +4206,7 @@ function renderProjectBtns() {
             '<input id="expAmt-'+i+'" type="number" placeholder="₪" style="width:70px;padding:6px 8px;border:1.5px solid rgba(0,0,0,0.2);border-radius:7px;font-size:12px;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.7);">' +
             '<button onclick="event.stopPropagation();addExpense('+i+')" style="padding:6px 12px;background:rgba(0,0,0,0.7);color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:900;cursor:pointer;">+</button>' +
           '</div>' +
+          '<input id="expLink-'+i+'" type="url" placeholder="📧 Gmail link (אופציונלי)..." style="width:100%;margin-top:5px;padding:5px 8px;border:1.5px solid rgba(0,0,0,0.15);border-radius:7px;font-size:11px;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.6);box-sizing:border-box;">' +
         '</div>' +
       '</div>' +
       _progressMeterHtml(p, i) +
@@ -4345,9 +4461,11 @@ function _renderExpenses(i, exps) {
 
   var rows = exps.map(function(ex) {
     var catIcon = ex.category==='חומרים'?'🔩':'👷';
+    var linkBtn = ex.link ? '<a href="'+ex.link+'" target="_blank" onclick="event.stopPropagation()" style="flex-shrink:0;font-size:13px;text-decoration:none;" title="פתח מייל">📧</a>' : '';
     return '<div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:0.5px solid rgba(0,0,0,0.1);font-size:11px;">' +
       '<span style="flex-shrink:0;">' + catIcon + '</span>' +
       '<span style="flex:1;direction:rtl;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">' + (ex.desc||'') + '</span>' +
+      linkBtn +
       '<span style="font-weight:700;color:#c62828;flex-shrink:0;">₪' + (ex.amount||0).toLocaleString() + '</span>' +
       '<button onclick="event.stopPropagation();deleteExpense('+i+','+ex.row+')" style="background:none;border:none;color:#888;font-size:11px;cursor:pointer;padding:0 2px;">✕</button>' +
     '</div>';
@@ -4371,19 +4489,22 @@ function addExpense(i) {
   var cat = (document.getElementById('expCat-'+i)||{}).value || 'חומרים';
   var desc= (document.getElementById('expDesc-'+i)||{}).value.trim();
   var amt = parseFloat((document.getElementById('expAmt-'+i)||{}).value||0);
+  var link= ((document.getElementById('expLink-'+i)||{}).value||'').trim();
   if (!amt) { showToast('הכנס סכום'); return; }
   var today = new Date().toISOString().slice(0,10);
   fetch(SHEETS_URL + '?action=addExpense&jobId=' + encodeURIComponent(p.jobId) +
     '&client=' + encodeURIComponent(p.jobClient||p.client||'') +
     '&date=' + today + '&category=' + encodeURIComponent(cat) +
     '&desc=' + encodeURIComponent(desc) + '&amount=' + amt +
+    '&link=' + encodeURIComponent(link) +
     '&expensesOn=' + encodeURIComponent(p._expensesOn||'me'))
   .then(function(r){return r.json();}).then(function(d){
     if (d.ok) {
       _expCache[p.jobId] = null; // invalidate cache
       var descEl = document.getElementById('expDesc-'+i);
       var amtEl  = document.getElementById('expAmt-'+i);
-      if (descEl) descEl.value=''; if (amtEl) amtEl.value='';
+      var linkEl = document.getElementById('expLink-'+i);
+      if (descEl) descEl.value=''; if (amtEl) amtEl.value=''; if (linkEl) linkEl.value='';
       _loadExpenses(i);
       showToast('✓ הוצאה נוספה');
     } else showToast('⚠️ '+(d.error||'שגיאה'));
@@ -5007,6 +5128,7 @@ function renderSetup() {
               <input id="expAmt-${i}" type="number" placeholder="₪" style="width:64px;padding:6px 8px;border:1.5px solid rgba(0,0,0,0.2);border-radius:7px;font-size:12px;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.7);">
               <button onclick="event.stopPropagation();addExpense(${i})" style="padding:6px 12px;background:rgba(0,0,0,0.7);color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:900;cursor:pointer;">+</button>
             </div>
+            <input id="expLink-${i}" type="url" placeholder="📧 Gmail link (אופציונלי)..." style="width:100%;margin-top:5px;padding:5px 8px;border:1.5px solid rgba(0,0,0,0.15);border-radius:7px;font-size:11px;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.6);box-sizing:border-box;">
           </div>
         </div>
         ${_progressMeterHtml(p, i)}
@@ -5140,6 +5262,7 @@ function _addExpenseToDoneJob() {
   var cat  = (document.getElementById('editExpCat')||{}).value || 'חומרים';
   var desc = (document.getElementById('editExpDesc')||{}).value || '';
   var amt  = parseFloat((document.getElementById('editExpAmt')||{}).value) || 0;
+  var link = ((document.getElementById('editExpLink')||{}).value||'').trim();
   if (!amt) { showToast('הכנס סכום'); return; }
   var jobId = _editDoneJob.id, client = _editDoneJob.client;
   var expOn = _editDoneJob._expensesOn || '';
@@ -5148,11 +5271,13 @@ function _addExpenseToDoneJob() {
     '&category=' + encodeURIComponent(cat) +
     '&desc=' + encodeURIComponent(desc) +
     '&amount=' + encodeURIComponent(amt) +
+    '&link=' + encodeURIComponent(link) +
     (expOn ? '&expensesOn=' + encodeURIComponent(expOn) : ''))
     .then(function(r){ return r.text(); })
     .then(function(){
       var de = document.getElementById('editExpDesc'); if (de) de.value = '';
       var ae = document.getElementById('editExpAmt');  if (ae) ae.value = '';
+      var le = document.getElementById('editExpLink'); if (le) le.value = '';
       showToast('✓ הוצאה נוספה');
       _loadExpensesForEdit();
     })
@@ -5215,6 +5340,7 @@ function openEditDoneJob(jobId, client) {
             '<input id="editExpAmt" type="number" placeholder="₪" style="width:70px;padding:9px;border:1.5px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;">' +
             '<button onclick="_addExpenseToDoneJob()" style="padding:9px 16px;background:#0d47a1;color:#fff;border:none;border-radius:9px;font-size:16px;font-weight:900;cursor:pointer;">+</button>' +
           '</div>' +
+          '<input id="editExpLink" type="url" placeholder="📧 Gmail link (אופציונלי)..." style="width:100%;margin-top:6px;padding:8px;border:1.5px solid #ddd;border-radius:9px;font-size:12px;font-family:Heebo,sans-serif;box-sizing:border-box;">' +
         '</div>';
       _loadExpensesForEdit();
     })
@@ -10378,5 +10504,36 @@ function showToast(msg) {
     </div>
   </div>
 </div>
+<!-- ── Monthly Expenses Overlay ───────────────────────────── -->
+<div id="monthlyExpOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10015;align-items:flex-end;justify-content:center;">
+  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;">
+    <div style="padding:16px 20px 12px;border-bottom:1px solid #eee;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:16px;font-weight:900;color:#c62828;">🧾 הוצאות חודשיות</div>
+        <div style="font-size:11px;color:#888;margin-top:2px;">דוח הוצאות חודשי ללקוח עם קישורי מקור</div>
+      </div>
+      <button onclick="document.getElementById('monthlyExpOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+    </div>
+    <div style="padding:14px 20px;border-bottom:1px solid #eee;flex-shrink:0;display:flex;gap:10px;">
+      <div style="flex:1;">
+        <div style="font-size:10px;color:#888;margin-bottom:4px;">לקוח</div>
+        <select id="meClient" onchange="_loadMonthlyExpenses()" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;background:#fff;">
+          <option value="">בחר לקוח…</option>
+        </select>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:10px;color:#888;margin-bottom:4px;">חודש</div>
+        <input type="month" id="meMonth" onchange="_loadMonthlyExpenses()" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;">
+      </div>
+    </div>
+    <div id="meBody" style="flex:1;overflow-y:auto;padding:14px 20px;">
+      <div style="color:#bbb;font-size:13px;text-align:center;padding:30px 0;">בחר לקוח וחודש</div>
+    </div>
+    <div style="padding:12px 20px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid #eee;flex-shrink:0;">
+      <button id="meSendBtn" onclick="_sendMonthlyExpenseReport()" style="display:none;width:100%;padding:13px;background:#c62828;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">📤 שלח דוח הוצאות ללקוח</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
