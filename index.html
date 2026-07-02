@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v884</title>
+<title>י.ב אחזקות — v885</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v884
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v885
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -531,7 +531,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v884 · 23/06/2026
+v885 · 23/06/2026
 • Pre-Quotation Briefing / Pre-Project Survey: נוסף תיבת "+" להוספת כלי מותאם בסקצי֙ Suggested Tools (כמו שיש ב-Materials needed) — קודם היה רשימת צ'קבוקסים קבועה מ-AI בלבד, לא ניתן היה להוסיף כלי מותאם.
 
 ─────────────────
@@ -643,7 +643,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v884 · 15/06/2026
+v885 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1405,7 +1405,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v884</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v885</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2374,14 +2374,16 @@ function openMonthlyExpenses() {
   var _fallbackMe = ['GOLMAT','ROLLMAT','BILLINSKY','MODUL PLADA','PAL-YAM','SONIC BEAT LTD','Y.SHAY'];
   fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(clients) {
     var list = (clients && clients.length) ? clients : _fallbackMe;
-    sel.innerHTML = '<option value="">בחר לקוח…</option>';
+    sel.innerHTML = '<option value="">בחר לקוח…</option>' +
+      '<option value="__ALL__">📋 כל הלקוחות</option>';
     list.forEach(function(name) {
       var opt = document.createElement('option');
       opt.value = name; opt.textContent = name;
       sel.appendChild(opt);
     });
   }).catch(function(){
-    sel.innerHTML = '<option value="">בחר לקוח…</option>';
+    sel.innerHTML = '<option value="">בחר לקוח…</option>' +
+      '<option value="__ALL__">📋 כל הלקוחות</option>';
     _fallbackMe.forEach(function(name){
       var opt = document.createElement('option');
       opt.value = name; opt.textContent = name;
@@ -2398,64 +2400,77 @@ function _loadMonthlyExpenses() {
   sendBtn.style.display = 'none';
   if (!client || !month) { body.innerHTML = '<div style="color:#bbb;font-size:13px;text-align:center;padding:30px 0;">בחר לקוח וחודש</div>'; return; }
   body.innerHTML = '<div style="color:#bbb;font-size:13px;text-align:center;padding:30px 0;">⏳ טוען…</div>';
-  fetch(SHEETS_URL + '?action=getExpenses&client=' + encodeURIComponent(client) + '&allForClient=1&_t=' + Date.now())
-    .then(function(r){ return r.json(); })
-    .then(function(exps) {
-      // Filter by selected month
-      var filtered = (exps||[]).filter(function(e) {
-        var d = String(e.date||'');
-        var ym = '';
-        if (d.match(/^\d{4}-\d{2}/)) ym = d.slice(0,7);
-        else if (d.match(/^\d{2}\/\d{2}\/\d{4}/)) { var p=d.split('/'); ym = p[2]+'-'+p[1]; }
-        else { try { var dt=new Date(d); if(!isNaN(dt)) ym=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0'); } catch(_){} }
-        return ym === month;
-      });
-      if (!filtered.length) {
-        body.innerHTML = '<div style="color:#bbb;font-size:13px;text-align:center;padding:30px 0;">אין הוצאות לחודש ' + month + ' עבור ' + client + '</div>';
-        sendBtn.style.display = 'none';
-        return;
-      }
-      // Group by jobId
-      var jobs = {};
-      filtered.forEach(function(e) {
-        var jid = e.jobId||'ללא פרויקט';
-        if (!jobs[jid]) jobs[jid] = [];
-        jobs[jid].push(e);
-      });
-      var total = filtered.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
-      var html = '';
-      Object.keys(jobs).forEach(function(jid) {
-        var rows = jobs[jid];
-        var jobTotal = rows.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
-        var po = rows[0].po || '';
-        var jobDesc = rows[0].jobDesc || '';
-        var headerLabel = jid + (po ? ' · ' + po : '') + (jobDesc ? ' · ' + jobDesc.slice(0,35) : '');
-        html += '<div style="margin-bottom:14px;">' +
-          '<div style="font-size:11px;font-weight:900;color:#0d47a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1.5px solid #e3f2fd;">' + headerLabel + '</div>';
-        rows.forEach(function(e) {
-          var catIcon = e.category==='חומרים'?'🔩':'👷';
-          var dateStr = String(e.date||'').slice(0,10);
-          html += '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid #f0f0f0;font-size:12px;">' +
-            '<span>' + catIcon + '</span>' +
-            '<div style="flex:1;">' +
-              '<div style="direction:rtl;color:#333;">' + (e.desc||'—') + '</div>' +
-              '<div style="font-size:10px;color:#999;">' + dateStr + ' · ' + (e.category||'') + '</div>' +
-            '</div>' +
-            (e.link ? '<a href="'+e.link+'" target="_blank" style="font-size:15px;text-decoration:none;flex-shrink:0;" title="פתח מייל מקור">📧</a>' : '') +
-            '<span style="font-weight:700;color:#c62828;flex-shrink:0;">₪' + (parseFloat(e.amount)||0).toLocaleString() + '</span>' +
-          '</div>';
-        });
-        html += '<div style="text-align:left;font-size:11px;font-weight:700;color:#555;padding:4px 0;">סה"כ: ₪' + jobTotal.toLocaleString() + '</div>' +
+  sendBtn.style.display = 'none';
+
+  var allClients = client === '__ALL__' ? _fallbackMe : [client];
+  var allExps = [];
+  var pending = allClients.length;
+
+  function _afterFetch() {
+    pending--;
+    if (pending > 0) return;
+    // Filter by selected month
+    var filtered = allExps.filter(function(e) {
+      var d = String(e.date||'');
+      var ym = '';
+      if (d.match(/^\d{4}-\d{2}/)) ym = d.slice(0,7);
+      else if (d.match(/^\d{2}\/\d{2}\/\d{4}/)) { var p=d.split('/'); ym = p[2]+'-'+p[1]; }
+      else { try { var dt=new Date(d); if(!isNaN(dt)) ym=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0'); } catch(_){} }
+      return ym === month;
+    });
+    if (!filtered.length) {
+      body.innerHTML = '<div style="color:#bbb;font-size:13px;text-align:center;padding:30px 0;">אין הוצאות לחודש ' + month + (client !== '__ALL__' ? ' עבור ' + client : '') + '</div>';
+      sendBtn.style.display = 'none';
+      return;
+    }
+    // Group by client+jobId
+    var jobs = {};
+    var jobOrder = [];
+    filtered.forEach(function(e) {
+      var key = (client === '__ALL__' ? (e.client||'') + ' · ' : '') + (e.jobId||'ללא פרויקט');
+      if (!jobs[key]) { jobs[key] = []; jobOrder.push(key); }
+      jobs[key].push(e);
+    });
+    var total = filtered.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
+    var html = '';
+    jobOrder.forEach(function(key) {
+      var rows = jobs[key];
+      var jobTotal = rows.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
+      var po = rows[0].po || '';
+      var jobDesc = rows[0].jobDesc || '';
+      var headerLabel = key + (po ? ' · ' + po : '') + (jobDesc ? ' · ' + jobDesc.slice(0,30) : '');
+      html += '<div style="margin-bottom:14px;">' +
+        '<div style="font-size:11px;font-weight:900;color:#0d47a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1.5px solid #e3f2fd;">' + headerLabel + '</div>';
+      rows.forEach(function(e) {
+        var catIcon = e.category==='חומרים'?'🔩':'👷';
+        var dateStr = '';
+        try { var dt2=new Date(e.date); if(!isNaN(dt2)) dateStr=('0'+dt2.getDate()).slice(-2)+'/'+('0'+(dt2.getMonth()+1)).slice(-2); } catch(_){}
+        html += '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid #f0f0f0;font-size:12px;">' +
+          '<span>' + catIcon + '</span>' +
+          '<div style="flex:1;">' +
+            '<div style="direction:rtl;color:#333;">' + (e.desc||'—') + '</div>' +
+            '<div style="font-size:10px;color:#999;">' + dateStr + (e.category ? ' · ' + e.category : '') + '</div>' +
+          '</div>' +
+          (e.link ? '<a href="'+e.link+'" target="_blank" style="font-size:15px;text-decoration:none;flex-shrink:0;" title="פתח מייל מקור">📧</a>' : '') +
+          '<span style="font-weight:700;color:#c62828;flex-shrink:0;">₪' + (parseFloat(e.amount)||0).toLocaleString() + '</span>' +
         '</div>';
       });
-      html += '<div style="background:#fff3e0;border-radius:10px;padding:10px 14px;margin-top:8px;display:flex;justify-content:space-between;font-weight:900;font-size:14px;"><span>סה"כ הוצאות חודש ' + month + '</span><span style="color:#c62828;">₪' + total.toLocaleString() + '</span></div>';
-      body.innerHTML = html;
-      sendBtn.style.display = 'block';
-      sendBtn.dataset.client = client;
-      sendBtn.dataset.month  = month;
-      sendBtn.dataset.total  = total;
-    })
-    .catch(function(){ body.innerHTML = '<div style="color:#c62828;font-size:13px;text-align:center;padding:20px;">⚠️ שגיאה בטעינת הוצאות</div>'; });
+      html += '<div style="text-align:left;font-size:11px;font-weight:700;color:#555;padding:4px 0;">סה"כ: ₪' + jobTotal.toLocaleString() + '</div></div>';
+    });
+    html += '<div style="background:#fff3e0;border-radius:10px;padding:10px 14px;margin-top:8px;display:flex;justify-content:space-between;font-weight:900;font-size:14px;"><span>סה"כ הוצאות חודש ' + month + '</span><span style="color:#c62828;">₪' + total.toLocaleString() + '</span></div>';
+    body.innerHTML = html;
+    sendBtn.style.display = 'block';
+    sendBtn.dataset.client = client;
+    sendBtn.dataset.month  = month;
+    sendBtn.dataset.total  = total;
+  }
+
+  allClients.forEach(function(c) {
+    fetch(SHEETS_URL + '?action=getExpenses&client=' + encodeURIComponent(c) + '&allForClient=1&_t=' + Date.now())
+      .then(function(r){ return r.json(); })
+      .then(function(exps){ (exps||[]).forEach(function(e){ allExps.push(e); }); _afterFetch(); })
+      .catch(function(){ _afterFetch(); });
+  });
 }
 
 function _sendMonthlyExpenseReport() {
