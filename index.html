@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v885</title>
+<title>י.ב אחזקות — v887</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v885
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v887
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -531,7 +531,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v885 · 23/06/2026
+v887 · 23/06/2026
 • Pre-Quotation Briefing / Pre-Project Survey: נוסף תיבת "+" להוספת כלי מותאם בסקצי֙ Suggested Tools (כמו שיש ב-Materials needed) — קודם היה רשימת צ'קבוקסים קבועה מ-AI בלבד, לא ניתן היה להוסיף כלי מותאם.
 
 ─────────────────
@@ -643,7 +643,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v885 · 15/06/2026
+v887 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1405,7 +1405,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v885</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v887</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2432,13 +2432,30 @@ function _loadMonthlyExpenses() {
       jobs[key].push(e);
     });
     var total = filtered.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
+    // Build plain text for clipboard
+    var reportText = 'דוח הוצאות ' + month + (client !== '__ALL__' ? ' — ' + client : ' — כל הלקוחות') + '\n';
+    reportText += '══════════════════════\n';
     var html = '';
+    var expNum = 0;
     jobOrder.forEach(function(key) {
       var rows = jobs[key];
       var jobTotal = rows.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
       var po = rows[0].po || '';
       var jobDesc = rows[0].jobDesc || '';
       var headerLabel = key + (po ? ' · ' + po : '') + (jobDesc ? ' · ' + jobDesc.slice(0,30) : '');
+      reportText += '\n── ' + headerLabel + ' ──\n';
+      rows.forEach(function(e) {
+        expNum++;
+        var nums = ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
+        var numStr = expNum <= 10 ? nums[expNum-1] : expNum + '.';
+        var catIcon = e.category==='חומרים'?'🔩':'👷';
+        var dateStr = '';
+        try { var dt2=new Date(e.date); if(!isNaN(dt2)) dateStr=('0'+dt2.getDate()).slice(-2)+'/'+('0'+(dt2.getMonth()+1)).slice(-2); } catch(_){}
+        reportText += numStr + ' ' + catIcon + ' ' + (e.desc||'—') + ' | ₪' + (parseFloat(e.amount)||0).toLocaleString() + ' | ' + dateStr;
+        if (e.link) reportText += '\n   🔗 ' + e.link;
+        reportText += '\n';
+      });
+      reportText += 'סה"כ: ₪' + jobTotal.toLocaleString() + '\n';
       html += '<div style="margin-bottom:14px;">' +
         '<div style="font-size:11px;font-weight:900;color:#0d47a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1.5px solid #e3f2fd;">' + headerLabel + '</div>';
       rows.forEach(function(e) {
@@ -2457,12 +2474,11 @@ function _loadMonthlyExpenses() {
       });
       html += '<div style="text-align:left;font-size:11px;font-weight:700;color:#555;padding:4px 0;">סה"כ: ₪' + jobTotal.toLocaleString() + '</div></div>';
     });
+    reportText += '\n══════════════════════\nסה"כ הוצאות ' + month + ': ₪' + total.toLocaleString();
     html += '<div style="background:#fff3e0;border-radius:10px;padding:10px 14px;margin-top:8px;display:flex;justify-content:space-between;font-weight:900;font-size:14px;"><span>סה"כ הוצאות חודש ' + month + '</span><span style="color:#c62828;">₪' + total.toLocaleString() + '</span></div>';
     body.innerHTML = html;
     sendBtn.style.display = 'block';
-    sendBtn.dataset.client = client;
-    sendBtn.dataset.month  = month;
-    sendBtn.dataset.total  = total;
+    sendBtn.dataset.report = reportText;
   }
 
   allClients.forEach(function(c) {
@@ -2473,23 +2489,26 @@ function _loadMonthlyExpenses() {
   });
 }
 
-function _sendMonthlyExpenseReport() {
-  var btn    = document.getElementById('meSendBtn');
-  var client = btn.dataset.client;
-  var month  = btn.dataset.month;
-  var total  = btn.dataset.total;
-  btn.textContent = '⏳ שולח…'; btn.disabled = true;
-  fetch(SHEETS_URL + '?action=sendMonthlyExpenseReport' +
-    '&client=' + encodeURIComponent(client) +
-    '&month='  + encodeURIComponent(month)  +
-    '&email=yanivberg@icloud.com' +
-    '&total='  + encodeURIComponent(total))
-    .then(function(r){ return r.json(); })
-    .then(function(d) {
-      if (d.ok) { showToast('✅ דוח נשלח ל-yanivberg@icloud.com'); btn.textContent = '✅ נשלח!'; }
-      else { showToast('⚠️ ' + (d.error||'שגיאה')); btn.textContent = '📤 שלח דוח הוצאות'; btn.disabled = false; }
-    })
-    .catch(function(){ showToast('⚠️ שגיאת חיבור'); btn.textContent = '📤 שלח דוח הוצאות'; btn.disabled = false; });
+function _copyMonthlyExpenseReport() {
+  var btn  = document.getElementById('meSendBtn');
+  var text = btn.dataset.report || '';
+  if (!text) { showToast('⚠️ אין נתונים להעתקה'); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      btn.textContent = '✅ הועתק!';
+      showToast('✅ הדוח הועתק — הדבק בווטסאפ / מייל');
+      setTimeout(function(){ btn.textContent = '📋 העתק דוח הוצאות'; }, 3000);
+    }).catch(function() { _copyFallback(text, btn); });
+  } else { _copyFallback(text, btn); }
+}
+function _copyFallback(text, btn) {
+  var ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); btn.textContent = '✅ הועתק!'; showToast('✅ הדוח הועתק');
+    setTimeout(function(){ btn.textContent = '📋 העתק דוח הוצאות'; }, 3000);
+  } catch(e) { showToast('⚠️ לא ניתן להעתיק — נסה ידנית'); }
+  document.body.removeChild(ta);
 }
 // ── End Monthly Expenses Report ────────────────────────────────────────────
 var PRE_SURVEY_SNAPSHOT_KEY = 'yb_preSurveySnapshot';
@@ -10549,7 +10568,7 @@ function showToast(msg) {
       <div style="color:#bbb;font-size:13px;text-align:center;padding:30px 0;">בחר לקוח וחודש</div>
     </div>
     <div style="padding:12px 20px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid #eee;flex-shrink:0;">
-      <button id="meSendBtn" onclick="_sendMonthlyExpenseReport()" style="display:none;width:100%;padding:13px;background:#c62828;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">📤 שלח דוח הוצאות אלי</button>
+      <button id="meSendBtn" onclick="_copyMonthlyExpenseReport()" style="display:none;width:100%;padding:13px;background:#1b5e20;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">📋 העתק דוח הוצאות</button>
     </div>
   </div>
 </div>
