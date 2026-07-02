@@ -2368,21 +2368,26 @@ function openMonthlyExpenses() {
   var now = new Date();
   var monthStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
   document.getElementById('meMonth').value = monthStr;
-  // Load clients
+  // Load clients from job sheets (not just Clients sheet)
   var sel = document.getElementById('meClient');
   sel.innerHTML = '<option value="">⏳ טוען לקוחות…</option>';
-  fetch(SHEETS_URL + '?action=getClients&full=1').then(function(r){ return r.json(); }).then(function(clients) {
+  var _fallbackMe = ['GOLMAT','ROLLMAT','BILLINSKY','MODUL PLADA','PAL-YAM','SONIC BEAT LTD','Y.SHAY'];
+  fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(clients) {
+    var list = (clients && clients.length) ? clients : _fallbackMe;
     sel.innerHTML = '<option value="">בחר לקוח…</option>';
-    (clients||[]).forEach(function(c) {
-      var name = typeof c === 'string' ? c : (c.name||'');
-      if (!name) return;
+    list.forEach(function(name) {
       var opt = document.createElement('option');
-      opt.value = name;
-      opt.dataset.email = typeof c === 'object' ? (c.email||'') : '';
-      opt.textContent = name;
+      opt.value = name; opt.textContent = name;
       sel.appendChild(opt);
     });
-  }).catch(function(){ sel.innerHTML = '<option value="">⚠️ שגיאה</option>'; });
+  }).catch(function(){
+    sel.innerHTML = '<option value="">בחר לקוח…</option>';
+    _fallbackMe.forEach(function(name){
+      var opt = document.createElement('option');
+      opt.value = name; opt.textContent = name;
+      sel.appendChild(opt);
+    });
+  });
 }
 
 function _loadMonthlyExpenses() {
@@ -2454,23 +2459,33 @@ function _sendMonthlyExpenseReport() {
   var client = btn.dataset.client;
   var month  = btn.dataset.month;
   var total  = btn.dataset.total;
-  // Get client email from the dropdown's selected option
-  var sel    = document.getElementById('meClient');
-  var opt    = sel.options[sel.selectedIndex];
-  var email  = opt ? (opt.dataset.email||'') : '';
-  if (!email) { showToast('⚠️ אין כתובת מייל ללקוח זה בגיליון Clients'); return; }
   btn.textContent = '⏳ שולח…'; btn.disabled = true;
-  fetch(SHEETS_URL + '?action=sendMonthlyExpenseReport' +
-    '&client=' + encodeURIComponent(client) +
-    '&month='  + encodeURIComponent(month)  +
-    '&email='  + encodeURIComponent(email)  +
-    '&total='  + encodeURIComponent(total))
+  // Fetch client email from Clients sheet first
+  fetch(SHEETS_URL + '?action=getClients&full=1')
     .then(function(r){ return r.json(); })
-    .then(function(d) {
-      if (d.ok) { showToast('✅ דוח הוצאות נשלח ל-' + email); btn.textContent = '✅ נשלח!'; }
-      else { showToast('⚠️ ' + (d.error||'שגיאה')); btn.textContent = '📤 שלח דוח הוצאות ללקוח'; btn.disabled = false; }
+    .then(function(clients) {
+      var email = '';
+      (clients||[]).forEach(function(c) {
+        if ((c.name||'').toLowerCase() === client.toLowerCase()) email = c.email||'';
+      });
+      if (!email) {
+        showToast('⚠️ אין כתובת מייל ל-' + client + ' בגיליון Clients');
+        btn.textContent = '📤 שלח דוח הוצאות ללקוח'; btn.disabled = false;
+        return;
+      }
+      fetch(SHEETS_URL + '?action=sendMonthlyExpenseReport' +
+        '&client=' + encodeURIComponent(client) +
+        '&month='  + encodeURIComponent(month)  +
+        '&email='  + encodeURIComponent(email)  +
+        '&total='  + encodeURIComponent(total))
+        .then(function(r){ return r.json(); })
+        .then(function(d) {
+          if (d.ok) { showToast('✅ דוח נשלח ל-' + email); btn.textContent = '✅ נשלח!'; }
+          else { showToast('⚠️ ' + (d.error||'שגיאה')); btn.textContent = '📤 שלח דוח הוצאות ללקוח'; btn.disabled = false; }
+        })
+        .catch(function(){ showToast('⚠️ שגיאת חיבור'); btn.textContent = '📤 שלח דוח הוצאות ללקוח'; btn.disabled = false; });
     })
-    .catch(function(){ showToast('⚠️ שגיאת חיבור'); btn.textContent = '📤 שלח דוח הוצאות ללקוח'; btn.disabled = false; });
+    .catch(function(){ showToast('⚠️ שגיאה בטעינת לקוחות'); btn.textContent = '📤 שלח דוח הוצאות ללקוח'; btn.disabled = false; });
 }
 // ── End Monthly Expenses Report ────────────────────────────────────────────
 var PRE_SURVEY_SNAPSHOT_KEY = 'yb_preSurveySnapshot';
