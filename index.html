@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v887</title>
+<title>י.ב אחזקות — v889</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v887
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v889
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -531,7 +531,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v887 · 23/06/2026
+v889 · 23/06/2026
 • Pre-Quotation Briefing / Pre-Project Survey: נוסף תיבת "+" להוספת כלי מותאם בסקצי֙ Suggested Tools (כמו שיש ב-Materials needed) — קודם היה רשימת צ'קבוקסים קבועה מ-AI בלבד, לא ניתן היה להוסיף כלי מותאם.
 
 ─────────────────
@@ -643,7 +643,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v887 · 15/06/2026
+v889 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1405,7 +1405,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v887</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v889</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2432,28 +2432,25 @@ function _loadMonthlyExpenses() {
       jobs[key].push(e);
     });
     var total = filtered.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
-    // Build plain text for clipboard
-    var reportText = 'דוח הוצאות ' + month + (client !== '__ALL__' ? ' — ' + client : ' — כל הלקוחות') + '\n';
-    reportText += '══════════════════════\n';
-    var html = '';
+    // Build flat numbered list for clipboard
+    var monthHebrew = {'01':'ינואר','02':'פברואר','03':'מרץ','04':'אפריל','05':'מאי','06':'יוני','07':'יולי','08':'אוגוסט','09':'ספטמבר','10':'אוקטובר','11':'נובמבר','12':'דצמבר'};
+    var monthNum = month.slice(5,7);
+    var monthName = monthHebrew[monthNum] || month;
+    var clientLabel = client === '__ALL__' ? 'כל הלקוחות' : client;
+    var reportText = 'הוצאות ' + monthName + ' ' + month.slice(0,4) + ' — ' + clientLabel + '\n';
+    reportText += '─────────────────────\n';
     var expNum = 0;
+    var html = '';
     jobOrder.forEach(function(key) {
       var rows = jobs[key];
       var jobTotal = rows.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
       var po = rows[0].po || '';
       var jobDesc = rows[0].jobDesc || '';
       var headerLabel = key + (po ? ' · ' + po : '') + (jobDesc ? ' · ' + jobDesc.slice(0,30) : '');
-      reportText += '\n── ' + headerLabel + ' ──\n';
       rows.forEach(function(e) {
         expNum++;
-        var nums = ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
-        var numStr = expNum <= 10 ? nums[expNum-1] : expNum + '.';
-        var catIcon = e.category==='חומרים'?'🔩':'👷';
-        var dateStr = '';
-        try { var dt2=new Date(e.date); if(!isNaN(dt2)) dateStr=('0'+dt2.getDate()).slice(-2)+'/'+('0'+(dt2.getMonth()+1)).slice(-2); } catch(_){}
-        reportText += numStr + ' ' + catIcon + ' ' + (e.desc||'—') + ' | ₪' + (parseFloat(e.amount)||0).toLocaleString() + ' | ' + dateStr;
-        if (e.link) reportText += '\n   🔗 ' + e.link;
-        reportText += '\n';
+        var ePo = e.po || po || '';
+        reportText += expNum + '. ' + (e.desc||'—') + (ePo ? ' | ' + ePo : '') + ' | ₪' + (parseFloat(e.amount)||0).toLocaleString() + '\n';
       });
       reportText += 'סה"כ: ₪' + jobTotal.toLocaleString() + '\n';
       html += '<div style="margin-bottom:14px;">' +
@@ -2474,7 +2471,8 @@ function _loadMonthlyExpenses() {
       });
       html += '<div style="text-align:left;font-size:11px;font-weight:700;color:#555;padding:4px 0;">סה"כ: ₪' + jobTotal.toLocaleString() + '</div></div>';
     });
-    reportText += '\n══════════════════════\nסה"כ הוצאות ' + month + ': ₪' + total.toLocaleString();
+    reportText += '─────────────────────\n';
+    reportText += 'סה"כ: ₪' + total.toLocaleString();
     html += '<div style="background:#fff3e0;border-radius:10px;padding:10px 14px;margin-top:8px;display:flex;justify-content:space-between;font-weight:900;font-size:14px;"><span>סה"כ הוצאות חודש ' + month + '</span><span style="color:#c62828;">₪' + total.toLocaleString() + '</span></div>';
     body.innerHTML = html;
     sendBtn.style.display = 'block';
@@ -6808,6 +6806,7 @@ function createCaspitInvoice() {
           '&createdAt=' + encodeURIComponent(createdAt)
         ).catch(function(){});
         showCaspitLog(result);
+        window._lastInvoiceClient = g.jobs && g.jobs[0] ? (g.jobs[0].client||'') : '';
         _caspitShowSuccess(result);
       } else {
         showToast('⚠️ ' + g.clientName + ': ' + (result.error || result.Message || result.ErrorMessage || 'Caspit error'), 5000);
@@ -6826,6 +6825,98 @@ function _caspitShowSuccess(result) {
   showToast('✓ מסמך ' + docNum + ' | ' + status, 4000);
   showCaspitLog(result);
   _renderAllocation(result);
+  // Show expense summary step for this client
+  setTimeout(function() { _showInvoiceExpenseStep(); }, 600);
+}
+
+function _showInvoiceExpenseStep() {
+  var client = window._lastInvoiceClient || '';
+  if (!client) return;
+  // Get current month
+  var now = new Date();
+  var month = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  // Build overlay
+  var existing = document.getElementById('invoiceExpOverlay');
+  if (existing) existing.remove();
+  var overlay = document.createElement('div');
+  overlay.id = 'invoiceExpOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10030;display:flex;align-items:flex-end;justify-content:center;';
+  overlay.innerHTML =
+    '<div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:88vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;">' +
+      '<div style="padding:14px 18px 10px;border-bottom:1px solid #eee;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;">' +
+        '<div>' +
+          '<div style="font-size:15px;font-weight:900;color:#c62828;">🧾 הוצאות ' + client + ' — ' + month.slice(0,7).replace('-','/') + '</div>' +
+          '<div style="font-size:11px;color:#888;margin-top:2px;">צלם מסך ו/או העתק לשליחה ללקוח</div>' +
+        '</div>' +
+        '<button onclick="document.getElementById(\'invoiceExpOverlay\').remove()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>' +
+      '</div>' +
+      '<div id="invoiceExpBody" style="flex:1;overflow-y:auto;padding:14px 18px;">' +
+        '<div style="color:#bbb;font-size:13px;text-align:center;padding:20px 0;">⏳ טוען הוצאות...</div>' +
+      '</div>' +
+      '<div style="padding:10px 18px;padding-bottom:max(10px,env(safe-area-inset-bottom));border-top:1px solid #eee;flex-shrink:0;display:flex;gap:8px;">' +
+        '<button onclick="document.getElementById(\'invoiceExpOverlay\').remove()" style="flex:1;padding:11px;background:#f5f5f5;color:#333;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">סגור</button>' +
+        '<button id="invoiceExpCopyBtn" style="flex:2;padding:11px;background:#1b5e20;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">📋 העתק רשימת הוצאות</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  // Load expenses
+  fetch(SHEETS_URL + '?action=getExpenses&client=' + encodeURIComponent(client) + '&allForClient=1&_t=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(exps) {
+      var filtered = (exps||[]).filter(function(e) {
+        var d = String(e.date||'');
+        var ym = '';
+        if (d.match(/^\d{4}-\d{2}/)) ym = d.slice(0,7);
+        else if (d.match(/^\d{2}\/\d{2}\/\d{4}/)) { var p=d.split('/'); ym=p[2]+'-'+p[1]; }
+        else { try { var dt=new Date(d); if(!isNaN(dt)) ym=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0'); } catch(_){} }
+        return ym === month;
+      });
+      var body = document.getElementById('invoiceExpBody');
+      if (!body) return;
+      if (!filtered.length) {
+        body.innerHTML = '<div style="color:#bbb;font-size:13px;text-align:center;padding:30px 0;">אין הוצאות לחודש זה עבור ' + client + '</div>';
+        var cb = document.getElementById('invoiceExpCopyBtn'); if (cb) cb.style.display='none';
+        return;
+      }
+      var total = filtered.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
+      // Build display + text
+      var monthHebrew = {'01':'ינואר','02':'פברואר','03':'מרץ','04':'אפריל','05':'מאי','06':'יוני','07':'יולי','08':'אוגוסט','09':'ספטמבר','10':'אוקטובר','11':'נובמבר','12':'דצמבר'};
+      var mName = monthHebrew[month.slice(5,7)] || month;
+      var reportText = 'הוצאות ' + mName + ' ' + month.slice(0,4) + ' — ' + client + '\n─────────────────────\n';
+      var html = '';
+      filtered.forEach(function(e, idx) {
+        var po = e.po || '';
+        var dateStr = '';
+        try { var dt2=new Date(e.date); if(!isNaN(dt2)) dateStr=('0'+dt2.getDate()).slice(-2)+'/'+('0'+(dt2.getMonth()+1)).slice(-2); } catch(_){}
+        reportText += (idx+1) + '. ' + (e.desc||'—') + (po?' | '+po:'') + ' | ₪' + (parseFloat(e.amount)||0).toLocaleString() + '\n';
+        html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid #f0f0f0;font-size:13px;">' +
+          '<span style="font-size:11px;color:#0d47a1;font-weight:700;flex-shrink:0;width:20px;">' + (idx+1) + '.</span>' +
+          '<div style="flex:1;">' +
+            '<div style="color:#222;">' + (e.desc||'—') + '</div>' +
+            '<div style="font-size:10px;color:#999;">' + (po||'') + (dateStr?' · '+dateStr:'') + '</div>' +
+          '</div>' +
+          (e.link ? '<a href="'+e.link+'" target="_blank" style="font-size:15px;text-decoration:none;">📧</a>' : '') +
+          '<span style="font-weight:700;color:#c62828;">₪' + (parseFloat(e.amount)||0).toLocaleString() + '</span>' +
+        '</div>';
+      });
+      reportText += '─────────────────────\nסה"כ: ₪' + total.toLocaleString();
+      html += '<div style="background:#fff3e0;border-radius:8px;padding:9px 12px;margin-top:10px;display:flex;justify-content:space-between;font-weight:900;font-size:14px;"><span>סה"כ</span><span style="color:#c62828;">₪' + total.toLocaleString() + '</span></div>';
+      body.innerHTML = html;
+      var cb = document.getElementById('invoiceExpCopyBtn');
+      if (cb) cb.onclick = function() {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(reportText).then(function(){ cb.textContent='✅ הועתק!'; showToast('✅ הועתק — הדבק בווטסאפ / מייל'); setTimeout(function(){ cb.textContent='📋 העתק רשימת הוצאות'; }, 2500); });
+        } else {
+          var ta=document.createElement('textarea'); ta.value=reportText; ta.style.position='fixed'; ta.style.opacity='0';
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+          document.body.removeChild(ta); cb.textContent='✅ הועתק!'; setTimeout(function(){ cb.textContent='📋 העתק רשימת הוצאות'; }, 2500);
+        }
+      };
+    })
+    .catch(function(){
+      var body = document.getElementById('invoiceExpBody');
+      if (body) body.innerHTML = '<div style="color:#c62828;font-size:13px;text-align:center;padding:20px;">⚠️ שגיאה בטעינת הוצאות</div>';
+    });
 }
 
 function _allocBannerHtml(alloc9) {
