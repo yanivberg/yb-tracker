@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v889</title>
+<title>י.ב אחזקות — v890</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -492,8 +492,6 @@ input[id^="progSlider-"]::-moz-range-track {
         <span style="font-size:24px;flex-shrink:0;">🧰</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#333;">My Toolbox</div><div style="font-size:11px;color:#888;margin-top:1px;">Manage your tools</div></div></div>
       <div onclick="closeSetupDrawer();runPOImportScan();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📧</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6a1b9a;">Import PO Emails</span></div>
-      <div onclick="closeSetupDrawer();openMonthlyExpenses();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
-        <span style="font-size:24px;flex-shrink:0;">🧾</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#c62828;">Monthly Expenses</div><div style="font-size:11px;color:#888;margin-top:1px;">דוח הוצאות חודשי ללקוח</div></div></div>
       <div onclick="closeSetupDrawer();hardReset();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🗑</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#ccc;">Reset All</span></div>
     </div>
@@ -520,7 +518,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v889
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v890
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -531,7 +529,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v889 · 23/06/2026
+v890 · 23/06/2026
 • Pre-Quotation Briefing / Pre-Project Survey: נוסף תיבת "+" להוספת כלי מותאם בסקצי֙ Suggested Tools (כמו שיש ב-Materials needed) — קודם היה רשימת צ'קבוקסים קבועה מ-AI בלבד, לא ניתן היה להוסיף כלי מותאם.
 
 ─────────────────
@@ -643,7 +641,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v889 · 15/06/2026
+v890 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1405,7 +1403,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v889</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v890</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1628,6 +1626,14 @@ SHEET SYNC
           <span id="acc-arrow-txlog" style="font-size:13px;color:#aaa;">▼</span>
         </button>
         <div id="caspitBody-txlog" style="display:none;padding:0 20px 16px;direction:rtl;"></div>
+      </div>
+      <!-- Monthly Expenses accordion -->
+      <div style="border-bottom:1px solid #f0f0f0;">
+        <button id="acc-hdr-monthlyexp" onclick="toggleCaspitAccordion('monthlyexp')" style="width:100%;padding:14px 20px;background:none;border:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">
+          <span style="font-size:14px;font-weight:900;color:inherit;">🧾 Monthly Expenses</span>
+          <span id="acc-arrow-monthlyexp" style="font-size:13px;color:#aaa;">▼</span>
+        </button>
+        <div id="caspitBody-monthlyexp" style="display:none;padding:0 20px 16px;direction:rtl;"></div>
       </div>
 
     </div>
@@ -2360,30 +2366,42 @@ updateClock();
 setInterval(updateClock, 1000);
 
 // ── Init ──────────────────────────────────────────────
-// ── Monthly Expenses Report ────────────────────────────────────────────────
-function openMonthlyExpenses() {
-  var overlay = document.getElementById('monthlyExpOverlay');
-  overlay.style.display = 'flex';
-  // Default month = current month
+function _renderMonthlyExpensesInCaspit() {
+  var body = document.getElementById('caspitBody-monthlyexp');
+  if (!body) return;
   var now = new Date();
   var monthStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
-  document.getElementById('meMonth').value = monthStr;
-  // Load clients from job sheets (not just Clients sheet)
+  body.innerHTML =
+    '<div style="padding-top:6px;">' +
+    '<div style="display:flex;gap:8px;margin-bottom:10px;">' +
+      '<div style="flex:1;">' +
+        '<div style="font-size:10px;color:#888;margin-bottom:3px;">לקוח</div>' +
+        '<select id="meClient" onchange="_loadMonthlyExpenses()" style="width:100%;padding:7px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;background:#fff;box-sizing:border-box;">' +
+          '<option value="">בחר לקוח…</option>' +
+          '<option value="__ALL__">📋 כל הלקוחות</option>' +
+        '</select>' +
+      '</div>' +
+      '<div style="flex:1;">' +
+        '<div style="font-size:10px;color:#888;margin-bottom:3px;">חודש</div>' +
+        '<input type="month" id="meMonth" value="' + monthStr + '" onchange="_loadMonthlyExpenses()" style="width:100%;padding:7px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;box-sizing:border-box;">' +
+      '</div>' +
+    '</div>' +
+    '<div id="meBody" style="min-height:40px;"><div style="color:#bbb;font-size:12px;text-align:center;padding:16px 0;">בחר לקוח וחודש</div></div>' +
+    '<button id="meSendBtn" onclick="_copyMonthlyExpenseReport()" style="display:none;width:100%;margin-top:10px;padding:11px;background:#1b5e20;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">📋 העתק דוח הוצאות</button>' +
+    '</div>';
+  // Populate client dropdown
   var sel = document.getElementById('meClient');
-  sel.innerHTML = '<option value="">⏳ טוען לקוחות…</option>';
   var _fallbackMe = ['GOLMAT','ROLLMAT','BILLINSKY','MODUL PLADA','PAL-YAM','SONIC BEAT LTD','Y.SHAY'];
   fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(clients) {
     var list = (clients && clients.length) ? clients : _fallbackMe;
-    sel.innerHTML = '<option value="">בחר לקוח…</option>' +
-      '<option value="__ALL__">📋 כל הלקוחות</option>';
+    sel.innerHTML = '<option value="">בחר לקוח…</option><option value="__ALL__">📋 כל הלקוחות</option>';
     list.forEach(function(name) {
       var opt = document.createElement('option');
       opt.value = name; opt.textContent = name;
       sel.appendChild(opt);
     });
   }).catch(function(){
-    sel.innerHTML = '<option value="">בחר לקוח…</option>' +
-      '<option value="__ALL__">📋 כל הלקוחות</option>';
+    sel.innerHTML = '<option value="">בחר לקוח…</option><option value="__ALL__">📋 כל הלקוחות</option>';
     _fallbackMe.forEach(function(name){
       var opt = document.createElement('option');
       opt.value = name; opt.textContent = name;
@@ -2391,6 +2409,8 @@ function openMonthlyExpenses() {
     });
   });
 }
+
+// ── Monthly Expenses Report ────────────────────────────────────────────────
 
 function _loadMonthlyExpenses() {
   var client = document.getElementById('meClient').value;
@@ -6112,6 +6132,7 @@ function toggleCaspitAccordion(tab) {
     _saveCaspitState();
     if (tab === 'txlog') { _renderTransactionLogForm(); return; }
     if (tab === 'lessons') { _renderLessonsTab(); return; }
+    if (tab === 'monthlyexp') { _renderMonthlyExpensesInCaspit(); return; }
     _renderCaspitBody();
   }
 }
@@ -10633,36 +10654,7 @@ function showToast(msg) {
     </div>
   </div>
 </div>
-<!-- ── Monthly Expenses Overlay ───────────────────────────── -->
-<div id="monthlyExpOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10015;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;">
-    <div style="padding:16px 20px 12px;border-bottom:1px solid #eee;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;">
-      <div>
-        <div style="font-size:16px;font-weight:900;color:#c62828;">🧾 הוצאות חודשיות</div>
-        <div style="font-size:11px;color:#888;margin-top:2px;">דוח הוצאות חודשי ללקוח עם קישורי מקור</div>
-      </div>
-      <button onclick="document.getElementById('monthlyExpOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
-    </div>
-    <div style="padding:14px 20px;border-bottom:1px solid #eee;flex-shrink:0;display:flex;gap:10px;">
-      <div style="flex:1;">
-        <div style="font-size:10px;color:#888;margin-bottom:4px;">לקוח</div>
-        <select id="meClient" onchange="_loadMonthlyExpenses()" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;background:#fff;">
-          <option value="">בחר לקוח…</option>
-        </select>
-      </div>
-      <div style="flex:1;">
-        <div style="font-size:10px;color:#888;margin-bottom:4px;">חודש</div>
-        <input type="month" id="meMonth" onchange="_loadMonthlyExpenses()" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;">
-      </div>
-    </div>
-    <div id="meBody" style="flex:1;overflow-y:auto;padding:14px 20px;">
-      <div style="color:#bbb;font-size:13px;text-align:center;padding:30px 0;">בחר לקוח וחודש</div>
-    </div>
-    <div style="padding:12px 20px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid #eee;flex-shrink:0;">
-      <button id="meSendBtn" onclick="_copyMonthlyExpenseReport()" style="display:none;width:100%;padding:13px;background:#1b5e20;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">📋 העתק דוח הוצאות</button>
-    </div>
-  </div>
-</div>
+<!-- ── Monthly Expenses overlay removed — now lives inside Account Manager accordion ── -->
 
 </body>
 </html>
