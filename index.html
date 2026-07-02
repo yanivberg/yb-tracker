@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v881</title>
+<title>י.ב אחזקות — v883</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v881
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v883
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -531,7 +531,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v881 · 23/06/2026
+v883 · 23/06/2026
 • Pre-Quotation Briefing / Pre-Project Survey: נוסף תיבת "+" להוספת כלי מותאם בסקצי֙ Suggested Tools (כמו שיש ב-Materials needed) — קודם היה רשימת צ'קבוקסים קבועה מ-AI בלבד, לא ניתן היה להוסיף כלי מותאם.
 
 ─────────────────
@@ -643,7 +643,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v881 · 15/06/2026
+v883 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1405,7 +1405,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v881</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v883</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2426,8 +2426,11 @@ function _loadMonthlyExpenses() {
       Object.keys(jobs).forEach(function(jid) {
         var rows = jobs[jid];
         var jobTotal = rows.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
+        var po = rows[0].po || '';
+        var jobDesc = rows[0].jobDesc || '';
+        var headerLabel = jid + (po ? ' · ' + po : '') + (jobDesc ? ' · ' + jobDesc.slice(0,35) : '');
         html += '<div style="margin-bottom:14px;">' +
-          '<div style="font-size:11px;font-weight:900;color:#0d47a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1.5px solid #e3f2fd;">' + jid + '</div>';
+          '<div style="font-size:11px;font-weight:900;color:#0d47a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1.5px solid #e3f2fd;">' + headerLabel + '</div>';
         rows.forEach(function(e) {
           var catIcon = e.category==='חומרים'?'🔩':'👷';
           var dateStr = String(e.date||'').slice(0,10);
@@ -2460,32 +2463,17 @@ function _sendMonthlyExpenseReport() {
   var month  = btn.dataset.month;
   var total  = btn.dataset.total;
   btn.textContent = '⏳ שולח…'; btn.disabled = true;
-  // Fetch client email from Clients sheet first
-  fetch(SHEETS_URL + '?action=getClients&full=1')
+  fetch(SHEETS_URL + '?action=sendMonthlyExpenseReport' +
+    '&client=' + encodeURIComponent(client) +
+    '&month='  + encodeURIComponent(month)  +
+    '&email=yanivberg@icloud.com' +
+    '&total='  + encodeURIComponent(total))
     .then(function(r){ return r.json(); })
-    .then(function(clients) {
-      var email = '';
-      (clients||[]).forEach(function(c) {
-        if ((c.name||'').toLowerCase() === client.toLowerCase()) email = c.email||'';
-      });
-      if (!email) {
-        showToast('⚠️ אין כתובת מייל ל-' + client + ' בגיליון Clients');
-        btn.textContent = '📤 שלח דוח הוצאות ללקוח'; btn.disabled = false;
-        return;
-      }
-      fetch(SHEETS_URL + '?action=sendMonthlyExpenseReport' +
-        '&client=' + encodeURIComponent(client) +
-        '&month='  + encodeURIComponent(month)  +
-        '&email='  + encodeURIComponent(email)  +
-        '&total='  + encodeURIComponent(total))
-        .then(function(r){ return r.json(); })
-        .then(function(d) {
-          if (d.ok) { showToast('✅ דוח נשלח ל-' + email); btn.textContent = '✅ נשלח!'; }
-          else { showToast('⚠️ ' + (d.error||'שגיאה')); btn.textContent = '📤 שלח דוח הוצאות ללקוח'; btn.disabled = false; }
-        })
-        .catch(function(){ showToast('⚠️ שגיאת חיבור'); btn.textContent = '📤 שלח דוח הוצאות ללקוח'; btn.disabled = false; });
+    .then(function(d) {
+      if (d.ok) { showToast('✅ דוח נשלח ל-yanivberg@icloud.com'); btn.textContent = '✅ נשלח!'; }
+      else { showToast('⚠️ ' + (d.error||'שגיאה')); btn.textContent = '📤 שלח דוח הוצאות'; btn.disabled = false; }
     })
-    .catch(function(){ showToast('⚠️ שגיאה בטעינת לקוחות'); btn.textContent = '📤 שלח דוח הוצאות ללקוח'; btn.disabled = false; });
+    .catch(function(){ showToast('⚠️ שגיאת חיבור'); btn.textContent = '📤 שלח דוח הוצאות'; btn.disabled = false; });
 }
 // ── End Monthly Expenses Report ────────────────────────────────────────────
 var PRE_SURVEY_SNAPSHOT_KEY = 'yb_preSurveySnapshot';
@@ -10545,7 +10533,7 @@ function showToast(msg) {
       <div style="color:#bbb;font-size:13px;text-align:center;padding:30px 0;">בחר לקוח וחודש</div>
     </div>
     <div style="padding:12px 20px;padding-bottom:max(12px,env(safe-area-inset-bottom));border-top:1px solid #eee;flex-shrink:0;">
-      <button id="meSendBtn" onclick="_sendMonthlyExpenseReport()" style="display:none;width:100%;padding:13px;background:#c62828;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">📤 שלח דוח הוצאות ללקוח</button>
+      <button id="meSendBtn" onclick="_sendMonthlyExpenseReport()" style="display:none;width:100%;padding:13px;background:#c62828;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">📤 שלח דוח הוצאות אלי</button>
     </div>
   </div>
 </div>
