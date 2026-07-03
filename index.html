@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v891</title>
+<title>י.ב אחזקות — v892</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v891
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v892
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -531,7 +531,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v891 · 23/06/2026
+v892 · 23/06/2026
 • Pre-Quotation Briefing / Pre-Project Survey: נוסף תיבת "+" להוספת כלי מותאם בסקצי֙ Suggested Tools (כמו שיש ב-Materials needed) — קודם היה רשימת צ'קבוקסים קבועה מ-AI בלבד, לא ניתן היה להוסיף כלי מותאם.
 
 ─────────────────
@@ -643,7 +643,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v891 · 15/06/2026
+v892 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1405,7 +1405,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v891</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v892</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2433,13 +2433,16 @@ function _loadMonthlyExpenses() {
       var jobTotal = rows.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
       var po = rows[0].po || '';
       var jobDesc = rows[0].jobDesc || '';
+      var jobKey = key; // e.g. "G0368"
       var headerLabel = key + (po ? ' · ' + po : '') + (jobDesc ? ' · ' + jobDesc.slice(0,30) : '');
       rows.forEach(function(e) {
         expNum++;
         var ePo = e.po || po || '';
-        reportText += expNum + '. ' + (e.desc||'—') + (ePo ? ' | ' + ePo : '') + ' | ₪' + (parseFloat(e.amount)||0).toLocaleString() + '\n';
+        // Use expense desc if available, else fall back to job description, else job key
+        var eDesc = (e.desc && e.desc !== '—' && e.desc.trim()) ? e.desc
+                  : (jobDesc ? jobDesc.slice(0,50) : jobKey);
+        reportText += expNum + '. ' + eDesc + (ePo ? ' | ' + ePo : '') + ' | ₪' + (parseFloat(e.amount)||0).toLocaleString() + '\n';
       });
-      reportText += 'סה"כ: ₪' + jobTotal.toLocaleString() + '\n';
       html += '<div style="margin-bottom:14px;">' +
         '<div style="font-size:11px;font-weight:900;color:#0d47a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1.5px solid #e3f2fd;">' + headerLabel + '</div>';
       rows.forEach(function(e) {
@@ -6875,7 +6878,7 @@ function _showInvoiceExpenseStep() {
         var po = e.po || '';
         var dateStr = '';
         try { var dt2=new Date(e.date); if(!isNaN(dt2)) dateStr=('0'+dt2.getDate()).slice(-2)+'/'+('0'+(dt2.getMonth()+1)).slice(-2); } catch(_){}
-        reportText += (idx+1) + '. ' + (e.desc||'—') + (po?' | '+po:'') + ' | ₪' + (parseFloat(e.amount)||0).toLocaleString() + '\n';
+        reportText += (idx+1) + '. ' + ((e.desc && e.desc !== '—' && e.desc.trim()) ? e.desc : (e.jobDesc || e.jobId || '—')) + (po?' | '+po:'') + ' | ₪' + (parseFloat(e.amount)||0).toLocaleString() + '\n';
         html += '<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid #f0f0f0;font-size:13px;">' +
           '<span style="font-size:11px;color:#0d47a1;font-weight:700;flex-shrink:0;width:20px;">' + (idx+1) + '.</span>' +
           '<div style="flex:1;">' +
