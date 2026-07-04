@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>י.ב אחזקות — v905</title>
+<title>י.ב אחזקות — v906</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -519,7 +519,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v905
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v906
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -530,7 +530,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v905 · 04/07/2026
+v906 · 04/07/2026
 • הוצאות חודשיות: סיכום שינויים v887-v897 — הוסף Gmail link להוצאות; שלב הצגת הוצאות אחרי יצירת חשבונית; כפתור העתק דוח הוצאות כרשימה ממוספרת; כותרת דוח נעדכנה ל-"סיכום הוצאות חומרים לפרוייקטים - MM/YY - CLIENT"; הוסרו סה"כ ביניים פרויקטים מהתצוגה; תיקון fallback לתיאור ריק.
 
 ─────────────────
@@ -646,7 +646,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v905 · 15/06/2026
+v906 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1408,7 +1408,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v905</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v906</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2626,9 +2626,8 @@ function _pickerMaybeGo() {
 }
 
 function _pickerBuild() {
-  var view = new google.picker.DocsView()
-    .setParent(PICKER_FOLDER_ID)
-    .setIncludeFolders(false)
+  var view = new google.picker.DocsView(google.picker.ViewId.DOCS)
+    .setIncludeFolders(true)
     .setSelectFolderEnabled(false);
   new google.picker.PickerBuilder()
     .addView(view)
