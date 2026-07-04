@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <script src="https://apis.google.com/js/platform.js" async defer></script>
 <script src="https://apis.google.com/js/picker.js"></script>
-<title>י.ב אחזקות — v900</title>
+<title>י.ב אחזקות — v901</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -521,7 +521,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v900
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v901
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -532,7 +532,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v900 · 04/07/2026
+v901 · 04/07/2026
 • הוצאות חודשיות: סיכום שינויים v887-v897 — הוסף Gmail link להוצאות; שלב הצגת הוצאות אחרי יצירת חשבונית; כפתור העתק דוח הוצאות כרשימה ממוספרת; כותרת דוח נעדכנה ל-"סיכום הוצאות חומרים לפרוייקטים - MM/YY - CLIENT"; הוסרו סה"כ ביניים פרויקטים מהתצוגה; תיקון fallback לתיאור ריק.
 
 ─────────────────
@@ -648,7 +648,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v900 · 15/06/2026
+v901 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1410,7 +1410,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v900</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v901</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2555,51 +2555,80 @@ function _savePreSurveySnapshot() {
   } catch(e) {}
 }
 
-// ── Google Drive Receipt Picker ──────────────────────────────────────────
+// ── Google Drive Receipt Picker (GIS) ───────────────────────────────────
 var PICKER_CLIENT_ID = '99200476359-h8q9oi0qgedvstn8ls9ecmls4ss1c79s.apps.googleusercontent.com';
 var PICKER_FOLDER_ID = '1JlnCSiW15OQtWJ3iAZtbqpyIir3XL6tp';
 var _pickerTargetField = null;
 var _pickerTargetBtn   = null;
-var _pickerLoaded = false;
+var _pickerExpRow      = null;
+var _pickerAccessToken = null;
+var _pickerLoaded      = false;
+var _gisLoaded         = false;
+var _tokenClient       = null;
 
 function _openReceiptPicker(hiddenInputId, btnId) {
   _pickerTargetField = hiddenInputId;
   _pickerTargetBtn   = btnId;
+  _pickerExpRow      = null;
+  _pickerEnsureLoaded();
+}
+
+function _openReceiptPickerForExp(expRow) {
+  _pickerTargetField = null;
+  _pickerTargetBtn   = null;
+  _pickerExpRow      = parseInt(expRow);
+  _pickerEnsureLoaded();
+}
+
+function _pickerEnsureLoaded() {
+  // Load gapi (picker) if needed
   if (!_pickerLoaded) {
-    var s = document.createElement('script');
-    s.src = 'https://apis.google.com/js/api.js';
-    s.onload = function() {
-      gapi.load('auth2:picker', function() {
-        _pickerLoaded = true;
-        _pickerAuth();
-      });
-    };
-    document.head.appendChild(s);
-  } else {
-    gapi.load('auth2:picker', _pickerAuth);
+    if (typeof gapi === 'undefined') {
+      var s1 = document.createElement('script');
+      s1.src = 'https://apis.google.com/js/api.js';
+      s1.onload = function() { gapi.load('picker', function() { _pickerLoaded = true; _pickerMaybeGo(); }); };
+      document.head.appendChild(s1);
+    } else {
+      gapi.load('picker', function() { _pickerLoaded = true; _pickerMaybeGo(); });
+    }
   }
+  // Load GIS if needed
+  if (!_gisLoaded) {
+    var s2 = document.createElement('script');
+    s2.src = 'https://accounts.google.com/gsi/client';
+    s2.onload = function() {
+      _tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: PICKER_CLIENT_ID,
+        scope: 'https://www.googleapis.com/auth/drive.readonly',
+        callback: function(resp) {
+          if (resp.error) { showToast('⚠️ Google auth: ' + resp.error); return; }
+          _pickerAccessToken = resp.access_token;
+          _pickerBuild();
+        }
+      });
+      _gisLoaded = true;
+      _pickerMaybeGo();
+    };
+    document.head.appendChild(s2);
+  }
+  _pickerMaybeGo();
 }
 
-function _pickerAuth() {
-  gapi.auth2.init({ client_id: PICKER_CLIENT_ID })
-    .then(function(auth2) {
-      return auth2.isSignedIn.get() ? Promise.resolve(auth2) : auth2.signIn().then(function(){ return auth2; });
-    })
-    .then(function(auth2) {
-      var token = auth2.currentUser.get().getAuthResponse().access_token;
-      _pickerOpen(token);
-    })
-    .catch(function(e){ showToast('⚠️ Google auth: ' + (e.error||e)); });
+function _pickerMaybeGo() {
+  if (!_pickerLoaded || !_gisLoaded) return;
+  // If we have a valid token, go straight to picker; otherwise request one
+  if (_pickerAccessToken) { _pickerBuild(); return; }
+  _tokenClient.requestAccessToken({ prompt: '' });
 }
 
-function _pickerOpen(token) {
+function _pickerBuild() {
   var view = new google.picker.DocsView()
     .setParent(PICKER_FOLDER_ID)
     .setIncludeFolders(false)
     .setSelectFolderEnabled(false);
   new google.picker.PickerBuilder()
     .addView(view)
-    .setOAuthToken(token)
+    .setOAuthToken(_pickerAccessToken)
     .setCallback(_pickerCallback)
     .setTitle('בחר קבלה')
     .build()
@@ -2607,49 +2636,29 @@ function _pickerOpen(token) {
 }
 
 function _pickerCallback(data) {
+  if (data.action === google.picker.Action.CANCEL) return;
   if (data.action !== google.picker.Action.PICKED) return;
   var file = data.docs[0];
   var link = 'https://drive.google.com/file/d/' + file.id + '/view';
   var name = file.name || 'קבלה';
-  var inp = document.getElementById(_pickerTargetField);
-  if (inp) inp.value = link;
-  var btn = document.getElementById(_pickerTargetBtn);
-  if (btn) { btn.textContent = '🧾 ' + name.slice(0,22); btn.title = name; btn.style.color='#1b5e20'; }
-  showToast('✅ ' + name.slice(0,30));
-}
-function _openReceiptPickerForExp(expRow) {
-  // Opens picker and saves receipt link directly to Expenses sheet row
-  _pickerTargetField = null;
-  _pickerTargetBtn   = null;
-  var _expRow = parseInt(expRow);
-  // Temporarily override callback
-  var _origCallback = window._pickerCallback;
-  window._pickerCallbackForExp = function(data) {
-    if (data.action !== google.picker.Action.PICKED) return;
-    var file = data.docs[0];
-    var link = 'https://drive.google.com/file/d/' + file.id + '/view';
-    var name = file.name || 'קבלה';
-    // Save to AS
-    fetch(SHEETS_URL + '?action=updateExpenseReceipt&row=' + _expRow + '&receipt=' + encodeURIComponent(link))
+  if (_pickerTargetField) {
+    var inp = document.getElementById(_pickerTargetField);
+    if (inp) inp.value = link;
+  }
+  if (_pickerTargetBtn) {
+    var btn = document.getElementById(_pickerTargetBtn);
+    if (btn) { btn.textContent = '🧾 ' + name.slice(0,22); btn.title = name; btn.style.color='#1b5e20'; }
+  }
+  if (_pickerExpRow) {
+    fetch(SHEETS_URL + '?action=updateExpenseReceipt&row=' + _pickerExpRow + '&receipt=' + encodeURIComponent(link))
       .then(function(r){ return r.json(); })
       .then(function(d){
-        if (d.ok) {
-          showToast('✅ קבלה צורפה: ' + name.slice(0,25));
-          // Refresh the monthly expenses display
-          _loadMonthlyExpenses();
-        } else showToast('⚠️ ' + (d.error||'שגיאה'));
+        if (d.ok) { showToast('✅ ' + name.slice(0,25)); _loadMonthlyExpenses(); }
+        else showToast('⚠️ ' + (d.error||'שגיאה'));
       });
-    window._pickerCallback = _origCallback; // restore
-  };
-  // Temporarily swap callback
-  window._pickerCallback = window._pickerCallbackForExp;
-  if (!_pickerLoaded) {
-    var s = document.createElement('script');
-    s.src = 'https://apis.google.com/js/api.js';
-    s.onload = function() { gapi.load('auth2:picker', function(){ _pickerLoaded=true; _pickerAuth(); }); };
-    document.head.appendChild(s);
+    _pickerExpRow = null;
   } else {
-    gapi.load('auth2:picker', _pickerAuth);
+    showToast('✅ ' + name.slice(0,30));
   }
 }
 // ── End Picker ───────────────────────────────────────────────────────────
