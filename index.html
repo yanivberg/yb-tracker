@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v895</title>
+<title>י.ב אחזקות — v897</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v895
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v897
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -531,7 +531,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v895 · 23/06/2026
+v897 · 23/06/2026
 • Pre-Quotation Briefing / Pre-Project Survey: נוסף תיבת "+" להוספת כלי מותאם בסקצי֙ Suggested Tools (כמו שיש ב-Materials needed) — קודם היה רשימת צ'קבוקסים קבועה מ-AI בלבד, לא ניתן היה להוסיף כלי מותאם.
 
 ─────────────────
@@ -643,7 +643,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v895 · 15/06/2026
+v897 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1405,7 +1405,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v895</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v897</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2362,21 +2362,22 @@ setInterval(updateClock, 1000);
 // ── Monthly Expenses Report ────────────────────────────────────────────────
 function openMonthlyExpenses() {
   var overlay = document.getElementById('monthlyExpOverlay');
-  overlay.style.cssText = 'display:flex;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10015;align-items:flex-end;justify-content:center;';
+  overlay.style.cssText = 'display:flex;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10015;align-items:center;justify-content:center;';
   var now = new Date();
   var monthStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
   document.getElementById('meMonth').value = monthStr;
   var sel = document.getElementById('meClient');
   sel.innerHTML = '<option value="">⏳ טוען לקוחות…</option>';
   var _fallbackMe = ['GOLMAT','ROLLMAT','BILLINSKY','MODUL PLADA','PAL-YAM','SONIC BEAT LTD','Y.SHAY'];
-  fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(clients) {
-    var list = (clients && clients.length) ? clients : _fallbackMe;
+  function _populateMeClients(list) {
     sel.innerHTML = '<option value="">בחר לקוח…</option><option value="__ALL__">📋 כל הלקוחות</option>';
-    list.forEach(function(name) { var opt = document.createElement('option'); opt.value = name; opt.textContent = name; sel.appendChild(opt); });
-  }).catch(function(){
-    sel.innerHTML = '<option value="">בחר לקוח…</option><option value="__ALL__">📋 כל הלקוחות</option>';
-    _fallbackMe.forEach(function(name){ var opt = document.createElement('option'); opt.value = name; opt.textContent = name; sel.appendChild(opt); });
-  });
+    list.forEach(function(name){ var opt=document.createElement('option'); opt.value=name; opt.textContent=name; sel.appendChild(opt); });
+  }
+  sel.innerHTML = '<option value="">⏳ טוען לקוחות…</option>';
+  fetch(SHEETS_URL + '?action=getClients')
+    .then(function(r){ return r.json(); })
+    .then(function(clients){ _populateMeClients((Array.isArray(clients) && clients.length) ? clients : _fallbackMe); })
+    .catch(function(){ _populateMeClients(_fallbackMe); });
 }
 
 function _loadMonthlyExpenses() {
@@ -10624,8 +10625,8 @@ function showToast(msg) {
   </div>
 </div>
 <!-- ── Monthly Expenses Overlay ───────────────────────────── -->
-<div id="monthlyExpOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10015;display:none;align-items:flex-end;justify-content:center;">
-  <div style="background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:420px;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;margin:0 auto;">
+<div id="monthlyExpOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);z-index:10015;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:420px;max-height:92vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;margin:0 auto;">
     <div style="padding:16px 20px 12px;border-bottom:1px solid #eee;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;">
       <div>
         <div style="font-size:16px;font-weight:900;color:#c62828;">🧾 הוצאות חודשיות</div>
