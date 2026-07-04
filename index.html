@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="י.ב אחזקות">
-<title>י.ב אחזקות — v897</title>
+<title>י.ב אחזקות — v898</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -520,7 +520,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v897
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v898
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -531,7 +531,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v897 · 23/06/2026
+v898 · 23/06/2026
 • Pre-Quotation Briefing / Pre-Project Survey: נוסף תיבת "+" להוספת כלי מותאם בסקצי֙ Suggested Tools (כמו שיש ב-Materials needed) — קודם היה רשימת צ'קבוקסים קבועה מ-AI בלבד, לא ניתן היה להוסיף כלי מותאם.
 
 ─────────────────
@@ -643,7 +643,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v897 · 15/06/2026
+v898 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1405,7 +1405,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v897</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v898</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2425,7 +2425,7 @@ function _loadMonthlyExpenses() {
     var monthNum = month.slice(5,7);
     var monthName = monthHebrew[monthNum] || month;
     var clientLabel = client === '__ALL__' ? 'כל הלקוחות' : client;
-    var reportText = 'סיכום הוצאות - י' + monthNum + '/' + month.slice(2,4) + ' - ' + clientLabel + '\n';
+    var reportText = 'סיכום הוצאות חומרים לפרוייקטים - ' + monthNum + '/' + month.slice(2,4) + ' - ' + clientLabel + '\n';
     reportText += '─────────────────────\n';
     var expNum = 0;
     var html = '';
@@ -2470,12 +2470,30 @@ function _loadMonthlyExpenses() {
     sendBtn.dataset.report = reportText;
   }
 
-  allClients.forEach(function(c) {
-    fetch(SHEETS_URL + '?action=getExpenses&client=' + encodeURIComponent(c) + '&allForClient=1&_t=' + Date.now())
-      .then(function(r){ return r.json(); })
-      .then(function(exps){ (exps||[]).forEach(function(e){ allExps.push(e); }); _afterFetch(); })
-      .catch(function(){ _afterFetch(); });
-  });
+  if (client === '__ALL__') {
+    // Sequential fetch to avoid overloading Apps Script with parallel requests
+    var idx = 0;
+    function fetchNext() {
+      if (idx >= allClients.length) { _afterFetch._count = allClients.length - 1; _afterFetch(); return; }
+      var c = allClients[idx++];
+      fetch(SHEETS_URL + '?action=getExpenses&client=' + encodeURIComponent(c) + '&allForClient=1&_t=' + Date.now())
+        .then(function(r){ return r.json(); })
+        .then(function(exps){ if (Array.isArray(exps)) exps.forEach(function(e){ allExps.push(e); }); fetchNext(); })
+        .catch(function(){ fetchNext(); });
+    }
+    // Override _afterFetch to only fire once at the end
+    var _origAfter = _afterFetch;
+    _afterFetch = function() { pending = 1; _origAfter(); };
+    pending = 1;
+    fetchNext();
+  } else {
+    allClients.forEach(function(c) {
+      fetch(SHEETS_URL + '?action=getExpenses&client=' + encodeURIComponent(c) + '&allForClient=1&_t=' + Date.now())
+        .then(function(r){ return r.json(); })
+        .then(function(exps){ if (Array.isArray(exps)) exps.forEach(function(e){ allExps.push(e); }); _afterFetch(); })
+        .catch(function(){ _afterFetch(); });
+    });
+  }
 }
 
 function _copyMonthlyExpenseReport() {
