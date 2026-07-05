@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>י.ב אחזקות — v909</title>
+<title>י.ב אחזקות — v910</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -519,7 +519,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v909
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v910
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -530,7 +530,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v909 · 04/07/2026
+v910 · 04/07/2026
 • הוצאות חודשיות: סיכום שינויים v887-v897 — הוסף Gmail link להוצאות; שלב הצגת הוצאות אחרי יצירת חשבונית; כפתור העתק דוח הוצאות כרשימה ממוספרת; כותרת דוח נעדכנה ל-"סיכום הוצאות חומרים לפרוייקטים - MM/YY - CLIENT"; הוסרו סה"כ ביניים פרויקטים מהתצוגה; תיקון fallback לתיאור ריק.
 
 ─────────────────
@@ -646,7 +646,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v909 · 15/06/2026
+v910 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1408,7 +1408,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v909</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v910</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3447,7 +3447,7 @@ function mjOpenEdit(i) {
     _mjSelect('סטטוס','mj_status', j.status, _MJ_STATS) +
     _mjGrp('תמחור') +
     _mjRow(_mjInput('מחיר ליחידה','mj_price', j.price, 'number'), _mjInput('כמות','mj_qty', j.qty, 'number')) +
-    _mjRow('<div><div style="font-size:10px;color:#888;margin-bottom:3px;">הכנסה מתוכננת <span style="color:#bbb;">(נוסחה)</span></div><input id="mj_income" value="' + (j.income||'') + '" readonly style="width:100%;padding:8px 10px;border:1.5px dashed #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;background:#fafafa;color:#777;"></div>', _mjInput('עלויות','mj_costs', j.costs, 'number')) +
+    _mjRow(_mjInput('הכנסה מתוכננת','mj_income', j.income, 'number'), _mjInput('עלויות','mj_costs', j.costs, 'number')) +
     _mjRow(_mjRO('רווח גולמי', '₪'+gross), _mjRO('רווח לשעה', pph ? ('₪'+pph) : '—')) +
     _mjGrp('שעות ותאריכים') +
     _mjRow(_mjInput('הערכת שעות','mj_hours', j.hours, 'number'), _mjInput('שעות בפועל','mj_hoursActual', j.hoursActual, 'number')) +
@@ -3465,11 +3465,11 @@ function mjSave() {
   var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
   var params = {
     desc: g('mj_desc'), category: g('mj_category'), status: g('mj_status'),
-    price: g('mj_price'), qty: g('mj_qty'), costs: g('mj_costs'),
+    price: g('mj_price'), qty: g('mj_qty'), income: g('mj_income'), costs: g('mj_costs'),
     hours: g('mj_hours'), hoursActual: g('mj_hoursActual'),
     dateStart: g('mj_dateStart'), dateEnd: g('mj_dateEnd'),
     po: g('mj_po'), quote: g('mj_quote'), invoice: g('mj_invoice'), notes: g('mj_notes')
-  }; // v909: income removed — הכנסה מתוכננת is a live sheet formula, read-only from the app
+  };
   var qs = '?action=updateJobFull&jobId=' + encodeURIComponent(j.id) + '&client=' + encodeURIComponent(_mjClient);
   for (var k in params) qs += '&' + k + '=' + encodeURIComponent(params[k]);
   mjCloseEdit();
@@ -4660,11 +4660,17 @@ function _renderExpenses(i, exps) {
 
 function addExpense(i) {
   var p   = projects[i]; if (!p) return;
-  var cat = (document.getElementById('expCat-'+i)||{}).value || 'חומרים';
-  var desc= (document.getElementById('expDesc-'+i)||{}).value.trim();
-  var amt = parseFloat((document.getElementById('expAmt-'+i)||{}).value||0);
-  var link= ((document.getElementById('expLink-'+i)||{}).value||'').trim();
-  var receipt= ((document.getElementById('expReceipt-'+i)||{}).value||'').trim();
+  // Duplicate IDs exist across 3 render paths — pick the first with a value in amount
+  function _getVal(prefix) {
+    var els = document.querySelectorAll('#' + prefix + i + ', [id="' + prefix + i + '"]');
+    for (var k = 0; k < els.length; k++) if (els[k].value) return els[k].value;
+    return '';
+  }
+  var cat = _getVal('expCat-') || 'חומרים';
+  var desc= (_getVal('expDesc-')||'').trim();
+  var amt = parseFloat(_getVal('expAmt-')||0);
+  var link= (_getVal('expLink-')||'').trim();
+  var receipt= (_getVal('expReceipt-')||'').trim();
   if (!amt) { showToast('הכנס סכום'); return; }
   var today = new Date().toISOString().slice(0,10);
   fetch(SHEETS_URL + '?action=addExpense&jobId=' + encodeURIComponent(p.jobId) +
@@ -7822,7 +7828,7 @@ function _renderCaspitQuoteForm() {
     }
 
     // Job notes (from sheet, ממתין להצעה picker) -> internal Details, newline-joined
-    // v909: skip notes identical/contained in a line description — otherwise the
+    // v910: skip notes identical/contained in a line description — otherwise the
     // description prints twice on the Caspit PDF (once as the line, once as פרטים).
     var pendingNotes = (_quotePrefill.pendingNotes || []).filter(Boolean).filter(function(n) {
       var nt = String(n).trim();
@@ -8000,7 +8006,7 @@ function createCaspitQuote() {
   }
   if (!rowData.length) { showToast('Add at least one line item'); return; }
 
-  // v909: skip pre-send category confirm — go straight to Caspit
+  // v910: skip pre-send category confirm — go straight to Caspit
   _doCreateCaspitQuote(rowData, contactId, sheetClient);
 }
 
@@ -8078,7 +8084,7 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
     });
     var comments = (document.getElementById('caspitComments')||{}).value||'';
     var details  = (document.getElementById('caspitDetails')||{}).value||'';
-    // v909: strip any Details line that duplicates a row description (prevents
+    // v910: strip any Details line that duplicates a row description (prevents
     // the description printing twice on the Caspit PDF as both line + פרטים).
     if (details) {
       var _rowDescs = rowData.map(function(r){ return String(r.desc||'').trim(); }).filter(Boolean);
@@ -8781,7 +8787,7 @@ function openProjectSurvey(i) {
   var steps = PROCESS_STEPS_BY_CAT[p.category] || PROCESS_STEPS_BY_CAT['default'];
   var myTools = getMyToolbox();
   var catSpecific = (getCategoryTools()[p.category] || []);
-  // v909: show only up to 10 tools instantly; AI-refined list (grounded in this
+  // v910: show only up to 10 tools instantly; AI-refined list (grounded in this
   // client's job-survey history) replaces it in the background via _refineSurveyTools.
   var suggestedTools = catSpecific.concat(myTools.filter(function(t){ return catSpecific.indexOf(t)<0; })).slice(0,10);
 
@@ -8831,7 +8837,7 @@ function openProjectSurvey(i) {
   _refineSurveyTools(p);
 }
 
-// v909: background AI refinement of survey tool suggestions — reuses the existing
+// v910: background AI refinement of survey tool suggestions — reuses the existing
 // analyzeQuotationLines AS action, which grounds tools in this client's real job
 // history (completed jobs + past Job Surveys). Replaces the static list with a
 // learned one, preserving anything the user already checked.
