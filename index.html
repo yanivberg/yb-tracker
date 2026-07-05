@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>י.ב אחזקות — v907</title>
+<title>י.ב אחזקות — v909</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -519,7 +519,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v907
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v909
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -530,7 +530,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v907 · 04/07/2026
+v909 · 04/07/2026
 • הוצאות חודשיות: סיכום שינויים v887-v897 — הוסף Gmail link להוצאות; שלב הצגת הוצאות אחרי יצירת חשבונית; כפתור העתק דוח הוצאות כרשימה ממוספרת; כותרת דוח נעדכנה ל-"סיכום הוצאות חומרים לפרוייקטים - MM/YY - CLIENT"; הוסרו סה"כ ביניים פרויקטים מהתצוגה; תיקון fallback לתיאור ריק.
 
 ─────────────────
@@ -646,7 +646,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v907 · 15/06/2026
+v909 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1408,7 +1408,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v907</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v909</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3447,7 +3447,7 @@ function mjOpenEdit(i) {
     _mjSelect('סטטוס','mj_status', j.status, _MJ_STATS) +
     _mjGrp('תמחור') +
     _mjRow(_mjInput('מחיר ליחידה','mj_price', j.price, 'number'), _mjInput('כמות','mj_qty', j.qty, 'number')) +
-    _mjRow(_mjInput('הכנסה מתוכננת','mj_income', j.income, 'number'), _mjInput('עלויות','mj_costs', j.costs, 'number')) +
+    _mjRow('<div><div style="font-size:10px;color:#888;margin-bottom:3px;">הכנסה מתוכננת <span style="color:#bbb;">(נוסחה)</span></div><input id="mj_income" value="' + (j.income||'') + '" readonly style="width:100%;padding:8px 10px;border:1.5px dashed #ddd;border-radius:8px;font-size:13px;font-family:Heebo,sans-serif;box-sizing:border-box;background:#fafafa;color:#777;"></div>', _mjInput('עלויות','mj_costs', j.costs, 'number')) +
     _mjRow(_mjRO('רווח גולמי', '₪'+gross), _mjRO('רווח לשעה', pph ? ('₪'+pph) : '—')) +
     _mjGrp('שעות ותאריכים') +
     _mjRow(_mjInput('הערכת שעות','mj_hours', j.hours, 'number'), _mjInput('שעות בפועל','mj_hoursActual', j.hoursActual, 'number')) +
@@ -3465,11 +3465,11 @@ function mjSave() {
   var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
   var params = {
     desc: g('mj_desc'), category: g('mj_category'), status: g('mj_status'),
-    price: g('mj_price'), qty: g('mj_qty'), income: g('mj_income'), costs: g('mj_costs'),
+    price: g('mj_price'), qty: g('mj_qty'), costs: g('mj_costs'),
     hours: g('mj_hours'), hoursActual: g('mj_hoursActual'),
     dateStart: g('mj_dateStart'), dateEnd: g('mj_dateEnd'),
     po: g('mj_po'), quote: g('mj_quote'), invoice: g('mj_invoice'), notes: g('mj_notes')
-  };
+  }; // v909: income removed — הכנסה מתוכננת is a live sheet formula, read-only from the app
   var qs = '?action=updateJobFull&jobId=' + encodeURIComponent(j.id) + '&client=' + encodeURIComponent(_mjClient);
   for (var k in params) qs += '&' + k + '=' + encodeURIComponent(params[k]);
   mjCloseEdit();
@@ -7822,7 +7822,15 @@ function _renderCaspitQuoteForm() {
     }
 
     // Job notes (from sheet, ממתין להצעה picker) -> internal Details, newline-joined
-    var pendingNotes = (_quotePrefill.pendingNotes || []).filter(Boolean);
+    // v909: skip notes identical/contained in a line description — otherwise the
+    // description prints twice on the Caspit PDF (once as the line, once as פרטים).
+    var pendingNotes = (_quotePrefill.pendingNotes || []).filter(Boolean).filter(function(n) {
+      var nt = String(n).trim();
+      if (!nt) return false;
+      var lineDescs = (_quotePrefill.lines || []).map(function(l){ return String((l && l.desc) || l || '').trim(); });
+      if (_quotePrefill.desc) lineDescs.push(String(_quotePrefill.desc).trim());
+      return !lineDescs.some(function(d){ return d && (d === nt || d.indexOf(nt) !== -1 || nt.indexOf(d) !== -1); });
+    });
     if (pendingNotes.length) {
       var detailsEl2 = document.getElementById('caspitDetails');
       if (detailsEl2) {
@@ -8069,6 +8077,16 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
     });
     var comments = (document.getElementById('caspitComments')||{}).value||'';
     var details  = (document.getElementById('caspitDetails')||{}).value||'';
+    // v909: strip any Details line that duplicates a row description (prevents
+    // the description printing twice on the Caspit PDF as both line + פרטים).
+    if (details) {
+      var _rowDescs = rowData.map(function(r){ return String(r.desc||'').trim(); }).filter(Boolean);
+      details = details.split('\n').filter(function(ln) {
+        var lt = ln.replace(/^\d+\.\s*/,'').trim();
+        if (!lt) return false;
+        return !_rowDescs.some(function(d){ return d === lt || d.indexOf(lt) !== -1 || lt.indexOf(d) !== -1; });
+      }).join('\n');
+    }
     var payload = {
       TrxTypeId: 16, DocumentId: 'YB-Q-' + Date.now(), DocumentSource: 2,
       DocumentNumberBranch: 1, TrxCodeNumber: 3, ChargeVAT: true, ContactId: contactId,
@@ -8762,7 +8780,9 @@ function openProjectSurvey(i) {
   var steps = PROCESS_STEPS_BY_CAT[p.category] || PROCESS_STEPS_BY_CAT['default'];
   var myTools = getMyToolbox();
   var catSpecific = (getCategoryTools()[p.category] || []);
-  var suggestedTools = myTools.concat(catSpecific.filter(function(t){ return myTools.indexOf(t)<0; })).slice(0,12);
+  // v909: show only up to 10 tools instantly; AI-refined list (grounded in this
+  // client's job-survey history) replaces it in the background via _refineSurveyTools.
+  var suggestedTools = catSpecific.concat(myTools.filter(function(t){ return catSpecific.indexOf(t)<0; })).slice(0,10);
 
   var html =
     // Rating
@@ -8776,8 +8796,8 @@ function openProjectSurvey(i) {
 
     // Tools used
     '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
-      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">🔧 Tools used</div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">' +
+      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">🔧 Tools used <span id="surveyToolsAI" style="font-weight:400;font-size:10px;color:#aaa;">· ⏳ מתאים לפי היסטוריה…</span></div>' +
+      '<div id="surveyToolsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">' +
         suggestedTools.map(function(t,ti){ return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:4px 0;"><input type="checkbox" id="stool_'+ti+'" data-tool="'+t.replace(/"/g,'&quot;')+'"> '+t+'</label>'; }).join('') +
       '</div>' +
       '<div style="margin-top:8px;display:flex;gap:6px;">' +
@@ -8807,6 +8827,38 @@ function openProjectSurvey(i) {
     '<button onclick="skipProjectSurvey()" style="width:100%;padding:10px;background:transparent;border:none;font-size:12px;color:#aaa;cursor:pointer;font-family:Heebo,sans-serif;">Skip survey</button>';
 
   body.innerHTML = html;
+  _refineSurveyTools(p);
+}
+
+// v909: background AI refinement of survey tool suggestions — reuses the existing
+// analyzeQuotationLines AS action, which grounds tools in this client's real job
+// history (completed jobs + past Job Surveys). Replaces the static list with a
+// learned one, preserving anything the user already checked.
+function _refineSurveyTools(p) {
+  var desc = p.title || p.name || '';
+  if (!desc) { var h0=document.getElementById('surveyToolsAI'); if(h0) h0.style.display='none'; return; }
+  fetch(SHEETS_URL + '?action=analyzeQuotationLines' +
+    '&lines='  + encodeURIComponent(JSON.stringify([desc])) +
+    '&cat='    + encodeURIComponent(p.category || '') +
+    '&client=' + encodeURIComponent(p.jobClient || p.client || ''))
+    .then(function(r){ return r.json(); })
+    .then(function(result) {
+      var hint = document.getElementById('surveyToolsAI');
+      var grid = document.getElementById('surveyToolsGrid');
+      var aiTools = (result && result.parsed && result.parsed.tools) ? result.parsed.tools.filter(Boolean) : [];
+      if (!grid || !aiTools.length) { if (hint) hint.style.display='none'; return; }
+      // Preserve anything the user already checked
+      var checked = Array.from(grid.querySelectorAll('input:checked')).map(function(cb){ return cb.dataset.tool; });
+      var merged = checked.slice();
+      aiTools.forEach(function(t){ if (merged.indexOf(t) < 0) merged.push(t); });
+      merged = merged.slice(0, 10);
+      grid.innerHTML = merged.map(function(t,ti){
+        var isOn = checked.indexOf(t) >= 0 ? ' checked' : '';
+        return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:4px 0;"><input type="checkbox" id="stool_'+ti+'" data-tool="'+t.replace(/"/g,'&quot;')+'"'+isOn+'> '+t+'</label>';
+      }).join('');
+      if (hint) hint.textContent = '· 🤖 מותאם לפי היסטוריה';
+    })
+    .catch(function(){ var h=document.getElementById('surveyToolsAI'); if(h) h.style.display='none'; });
 }
 
 function _setSurveyRating(n) {
