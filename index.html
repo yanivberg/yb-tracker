@@ -8000,7 +8000,8 @@ function createCaspitQuote() {
   }
   if (!rowData.length) { showToast('Add at least one line item'); return; }
 
-  _showCqCategoryConfirm(rowData, contactId, sheetClient);
+  // v909: skip pre-send category confirm — go straight to Caspit
+  _doCreateCaspitQuote(rowData, contactId, sheetClient);
 }
 
 function _showCqCategoryConfirm(rowData, contactId, sheetClient) {
