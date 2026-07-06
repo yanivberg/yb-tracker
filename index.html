@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>י.ב אחזקות — v911</title>
+<title>י.ב אחזקות — v913</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -519,7 +519,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v911
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v913
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -530,7 +530,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v911 · 04/07/2026
+v913 · 04/07/2026
 • הוצאות חודשיות: סיכום שינויים v887-v897 — הוסף Gmail link להוצאות; שלב הצגת הוצאות אחרי יצירת חשבונית; כפתור העתק דוח הוצאות כרשימה ממוספרת; כותרת דוח נעדכנה ל-"סיכום הוצאות חומרים לפרוייקטים - MM/YY - CLIENT"; הוסרו סה"כ ביניים פרויקטים מהתצוגה; תיקון fallback לתיאור ריק.
 
 ─────────────────
@@ -646,7 +646,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v911 · 15/06/2026
+v913 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1408,7 +1408,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v911</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v913</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2513,6 +2513,121 @@ function _copyFallback(text, btn) {
   document.body.removeChild(ta);
 }
 // ── End Monthly Expenses Report ────────────────────────────────────────────
+
+// ── New Quotation form persistence — survives accidental refresh ───────────
+var CQ_SNAPSHOT_KEY = 'yb_cqSnapshot';
+var _cqSnapTimer = null;
+
+function _cqCaptureSnapshot() {
+  try {
+    var caspitOverlay = document.getElementById('caspitOverlay');
+    if (!caspitOverlay || caspitOverlay.style.display === 'none') {
+      localStorage.removeItem(CQ_SNAPSHOT_KEY); return;
+    }
+    var sheetClient = (document.getElementById('caspitQuoteSheetClient')||{}).value || '';
+    if (!sheetClient) return;
+    var rows = [];
+    var descs = document.querySelectorAll('.cq-desc');
+    var qtys  = document.querySelectorAll('.cq-qty');
+    var prices= document.querySelectorAll('.cq-price');
+    var hrsEls= document.querySelectorAll('.cq-hours');
+    var cats  = document.querySelectorAll('.cq-cat');
+    var nRows = Math.max(descs.length, qtys.length, prices.length);
+    for (var i = 0; i < nRows; i++) {
+      rows.push({
+        desc:  descs[i]  ? descs[i].value  : '',
+        qty:   qtys[i]   ? qtys[i].value   : '',
+        price: prices[i] ? prices[i].value : '',
+        hours: hrsEls[i] ? hrsEls[i].value : '',
+        cat:   cats[i]   ? cats[i].value   : ''
+      });
+    }
+    var snap = {
+      ts: Date.now(),
+      sheetClient: sheetClient,
+      caspitContact: (document.getElementById('caspitQuoteContactSelect')||{}).value || '',
+      comments: (document.getElementById('caspitComments')||{}).value || '',
+      details:  (document.getElementById('caspitDetails')||{}).value  || '',
+      rows: rows
+    };
+    if (!rows.some(function(r){ return r.desc || r.price || r.qty; }) && !snap.comments && !snap.details) return;
+    localStorage.setItem(CQ_SNAPSHOT_KEY, JSON.stringify(snap));
+  } catch(e) {}
+}
+
+function _cqScheduleSnapshot() {
+  if (_cqSnapTimer) clearTimeout(_cqSnapTimer);
+  _cqSnapTimer = setTimeout(_cqCaptureSnapshot, 400);
+}
+
+function _clearCqSnapshot() {
+  try { localStorage.removeItem(CQ_SNAPSHOT_KEY); } catch(e) {}
+}
+
+function _restoreCqSnapshotIfAny() {
+  try {
+    var raw = localStorage.getItem(CQ_SNAPSHOT_KEY);
+    if (!raw) return;
+    var snap = JSON.parse(raw);
+    if (!snap || !snap.ts || (Date.now() - snap.ts) > 6*60*60*1000) { localStorage.removeItem(CQ_SNAPSHOT_KEY); return; }
+    if (!snap.sheetClient) return;
+    setTimeout(function() {
+      var sheetSel = document.getElementById('caspitQuoteSheetClient');
+      if (!sheetSel) return;
+      sheetSel.value = snap.sheetClient;
+      try { sheetSel.dispatchEvent(new Event('change')); } catch(_){}
+      setTimeout(function() {
+        var existingRows = document.querySelectorAll('.cq-desc').length;
+        var need = (snap.rows||[]).length;
+        for (var k = existingRows; k < need; k++) {
+          var addBtn = document.querySelector('[onclick*="_cqAddRow"], [onclick*="addQuoteRow"]');
+          if (addBtn) addBtn.click();
+        }
+        setTimeout(function() {
+          var descs = document.querySelectorAll('.cq-desc');
+          var qtys  = document.querySelectorAll('.cq-qty');
+          var prices= document.querySelectorAll('.cq-price');
+          var hrsEls= document.querySelectorAll('.cq-hours');
+          var cats  = document.querySelectorAll('.cq-cat');
+          (snap.rows||[]).forEach(function(r, i) {
+            if (descs[i])  descs[i].value  = r.desc  || '';
+            if (qtys[i])   qtys[i].value   = r.qty   || '';
+            if (prices[i]) prices[i].value = r.price || '';
+            if (hrsEls[i]) hrsEls[i].value = r.hours || '';
+            if (cats[i])   cats[i].value   = r.cat   || '';
+          });
+          var comm = document.getElementById('caspitComments'); if (comm && snap.comments) comm.value = snap.comments;
+          var det  = document.getElementById('caspitDetails');  if (det  && snap.details)  det.value  = snap.details;
+          var contact = document.getElementById('caspitQuoteContactSelect'); if (contact && snap.caspitContact) contact.value = snap.caspitContact;
+          if (typeof calcCaspitTotal === 'function') calcCaspitTotal();
+          showToast('📋 טופס הצעת מחיר שוחזר');
+        }, 250);
+      }, 400);
+    }, 300);
+  } catch(e) { try{ localStorage.removeItem(CQ_SNAPSHOT_KEY); }catch(_){} }
+}
+
+function _initCqPersistence() {
+  var caspitOverlay = document.getElementById('caspitOverlay');
+  if (!caspitOverlay) return;
+  var mo = new MutationObserver(function() {
+    caspitOverlay.querySelectorAll('input, textarea, select').forEach(function(el) {
+      if (el.dataset.cqSnapAttached) return;
+      el.dataset.cqSnapAttached = '1';
+      el.addEventListener('input', _cqScheduleSnapshot);
+      el.addEventListener('change', _cqScheduleSnapshot);
+    });
+  });
+  mo.observe(caspitOverlay, { childList: true, subtree: true });
+  caspitOverlay.querySelectorAll('input, textarea, select').forEach(function(el) {
+    if (el.dataset.cqSnapAttached) return;
+    el.dataset.cqSnapAttached = '1';
+    el.addEventListener('input', _cqScheduleSnapshot);
+    el.addEventListener('change', _cqScheduleSnapshot);
+  });
+}
+// ── End New Quotation persistence ─────────────────────────────────────────
+
 var PRE_SURVEY_SNAPSHOT_KEY = 'yb_preSurveySnapshot';
 
 function _savePreSurveySnapshot() {
@@ -2754,6 +2869,8 @@ function init() {
   setTimeout(function() {
     _restorePreSurveySnapshotIfAny();
     _initPreSurveyPersistence();
+    _initCqPersistence();
+    _restoreCqSnapshotIfAny();
   }, 450);
 }
 
@@ -4345,9 +4462,6 @@ function renderProjectBtns() {
       '<div style="margin-bottom:12px;">' +
         '<button onclick="toggleProject('+i+')" style="width:100%;padding:18px;border:none;border-radius:12px;font-size:22px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:' + (cc.solid||'#333') + ';color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.25);position:relative;z-index:2;">' +
           (p.done ? '↩ Restore' : (p.active ? '⏸ Pause' : '▶ Start')) + '</button>' +
-      '</div>' +
-      '<div style="margin-bottom:12px;">' +
-        '<button onclick="event.stopPropagation();openSwDetails('+i+')" style="width:100%;padding:13px;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#0d47a1;box-shadow:0 3px 10px rgba(0,0,0,0.12);position:relative;z-index:2;">✏️ פרטים + סטטוס</button>' +
       '</div>' +
       '<div style="border-top:2px solid rgba(0,0,0,0.15);padding-top:10px;">' +
         '<div style="font-size:11px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Notes</div>' +
@@ -6978,6 +7092,7 @@ function createCaspitInvoice() {
 }
 
 function _caspitShowSuccess(result) {
+  _clearCqSnapshot();
   var docNum = result.number || result.DocumentNumber || result.documentId || result.Id || '?';
   var status = result.status || 'created';
   showToast('✓ מסמך ' + docNum + ' | ' + status, 4000);
@@ -7828,7 +7943,7 @@ function _renderCaspitQuoteForm() {
     }
 
     // Job notes (from sheet, ממתין להצעה picker) -> internal Details, newline-joined
-    // v911: skip notes identical/contained in a line description — otherwise the
+    // v913: skip notes identical/contained in a line description — otherwise the
     // description prints twice on the Caspit PDF (once as the line, once as פרטים).
     var pendingNotes = (_quotePrefill.pendingNotes || []).filter(Boolean).filter(function(n) {
       var nt = String(n).trim();
@@ -8006,7 +8121,7 @@ function createCaspitQuote() {
   }
   if (!rowData.length) { showToast('Add at least one line item'); return; }
 
-  // v911: skip pre-send category confirm — go straight to Caspit
+  // v913: skip pre-send category confirm — go straight to Caspit
   _doCreateCaspitQuote(rowData, contactId, sheetClient);
 }
 
@@ -8084,7 +8199,7 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
     });
     var comments = (document.getElementById('caspitComments')||{}).value||'';
     var details  = (document.getElementById('caspitDetails')||{}).value||'';
-    // v911: strip any Details line that duplicates a row description (prevents
+    // v913: strip any Details line that duplicates a row description (prevents
     // the description printing twice on the Caspit PDF as both line + פרטים).
     if (details) {
       var _rowDescs = rowData.map(function(r){ return String(r.desc||'').trim(); }).filter(Boolean);
@@ -8787,7 +8902,7 @@ function openProjectSurvey(i) {
   var steps = PROCESS_STEPS_BY_CAT[p.category] || PROCESS_STEPS_BY_CAT['default'];
   var myTools = getMyToolbox();
   var catSpecific = (getCategoryTools()[p.category] || []);
-  // v911: show only up to 10 tools instantly; AI-refined list (grounded in this
+  // v913: show only up to 10 tools instantly; AI-refined list (grounded in this
   // client's job-survey history) replaces it in the background via _refineSurveyTools.
   var suggestedTools = catSpecific.concat(myTools.filter(function(t){ return catSpecific.indexOf(t)<0; })).slice(0,10);
 
@@ -8837,7 +8952,7 @@ function openProjectSurvey(i) {
   _refineSurveyTools(p);
 }
 
-// v911: background AI refinement of survey tool suggestions — reuses the existing
+// v913: background AI refinement of survey tool suggestions — reuses the existing
 // analyzeQuotationLines AS action, which grounds tools in this client's real job
 // history (completed jobs + past Job Surveys). Replaces the static list with a
 // learned one, preserving anything the user already checked.
