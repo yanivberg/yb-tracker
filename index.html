@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>י.ב אחזקות — v915</title>
+<title>י.ב אחזקות — v916</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -519,7 +519,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v915
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v916
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -530,7 +530,7 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v25 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
-v915 · 04/07/2026
+v916 · 04/07/2026
 • הוצאות חודשיות: סיכום שינויים v887-v897 — הוסף Gmail link להוצאות; שלב הצגת הוצאות אחרי יצירת חשבונית; כפתור העתק דוח הוצאות כרשימה ממוספרת; כותרת דוח נעדכנה ל-"סיכום הוצאות חומרים לפרוייקטים - MM/YY - CLIENT"; הוסרו סה"כ ביניים פרויקטים מהתצוגה; תיקון fallback לתיאור ריק.
 
 ─────────────────
@@ -646,7 +646,7 @@ v832 · 16/06/2026
 • עדכון SHEETS_URL לפריסת Apps Script v203 החדשה (AKfycbxXpxI…).
 
 ─────────────────
-v915 · 15/06/2026
+v916 · 15/06/2026
 • יצירת חשבונית מס: מוצג מספר הקצאה (רשות המיסים) בתוצאה — 9 הספרות האחרונות בלבד. אם לא הוקצה (מתחת לסף / מודול חשבוניות ישראל לא פעיל) מוצגת הודעה כתומה + "🔄 בדוק שוב" ששולף מחדש את המסמך (getDocument). קריאה בלבד — כספית מקצה אוטומטית, אין הקלדה. ללא שינוי Worker/Apps Script.
 
 ─────────────────
@@ -1408,7 +1408,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v915</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v916</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3395,7 +3395,7 @@ function savePQEdit(idx, jobId, client, oldDocNumber) {
       TrxTypeId: 16, DocumentId: newDocId, DocumentSource: 2,
       DocumentNumberBranch: 1, TrxCodeNumber: 3, ChargeVAT: true,
       ContactId: contactId || undefined, CustomerBusinessName: customerName || undefined, CustomerName: customerName || undefined,
-      DocumentLines: [{ ProductName: desc||'—', Details: '', Qty: qty, UnitPrice: price||1, ChargeVAT: true }]
+      DocumentLines: [{ ProductName: desc||'—', Qty: qty, UnitPrice: price||1, ChargeVAT: true }]
     };
     return _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
       method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
@@ -7031,13 +7031,13 @@ function createCaspitInvoice() {
       CustomerPhone:      matchedContact ? (matchedContact.Phone    || undefined) : undefined,
       CustomerEmail:      matchedContact ? (matchedContact.Email    || undefined) : undefined,
       Comments: docComments || undefined,
-      Details:  docDetails || ' ',   // v915: single space bypasses Caspit auto-fill from ProductName
+      Details:  docDetails || ' ',   // v916: single space bypasses Caspit auto-fill from ProductName
       DocumentLines: g.jobs.map(function(job, li) {
         var unitPrice = parseFloat(job.income) || parseFloat(job.gp) || parseFloat(job.price) || 1;
         if (!unitPrice || isNaN(unitPrice) || unitPrice <= 0) unitPrice = 1;
         var qty = parseFloat(job.qty) || 1;
         var lineDesc = (job.id || '') + ' | ' + (job.po || '') + ' | ' + (job.dateEnd || '') + ' | ' + (job.desc || '—');
-        return { ProductName: lineDesc, Details: '', Qty: qty, UnitPrice: unitPrice, ChargeVAT: true };
+        return { ProductName: lineDesc, Qty: qty, UnitPrice: unitPrice, ChargeVAT: true };
       })
     };
     _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
@@ -7943,7 +7943,7 @@ function _renderCaspitQuoteForm() {
     }
 
     // Job notes (from sheet, ממתין להצעה picker) -> internal Details, newline-joined
-    // v915: skip notes identical/contained in a line description — otherwise the
+    // v916: skip notes identical/contained in a line description — otherwise the
     // description prints twice on the Caspit PDF (once as the line, once as פרטים).
     var pendingNotes = (_quotePrefill.pendingNotes || []).filter(Boolean).filter(function(n) {
       var nt = String(n).trim();
@@ -8121,7 +8121,7 @@ function createCaspitQuote() {
   }
   if (!rowData.length) { showToast('Add at least one line item'); return; }
 
-  // v915: skip pre-send category confirm — go straight to Caspit
+  // v916: skip pre-send category confirm — go straight to Caspit
   _doCreateCaspitQuote(rowData, contactId, sheetClient);
 }
 
@@ -8195,11 +8195,11 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
     _pbFastRefresh();   // accumulate these lines into מחירון כללי (fast, background)
     btn.textContent = '⏳ Sending to Caspit…';
     var lines = rowData.map(function(r) {
-      return { ProductName: r.desc, Details: '', Qty: r.qty, UnitPrice: r.price > 0 ? r.price : 0.01, ChargeVAT: true };
+      return { ProductName: r.desc, Qty: r.qty, UnitPrice: r.price > 0 ? r.price : 0.01, ChargeVAT: true };
     });
     var comments = (document.getElementById('caspitComments')||{}).value||'';
     var details  = (document.getElementById('caspitDetails')||{}).value||'';
-    // v915: strip any Details line that duplicates a row description (prevents
+    // v916: strip any Details line that duplicates a row description (prevents
     // the description printing twice on the Caspit PDF as both line + פרטים).
     if (details) {
       var _rowDescs = rowData.map(function(r){ return String(r.desc||'').trim(); }).filter(Boolean);
@@ -8219,7 +8219,7 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
       CustomerPhone:      selectedContact ? (selectedContact.Phone    || undefined) : undefined,
       CustomerEmail:      selectedContact ? (selectedContact.Email    || undefined) : undefined,
       Comments: comments || undefined,
-      Details:  details || ' ',   // v915: Caspit auto-fills פרטים from ProductName even when Details is empty string — send single space to bypass server-side auto-fill
+      Details:  details || ' ',   // v916: Caspit auto-fills פרטים from ProductName even when Details is empty string — send single space to bypass server-side auto-fill
       SendByEmail: true, Email: 'yanivberg@icloud.com',
       DocumentLines: lines
     };
@@ -8902,7 +8902,7 @@ function openProjectSurvey(i) {
   var steps = PROCESS_STEPS_BY_CAT[p.category] || PROCESS_STEPS_BY_CAT['default'];
   var myTools = getMyToolbox();
   var catSpecific = (getCategoryTools()[p.category] || []);
-  // v915: show only up to 10 tools instantly; AI-refined list (grounded in this
+  // v916: show only up to 10 tools instantly; AI-refined list (grounded in this
   // client's job-survey history) replaces it in the background via _refineSurveyTools.
   var suggestedTools = catSpecific.concat(myTools.filter(function(t){ return catSpecific.indexOf(t)<0; })).slice(0,10);
 
@@ -8952,7 +8952,7 @@ function openProjectSurvey(i) {
   _refineSurveyTools(p);
 }
 
-// v915: background AI refinement of survey tool suggestions — reuses the existing
+// v916: background AI refinement of survey tool suggestions — reuses the existing
 // analyzeQuotationLines AS action, which grounds tools in this client's real job
 // history (completed jobs + past Job Surveys). Replaces the static list with a
 // learned one, preserving anything the user already checked.
