@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v921</title>
+<title>י.ב אחזקות — v922</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -521,16 +521,20 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v921
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v922
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxqbXK…exec (v201)
+Apps Script: AKfycbxqbXK…exec (v202)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v922 · 10/07/2026
+• תיקון ביניים: הוחזר SendByEmail ביצירת הצעה חדשה — התגלה ש-API של כספית EmailDocument מחזיר 500 גם עם טוקן טרי (גם ב-emailQuote החדש וגם ב-updateQuote הישן — mailSent היה false מאז ומעולם, בשקט). עד לפתרון: המייל נשלח ביצירה (ה-PDF במייל עשוי עדיין להציג כפילות), אבל המסמך השמור מנוקה מיד (Details-first) — תקין בכספית, בהדפסות ובעריכות. AS v202 פרס: מטמון טוקן 8 דק' + ניסיון חוזר. המשך טיפול: או תקלה מול כספית או מעבר לשליחת PDF דרך Gmail (דורש ניקוי גרסאות ב-Apps Script — הפרויקט בתקרת 200 גרסאות!).
+
 ─────────────────
 v921 · 10/07/2026
 • תיאור כפול — סגירת שני החורים האחרונים: (1) המייל עם ה-PDF נשלח בעת היצירה, לפני הניקוי — עכשיו הצעה חדשה נוצרת בלי SendByEmail, ורק אחרי ניקוי השורות נשלח המייל דרך פעולה חדשה emailQuote ב-Apps Script (v201 נדרש!). (2) הניקוי שומר עכשיו את התיאור בשדה Details ומרוקן את ProductName — מצב שהודגם שמודפס פעם אחת ושורד גם שמירה מחדש מתוך ממשק כספית (שמוחק שם פריט חופשי). גם עריכת הצעה שומרת כך.
@@ -1430,7 +1434,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v921</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v922</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -8278,21 +8282,14 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
       CustomerEmail:      selectedContact ? (selectedContact.Email    || undefined) : undefined,
       Comments: comments || undefined,
       Details:  details || ' ',   // v916: Caspit auto-fills פרטים from ProductName even when Details is empty string — send single space to bypass server-side auto-fill
-      // v921: SendByEmail removed — email is sent AFTER the line-Details cleanup PUT (via AS emailQuote), so the mailed PDF is clean
+      SendByEmail: true, Email: 'yanivberg@icloud.com',   // v922 interim: EmailDocument API 500s (see changelog) — until solved, mail at create; the PDF in the mail may still show the dup, but the stored doc is cleaned right after
       DocumentLines: lines
     };
     return _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     }).then(function(r){ return r.json(); })
     .then(function(result) {
-      // v921: clean the auto-filled line Details FIRST, then email — the PDF Caspit
-      // generates for the email reflects whatever the document holds at send time.
-      _clearCaspitLineDetails(result).then(function(){
-        var _did  = (result.rawResponse && result.rawResponse.DocumentId) || result.documentId || '';
-        var _dnum = result.number || (result.rawResponse && result.rawResponse.Number) || '';
-        if (_did) fetch(SHEETS_URL, { method:'POST', headers:{'Content-Type':'text/plain'},
-          body: JSON.stringify({action:'emailQuote', docId:_did, docNum:_dnum}) }).catch(function(){});   // POST — emailQuote lives in doPost
-      });
+      _clearCaspitLineDetails(result);   // v921/v922: Details-first cleanup (kept). emailQuote call removed for now — Caspit EmailDocument returns 500 even with fresh token (AS emailQuote + updateQuote both affected; pre-existing, silent). Re-enable when solved.
       // Update status on all saved rows to ניתנה הצעה
       var statusUpdates = jobIds.filter(function(jid){ return jid && jid.indexOf('Error') === -1; });
       Promise.all(statusUpdates.map(function(jid) {
