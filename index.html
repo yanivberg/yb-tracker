@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v918</title>
+<title>י.ב אחזקות — v919</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -521,7 +521,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v918
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v919
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -531,6 +531,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v919 · 10/07/2026
+• תיקון סופי לתיאור כפול ("X / X") בשורת המסמך: כספית ממלאת אוטומטית גם את שדה Details של כל שורה (לא רק ברמת המסמך) מ-ProductName — וה-PDF מדפיס "תיאור / תיאור". נשלח עכשיו רווח בודד ב-Details של כל שורה בכל 4 המסלולים (הצעה חדשה, ממתין להצעה, חשבונית/קבלה, עריכת הצעה). שמירה מחדש של הצעה ישנה מנקה גם שורות שכבר שוכפלו. אומת מול המסמך 01/900179.
+
 ─────────────────
 v918 · 10/07/2026
 • תיקון תיאור כפול בהצעת מחיר (PDF): כספית ממלאת אוטומטית את שדה "פרטים" מתיאור השורה כשהוא ריק — התיקון של v916 הוחל גם על שני המסלולים שנותרו: שמירת עבודה "ממתין להצעה" (Save & Send to Caspit) ועריכת הצעה קיימת. בעריכת הצעה מוסרות גם שורות "פרטים" שמשכפלות תיאור שורה — שמירה מחדש מנקה מסמכים ישנים.
@@ -1418,7 +1422,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v918</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v919</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3406,7 +3410,7 @@ function savePQEdit(idx, jobId, client, oldDocNumber) {
       DocumentNumberBranch: 1, TrxCodeNumber: 3, ChargeVAT: true,
       ContactId: contactId || undefined, CustomerBusinessName: customerName || undefined, CustomerName: customerName || undefined,
       Details: ' ',   // v918: bypass Caspit auto-fill of פרטים from ProductName (double description fix)
-      DocumentLines: [{ ProductName: desc||'—', Qty: qty, UnitPrice: price||1, ChargeVAT: true }]
+      DocumentLines: [{ ProductName: desc||'—', Details: ' ', Qty: qty, UnitPrice: price||1, ChargeVAT: true }]  // v919: line Details ' ' bypasses Caspit auto-fill
     };
     return _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
       method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
@@ -7048,7 +7052,7 @@ function createCaspitInvoice() {
         if (!unitPrice || isNaN(unitPrice) || unitPrice <= 0) unitPrice = 1;
         var qty = parseFloat(job.qty) || 1;
         var lineDesc = (job.id || '') + ' | ' + (job.po || '') + ' | ' + (job.dateEnd || '') + ' | ' + (job.desc || '—');
-        return { ProductName: lineDesc, Qty: qty, UnitPrice: unitPrice, ChargeVAT: true };
+        return { ProductName: lineDesc, Details: ' ', Qty: qty, UnitPrice: unitPrice, ChargeVAT: true };  // v919: line Details ' ' bypasses Caspit auto-fill
       })
     };
     _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
@@ -7773,7 +7777,7 @@ function _saveEditedQuote() {
     var name = (row.querySelector('.eq-name')||{}).value||'';
     var qty  = parseFloat((row.querySelector('.eq-qty')||{}).value||1);
     var price= parseFloat((row.querySelector('.eq-price')||{}).value||0);
-    if (name || price) newLines.push({Number:i+1, ProductName:name, Qty:qty, UnitPrice:price, ExtendedPrice:Math.round(qty*price*100)/100, ChargeVAT:true});
+    if (name || price) newLines.push({Number:i+1, ProductName:name, Details:' ', Qty:qty, UnitPrice:price, ExtendedPrice:Math.round(qty*price*100)/100, ChargeVAT:true});  // v919: line Details ' ' — also cleans old duplicated lines on re-save
   });
   var custId   = (document.getElementById('eqContactId')||{}).value || (document.getElementById('eqContact')||{}).value||'';
   var details  = (document.getElementById('eqDetails')||{}).value||'';
@@ -8216,7 +8220,7 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
     _pbFastRefresh();   // accumulate these lines into מחירון כללי (fast, background)
     btn.textContent = '⏳ Sending to Caspit…';
     var lines = rowData.map(function(r) {
-      return { ProductName: r.desc, Qty: r.qty, UnitPrice: r.price > 0 ? r.price : 0.01, ChargeVAT: true };
+      return { ProductName: r.desc, Details: ' ', Qty: r.qty, UnitPrice: r.price > 0 ? r.price : 0.01, ChargeVAT: true };  // v919: line Details ' ' bypasses Caspit auto-fill
     });
     var comments = (document.getElementById('caspitComments')||{}).value||'';
     var details  = (document.getElementById('caspitDetails')||{}).value||'';
