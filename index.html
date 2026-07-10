@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v919</title>
+<title>י.ב אחזקות — v920</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -521,7 +521,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v919
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v920
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -531,6 +531,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v920 · 10/07/2026
+• תיאור כפול — הפתרון האמיתי (אחרי ניסוי API מבוקר): כספית ממלאת את Details של כל שורה מ-ProductName ביצירה, וגם רווח בודד נמחק ומוחלף (v919 לא עזר). עדכון (PUT) עם Details ריק כן מנקה ל-null — אומת על מסמך 01/900182. לכן אחרי כל יצירת הצעת מחיר האפליקציה שולחת מיד עדכון שמרוקן את שדות ה-Details של השורות (קריאת API אחת נוספת, שקופה). הצעות בלבד (TrxTypeId 16). בעריכת הצעה נשלח כעת Details ריק במקום רווח.
+
 ─────────────────
 v919 · 10/07/2026
 • תיקון סופי לתיאור כפול ("X / X") בשורת המסמך: כספית ממלאת אוטומטית גם את שדה Details של כל שורה (לא רק ברמת המסמך) מ-ProductName — וה-PDF מדפיס "תיאור / תיאור". נשלח עכשיו רווח בודד ב-Details של כל שורה בכל 4 המסלולים (הצעה חדשה, ממתין להצעה, חשבונית/קבלה, עריכת הצעה). שמירה מחדש של הצעה ישנה מנקה גם שורות שכבר שוכפלו. אומת מול המסמך 01/900179.
@@ -1422,7 +1426,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v919</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v920</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3416,6 +3420,7 @@ function savePQEdit(idx, jobId, client, oldDocNumber) {
       method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
     }).then(function(r){ return r.json(); });
   }).then(function(result) {
+    _clearCaspitLineDetails(result);   // v920: strip Caspit's auto-filled line Details
     if (btn) { btn.textContent = '✓ Save & Send to Caspit'; btn.disabled = false; }
     var docNumber  = result.number || result.DocumentNumber || '';
     var docId      = result.documentId || result.Id || '';
@@ -7768,6 +7773,26 @@ function _renderEditForm(d) {
     '<div style="font-size:10px;color:#888;text-align:center;margin-top:4px;">עדכון כספית + גיליון → PDF ל-yanivberg@icloud.com</div>';
 }
 
+// v920: Caspit auto-fills each DocumentLine's Details from ProductName on CREATE
+// (undocumented; whitespace is trimmed server-side so ' ' does NOT bypass it — verified
+// empirically on doc 01/900182). An UPDATE with Details:'' clears it to null, which prints
+// clean on the PDF. So after every quote creation we immediately PUT the doc back with
+// blank line Details. Quotes only (TrxTypeId 16) — issued invoices are locked tax docs.
+function _clearCaspitLineDetails(createResult) {
+  try {
+    var doc = createResult && createResult.rawResponse;
+    if (!doc || doc.TrxTypeId !== 16 || !doc.DocumentLines || !doc.DocumentLines.length) return Promise.resolve();
+    var upd = Object.assign({}, doc);
+    ['TotalLinesChargeVAT','TotalBeforeVAT','TotalBeforeVATChargeVAT','TotalNoChargeVat','Vat','Total','TotalWithVat','TotalPayment','AllocationNumber','EffectiveTotal','Status','LinkToPdf','ViewUrl','PaymentUrl','DateCreated','UserCreated','DateUpdated','UserUpdated','RelatedDocuments'].forEach(function(k){ delete upd[k]; });
+    upd.DocumentLines = doc.DocumentLines.map(function(l){
+      return {Number:l.Number, ProductName:l.ProductName, Details:'', UnitPrice:l.UnitPrice, Qty:l.Qty, ChargeVAT:l.ChargeVAT, ExtendedPrice:l.ExtendedPrice};
+    });
+    return _caspitFetch(CASPIT_PROXY_URL + '?action=updateDocument', {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(upd)
+    }).catch(function(){});
+  } catch(e) { return Promise.resolve(); }
+}
+
 function _saveEditedQuote() {
   if (!_editQuoteDoc) { showToast('בחר הצעה תחילה'); return; }
   var btn = document.getElementById('editSaveBtn');
@@ -7777,7 +7802,7 @@ function _saveEditedQuote() {
     var name = (row.querySelector('.eq-name')||{}).value||'';
     var qty  = parseFloat((row.querySelector('.eq-qty')||{}).value||1);
     var price= parseFloat((row.querySelector('.eq-price')||{}).value||0);
-    if (name || price) newLines.push({Number:i+1, ProductName:name, Details:' ', Qty:qty, UnitPrice:price, ExtendedPrice:Math.round(qty*price*100)/100, ChargeVAT:true});  // v919: line Details ' ' — also cleans old duplicated lines on re-save
+    if (name || price) newLines.push({Number:i+1, ProductName:name, Details:'', Qty:qty, UnitPrice:price, ExtendedPrice:Math.round(qty*price*100)/100, ChargeVAT:true});  // v919: line Details ' ' — also cleans old duplicated lines on re-save
   });
   var custId   = (document.getElementById('eqContactId')||{}).value || (document.getElementById('eqContact')||{}).value||'';
   var details  = (document.getElementById('eqDetails')||{}).value||'';
@@ -8252,6 +8277,7 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     }).then(function(r){ return r.json(); })
     .then(function(result) {
+      _clearCaspitLineDetails(result);   // v920: strip Caspit's auto-filled line Details
       // Update status on all saved rows to ניתנה הצעה
       var statusUpdates = jobIds.filter(function(jid){ return jid && jid.indexOf('Error') === -1; });
       Promise.all(statusUpdates.map(function(jid) {
