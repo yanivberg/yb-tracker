@@ -1,0 +1,14 @@
+{
+  "name": "י.ב אחזקות — YB Tracker",
+  "short_name": "י.ב אחזקות",
+  "start_url": "/yb-tracker/",
+  "scope": "/yb-tracker/",
+  "display": "standalone",
+  "dir": "rtl",
+  "lang": "he",
+  "background_color": "#ffffff",
+  "theme_color": "#00695c",
+  "icons": [
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
