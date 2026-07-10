@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v920</title>
+<title>י.ב אחזקות — v921</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -521,16 +521,20 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v920
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v921
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxqbXK…exec (v200)
+Apps Script: AKfycbxqbXK…exec (v201)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v921 · 10/07/2026
+• תיאור כפול — סגירת שני החורים האחרונים: (1) המייל עם ה-PDF נשלח בעת היצירה, לפני הניקוי — עכשיו הצעה חדשה נוצרת בלי SendByEmail, ורק אחרי ניקוי השורות נשלח המייל דרך פעולה חדשה emailQuote ב-Apps Script (v201 נדרש!). (2) הניקוי שומר עכשיו את התיאור בשדה Details ומרוקן את ProductName — מצב שהודגם שמודפס פעם אחת ושורד גם שמירה מחדש מתוך ממשק כספית (שמוחק שם פריט חופשי). גם עריכת הצעה שומרת כך.
+
 ─────────────────
 v920 · 10/07/2026
 • תיאור כפול — הפתרון האמיתי (אחרי ניסוי API מבוקר): כספית ממלאת את Details של כל שורה מ-ProductName ביצירה, וגם רווח בודד נמחק ומוחלף (v919 לא עזר). עדכון (PUT) עם Details ריק כן מנקה ל-null — אומת על מסמך 01/900182. לכן אחרי כל יצירת הצעת מחיר האפליקציה שולחת מיד עדכון שמרוקן את שדות ה-Details של השורות (קריאת API אחת נוספת, שקופה). הצעות בלבד (TrxTypeId 16). בעריכת הצעה נשלח כעת Details ריק במקום רווח.
@@ -1426,7 +1430,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v920</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v921</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -7785,7 +7789,11 @@ function _clearCaspitLineDetails(createResult) {
     var upd = Object.assign({}, doc);
     ['TotalLinesChargeVAT','TotalBeforeVAT','TotalBeforeVATChargeVAT','TotalNoChargeVat','Vat','Total','TotalWithVat','TotalPayment','AllocationNumber','EffectiveTotal','Status','LinkToPdf','ViewUrl','PaymentUrl','DateCreated','UserCreated','DateUpdated','UserUpdated','RelatedDocuments'].forEach(function(k){ delete upd[k]; });
     upd.DocumentLines = doc.DocumentLines.map(function(l){
-      return {Number:l.Number, ProductName:l.ProductName, Details:'', UnitPrice:l.UnitPrice, Qty:l.Qty, ChargeVAT:l.ChargeVAT, ExtendedPrice:l.ExtendedPrice};
+      // v921: keep the description in Details and BLANK ProductName (was the reverse).
+      // Proven on doc 900180: this state prints the description once on the PDF, and it
+      // survives re-saves from Caspit's own web UI (which drops free-text ProductName
+      // because its editor binds the item name to the product catalog).
+      return {Number:l.Number, ProductName:'', Details:(l.ProductName||l.Details||''), UnitPrice:l.UnitPrice, Qty:l.Qty, ChargeVAT:l.ChargeVAT, ExtendedPrice:l.ExtendedPrice};
     });
     return _caspitFetch(CASPIT_PROXY_URL + '?action=updateDocument', {
       method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(upd)
@@ -7802,7 +7810,7 @@ function _saveEditedQuote() {
     var name = (row.querySelector('.eq-name')||{}).value||'';
     var qty  = parseFloat((row.querySelector('.eq-qty')||{}).value||1);
     var price= parseFloat((row.querySelector('.eq-price')||{}).value||0);
-    if (name || price) newLines.push({Number:i+1, ProductName:name, Details:'', Qty:qty, UnitPrice:price, ExtendedPrice:Math.round(qty*price*100)/100, ChargeVAT:true});  // v919: line Details ' ' — also cleans old duplicated lines on re-save
+    if (name || price) newLines.push({Number:i+1, ProductName:'', Details:name, Qty:qty, UnitPrice:price, ExtendedPrice:Math.round(qty*price*100)/100, ChargeVAT:true});  // v921: Details-first (survives Caspit UI re-saves, prints once)  // v919: line Details ' ' — also cleans old duplicated lines on re-save
   });
   var custId   = (document.getElementById('eqContactId')||{}).value || (document.getElementById('eqContact')||{}).value||'';
   var details  = (document.getElementById('eqDetails')||{}).value||'';
@@ -8270,14 +8278,21 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
       CustomerEmail:      selectedContact ? (selectedContact.Email    || undefined) : undefined,
       Comments: comments || undefined,
       Details:  details || ' ',   // v916: Caspit auto-fills פרטים from ProductName even when Details is empty string — send single space to bypass server-side auto-fill
-      SendByEmail: true, Email: 'yanivberg@icloud.com',
+      // v921: SendByEmail removed — email is sent AFTER the line-Details cleanup PUT (via AS emailQuote), so the mailed PDF is clean
       DocumentLines: lines
     };
     return _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     }).then(function(r){ return r.json(); })
     .then(function(result) {
-      _clearCaspitLineDetails(result);   // v920: strip Caspit's auto-filled line Details
+      // v921: clean the auto-filled line Details FIRST, then email — the PDF Caspit
+      // generates for the email reflects whatever the document holds at send time.
+      _clearCaspitLineDetails(result).then(function(){
+        var _did  = (result.rawResponse && result.rawResponse.DocumentId) || result.documentId || '';
+        var _dnum = result.number || (result.rawResponse && result.rawResponse.Number) || '';
+        if (_did) fetch(SHEETS_URL, { method:'POST', headers:{'Content-Type':'text/plain'},
+          body: JSON.stringify({action:'emailQuote', docId:_did, docNum:_dnum}) }).catch(function(){});   // POST — emailQuote lives in doPost
+      });
       // Update status on all saved rows to ניתנה הצעה
       var statusUpdates = jobIds.filter(function(jid){ return jid && jid.indexOf('Error') === -1; });
       Promise.all(statusUpdates.map(function(jid) {
