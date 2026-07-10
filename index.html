@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v917</title>
+<title>י.ב אחזקות — v918</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -521,7 +521,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v917
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v918
 Deployed: 14/06/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (v200)
@@ -531,6 +531,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v918 · 10/07/2026
+• תיקון תיאור כפול בהצעת מחיר (PDF): כספית ממלאת אוטומטית את שדה "פרטים" מתיאור השורה כשהוא ריק — התיקון של v916 הוחל גם על שני המסלולים שנותרו: שמירת עבודה "ממתין להצעה" (Save & Send to Caspit) ועריכת הצעה קיימת. בעריכת הצעה מוסרות גם שורות "פרטים" שמשכפלות תיאור שורה — שמירה מחדש מנקה מסמכים ישנים.
+
 ─────────────────
 v917 · 10/07/2026
 • PWA: נוסף Service Worker (sw.js) — האפליקציה נפתחת גם ללא קליטה, מהעותק השמור; טעינה קרה מהירה יותר. אסטרטגיית network-first: כשיש אינטרנט תמיד מתקבלת הגרסה החדשה ביותר. נוספו manifest.webmanifest ואייקון אפליקציה (icon-512.png). עודכנה גרסת Worker בפאנל המידע (v25→v29).
@@ -1414,7 +1418,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v917</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v918</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3401,6 +3405,7 @@ function savePQEdit(idx, jobId, client, oldDocNumber) {
       TrxTypeId: 16, DocumentId: newDocId, DocumentSource: 2,
       DocumentNumberBranch: 1, TrxCodeNumber: 3, ChargeVAT: true,
       ContactId: contactId || undefined, CustomerBusinessName: customerName || undefined, CustomerName: customerName || undefined,
+      Details: ' ',   // v918: bypass Caspit auto-fill of פרטים from ProductName (double description fix)
       DocumentLines: [{ ProductName: desc||'—', Qty: qty, UnitPrice: price||1, ChargeVAT: true }]
     };
     return _caspitFetch(CASPIT_PROXY_URL + '?action=createDocument', {
@@ -7775,8 +7780,18 @@ function _saveEditedQuote() {
   var comments = (document.getElementById('eqComments')||{}).value||'';
   var date     = (document.getElementById('eqDate')||{}).value||'';
   var totalAmt = newLines.reduce(function(s,l){return s+l.ExtendedPrice;},0);
+  // v918: double-description fix — strip Details lines duplicating a line description
+  // (cleans docs that got Caspit's auto-filled פרטים), send ' ' when empty to bypass auto-fill
+  if (details) {
+    var _lineDescs = newLines.map(function(l){ return String(l.ProductName||'').trim(); }).filter(Boolean);
+    details = details.split('\n').filter(function(ln) {
+      var lt = ln.replace(/^\d+\.\s*/,'').trim();
+      if (!lt) return false;
+      return !_lineDescs.some(function(d){ return d === lt || d.indexOf(lt) !== -1 || lt.indexOf(d) !== -1; });
+    }).join('\n');
+  }
   var updDoc = Object.assign({}, _editQuoteDoc, {
-    DocumentLines: newLines, Details: details, Comments: comments,
+    DocumentLines: newLines, Details: details || ' ', Comments: comments,
     CustomerId: custId || _editQuoteDoc.CustomerId
   });
   ['TotalLinesChargeVAT','TotalBeforeVAT','Total','TotalWithVat','TotalPayment',
