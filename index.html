@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v923</title>
+<title>י.ב אחזקות — v924</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -521,10 +521,10 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v923
-Deployed: 11/07/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v924
+Deployed: 12/07/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxqbXK…exec (v203)
+Apps Script: AKfycbxqbXK…exec (Version 333)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
@@ -532,6 +532,9 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v924 · 12/07/2026
+• ייבוא הזמנות רכש — תיקון כמות/מחיר: הפרסר קורא עכשיו לכל שורה כמות + מחיר ליחידה + סה"כ מחיר (היה קורא רק מחיר ליחידה, וכמות ננעלה על 1). כך שורה של "6 יח' × 200 ₪ = 1,200 ₪" נכנסת נכון (במקום 200 ₪). חל על גולמט/רולמט (ILS) ופל ים (ש"ח). המודל מציג עכשיו "כמות × מחיר ליחידה = סה"כ", והכתיבה שולחת qty ל-addPONewRow/attachPOToJob. דורש AS Version 333.
+
 v923 · 11/07/2026
 • תיאור כפול — הפתרון הסופי: המייל עם ה-PDF כבר לא נשלח דרך API של כספית (EmailDocument מחזיר 500 תמיד — mailSent היה false בשקט). במקום זה, אחרי ניקוי שורות ה-Details, האפליקציה קוראת ל-emailQuote ב-Apps Script (v203) ששולף את ה-PDF הנקי דרך getDocPdf ומצרף אותו למייל דרך Gmail — בדיוק כמו במקבץ החודשי. כך המייל מציג את התיאור פעם אחת, כמו המסמך השמור. חל על 3 מסלולי היצירה (הצעה חדשה, ממתין להצעה, עריכת הצעה). דורש AS v203.
 
@@ -1437,7 +1440,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v923</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v924</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6094,7 +6097,7 @@ function renderPOAttachList() {
           '<span style="font-size:11px;font-weight:900;color:#fff;background:' + cc.grad + ';padding:3px 9px;border-radius:6px;">' + po.client + '</span>' +
           '<span style="font-size:12px;color:#888;">' + po.poNumber + '</span>' +
         '</div>' +
-        '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:2px;">₪' + po.price + '</div>' +
+        '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:2px;">' + (po.qty||1) + ' × ₪' + po.price + ' = ₪' + (po.total || ((po.qty||1)*po.price)) + '</div>' +
         '<div style="font-size:12px;color:#666;margin-bottom:10px;">' + (po.desc || '—') + '</div>' +
         '<div style="display:flex;gap:20px;margin-bottom:10px;">' +
           '<label style="display:flex;align-items:center;gap:6px;font-size:14px;font-family:Heebo,sans-serif;cursor:pointer;">' +
@@ -6154,12 +6157,14 @@ function confirmPOAttach() {
       url = SHEETS_URL + '?action=addPONewRow&client=' + encodeURIComponent(po.client) +
         '&poNumber=' + encodeURIComponent(po.poNumber) +
         '&desc='     + encodeURIComponent(po.desc || '') +
-        '&price='    + encodeURIComponent(po.price);
+        '&price='    + encodeURIComponent(po.price) +
+        '&qty='      + encodeURIComponent(po.qty || 1);   // v924: write real quantity (unit price × qty = line total)
     } else if (sel) {
       url = SHEETS_URL + '?action=attachPOToJob&jobId=' + encodeURIComponent(sel) +
         '&client='   + encodeURIComponent(po.client) +
         '&poNumber=' + encodeURIComponent(po.poNumber) +
-        '&price='    + encodeURIComponent(po.price);
+        '&price='    + encodeURIComponent(po.price) +
+        '&qty='      + encodeURIComponent(po.qty || 1);   // v924: also set quantity on the attached job
     }
     if (!url) { processNext(i + 1); return; }
     btn.textContent = '⏳ ' + (i + 1) + ' / ' + items.length + '…';
