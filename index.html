@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v924</title>
+<title>י.ב אחזקות — v925</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -521,8 +521,8 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v924
-Deployed: 12/07/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v925
+Deployed: 13/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 333)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
@@ -532,6 +532,9 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v925 · 13/07/2026
+• כרטיס 📓 יומן במסך הראשי: מציג את 5 ההערות האחרונות, ומתחתן כפתור מתקפל "▼ עוד N הערות" שחושף עד 10 סה"כ (הערות �6–10). לחיצה חוזרת מסתירה ("▲ הצג פחות"). ללא שנוי בשרת — getYoman כבר תומך ב-limit.
+
 v924 · 12/07/2026
 • ייבוא הזמנות רכש — תיקון כמות/מחיר: הפרסר קורא עכשיו לכל שורה כמות + מחיר ליחידה + סה"כ מחיר (היה קורא רק מחיר ליחידה, וכמות ננעלה על 1). כך שורה של "6 יח' × 200 ₪ = 1,200 ₪" נכנסת נכון (במקום 200 ₪). חל על גולמט/רולמט (ILS) ופל ים (ש"ח). המודל מציג עכשיו "כמות × מחיר ליחידה = סה"כ", והכתיבה שולחת qty ל-addPONewRow/attachPOToJob. דורש AS Version 333.
 
@@ -1440,7 +1443,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v924</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v925</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -7668,6 +7671,25 @@ function _toggleJobNotesByIdx(idx) {
 }
 
 // ── Main-page "Latest Notes" card (latest 5 across all clients) ──
+// v925: render one journal entry (shared by the top-5 and the accordion for 6–10)
+function _renderYomanEntry(n) {
+  var clampToggle = "var b=this.querySelector('.ybody'); b.style.webkitLineClamp=(b.style.webkitLineClamp==='unset'?'3':'unset');";
+  return '<div class="yentry" style="display:flex;gap:11px;align-items:flex-start;padding:9px 2px;border-bottom:1px solid #eef2f6;overflow:hidden;max-height:500px;transition:opacity .35s ease,max-height .35s ease,padding .35s ease;">' +
+    '<div class="ycb" onclick="markYomanDone(this,' + (n.row||0) + ')" style="width:22px;height:22px;border:2px solid #bbb;border-radius:6px;flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;-webkit-tap-highlight-color:transparent;"></div>' +
+    '<div class="ytext" onclick="' + clampToggle + '" style="flex:1;cursor:pointer;">' +
+      '<div style="font-size:10.5px;font-weight:700;margin-bottom:3px;"><span style="color:#0d47a1;">' + _escNote(n.date||'') + '</span><span style="color:#e65100;margin-right:6px;">' + _escNote(n.time||'') + '</span></div>' +
+      '<div class="ybody" style="font-size:13px;color:#222;line-height:1.5;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">' + _escNote(n.note||'') + '</div>' +
+    '</div>' +
+  '</div>';
+}
+// v925: accordion — reveal / hide journal entries 6–10
+function toggleMoreNotes() {
+  var more = document.getElementById('latestNotesMore'); var btn = document.getElementById('latestNotesMoreBtn');
+  if (!more) return;
+  var showing = more.style.display !== 'none';
+  more.style.display = showing ? 'none' : '';
+  if (btn) btn.innerHTML = showing ? ('▼ עוד ' + more.children.length + ' הערות') : '▲ הצג פחות';
+}
 function loadLatestNotes(silent) {
   var list = document.getElementById('latestNotesList'); if (!list) return;
   if (!silent) list.innerHTML = '<div style="font-size:12px;color:#90a4ae;padding:6px 0;">⏳ טוען…</div>';
@@ -7677,7 +7699,8 @@ function loadLatestNotes(silent) {
       var chev = document.getElementById('latestNotesChev'); if (chev) chev.style.transform = 'rotate(-90deg)';
     }
   }
-  fetch(SHEETS_URL + '?action=getYoman&limit=5&_t=' + Date.now())
+  // v925: fetch up to 10 — show the latest 5, keep 6–10 in a collapsible accordion
+  fetch(SHEETS_URL + '?action=getYoman&limit=10&_t=' + Date.now())
     .then(function(r){ return r.json(); })
     .then(function(items){
       items = Array.isArray(items) ? items : [];
@@ -7686,16 +7709,13 @@ function loadLatestNotes(silent) {
         list.innerHTML = '<div style="font-size:12px;color:#aaa;padding:6px 0;font-style:italic;">אין רשומות ביומן.</div>';
         _applyNotesCollapse(); return;
       }
-      var clampToggle = "var b=this.querySelector('.ybody'); b.style.webkitLineClamp=(b.style.webkitLineClamp==='unset'?'3':'unset');";
-      list.innerHTML = items.map(function(n){
-        return '<div class="yentry" style="display:flex;gap:11px;align-items:flex-start;padding:9px 2px;border-bottom:1px solid #eef2f6;overflow:hidden;max-height:500px;transition:opacity .35s ease,max-height .35s ease,padding .35s ease;">' +
-          '<div class="ycb" onclick="markYomanDone(this,' + (n.row||0) + ')" style="width:22px;height:22px;border:2px solid #bbb;border-radius:6px;flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;-webkit-tap-highlight-color:transparent;"></div>' +
-          '<div class="ytext" onclick="' + clampToggle + '" style="flex:1;cursor:pointer;">' +
-            '<div style="font-size:10.5px;font-weight:700;margin-bottom:3px;"><span style="color:#0d47a1;">' + _escNote(n.date||'') + '</span><span style="color:#e65100;margin-right:6px;">' + _escNote(n.time||'') + '</span></div>' +
-            '<div class="ybody" style="font-size:13px;color:#222;line-height:1.5;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">' + _escNote(n.note||'') + '</div>' +
-          '</div>' +
-        '</div>';
-      }).join('');
+      var html = items.slice(0, 5).map(_renderYomanEntry).join('');
+      var extra = items.slice(5, 10);
+      if (extra.length) {
+        html += '<div id="latestNotesMore" style="display:none;">' + extra.map(_renderYomanEntry).join('') + '</div>' +
+          '<div id="latestNotesMoreBtn" onclick="toggleMoreNotes()" style="text-align:center;padding:9px 0 2px;font-size:12px;font-weight:800;color:#0d47a1;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;">▼ עוד ' + extra.length + ' הערות</div>';
+      }
+      list.innerHTML = html;
       _applyNotesCollapse();
     })
     .catch(function(e){ if (!silent) list.innerHTML = '<div style="font-size:12px;color:#c62828;padding:6px 0;">⚠️ ' + e.message + '</div>'; });
