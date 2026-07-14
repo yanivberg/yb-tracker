@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v925</title>
+<title>י.ב אחזקות — v926</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -521,8 +521,8 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v925
-Deployed: 13/07/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v926
+Deployed: 14/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 333)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
@@ -532,6 +532,9 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v926 · 14/07/2026
+• תיקון עריכת הצעה: לחיצה על הצעה ברשימת "ערוך קיים" גוללת עכשיו אוטומטית לטופס העריכה. (לאחר שהרשימה גדלה ל-30 הצעות, טופס העריכה נפתח מתחת לרשימה ויצא מהמסך — נראה כאילו הלחיצה לא עובדת. ההצעה נבחרה תמיד, רק לא הייתה גלויה.)
+
 v925 · 13/07/2026
 • כרטיס 📓 יומן במסך הראשי: מציג את 5 ההערות האחרונות, ומתחתן כפתור מתקפל "▼ עוד N הערות" שחושף עד 10 סה"כ (הערות �6–10). לחיצה חוזרת מסתירה ("▲ הצג פחות"). ללא שנוי בשרת — getYoman כבר תומך ב-limit.
 
@@ -1443,7 +1446,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v925</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v926</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -7782,6 +7785,10 @@ function _selectQuoteByNumber(num) {
   _editQuoteDoc = d;
   _renderQuoteList(_recentQuotes||[], (document.getElementById('editQuoteSearch')||{}).value||'');
   _renderEditForm(d);
+  // v926: the quote list can be long (up to 30) and the edit form renders below it —
+  // scroll the form into view so tapping a quote is visibly responsive (was: form appeared off-screen).
+  var _fa = document.getElementById('editQuoteFormArea');
+  if (_fa) setTimeout(function(){ try { _fa.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e){ _fa.scrollIntoView(); } }, 60);
 }
 
 function _renderEditForm(d) {
