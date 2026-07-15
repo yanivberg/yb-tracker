@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v927</title>
+<title>י.ב אחזקות — v928</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -46,7 +46,7 @@ margin-bottom: 20px;
 
 /* ── SCREENS ── */
 .screen { display: none; }
-.screen.active { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.screen.active { display: flex; flex-direction: column; flex: 1; min-height: 0; justify-content: center; }
 
 /* ── SETUP SCREEN ── */
 .date-hero { margin-bottom: 24px; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v927
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v928
 Deployed: 14/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 333)
@@ -534,6 +534,9 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v928 · 14/07/2026
+• מרכוז אנכי: תוכן המסך (כרטיסים) ממורכז עכשיו אנכית באמצע המסך כשהתוכן קצר מגובה המסך. כשהתוכן ארוך — נגלל רגיל מלמעלה (ללא חיתוך). justify-content:center על .screen.active.
+
 v927 · 14/07/2026
 • נוסף שוב כפתור "Day Note 📝" למגירה הראשית (Toolbox) — פותח את חלון הוספת הערת היום ליומן. (בנוסף לכפתור 📝 הערה שבכרטיס 📓 יומן.)
 
@@ -1451,7 +1454,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v927</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v928</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
