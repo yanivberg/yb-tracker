@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v933</title>
+<title>י.ב אחזקות — v934</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v933
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v934
 Deployed: 17/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 334)
@@ -533,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v934 · 17/07/2026
+• כפתור ׽💰 הצעה׾ ביומן פותח עכשיו קודם את שאלון קדם-ההצעה (Pre-Quotation Briefing) — בדיוק כמו הכניסה הרגילה דרך ׽Edit/New Quotation׾ — כשתיאור השורה הראשונה כבר מולא מטקסט ההערה והקטגוריה מנוחשת ממנו. משם ממשיכים ב-׽נתח ועבור להצעת מחיר׾ או ב-׽Skip׾ כרגיל. (v933 דילג על השאלון והגיע ישר לטופס ההצעה.)
+
 ─────────────────
 v933 · 17/07/2026
 • כפתור ׽💰 הצעה׾ על כל הערה ביומן בעמוד הראשי (גם ב-5 הראשונות וגם באקורדיון) — פותח הצעת מחיר חדשה כשתיאור השורה הראשונה מולא מראש מטקסט ההערה. בוחרים לקוח, מתקנים כמות/מחיר ושולחים. (משתמש במנגנון ה-prefill הקיים; זו בניית v930 שעברה rebase על v932.)
@@ -1472,7 +1476,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v933</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v934</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -7725,19 +7729,26 @@ function _toggleJobNotesByIdx(idx) {
 // v933: the journal items currently rendered — lets the 💰 button look a note up by index
 // (avoids escaping the note text into an inline onclick).
 var _yomanItems = [];
-// v933: start a NEW quotation from a journal note — prefills the note text as the first line.
+// v934: open the PRE-QUOTATION BRIEFING first — the same gate the Caspit "Edit/New Quotation"
+// accordion goes through — with the note text seeding line 1. The survey then owns the quote
+// prefill, via "נתח ועבור להצעת מחיר" (AI) or "Skip — Go straight to quotation".
+// (v933 called switchCaspitTab('quote'), which renders the quote FORM and skipped the survey.)
 function _quoteFromNote(idx) {
   var n = (_yomanItems || [])[idx];
   if (!n) { showToast('הערה לא נמצאה'); return; }
   var text = String(n.note || '').replace(/\s+/g, ' ').trim();   // quote line desc is single-line
   if (!text) { showToast('ההערה ריקה'); return; }
-  _quotePrefill = { lines: [text] };   // same shape _skipToQuotation uses
+  _quotePrefill = {};   // the survey builds it (_analyzeForQuotation / _skipToQuotation)
   _quoteMode = 'new';
   _editQuoteDoc = null;
   _pendingQuoteIds = [];
   document.getElementById('caspitOverlay').style.display = 'flex';
   _caspitTab = 'quote';
-  switchCaspitTab('quote');
+  _caspitAccordionVisuals('quote');
+  _saveCaspitState();
+  openQuotationWithSurvey();   // renders the briefing body synchronously
+  var first = document.querySelector('#qsLinesList .qs-line');
+  if (first) { first.value = text; _guessQsCategory(); }   // same as the user typing it
 }
 function _renderYomanEntry(n, idx) {
   var clampToggle = "var b=this.querySelector('.ybody'); b.style.webkitLineClamp=(b.style.webkitLineClamp==='unset'?'3':'unset');";
