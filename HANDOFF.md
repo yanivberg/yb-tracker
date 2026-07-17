@@ -5,7 +5,7 @@ Principle: pointers + currently-load-bearing dated facts only, one page, hard ca
 ## What this is
 "BLUE" = YB Tracker: Hebrew RTL field-maintenance PWA for י.ב אחזקות (Yaniv Berg).
 Live: https://yanivberg.github.io/yb-tracker · Components: single-file index.html (GitHub Pages) · Google Apps Script backend · Cloudflare Worker (Caspit proxy).
-Current deployed: HTML v931 · AS deployment Version 334 (Code.gs = v204: expense rollup integrity) · Worker v30. [17/07/26]  (NOTE: an undeployed v930 "note→quote" build sits in claude-builds, built on v929 — rebase onto v931 before deploying it.)
+Current deployed: HTML v932 (v931 + blank-app hotfix: no literal `<tag>` in body text) · AS deployment Version 334 (Code.gs = v204: expense rollup integrity) · Worker v30. [17/07/26]  (NOTE: an undeployed v930 "note→quote" build sits in claude-builds, built on v929 — rebase onto v932 before deploying it.)
 
 ## Bootstrap (three reads, nothing more)
 1. This file. 2. Tail of SESSION-LOG.md. 3. Live probes: app title (HTML version) · worker `?action=health` · latest `apps-script-vNNN.js` in this repo (header + `grep -c "action === '"`). Confirm derived versions with Yaniv in one line.
