@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v932</title>
+<title>י.ב אחזקות — v933</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,16 +523,21 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v932
-Deployed: 14/07/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v933
+Deployed: 17/07/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxqbXK…exec (Version 333)
-Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
+Apps Script: AKfycbxqbXK…exec (Version 334)
+Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v933 · 17/07/2026
+• כפתור ׽💰 הצעה׾ על כל הערה ביומן בעמוד הראשי (גם ב-5 הראשונות וגם באקורדיון) — פותח הצעת מחיר חדשה כשתיאור השורה הראשונה מולא מראש מטקסט ההערה. בוחרים לקוח, מתקנים כמות/מחיר ושולחים. (משתמש במנגנון ה-prefill הקיים; זו בניית v930 שעברה rebase על v932.)
+• עדכון פרטי גרסאות במסך זה: Apps Script Version 334, Worker v30 (היו רשומים 333 / v29).
+
 ─────────────────
 v932 · 17/07/2026
 • תיקון חירום: רשומת ה-changelog של v931 הכילה תגית title מילולית (בסוגריים משולשים) שגרמה לדפדפן לבלוע את כל הסקריפט — האפליקציה נטענה ריקה. הוסרו סוגריים המשולשים מהטקסט. אין שינוי פונקציונלי אחר.
@@ -541,7 +546,6 @@ v932 · 17/07/2026
 v931 · 16/07/2026
 • מחיקת הוצאה מדוח ההוצאות החודשי: כפתור ✕ על כל הוצאה (הגנת שתי-לחיצות: ✕ ← אדום ׽מחק?׾ ← לחיצה שנייה). רענון אוטומטי אחרי מחיקה (deleteRow מזיז שורות).
 • תיקון באג חיוב קריטי (AS v204): מחיקת הוצאה לא עדכנה את שורת הריכוז ׽הוצאות [שם]׾ בגיליון הלקוח — לכן לקוחות חויבו אולי על הוצאות שנמחקו. עכשיו deleteExpense מסנכרן את השורה (_syncExpenseRollup). בנוסף: createExpenseRow היה מוסיף שורת ריכוז כפולה בכל הרצה — תוקן (אידמפוטנטי, עם מזהה SRC:[jobId] בעמודת ההערות). repairExpenseRollups(false) — סקריפט תיקון חד-פעמי לכפילויות היסטוריות (ברירת מחדל dry-run).
-• (v930 דולג בשרשרת ה-live — נבנה אבל לא פורס: כפתור ׽💰 הצעה׾ ביומן. צריך rebase על v931 לפני פריסה.)
 
 ─────────────────
 v929 · 15/07/2026
@@ -1468,7 +1472,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v932</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v933</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -7718,7 +7722,24 @@ function _toggleJobNotesByIdx(idx) {
 
 // ── Main-page "Latest Notes" card (latest 5 across all clients) ──
 // v925: render one journal entry (shared by the top-5 and the accordion for 6–10)
-function _renderYomanEntry(n) {
+// v933: the journal items currently rendered — lets the 💰 button look a note up by index
+// (avoids escaping the note text into an inline onclick).
+var _yomanItems = [];
+// v933: start a NEW quotation from a journal note — prefills the note text as the first line.
+function _quoteFromNote(idx) {
+  var n = (_yomanItems || [])[idx];
+  if (!n) { showToast('הערה לא נמצאה'); return; }
+  var text = String(n.note || '').replace(/\s+/g, ' ').trim();   // quote line desc is single-line
+  if (!text) { showToast('ההערה ריקה'); return; }
+  _quotePrefill = { lines: [text] };   // same shape _skipToQuotation uses
+  _quoteMode = 'new';
+  _editQuoteDoc = null;
+  _pendingQuoteIds = [];
+  document.getElementById('caspitOverlay').style.display = 'flex';
+  _caspitTab = 'quote';
+  switchCaspitTab('quote');
+}
+function _renderYomanEntry(n, idx) {
   var clampToggle = "var b=this.querySelector('.ybody'); b.style.webkitLineClamp=(b.style.webkitLineClamp==='unset'?'3':'unset');";
   return '<div class="yentry" style="display:flex;gap:11px;align-items:flex-start;padding:9px 2px;border-bottom:1px solid #eef2f6;overflow:hidden;max-height:500px;transition:opacity .35s ease,max-height .35s ease,padding .35s ease;">' +
     '<div class="ycb" onclick="markYomanDone(this,' + (n.row||0) + ')" style="width:22px;height:22px;border:2px solid #bbb;border-radius:6px;flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;-webkit-tap-highlight-color:transparent;"></div>' +
@@ -7726,6 +7747,7 @@ function _renderYomanEntry(n) {
       '<div style="font-size:10.5px;font-weight:700;margin-bottom:3px;"><span style="color:#0d47a1;">' + _escNote(n.date||'') + '</span><span style="color:#e65100;margin-right:6px;">' + _escNote(n.time||'') + '</span></div>' +
       '<div class="ybody" style="font-size:13px;color:#222;line-height:1.5;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">' + _escNote(n.note||'') + '</div>' +
     '</div>' +
+    '<div class="yquote" onclick="event.stopPropagation();_quoteFromNote(' + idx + ')" title="הצעת מחיר מההערה" style="flex-shrink:0;align-self:center;background:#e8f5e9;border:1px solid #a5d6a7;color:#2e7d32;border-radius:8px;padding:6px 9px;font-size:11.5px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">💰 הצעה</div>' +
   '</div>';
 }
 // v925: accordion — reveal / hide journal entries 6–10
@@ -7755,10 +7777,11 @@ function loadLatestNotes(silent) {
         list.innerHTML = '<div style="font-size:12px;color:#aaa;padding:6px 0;font-style:italic;">אין רשומות ביומן.</div>';
         _applyNotesCollapse(); return;
       }
-      var html = items.slice(0, 5).map(_renderYomanEntry).join('');
+      _yomanItems = items;   // v933: so 💰 הצעה can resolve a note by index
+      var html = items.slice(0, 5).map(function(n, i){ return _renderYomanEntry(n, i); }).join('');
       var extra = items.slice(5, 10);
       if (extra.length) {
-        html += '<div id="latestNotesMore" style="display:none;">' + extra.map(_renderYomanEntry).join('') + '</div>' +
+        html += '<div id="latestNotesMore" style="display:none;">' + extra.map(function(n, i){ return _renderYomanEntry(n, i + 5); }).join('') + '</div>' +
           '<div id="latestNotesMoreBtn" onclick="toggleMoreNotes()" style="text-align:center;padding:9px 0 2px;font-size:12px;font-weight:800;color:#0d47a1;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;">▼ עוד ' + extra.length + ' הערות</div>';
       }
       list.innerHTML = html;
