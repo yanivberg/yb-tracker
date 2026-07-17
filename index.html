@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v931</title>
+<title>י.ב אחזקות — v932</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v931
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v932
 Deployed: 14/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 333)
@@ -534,9 +534,13 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v932 · 17/07/2026
+• תיקון חירום: רשומת ה-changelog של v931 הכילה תגית <title> מילולית שגרמה לדפדפן לבלוע את כל הסקריפט — האפליקציה נטענה ריקה. הוסרו סוגריים המשולשים מהטקסט. אין שינוי פונקציונלי אחר.
+
+─────────────────
 v931 · 16/07/2026
 • מחיקת הוצאה מדוח ההוצאות החודשי: כפתור ✕ על כל הוצאה (הגנת שתי-לחיצות: ✕ ← אדום ׽מחק?׾ ← לחיצה שנייה). רענון אוטומטי אחרי מחיקה (deleteRow מזיז שורות).
-• תיקון באג חיוב קריטי (AS v204): מחיקת הוצאה לא עדכנה את שורת הריכוז ׽הוצאות <title>׾ בגיליון הלקוח — לכן לקוחות חויבו אולי על הוצאות שנמחקו. עכשיו deleteExpense מסנכרן את השורה (_syncExpenseRollup). בנוסף: createExpenseRow היה מוסיף שורת ריכוז כפולה בכל הרצה — תוקן (אידמפוטנטי, עם מזהה SRC:<jobId> בעמודת ההערות). repairExpenseRollups(false) — סקריפט תיקון חד-פעמי לכפילויות היסטוריות (ברירת מחדל dry-run).
+• תיקון באג חיוב קריטי (AS v204): מחיקת הוצאה לא עדכנה את שורת הריכוז ׽הוצאות [שם]׾ בגיליון הלקוח — לכן לקוחות חויבו אולי על הוצאות שנמחקו. עכשיו deleteExpense מסנכרן את השורה (_syncExpenseRollup). בנוסף: createExpenseRow היה מוסיף שורת ריכוז כפולה בכל הרצה — תוקן (אידמפוטנטי, עם מזהה SRC:[jobId] בעמודת ההערות). repairExpenseRollups(false) — סקריפט תיקון חד-פעמי לכפילויות היסטוריות (ברירת מחדל dry-run).
 • (v930 דולג בשרשרת ה-live — נבנה אבל לא פורס: כפתור ׽💰 הצעה׾ ביומן. צריך rebase על v931 לפני פריסה.)
 
 ─────────────────
@@ -1464,7 +1468,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v931</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v932</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
