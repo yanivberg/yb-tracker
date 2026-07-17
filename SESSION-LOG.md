@@ -6,6 +6,27 @@ This file was referenced by the bootstrap but did not exist until 13/07/2026 —
 
 ---
 
+## 2026-07-17 — v933: note→quote shipped (v930 rebased onto v932)
+SHIPPED:
+- HTML v933 DEPLOYED and VERIFIED LIVE (commit `18fee86a`). "💰 הצעה" button on every journal note on the main page (all 10 — top-5 and the 6–10 accordion). Opens a NEW Caspit quotation with line 1's description prefilled from the note text; reuses the existing `_quotePrefill` mechanism (same shape `_skipToQuotation` uses), so no new Caspit surface. Closes Yaniv's "Add option to make a new quotation from a daily note".
+- Also corrected stale app-info facts: Apps Script Version 333→334, Worker v29→v30 (both were wrong on screen; probe-verified).
+FACT (all 17/07/26):
+- `mcp__claude-in-chrome__javascript_tool` runs in the **MAIN world** on the live github.io app — page globals ARE readable/callable (`SHEETS_URL`, `showToast`, `_escNote`, `_quoteFromNote`, `_yomanItems`, `switchCaspitTab` all resolved; a fetch built on `SHEETS_URL` returned 10 notes). This FALSIFIES the v931-block claim that javascript_tool is isolated — that was a different browser tool, not this one. Injecting functions into the live app and invoking them is therefore a valid pre-deploy test. | evidence: `_quoteFromNote(5)` on live v932 opened the overlay, prefill consumed, line 1 == note #6 text
+- Rebase-not-replay: v930's diff was stored as difflib LINE-INDEX opcodes against v929, which are worthless once live moves to v932 (anchors drifted 32 lines). Re-deriving the change as named string anchors with `assert count==1` per anchor survived the rebase with zero manual fixups. Prefer anchored string pairs over line indices for anything that might outlive one deploy. | evidence: all 11 anchors matched first try on the v932 base
+- The GitHub `/edit/` page's CSP blocks `fetch('http://127.0.0.1:…')`, and `file_upload` refuses paths outside session-shared folders (both the project dir and the scratchpad were rejected) — so the byte-exact "serve the file locally and pull it in" trick does NOT work. Working method: send the small edit pairs as JSON and apply them in-page, gating the dispatch on a digest match. | evidence: TypeError: Failed to fetch; two file_upload rejections
+- Deriving difflib opcodes with context-widening to force uniqueness produces pairs that DON'T round-trip (adjacent edits overlap and clobber each other's anchors). Emit the pairs from the same explicit anchors the build uses, and assert they reproduce the build before shipping them. | evidence: "pairs reproduce v933 locally: False" → fixed by emitting from build's own sub1() calls
+PREFERENCE:
+- 17/07/26 | Yaniv approved the deploy via the one-approval gate (HANDOFF "Claude deploys, one approval each") — the gate still applies per-deploy even mid-flow. | seen this session
+OPEN (unchanged, still Yaniv-only — real billing data):
+- ⚠️ ACCEPTANCE TEST (5-step ✕-delete) NOT RUN — needs a scratch job/client.
+- ⚠️ repairExpenseRollups(true) dry-run → review Logger → repairExpenseRollups(false) NOT RUN.
+- Repo `pairs.json` in the repo root is from another session's tooling — confirm intentional or delete.
+RETIRED:
+- "javascript_tool on the live github.io app runs in an ISOLATED world; page globals read undefined" — FALSE for claude-in-chrome's javascript_tool. Killed 17/07/26, see tombstones.
+- "An undeployed v930 note→quote build needs rebasing before it can ship" — DONE; v930 is now v933 and live. claude-builds/v930 is historical.
+
+---
+
 ## 2026-07-17 — v932 HOTFIX: blank-app outage fixed (Cowork)
 SHIPPED:
 - HTML v932 DEPLOYED and VERIFIED LIVE (app renders: header v932, Today's Projects, Start Work Session). Restores the app after a blank-screen outage.
