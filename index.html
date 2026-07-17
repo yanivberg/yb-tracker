@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v929</title>
+<title>י.ב אחזקות — v931</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v929
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v931
 Deployed: 14/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 333)
@@ -533,6 +533,12 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v29 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v931 · 16/07/2026
+• מחיקת הוצאה מדוח ההוצאות החודשי: כפתור ✕ על כל הוצאה (הגנת שתי-לחיצות: ✕ ← אדום ׽מחק?׾ ← לחיצה שנייה). רענון אוטומטי אחרי מחיקה (deleteRow מזיז שורות).
+• תיקון באג חיוב קריטי (AS v204): מחיקת הוצאה לא עדכנה את שורת הריכוז ׽הוצאות <title>׾ בגיליון הלקוח — לכן לקוחות חויבו אולי על הוצאות שנמחקו. עכשיו deleteExpense מסנכרן את השורה (_syncExpenseRollup). בנוסף: createExpenseRow היה מוסיף שורת ריכוז כפולה בכל הרצה — תוקן (אידמפוטנטי, עם מזהה SRC:<jobId> בעמודת ההערות). repairExpenseRollups(false) — סקריפט תיקון חד-פעמי לכפילויות היסטוריות (ברירת מחדל dry-run).
+• (v930 דולג בשרשרת ה-live — נבנה אבל לא פורס: כפתור ׽💰 הצעה׾ ביומן. צריך rebase על v931 לפני פריסה.)
+
 ─────────────────
 v929 · 15/07/2026
 • כל הכרטיסים/חלונות שנפתחים מהמגירה (Account Manager, Work Log, יומן, סקרים וכו') נפתחים עכשיו ממורכזים באמצע המסך במקום צמודים לתחתית — 33 חלונות. הפינות של הכרטיס מעוגלות מכל הצדדים (במקום למעלה בלבד).
@@ -1458,7 +1464,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v929</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v931</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2434,6 +2440,26 @@ function openMonthlyExpenses() {
 
 var _ME_CLIENTS = ['GOLMAT','ROLLMAT','BILLINSKY','MODUL PLADA','PAL-YAM','SONIC BEAT LTD','Y.SHAY'];
 
+var _meArmed = null;
+function _meDisarm(b){ if(!b) return; clearTimeout(b._t); b.dataset.armed=''; b.textContent='✕';
+  b.style.color='#bbb'; b.style.fontWeight='400'; if(_meArmed===b) _meArmed=null; }
+function _meDeleteExpense(btn, row) {
+  if (btn.dataset.armed !== '1') {                 // tap 1 — arm
+    _meDisarm(_meArmed); _meArmed = btn;
+    btn.dataset.armed = '1'; btn.textContent = 'מחק?';
+    btn.style.color = '#c62828'; btn.style.fontWeight = '900';
+    btn._t = setTimeout(function(){ _meDisarm(btn); }, 3000);
+    return;
+  }
+  clearTimeout(btn._t); btn.textContent = '⏳';    // tap 2 — commit
+  fetch(SHEETS_URL + '?action=deleteExpense&row=' + encodeURIComponent(row))
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      showToast(res && res.ok ? '✓ הוצאה נמחקה' : 'מחיקה נכשלה');
+      _loadMonthlyExpenses();                      // MANDATORY: deleteRow shifts every row below, so all on-screen e.row go stale
+    })
+    .catch(function(){ showToast('מחיקה נכשלה'); _loadMonthlyExpenses(); });
+}
 function _loadMonthlyExpenses() {
   var client = document.getElementById('meClient').value;
   var month  = document.getElementById('meMonth').value;
@@ -2515,6 +2541,7 @@ function _loadMonthlyExpenses() {
           (e.receipt ? '<a href="'+e.receipt+'" target="_blank" style="font-size:15px;text-decoration:none;flex-shrink:0;" title="פתח קבלה">🧾</a>' :
             '<button type="button" onclick="_openReceiptPickerForExp(\''+e.row+'\')" style="font-size:11px;padding:2px 6px;border:1px dashed #ccc;border-radius:5px;background:#fff;color:#888;cursor:pointer;flex-shrink:0;">📎</button>') +
           '<span style="font-weight:700;color:#c62828;flex-shrink:0;">₪' + (parseFloat(e.amount)||0).toLocaleString() + '</span>' +
+          '<button type="button" onclick="_meDeleteExpense(this,\'' + e.row + '\')" style="background:none;border:none;color:#bbb;font-size:12px;cursor:pointer;padding:0 3px;flex-shrink:0;">✕</button>' +
         '</div>';
       });
       html += '<div style="height:6px;"></div></div>';
