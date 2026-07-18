@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v935</title>
+<title>י.ב אחזקות — v936</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v935
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v936
 Deployed: 18/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 334)
@@ -533,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v936 · 18/07/2026
+• כפתור "📋 העתק" על כל הערה ביומן — מעתיק ללוח את טקסט ההערה המלא, כולל שורות שנחתכות בתצוגה (המסך מציג 3 שורות בלבד). עובד גם כשה-Clipboard API חסום, דרך נפילה ל-execCommand שמתאימה ל-Safari/iOS.
+
 ─────────────────
 v935 · 18/07/2026
 • תיקון: שחזור טופס קדם-ההצעה ("שוחזר טופס שלא נשמר") איבד את כל שורות ההצעה שהוקלדו. השמירה מפתחת שדות ללא id לפי מיקום (_idx), אבל השחזור חיפש רק לפי getElementById — ושורות התיאור (class qs-line, ללא id) נמחקו כך שהטופס חזר ריק. עכשיו השחזור עובר על השדות באותו סדר בדיוק כמו השמירה.
@@ -1480,7 +1484,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v935</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v936</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -7758,6 +7762,39 @@ function _quoteFromNote(idx) {
   var first = document.querySelector('#qsLinesList .qs-line');
   if (first) { first.value = text; _guessQsCategory(); }   // same as the user typing it
 }
+// v936: copy a journal note's FULL text to the clipboard — the on-screen note is clamped to 3 lines.
+function _copyNote(idx) {
+  var n = (_yomanItems || [])[idx];
+  if (!n) { showToast('הערה לא נמצאה'); return; }
+  var text = String(n.note || '');
+  if (!text.trim()) { showToast('ההערה ריקה'); return; }
+  _copyToClipboard(text, '📋 ההערה הועתקה');
+}
+// The async Clipboard API needs a secure context and is still refused in some PWA/webview cases,
+// so fall back to a hidden textarea + execCommand — the pattern iOS Safari accepts.
+function _copyToClipboard(text, okMsg) {
+  function fallback() {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');            // stops iOS from opening the keyboard
+      ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+      document.body.appendChild(ta);
+      var range = document.createRange();
+      range.selectNodeContents(ta);
+      var sel = window.getSelection();
+      sel.removeAllRanges(); sel.addRange(range); // iOS ignores .select() alone — it needs a Range
+      ta.setSelectionRange(0, text.length);
+      var ok = document.execCommand('copy');
+      sel.removeAllRanges();
+      document.body.removeChild(ta);
+      showToast(ok ? okMsg : '❌ ההעתקה נכשלה');
+    } catch (e) { showToast('❌ ההעתקה נכשלה'); }
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function(){ showToast(okMsg); }, fallback);
+  } else { fallback(); }
+}
 function _renderYomanEntry(n, idx) {
   var clampToggle = "var b=this.querySelector('.ybody'); b.style.webkitLineClamp=(b.style.webkitLineClamp==='unset'?'3':'unset');";
   return '<div class="yentry" style="display:flex;gap:11px;align-items:flex-start;padding:9px 2px;border-bottom:1px solid #eef2f6;overflow:hidden;max-height:500px;transition:opacity .35s ease,max-height .35s ease,padding .35s ease;">' +
@@ -7766,6 +7803,7 @@ function _renderYomanEntry(n, idx) {
       '<div style="font-size:10.5px;font-weight:700;margin-bottom:3px;"><span style="color:#0d47a1;">' + _escNote(n.date||'') + '</span><span style="color:#e65100;margin-right:6px;">' + _escNote(n.time||'') + '</span></div>' +
       '<div class="ybody" style="font-size:13px;color:#222;line-height:1.5;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">' + _escNote(n.note||'') + '</div>' +
     '</div>' +
+    '<div class="ycopy" onclick="event.stopPropagation();_copyNote(' + idx + ')" title="העתק את ההערה המלאה" style="flex-shrink:0;align-self:center;background:#e3f2fd;border:1px solid #90caf9;color:#0d47a1;border-radius:8px;padding:6px 9px;font-size:11.5px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">📋 העתק</div>' +
     '<div class="yquote" onclick="event.stopPropagation();_quoteFromNote(' + idx + ')" title="הצעת מחיר מההערה" style="flex-shrink:0;align-self:center;background:#e8f5e9;border:1px solid #a5d6a7;color:#2e7d32;border-radius:8px;padding:6px 9px;font-size:11.5px;font-weight:800;cursor:pointer;white-space:nowrap;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">💰 הצעה</div>' +
   '</div>';
 }
