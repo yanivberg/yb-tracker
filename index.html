@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v939</title>
+<title>י.ב אחזקות — v940</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v939
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v940
 Deployed: 18/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 335)
@@ -533,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v940 · 18/07/2026
+• במסך "Attach PO to Existing Project" — ליד מספר ההזמנה מוצג עכשיו גם מזהה שורת הפרויקט בגיליון (G0080 / R0357 וכו'), ומתעדכן חי ברגע שבוחרים פרויקט מהרשימה. נעלם כשבוחרים "New Row" (עדיין אין שורה קיימת). שינוי צד-לקוח בלבד — getPendingQuote כבר החזיר את המזהה.
+
 ─────────────────
 v939 · 18/07/2026
 • בדוח ההוצאות החודשי, שורת הסיכום מציגה עכשיו גם "טרם חויב" — כמה מתוך סך החודש עדיין לא נכנס לשורת ריכוז אצל הלקוח. כתום כשנשאר משהו לחייב, ירוק כשהכל חויב. טקסט הדוח המועתק ללקוח לא השתנה.
@@ -1496,7 +1500,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v939</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v940</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6182,6 +6186,8 @@ function renderPOAttachList() {
     var sel = _poAttachSelections[idx];
     var isNew = sel === 'new';
     var ddStyle = isNew ? 'display:none;' : '';
+    // v940: the chosen project's spreadsheet line ID, shown next to the PO number
+    var jobBadge = (sel && sel !== 'new') ? sel : '';
     var opts = '<option value="">— Pick a pending project —</option>';
     _poAttachPendingJobs.forEach(function(job) {
       if (job.client !== po.client) return;
@@ -6192,7 +6198,10 @@ function renderPOAttachList() {
       '<div style="border-bottom:1px solid #f0f0f0;padding:14px 16px;" id="pocard-' + idx + '">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
           '<span style="font-size:11px;font-weight:900;color:#fff;background:' + cc.grad + ';padding:3px 9px;border-radius:6px;">' + po.client + '</span>' +
-          '<span style="font-size:12px;color:#888;">' + po.poNumber + '</span>' +
+          '<div style="display:flex;align-items:center;gap:8px;">' +
+            '<span id="pojob-' + idx + '" style="font-size:11px;font-weight:900;font-family:Heebo,sans-serif;color:#4a148c;background:#f3e5f5;border:1px solid #ce93d8;border-radius:6px;padding:2px 7px;' + (jobBadge ? '' : 'display:none;') + '">' + jobBadge + '</span>' +
+            '<span style="font-size:12px;color:#888;">' + po.poNumber + '</span>' +
+          '</div>' +
         '</div>' +
         '<div style="font-size:13px;font-weight:700;color:#111;margin-bottom:2px;">' + (po.qty||1) + ' × ₪' + po.price + ' = ₪' + (po.total || ((po.qty||1)*po.price)) + '</div>' +
         '<div style="font-size:12px;color:#666;margin-bottom:10px;">' + (po.desc || '—') + '</div>' +
@@ -6213,6 +6222,16 @@ function renderPOAttachList() {
   list.innerHTML = bulkBar + html;
 }
 
+// v940: keep the line-ID badge next to the PO number in sync with the current pick
+function _updatePOJobBadge(idx) {
+  var b = document.getElementById('pojob-' + idx);
+  if (!b) return;
+  var sel = _poAttachSelections[idx];
+  var id = (sel && sel !== 'new') ? sel : '';
+  b.textContent = id;
+  b.style.display = id ? '' : 'none';
+}
+
 function setPOChoice(idx, val) {
   var dd = document.getElementById('podd-' + idx);
   if (val === 'new') {
@@ -6222,10 +6241,12 @@ function setPOChoice(idx, val) {
     _poAttachSelections[idx] = '';
     if (dd) dd.style.display = 'block';
   }
+  _updatePOJobBadge(idx);
 }
 
 function setPOJob(idx, jobId) {
   _poAttachSelections[idx] = jobId || '';
+  _updatePOJobBadge(idx);
 }
 
 function confirmPOAttach() {
