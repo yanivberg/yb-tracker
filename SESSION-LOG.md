@@ -6,6 +6,45 @@ This file was referenced by the bootstrap but did not exist until 13/07/2026 —
 
 ---
 
+## 2026-07-18 — v934–v939 + AS v205: survey-first quotes, note clipboard, billed-expense marking
+SHIPPED:
+- HTML v934 — the journal "💰 הצעה" button now opens the Pre-Quotation Briefing FIRST (the same gate Edit/New Quotation goes through), with line 1 seeded from the note text. v933 called `switchCaspitTab('quote')` and skipped the survey entirely.
+- HTML v935 (commit `1f73072`) — FIX: the briefing's "↩️ שוחזר טופס שלא נשמר" restore silently dropped every typed quote line. `_savePreSurveySnapshot` keys id-less fields positionally (`el.id || '_idx'+i` → snapshot held `_idx1`, `_idx2`), but the restore looked fields up with `getElementById` ONLY, so the class-only `.qs-line` inputs never came back and the form reopened blank. Restore now walks `body.querySelectorAll('input, select, textarea')` in the same order save did.
+- HTML v936 (commit `bc53e5c`) — "📋 העתק" on every journal note copies the FULL note text (the card clamps to 3 lines). Clipboard API primary, hidden readonly-textarea + `execCommand` fallback for iOS.
+- AS v205 → deployment **Version 335** (repo mirror `apps-script-v205.js`) — `getExpenses` returns `invoicedDoc` (Expenses col J); `createExpenseRow` collects the un-stamped rows it summed and stamps them `yyyy-MM-dd` via the new `_stampExpensesBilled`, at BOTH success paths (rollup created / rollup updated in place). The summing loop itself is unchanged — the rollup stays the full job total.
+- HTML v937 (commit `e5d6763`) — daily expense list greys out + ✓ already-billed rows, billed date in the tooltip, still deletable.
+- HTML v938 (commit `6c56ac0`) — same marker in the Monthly Expenses report. No AS work needed: that report already fetched `getExpenses&allForClient=1`, the exact action v205 extended, and was discarding the field.
+- HTML v939 (commit `dd8bfa1`) — monthly report total bar gained a `טרם חויב` subtotal (orange when > 0, green at 0). The client-facing copied report text is unchanged in v938 and v939 by design.
+
+FACT (all 18/07/26):
+- **The double-billing bug the pasted v935-expense SPEC existed to fix was ALREADY FIXED in v204** — the SPEC was source-verified against v202. `createExpenseRow` (live line ~3549) delegates to `_syncExpenseRollup` whenever a rollup line exists, and that helper SETS the client-sheet line's price to the job's full expense total (line ~3646) instead of appending. Re-invoicing overwrites to the correct figure; it does not stack. | evidence: live v204 lines 3549 / 3623 / 3646
+- Therefore **col J is an informational "billed-on" stamp, NOT the guard.** Implementing the SPEC verbatim would have REGRESSED v204 either way: skip only inside `createExpenseRow` and execution still reaches 3549 and hands off to a helper that sums all rows (the skip changes nothing written, and the returned `total` becomes a lie); teach `_syncExpenseRollup` to skip stamped rows and any later add/delete recomputes the rollup from unbilled rows only, erasing already-billed money from the client sheet. | evidence: `_syncExpenseRollup` sums with no col-J filter, then setValue(total)
+- The SPEC's acceptance test step 4 ("rollup adds ₪70 only, not ₪220") encodes the pre-v204 append model and would FAIL on correct behaviour. Correct expectation: the line BECOMES ₪220, and the sheet holds ONE rollup line, not two summing ₪370.
+- Expenses columns per LIVE `getExpenses`: A=jobId B=client C=date D=category E=desc F=amount G=createdAt **H=link** I=(unread) — the SPEC's "H unused / I receipt" was wrong. Col J (index 9) was untouched anywhere in v204, so it was safe to claim. | evidence: push object, v204 lines 370–380
+- `navigator.clipboard.writeText` requires a **focused document**, not merely a user gesture. In automation an unfocused tab makes the Clipboard API reject AND `execCommand('copy')` return false — a convincing false "the feature is broken" signal. Click the page body first, then the button. | evidence: `fallback:false` while unfocused → `clipboardAPI` success after a body click; readText separately hung the renderer on a permission prompt
+- Anchored string pairs MUST assert `count == 1` against the live base: `var total = filtered.reduce(...)` occurs twice — the monthly report's `_afterFetch` AND `_showInvoiceExpenseStep`. The assert aborted the build instead of silently editing a screen nobody asked about; disambiguated by including the following comment line. | evidence: v939 build failed with "count 2", then passed
+- Clipboard is a clean way to move a whole file between two browser contexts without transferring bytes through the agent: `navigator.clipboard.writeText(model.getValue())` in the GAS tab → Cmd+V into the GitHub editor moved 251,851 chars exactly. | evidence: apps-script-v205.js pasted at exactly 251,851 chars
+- A JS-vs-Python length gap on the same file is a UNIT mismatch, not corruption: JS `String.length` counts UTF-16 units, Python `len()` counts code points, and Code.gs has 2 non-BMP emoji. Settle it with a digest of both sides rstripped. | evidence: 251,851 vs 251,850 but identical SHA-256 `74 24 42 64 190 225`
+- GAS project is at **194/200 versions** — warning shown in Manage deployments. | evidence: dialog text, 18/07/26
+
+PREFERENCE:
+- 18/07/26 | When a handed-down SPEC's premise has expired against live code, Yaniv wants the contradiction surfaced with a recommendation — not the spec executed as written. He chose "marker only" over the full spec once the v204 conflict was shown. | seen this session
+- 18/07/26 | One "commit" = one approval, per deploy, unchanged.
+
+OPEN:
+- ⚠️ YANIV-ONLY: acceptance test of the v205 billed-stamp on a SCRATCH job/client — with the corrected step-4 expectation above.
+- ⚠️ Prune GAS versions: 194/200, ~6 deploys of headroom.
+- 📱 The iOS `execCommand` fallback for 📋 העתק is reasoned but UNVERIFIED on a real iPhone — Chrome always took the Clipboard API path. One tap confirms or kills it.
+- Nothing will show ✓ until a job is invoiced under v205 — every existing row has an empty col J. Expected, not a bug.
+- Carried: repairExpenseRollups dry-run → apply; 5-step ✕-delete acceptance test; cancel test quotes 900182/83/85/86 (+87); `pairs.json` provenance.
+
+RETIRED:
+- "Re-invoicing a job double-bills every earlier expense" — FALSE since v204 (set-to-total). Killed 18/07/26.
+- "Repo `apps-script-v204.js` mirror ≠ live; reconcile it" — DONE. `apps-script-v205.js` is a byte-faithful pull of live source; SHA-256 of both sides rstripped = `74 24 42 64 190 225`.
+- "The Monthly Expenses report can't show billing status without backend work" — FALSE; it already had the field in its payload.
+
+---
+
 ## 2026-07-17 — v933: note→quote shipped (v930 rebased onto v932)
 SHIPPED:
 - HTML v933 DEPLOYED and VERIFIED LIVE (commit `18fee86a`). "💰 הצעה" button on every journal note on the main page (all 10 — top-5 and the 6–10 accordion). Opens a NEW Caspit quotation with line 1's description prefilled from the note text; reuses the existing `_quotePrefill` mechanism (same shape `_skipToQuotation` uses), so no new Caspit surface. Closes Yaniv's "Add option to make a new quotation from a daily note".
