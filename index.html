@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v938</title>
+<title>י.ב אחזקות — v939</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v938
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v939
 Deployed: 18/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 335)
@@ -533,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v939 · 18/07/2026
+• בדוח ההוצאות החודשי, שורת הסיכום מציגה עכשיו גם "טרם חויב" — כמה מתוך סך החודש עדיין לא נכנס לשורת ריכוז אצל הלקוח. כתום כשנשאר משהו לחייב, ירוק כשהכל חויב. טקסט הדוח המועתק ללקוח לא השתנה.
+
 ─────────────────
 v938 · 18/07/2026
 • סימון "כבר חויב" הורחב גם לדוח ההוצאות החודשי (🧾 הוצאות חודשיות) — שורה שחויבה מוצגת מעומעמת + ✓ עם תאריך החיוב, בדיוק כמו ברשימה היומית. הדוח כבר משך את השדה מ-getExpenses (allForClient=1) של Apps Script v205, ולכן זה שינוי צד-לקוח בלבד. טקסט הדוח המועתק ללקוח לא השתנה — הסימון פנימי בלבד.
@@ -1492,7 +1496,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v938</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v939</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2527,6 +2531,8 @@ function _loadMonthlyExpenses() {
       jobs[key].push(e);
     });
     var total = filtered.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
+    // v939: how much of this month hasn't been rolled up onto a client sheet yet (empty Expenses col J)
+    var unbilled = filtered.reduce(function(s,e){ return s + (String(e.invoicedDoc||'').trim() === '' ? (parseFloat(e.amount)||0) : 0); }, 0);
     // Build flat numbered list for clipboard
     var monthHebrew = {'01':'ינואר','02':'פברואר','03':'מרץ','04':'אפריל','05':'מאי','06':'יוני','07':'יולי','08':'אוגוסט','09':'ספטמבר','10':'אוקטובר','11':'נובמבר','12':'דצמבר'};
     var monthNum = month.slice(5,7);
@@ -2580,7 +2586,13 @@ function _loadMonthlyExpenses() {
     });
     reportText += '─────────────────────\n';
     reportText += 'סה"כ: ₪' + total.toLocaleString();
-    html += '<div style="background:#fff3e0;border-radius:10px;padding:10px 14px;margin-top:8px;display:flex;justify-content:space-between;font-weight:900;font-size:14px;"><span>סה"כ הוצאות חודש ' + month + '</span><span style="color:#c62828;">₪' + total.toLocaleString() + '</span></div>';
+    html += '<div style="background:#fff3e0;border-radius:10px;padding:10px 14px;margin-top:8px;font-weight:900;font-size:14px;">' +
+      '<div style="display:flex;justify-content:space-between;"><span>סה"כ הוצאות חודש ' + month + '</span><span style="color:#c62828;">₪' + total.toLocaleString() + '</span></div>' +
+      '<div style="display:flex;justify-content:space-between;margin-top:5px;padding-top:5px;border-top:1px solid rgba(0,0,0,0.08);font-size:12px;font-weight:800;">' +
+        '<span style="color:#666;">טרם חויב</span>' +
+        '<span style="color:' + (unbilled > 0 ? '#e65100' : '#2e7d32') + ';">₪' + unbilled.toLocaleString() + '</span>' +
+      '</div>' +
+    '</div>';
     body.innerHTML = html;
     sendBtn.style.display = 'block';
     sendBtn.dataset.report = reportText;
