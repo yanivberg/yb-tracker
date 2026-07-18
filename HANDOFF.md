@@ -1,11 +1,11 @@
 # BLUE — YB TRACKER · HANDOFF
-Updated: 12/07/2026. Repo-native working memory (promoted from the Drive "MASTER HANDOFF v2"; the v800-era doc is historical).
+Updated: 18/07/2026. Repo-native working memory (promoted from the Drive "MASTER HANDOFF v2"; the v800-era doc is historical).
 Principle: pointers + currently-load-bearing dated facts only, one page, hard cap. Detail lives in SESSION-LOG.md (append-only journal — read the last ~3 blocks at bootstrap). Recent observed behavior outvotes anything written here.
 
 ## What this is
 "BLUE" = YB Tracker: Hebrew RTL field-maintenance PWA for י.ב אחזקות (Yaniv Berg).
 Live: https://yanivberg.github.io/yb-tracker · Components: single-file index.html (GitHub Pages) · Google Apps Script backend · Cloudflare Worker (Caspit proxy).
-Current deployed: HTML v933 (💰 note→quote; the v930 build rebased onto v932) · AS deployment Version 334 (Code.gs = v204: expense rollup integrity) · Worker v30. [17/07/26 — all three probe-verified live]
+Current deployed: HTML v939 (billed-expense marking + monthly unbilled subtotal) · AS deployment Version 335 (Code.gs = v205: billed-on stamp) · Worker v30. [18/07/26 — all three probe-verified live]
 
 ## Bootstrap (three reads, nothing more)
 1. This file. 2. Tail of SESSION-LOG.md. 3. Live probes: app title (HTML version) · worker `?action=health` · latest `apps-script-vNNN.js` in this repo (header + `grep -c "action === '"`). Confirm derived versions with Yaniv in one line.
@@ -16,7 +16,7 @@ Current deployed: HTML v933 (💰 note→quote; the v930 build rebased onto v932
 - AS /exec (stable — always "New version" on the EXISTING deployment): `AKfycbxqbXKwg-EkbwKxtmulN_u_RpUi_HLn3Q8Hbw1VkBsl5Go7dRPjIJM2ulJUxZuS01tuVw`
 - GAS project: `script.google.com/home/projects/1OQbwNDsfDsRcx_398mkO5CIimZxuWKfXpoMmKuH_7iWSMICqumquXX_c`
   ⚠ TWO projects named "YB Tracker Main" — verify Deployment ID matches before editing; the other is a decoy.
-  ⚠ Project was AT the 200-version cap; Yaniv cleared old versions → 187 before v203 deploy. Still delete old versions before any new deploy. [11/07/26]
+  ⚠ Version cap: 194/200 used as of 18/07/26 (warning shown in Manage deployments) — ~6 deploys of headroom. Prune old versions from Project history before the next few deploys.
 - Accountant inbox (monthly docs + quote copies): yanivberg@icloud.com [confirmed 10/07/26]
 - Caspit TEST contact (ALL API tests, ₪1, cancel after — never real clients): "בדיקות מערכת — לא לקוח (TEST)", ContactId `YB-CONTACT-1783772031444`, #44 [10/07/26]
 
@@ -32,9 +32,17 @@ TrxTypeId 16 quote / 1 invoice / 2 receipt (disabled) / 3 combined. Line Details
 ## PO import (gmail-po-import.gs) [fixed & verified 12/07/26]
 Reads Gmail PO PDFs → parses line items → adds jobs to GOLMAT/ROLLMAT/PAL-YAM sheets. Manual (app Setup → PO Import → scanPOEmails preview → runPOImport). Live PO PDF facts: line = `<row> <SKU> <desc> <qty> יח' <unitPrice> <ILS|ש"ח> <lineTotal>` (NO date column — old regex required one, broke it). GOLMAT/ROLLMAT PO# prints digits-first `2601776POG` → normalize to `POG…`; currency ILS; SKU uppercase. PAL-YAM: pure-digit PO# (`הזמנת רכש מספר 2601003576`), currency `ש"ח`, lowercase SKU (zzz10), email layout varies every time (PDF layout constant) → search by content not subject. POGETTHREADS searches by attachment filename (`filename:הדפסת` GOLMAT/ROLLMAT) + `"הזמנת רכש" ("פל ים"|"t-p-y")` (Pal-Yam), NOT email subject (POs are forwarded w/ arbitrary subjects). POSCAN_RETURN/POIMPORT_RETURN convert every PDF via Drive (slow, seconds each) → guard skips non-PO PDFs by filename/subject/sender BEFORE conversion (scan ~28s vs 240s timeout). PODETECTCLIENT keys off PDF text (פל ים/ט.פ.י/t-p-y/tax 513327064 → PAL-YAM; רולמט/POR → ROLLMAT; else GOLMAT). POEXTRACTPO returns '' (not '?') on no-match so broad search skips non-POs.
 
+## Expenses & billing [dated 18/07/26 — load-bearing]
+Expenses sheet columns per LIVE `getExpenses`: A=jobId B=client C=date D=category E=desc F=amount G=createdAt **H=link** I=(unread) **J=invoicedDoc**.
+Col J = a `yyyy-MM-dd` "billed-on" stamp written by `createExpenseRow` via `_stampExpensesBilled`, on BOTH success paths (rollup created, and rollup updated in place). **Informational only.**
+⚠ The double-billing guard is NOT the stamp — it is v204's `_syncExpenseRollup` **set-to-total**: `createExpenseRow` delegates to it whenever a rollup line already exists, and it SETS the client-sheet line's price to the job's full expense total instead of appending. Re-invoicing therefore overwrites to the correct figure; it never stacks. (Pre-v204 it appended — that is the bug people remember.)
+⚠ Do NOT teach `_syncExpenseRollup` to skip stamped rows. It would recompute the rollup from unbilled rows only, so any later add/delete would erase already-billed money from the client sheet.
+From-now-on only: rows predating v205 have an empty col J and bill normally the first time; they simply show unmarked.
+HTML surfaces it in two places (v937 daily list, v938 monthly report): billed rows render greyed + ✓ with the date in the tooltip, still deletable. v939 adds a `טרם חויב` subtotal to the monthly total bar. The client-facing copied report text carries no billing marks by design.
+
 ## Open items
-⚠️ YANIV-ONLY (touches real billing data, carried since v931): (1) acceptance test of the 5-step ✕-delete flow on a SCRATCH job/client — never a real one; (2) `repairExpenseRollups(true)` dry-run → review Logger → `repairExpenseRollups(false)` to apply (cleans duplicate/stale `הוצאות` rollup lines from the old unconditional-append bug).
-Repo `apps-script-v204.js` mirror = base+edits; DEPLOYED Code.gs also carries another session's preserved ~247-char "PO v4" delta → reconcile the mirror by pulling live and re-committing.
+⚠️ YANIV-ONLY (touches real billing data, carried since v931): (1) acceptance test of the 5-step ✕-delete flow on a SCRATCH job/client — never a real one; (2) `repairExpenseRollups(true)` dry-run → review Logger → `repairExpenseRollups(false)` to apply (cleans duplicate/stale `הוצאות` rollup lines from the old unconditional-append bug); (3) acceptance test of the v205 billed-stamp on a SCRATCH job — expect the rollup line to BECOME the full job total on re-invoice (one line), not to gain a second line.
+📱 UNVERIFIED: the iOS execCommand fallback for 📋 העתק (note→clipboard) never ran in testing — Chrome always took the Clipboard API path. One tap on the iPhone confirms or kills it.
 cancel test quotes 900182/83/85/86 (+87) · v92x localStorage backup (spec pending approval) · Bitter-Lesson Phases 0–3 (bitter-lesson-harness-analysis.md) · skill v2 install via Settings (yb-tracker-build-deploy-SKILL-v2.md) · repo `pairs.json` — appeared in the repo root from another session's deploy tooling; confirm it's intentional or delete.
 DONE 11/07/26: AS v203 clean-email (Gmail+getDocPdf) — shipped & verified working, see Caspit facts above.
 RETIRED: bank-deposit Gmail importer [deleted by Yaniv 10/07/26] — see SESSION-LOG tombstones before re-proposing anything.
