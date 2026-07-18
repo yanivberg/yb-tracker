@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v941</title>
+<title>י.ב אחזקות — v942</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v941
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v942
 Deployed: 18/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 335)
@@ -533,6 +533,11 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v942 · 18/07/2026
+• אקורדיון "📋 תדריך" על כרטיס הפרויקט — מציג לקריאה בלבד את מה שמולא בשאלון קדם-ההצעה: 🔧 כלים נדרשים · 📝 שלבי ביצוע · 🔑 מפתחות להצלחה. זמין בשלושה מקומות: ברשימת "Today's Projects" בעמוד הראשי, ובכרטיסי הסשן — גם כשהפרויקט מושהה וגם כשהוא רץ וצובר שעות.
+• מקור הנתונים: preProjectSurveys ב-localStorage (התאמה לפי jobId, ובהיעדרו לפי תיאור, האחרון קובע). לכן פרויקט שנוצר בלי שאלון — או מכשיר אחר/ניקוי דפדפן — יציג "לא נמצא תדריך".
+
 ─────────────────
 v941 · 18/07/2026
 • השיוך בין לקוח הגיליון ללקוח בכספית (למשל GOLMAT ← גולמט בע"מ) נשמר עכשיו לצמיתות בגיליון Clients (עמודה I), ברגע שבוחרים ידנית — גם בטופס הצעת המחיר החדשה וגם במסך החשבוניות. מכאן והלאה כל מסמך ישלוף את השיוך מהגיליון במקום לנחש לפי שם. אישור/כישלון מוצג בהודעה.
@@ -1506,7 +1511,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v941</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v942</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -4503,6 +4508,7 @@ function renderProjectBtns() {
               '</button>' +
               pausedPanel +
             '</div>' +
+            _surveyAccordionHtml(i, p, false) +
             '<div style="border-top:1.5px solid rgba(0,0,0,0.12);padding-top:4px;margin-top:4px;">' +
               '<button onclick="event.stopPropagation();toggleExpensePanel('+i+')" style="background:none;border:none;width:100%;display:flex;align-items:center;justify-content:space-between;padding:4px 0;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
                 '<span style="font-size:10px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">💰 הוצאות</span>' +
@@ -4610,6 +4616,7 @@ function renderProjectBtns() {
         '</div>' +
         (!p.done ? '<button onclick="openProjectSurvey('+i+')" style="width:100%;margin-top:10px;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:rgba(255,255,255,0.55);color:#c62828;">✓ End Project</button>' : '') +
       '</div>' +
+      _surveyAccordionHtml(i, p, true) +
       '<div style="border-top:2px solid rgba(0,0,0,0.12);padding-top:10px;margin-top:4px;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
           '<span style="font-size:11px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">💰 הוצאות</span>' +
@@ -4662,6 +4669,65 @@ function renderProjectBtns() {
 
 function toggleNote(i) { projects[i].noteOpen = !projects[i].noteOpen; reRender(); if (projects[i].noteOpen) setTimeout(function() { var el = document.getElementById('noteInp-'+i); if(el) el.focus(); }, 60); }
 function reRender() { var s = document.getElementById('screen-setup'); if (s && s.classList.contains('active')) { renderSetup(); } else { renderProjectBtns(); } }
+// v942: the pre-quotation briefing captured for this project, read-only.
+// Lookup mirrors renderTips(): prefer an exact jobId match, fall back to description, newest wins.
+function _surveyForProject(p) {
+  if (!p) return null;
+  var all = [];
+  try { all = JSON.parse(localStorage.getItem('preProjectSurveys') || '[]'); } catch(e) { return null; }
+  if (!Array.isArray(all) || !all.length) return null;
+  var jid = String(p.jobId || '').trim();
+  var title = String(p.title || p.name || '').trim();
+  var hit = null;
+  if (jid) hit = all.filter(function(s){ return s && String(s.jobId||'').trim() === jid; }).pop();
+  if (!hit && title) hit = all.filter(function(s){ return s && String(s.desc||'').trim() === title; }).pop();
+  return hit || null;
+}
+
+function _surveyPanelHtml(p) {
+  var s = _surveyForProject(p);
+  if (!s) return '<div style="font-size:11px;color:rgba(0,0,0,0.45);padding:4px 0;direction:rtl;">לא נמצא תדריך לפרויקט זה</div>';
+  function sec(icon, label, items, color, numbered) {
+    var list = (items || []).filter(Boolean);
+    if (!list.length) return '';
+    return '<div style="margin-bottom:8px;">' +
+      '<div style="font-size:10px;font-weight:900;color:' + color + ';letter-spacing:0.3px;margin-bottom:3px;direction:rtl;">' + icon + ' ' + label + '</div>' +
+      list.map(function(t, n){
+        return '<div style="display:flex;gap:6px;align-items:flex-start;font-size:12px;color:#000;padding:2px 0;direction:rtl;">' +
+          '<span style="flex-shrink:0;color:' + color + ';font-weight:700;">' + (numbered ? (n+1) + '.' : '•') + '</span>' +
+          '<span style="flex:1;">' + _escNote(t) + '</span>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+  var html = sec('🔧', 'כלים נדרשים',   s.tools, '#1565c0', false) +
+             sec('📝', 'שלבי ביצוע',    s.steps, '#6a1b9a', true)  +
+             sec('🔑', 'מפתחות להצלחה', s.keys,  '#2e7d32', false);
+  if (!html) return '<div style="font-size:11px;color:rgba(0,0,0,0.45);padding:4px 0;direction:rtl;">התדריך נשמר ריק</div>';
+  return html + '<div style="font-size:9.5px;color:rgba(0,0,0,0.35);padding-top:2px;direction:rtl;">מתוך שאלון קדם-הצעה' + (s.date ? ' · ' + _escNote(s.date) : '') + '</div>';
+}
+
+function _surveyAccordionHtml(i, p, thick) {
+  var open = !!p._surveyOpen;
+  var bt = thick ? '2px' : '1.5px';
+  var pt = thick ? '10px' : '6px';
+  return '<div style="border-top:' + bt + ' solid rgba(0,0,0,0.12);padding-top:' + pt + ';margin-top:4px;">' +
+    '<button onclick="event.stopPropagation();toggleSurveyPanel(' + i + ')" style="background:none;border:none;width:100%;text-align:right;display:flex;align-items:center;justify-content:space-between;padding:4px 0;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+      '<span style="font-size:10px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">📋 תדריך</span>' +
+      '<span style="font-size:13px;color:#555;font-weight:700;">' + (open ? '▲' : '▼') + '</span>' +
+    '</button>' +
+    '<div id="surveyPanel-' + i + '" style="display:' + (open ? 'block' : 'none') + ';padding-top:4px;">' +
+      (open ? _surveyPanelHtml(p) : '') +
+    '</div>' +
+  '</div>';
+}
+
+function toggleSurveyPanel(i) {
+  if (!projects[i]) return;
+  projects[i]._surveyOpen = !projects[i]._surveyOpen;
+  reRender();
+}
+
 function toggleSetupNotes(i) { projects[i]._notesOpen = !projects[i]._notesOpen; reRender(); if (projects[i]._notesOpen) setTimeout(function() { var el = document.getElementById('noteInp-'+i); if(el) el.focus(); }, 60); }
 function toggleMinimizeCard(i) { projects[i]._minimized = !projects[i]._minimized; reRender(); }
 function formatMsHHMM(ms) { var t = Math.floor(ms/1000); return pad(Math.floor(t/3600)) + ':' + pad(Math.floor((t%3600)/60)); }
@@ -5547,6 +5613,7 @@ function renderSetup() {
           </button>
           ${notesPanel}
         </div>
+        ${_surveyAccordionHtml(i, p, false)}
         <div style="border-top:1.5px solid rgba(0,0,0,0.12);padding-top:6px;margin-top:4px;">
           <button onclick="event.stopPropagation();toggleExpensePanel(${i})" style="background:none;border:none;width:100%;text-align:right;display:flex;align-items:center;justify-content:space-between;padding:4px 0;cursor:pointer;-webkit-tap-highlight-color:transparent;">
             <span style="font-size:10px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">💰 הוצאות</span>
