@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v937</title>
+<title>י.ב אחזקות — v938</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v937
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v938
 Deployed: 18/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 335)
@@ -533,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v938 · 18/07/2026
+• סימון "כבר חויב" הורחב גם לדוח ההוצאות החודשי (🧾 הוצאות חודשיות) — שורה שחויבה מוצגת מעומעמת + ✓ עם תאריך החיוב, בדיוק כמו ברשימה היומית. הדוח כבר משך את השדה מ-getExpenses (allForClient=1) של Apps Script v205, ולכן זה שינוי צד-לקוח בלבד. טקסט הדוח המועתק ללקוח לא השתנה — הסימון פנימי בלבד.
+
 ─────────────────
 v937 · 18/07/2026
 • הוצאה שכבר נכנסה לשורת הריכוז אצל הלקוח מסומנת ברשימה היומית — מעומעמת + ✓ עם תאריך החיוב. Apps Script v205 חותם את התאריך בעמודה J של גיליון Expenses בכל פעם ש-createExpenseRow כותב או מעדכן את שורת הריכוז. הוצאות קיימות נשארות ללא סימון ומתחייבות כרגיל בפעם הראשונה — מכאן והלאה בלבד. הסימון אינפורמטיבי בלבד: ההגנה מפני חיוב כפול היא ה-set-to-total של _syncExpenseRollup מ-v204, לא החותמת.
@@ -1488,7 +1492,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v937</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v938</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2553,10 +2557,14 @@ function _loadMonthlyExpenses() {
         '<div style="font-size:11px;font-weight:900;color:#0d47a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1.5px solid #e3f2fd;">' + headerLabel + '</div>';
       rows.forEach(function(e) {
         var catIcon = e.category==='חומרים'?'🔩':'👷';
+        // v938: same billed marker as the daily list — invoicedDoc is Expenses col J (AS v205)
+        var inv  = String(e.invoicedDoc||'').trim() !== '';
+        var mark = inv ? '<span title="חויב ' + e.invoicedDoc + '" style="color:#2e7d32;flex-shrink:0;font-weight:700;">✓</span>' : '';
         var dateStr = '';
         try { var dt2=new Date(e.date); if(!isNaN(dt2)) dateStr=('0'+dt2.getDate()).slice(-2)+'/'+('0'+(dt2.getMonth()+1)).slice(-2); } catch(_){}
-        html += '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid #f0f0f0;font-size:12px;">' +
+        html += '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid #f0f0f0;font-size:12px;' + (inv ? 'opacity:0.5;' : '') + '">' +
           '<span>' + catIcon + '</span>' +
+          mark +
           '<div style="flex:1;">' +
             '<div style="direction:rtl;color:#333;">' + (e.desc||'—') + '</div>' +
             '<div style="font-size:10px;color:#999;">' + dateStr + (e.category ? ' · ' + e.category : '') + '</div>' +
