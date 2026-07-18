@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v940</title>
+<title>י.ב אחזקות — v941</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v940
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v941
 Deployed: 18/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 335)
@@ -533,6 +533,12 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v941 · 18/07/2026
+• השיוך בין לקוח הגיליון ללקוח בכספית (למשל GOLMAT ← גולמט בע"מ) נשמר עכשיו לצמיתות בגיליון Clients (עמודה I), ברגע שבוחרים ידנית — גם בטופס הצעת המחיר החדשה וגם במסך החשבוניות. מכאן והלאה כל מסמך ישלוף את השיוך מהגיליון במקום לנחש לפי שם. אישור/כישלון מוצג בהודעה.
+• חשוב: נשמר רק בבחירה מפורשת שלך. ניחוש אוטומטי (התאמה מטושטשת) לא נכתב לגיליון, כדי לא לקבע טעות.
+• מגבלה: ניקוי שיוך לא נשמר — הפעולה בשרת דוחה מזהה ריק; בחירה של איש קשר אחר כן דורסת.
+
 ─────────────────
 v940 · 18/07/2026
 • במסך "Attach PO to Existing Project" — ליד מספר ההזמנה מוצג עכשיו גם מזהה שורת הפרויקט בגיליון (G0080 / R0357 וכו'), ומתעדכן חי ברגע שבוחרים פרויקט מהרשימה. נעלם כשבוחרים "New Row" (עדיין אין שורה קיימת). שינוי צד-לקוח בלבד — getPendingQuote כבר החזיר את המזהה.
@@ -1500,7 +1506,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v940</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v941</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -7087,6 +7093,7 @@ function _caspitSetManualContact(clientName, contactId) {
   else delete _caspitMatchMap[clientName];
   var infoEl = document.getElementById('cinfo_' + clientName.replace(/[^a-zA-Z0-9]/g,'_'));
   if (infoEl) infoEl.innerHTML = _caspitContactInfoHtml(contactId || '');
+  _persistCaspitPair(clientName, contactId);   // v941: remember it for every future document
 }
 
 function _caspitContactInfoHtml(contactId) {
@@ -8145,7 +8152,7 @@ function _renderCaspitQuoteForm() {
     '<div id="caspitMatchResult" style="margin-bottom:10px;display:none;"></div>' +
     '<div style="margin-bottom:10px;">' +
       '<label style="font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:5px;">Caspit Contact <span style="font-size:10px;color:#aaa;font-weight:400;">(override if needed)</span></label>' +
-      '<select id="caspitQuoteContact" onchange="_updateQuoteContactInfo()" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;">' + opts + '</select>' +
+      '<select id="caspitQuoteContact" onchange="_onQuoteContactPicked()" style="width:100%;padding:11px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;">' + opts + '</select>' +
       '<div style="font-size:11px;color:#aaa;margin-top:3px;">' + _caspitContacts.length + ' contacts</div>' +
       '<div id="caspitQuoteContactInfo" style="padding:4px 0 2px;font-size:11px;color:#444;direction:rtl;min-height:14px;line-height:1.7;"></div>' +
     '</div>' +
@@ -8290,6 +8297,39 @@ function _autoMatchCaspitClient() {
   }
   if (contactId) contactSel.value = contactId;
   _updateQuoteContactInfo();
+}
+
+// v941: remember the spreadsheet-client -> Caspit-contact pairing in the Clients sheet (col I),
+// so every later document resolves it from there instead of re-guessing by name.
+// Only ever called from an EXPLICIT user pick — never from _autoMatchCaspitClient's fuzzy guess,
+// which would cement a wrong match as if it had been confirmed.
+function _persistCaspitPair(clientName, contactId) {
+  if (!clientName || !contactId) return;   // updateClientCaspitId rejects an empty id — clearing stays in-memory
+  _caspitMatchMap[clientName] = contactId;
+  var c = _caspitContacts.filter(function(x){ return (x.Id||x.ContactId||'') === contactId; })[0];
+  var label = (c && c.Name) ? c.Name : contactId;
+  fetch(SHEETS_URL + '?action=updateClientCaspitId&name=' + encodeURIComponent(clientName) +
+        '&caspitId=' + encodeURIComponent(contactId) + '&_t=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if (res && res.status === 'OK') {
+        var row = _sheetClientsData.filter(function(x){ return x && x.name === clientName; })[0];
+        if (row) row.caspitId = contactId;   // keep the snapshot in step so a re-render can't revert the pick
+        showToast('🔗 נשמר: ' + clientName + ' ← ' + label);
+      } else {
+        showToast('⚠️ השיוך לא נשמר (' + ((res && res.error) || 'שגיאה') + ') — ' + clientName + ' יזוהה מחדש בכל פעם', 6000);
+      }
+    })
+    .catch(function(e){ showToast('⚠️ שמירת השיוך נכשלה: ' + e.message, 6000); });
+}
+
+// v941: an explicit pick in the new-quote form — refresh the info line, then remember the pairing.
+function _onQuoteContactPicked() {
+  _updateQuoteContactInfo();
+  var sheetSel   = document.getElementById('caspitQuoteSheetClient');
+  var contactSel = document.getElementById('caspitQuoteContact');
+  if (!sheetSel || !contactSel) return;
+  _persistCaspitPair(sheetSel.value, contactSel.value);
 }
 
 function _updateQuoteContactInfo() {
