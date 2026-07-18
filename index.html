@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v936</title>
+<title>י.ב אחזקות — v937</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,16 +523,20 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v936
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v937
 Deployed: 18/07/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxqbXK…exec (Version 334)
+Apps Script: AKfycbxqbXK…exec (Version 335)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v937 · 18/07/2026
+• הוצאה שכבר נכנסה לשורת הריכוז אצל הלקוח מסומנת ברשימה היומית — מעומעמת + ✓ עם תאריך החיוב. Apps Script v205 חותם את התאריך בעמודה J של גיליון Expenses בכל פעם ש-createExpenseRow כותב או מעדכן את שורת הריכוז. הוצאות קיימות נשארות ללא סימון ומתחייבות כרגיל בפעם הראשונה — מכאן והלאה בלבד. הסימון אינפורמטיבי בלבד: ההגנה מפני חיוב כפול היא ה-set-to-total של _syncExpenseRollup מ-v204, לא החותמת.
+
 ─────────────────
 v936 · 18/07/2026
 • כפתור "📋 העתק" על כל הערה ביומן — מעתיק ללוח את טקסט ההערה המלא, כולל שורות שנחתכות בתצוגה (המסך מציג 3 שורות בלבד). עובד גם כשה-Clipboard API חסום, דרך נפילה ל-execCommand שמתאימה ל-Safari/iOS.
@@ -1484,7 +1488,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v936</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v937</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -4851,10 +4855,14 @@ function _renderExpenses(i, exps) {
 
   var rows = exps.map(function(ex) {
     var catIcon = ex.category==='חומרים'?'🔩':'👷';
+    // v937: invoicedDoc = Expenses col J stamp (AS v205). '' = not yet rolled up onto the client sheet.
+    var inv  = String(ex.invoicedDoc||'').trim() !== '';
+    var mark = inv ? '<span title="חויב ' + ex.invoicedDoc + '" style="color:#2e7d32;flex-shrink:0;font-weight:700;">✓</span>' : '';
     var linkBtn = ex.link ? '<a href="'+ex.link+'" target="_blank" onclick="event.stopPropagation()" style="flex-shrink:0;font-size:13px;text-decoration:none;" title="פתח מייל">📧</a>' : '';
     var receiptBtn = ex.receipt ? '<a href="'+ex.receipt+'" target="_blank" onclick="event.stopPropagation()" style="flex-shrink:0;font-size:13px;text-decoration:none;" title="פתח קבלה">🧾</a>' : '';
-    return '<div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:0.5px solid rgba(0,0,0,0.1);font-size:11px;">' +
+    return '<div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:0.5px solid rgba(0,0,0,0.1);font-size:11px;' + (inv ? 'opacity:0.5;' : '') + '">' +
       '<span style="flex-shrink:0;">' + catIcon + '</span>' +
+      mark +
       '<span style="flex:1;direction:rtl;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">' + (ex.desc||'') + '</span>' +
       linkBtn +
       receiptBtn +
