@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v942</title>
+<title>י.ב אחזקות — v943</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,16 +523,21 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v942
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v943
 Deployed: 18/07/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxqbXK…exec (Version 335)
+Apps Script: AKfycbxqbXK…exec (Version 336)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v943 · 19/07/2026 · AS v206 / Version 336
+• במסך "Gross Profit — To Invoice" נוסף בורר תקופה: יומי / שבועי / חודשי / הכל. הדוח נשאר "רווח גולמי להוצאת חשבונית", והבורר מצמצם לפי תאריך סיום הפרויקט (ובהיעדרו תאריך התחלה). "הכל" זהה למה שהיה. שבוע מתחיל ביום ראשון.
+• פרויקטים ל-חיוב שאין להם תאריך כלל מסוכמים בנפרד כ"ללא תאריך" — לא נבלעים ולא נעלמים מהסכום.
+
 ─────────────────
 v942 · 18/07/2026
 • אקורדיון "📋 תדריך" על כרטיס הפרויקט — מציג לקריאה בלבד את מה שמולא בשאלון קדם-ההצעה: 🔧 כלים נדרשים · 📝 שלבי ביצוע · 🔑 מפתחות להצלחה. זמין בשלושה מקומות: ברשימת "Today's Projects" בעמוד הראשי, ובכרטיסי הסשן — גם כשהפרויקט מושהה וגם כשהוא רץ וצובר שעות.
@@ -1511,7 +1516,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v942</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v943</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1606,6 +1611,7 @@ SHEET SYNC
       <div style="font-weight:700;font-size:17px;">💰 Gross Profit — To Invoice</div>
       <button onclick="document.getElementById('gpOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
     </div>
+    <div id="gpPeriodBar" style="display:flex;gap:5px;padding:12px 16px 0;flex-shrink:0;"></div>
     <div id="gpContent" style="overflow-y:auto;flex:1;padding:16px 20px;"></div>
     <div style="padding:14px 16px;border-top:1px solid #eee;flex-shrink:0;">
       <button id="gpCopyBtn" onclick="copyGP()" style="width:100%;padding:13px;background:#1a1a2e;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">📋 Copy to clipboard</button>
@@ -6032,21 +6038,43 @@ var _poAttachPendingJobs = [];
 // ── Gross Profit Summary ──────────────────────────────
 var _gpData = null;
 
+var _gpPeriod = 'all';   // v943: day|week|month|all — selected period for the gross-profit report
+function _renderGpPeriodBar() {
+  var bar = document.getElementById('gpPeriodBar'); if (!bar) return;
+  var opts = [['day','יומי'], ['week','שבועי'], ['month','חודשי'], ['all','הכל']];
+  bar.innerHTML = opts.map(function(o){
+    var on = _gpPeriod === o[0];
+    return '<button onclick="_setGpPeriod(\'' + o[0] + '\')" style="flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid ' +
+      (on?'#2e7d32':'#ddd') + ';background:' + (on?'#e8f5e9':'#fff') + ';color:' + (on?'#2e7d32':'#888') +
+      ';font-size:12px;font-weight:800;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">' + o[1] + '</button>';
+  }).join('');
+}
+function _setGpPeriod(p) {
+  if (_gpPeriod === p) return;
+  _gpPeriod = p;
+  _renderGpPeriodBar();
+  fetchGrossProfitSummary();   // reload for the chosen window; overlay stays open
+}
+
 function fetchGrossProfitSummary() {
   var overlay = document.getElementById('gpOverlay');
   var content = document.getElementById('gpContent');
   overlay.style.display = 'flex';
+  _renderGpPeriodBar();
   content.innerHTML = '<div style="text-align:center;padding:32px;color:#aaa;"><div style="font-size:28px;margin-bottom:10px;">⏳</div><div style="font-size:14px;">טוען נתונים…</div></div>';
   _gpData = null;
 
-  fetch(SHEETS_URL + '?action=getGrossProfitSummary')
+  fetch(SHEETS_URL + '?action=getGrossProfitSummary&period=' + encodeURIComponent(_gpPeriod))
     .then(function(r) { return r.json(); })
     .then(function(data) {
       _gpData = data;
       var clients = Object.keys(data.clients).sort(function(a,b) { return data.clients[b] - data.clients[a]; });
+      var _periodLabel = { day:'היום', week:'השבוע', month:'החודש', all:'הכל' }[data.period || 'all'] || 'הכל';
       var html = '<div style="text-align:center;margin-bottom:20px;">' +
-        '<div style="font-size:13px;color:#888;margin-bottom:4px;">סה״כ רווח גולמי · להוציא חש</div>' +
+        '<div style="font-size:13px;color:#888;margin-bottom:4px;">סה״כ רווח גולמי · להוציא חש · ' + _periodLabel + '</div>' +
         '<div style="font-size:36px;font-weight:900;color:#2e7d32;">₪' + data.total.toLocaleString() + '</div>' +
+        ((data.period && data.period !== 'all' && data.undated) ?
+          '<div style="font-size:11px;color:#e65100;margin-top:4px;">+ ₪' + data.undated.toLocaleString() + ' ללא תאריך (' + (data.undatedJobs||0) + ') — לא נכלל בתקופה</div>' : '') +
         '</div>';
       if (clients.length > 0) {
         html += '<div style="border-top:1px solid #f0f0f0;padding-top:14px;">';
@@ -6077,7 +6105,8 @@ function fetchGrossProfitSummary() {
 function copyGP() {
   if (!_gpData) return;
   var clients = Object.keys(_gpData.clients).sort(function(a,b) { return _gpData.clients[b] - _gpData.clients[a]; });
-  var text = '💰 Gross Profit — To Invoice\n';
+  var _pl = { day:'היום', week:'השבוע', month:'החודש', all:'הכל' }[(_gpData.period)||'all'] || 'הכל';
+  var text = '💰 Gross Profit — To Invoice · ' + _pl + '\n';
   text += '─────────────────\n';
   clients.forEach(function(c) { if (_gpData.clients[c] === 0) return; text += c + '\t₪' + _gpData.clients[c].toLocaleString() + '\n'; });
   text += '─────────────────\n';
