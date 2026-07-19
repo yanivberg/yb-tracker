@@ -1,11 +1,11 @@
 # BLUE — YB TRACKER · HANDOFF
-Updated: 18/07/2026. Repo-native working memory (promoted from the Drive "MASTER HANDOFF v2"; the v800-era doc is historical).
+Updated: 19/07/2026. Repo-native working memory (promoted from the Drive "MASTER HANDOFF v2"; the v800-era doc is historical).
 Principle: pointers + currently-load-bearing dated facts only, one page, hard cap. Detail lives in SESSION-LOG.md (append-only journal — read the last ~3 blocks at bootstrap). Recent observed behavior outvotes anything written here.
 
 ## What this is
 "BLUE" = YB Tracker: Hebrew RTL field-maintenance PWA for י.ב אחזקות (Yaniv Berg).
 Live: https://yanivberg.github.io/yb-tracker · Components: single-file index.html (GitHub Pages) · Google Apps Script backend · Cloudflare Worker (Caspit proxy).
-Current deployed: HTML v939 (billed-expense marking + monthly unbilled subtotal) · AS deployment Version 335 (Code.gs = v205: billed-on stamp) · Worker v30. [18/07/26 — all three probe-verified live]
+Current deployed: HTML v943 (gross-profit period filter) · AS deployment Version 336 (Code.gs = v206: getGrossProfitSummary period param) · Worker v30. [19/07/26 — all three probe-verified live]
 
 ## Bootstrap (three reads, nothing more)
 1. This file. 2. Tail of SESSION-LOG.md. 3. Live probes: app title (HTML version) · worker `?action=health` · latest `apps-script-vNNN.js` in this repo (header + `grep -c "action === '"`). Confirm derived versions with Yaniv in one line.
@@ -16,7 +16,7 @@ Current deployed: HTML v939 (billed-expense marking + monthly unbilled subtotal)
 - AS /exec (stable — always "New version" on the EXISTING deployment): `AKfycbxqbXKwg-EkbwKxtmulN_u_RpUi_HLn3Q8Hbw1VkBsl5Go7dRPjIJM2ulJUxZuS01tuVw`
 - GAS project: `script.google.com/home/projects/1OQbwNDsfDsRcx_398mkO5CIimZxuWKfXpoMmKuH_7iWSMICqumquXX_c`
   ⚠ TWO projects named "YB Tracker Main" — verify Deployment ID matches before editing; the other is a decoy.
-  ⚠ Version cap: 194/200 used as of 18/07/26 (warning shown in Manage deployments) — ~6 deploys of headroom. Prune old versions from Project history before the next few deploys.
+  ⚠ Version cap: 195/200 used as of 19/07/26 (warning shown in Manage deployments) — ~5 deploys of headroom. Prune old versions from Project history before the next few deploys.
 - Accountant inbox (monthly docs + quote copies): yanivberg@icloud.com [confirmed 10/07/26]
 - Caspit TEST contact (ALL API tests, ₪1, cancel after — never real clients): "בדיקות מערכת — לא לקוח (TEST)", ContactId `YB-CONTACT-1783772031444`, #44 [10/07/26]
 
@@ -40,9 +40,15 @@ Col J = a `yyyy-MM-dd` "billed-on" stamp written by `createExpenseRow` via `_sta
 From-now-on only: rows predating v205 have an empty col J and bill normally the first time; they simply show unmarked.
 HTML surfaces it in two places (v937 daily list, v938 monthly report): billed rows render greyed + ✓ with the date in the tooltip, still deletable. v939 adds a `טרם חויב` subtotal to the monthly total bar. The client-facing copied report text carries no billing marks by design.
 
+## Client ↔ Caspit + reports [dated 19/07/26 — load-bearing]
+- **Client↔Caspit pairing** = Clients sheet **col I** (`caspitId`); `getClients&full=1` returns it, `_buildMatchMap()` uses it as PRIMARY (before exact-name, then fuzzy ≥75). AS `updateClientCaspitId` writes it by client name. v941: an EXPLICIT contact pick now persists via shared `_persistCaspitPair` — new-quote form (`#caspitQuoteContact`→`_onQuoteContactPicked`) AND invoice tab (`_caspitSetManualContact`). ⚠ Fuzzy auto-match (`_autoMatchCaspitClient`) writes NOTHING — never cement a guess. ⚠ Clearing is NOT persisted (action rejects empty id); a client with no Clients-sheet row warns, doesn't silently no-op. Pre-v941 it only wrote on new-contact creation → why it always "forgot".
+- **Pre-quotation briefing (survey)** saved to localStorage `preProjectSurveys` + POSTed to `Pre-Project Surveys` sheet. v942 shows it read-only (🔧 tools · 📝 steps · 🔑 keys) as a "📋 תדריך" accordion on all 3 project cards (renderSetup main page + renderProjectBtns paused + active). Reads localStorage only (jobId→desc match). ⚠ `getSurveyData` omits jobId (row[1]) → no server fallback; a survey from another device / after cache-clear shows "לא נמצא תדריך". 1-line fix if needed: add `jobId: row[1]`.
+- **Gross-profit report** (drawer 💰) = PIPELINE view: rows at invoice status `להוציא חש`, sum רווח גולמי — NOT a period report until v206. AS v206 added `period=day|week|month|all` (default/unknown = `all` = byte-for-byte old behaviour); filters by תאריך סיום, falling back to תאריך התחלה; dateless rows go to an `undated` bucket, SURFACED not dropped (now ₪904 / 4 to-invoice jobs). Week starts Sunday. HTML v943 = segmented control יומי/שבועי/חודשי/הכל in the overlay.
+
 ## Open items
 ⚠️ YANIV-ONLY (touches real billing data, carried since v931): (1) acceptance test of the 5-step ✕-delete flow on a SCRATCH job/client — never a real one; (2) `repairExpenseRollups(true)` dry-run → review Logger → `repairExpenseRollups(false)` to apply (cleans duplicate/stale `הוצאות` rollup lines from the old unconditional-append bug); (3) acceptance test of the v205 billed-stamp on a SCRATCH job — expect the rollup line to BECOME the full job total on re-invoice (one line), not to gain a second line.
 📱 UNVERIFIED: the iOS execCommand fallback for 📋 העתק (note→clipboard) never ran in testing — Chrome always took the Clipboard API path. One tap on the iPhone confirms or kills it.
+⚠ AS `apps-script-v206.js` mirror NOT committed to repo — the GitHub new-file editor froze rendering the 254KB single paste; v206 is LIVE & correct (Version 336, digest `37 46 80 162 28 140`). Last committed mirror is v205. Retry by pasting in chunks, or accept v205 as the mirror baseline.
 cancel test quotes 900182/83/85/86 (+87) · v92x localStorage backup (spec pending approval) · Bitter-Lesson Phases 0–3 (bitter-lesson-harness-analysis.md) · skill v2 install via Settings (yb-tracker-build-deploy-SKILL-v2.md) · repo `pairs.json` — appeared in the repo root from another session's deploy tooling; confirm it's intentional or delete.
 DONE 11/07/26: AS v203 clean-email (Gmail+getDocPdf) — shipped & verified working, see Caspit facts above.
 RETIRED: bank-deposit Gmail importer [deleted by Yaniv 10/07/26] — see SESSION-LOG tombstones before re-proposing anything.
