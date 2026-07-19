@@ -6,6 +6,42 @@ This file was referenced by the bootstrap but did not exist until 13/07/2026 —
 
 ---
 
+## 2026-07-19 — v940–v943 + AS v206: PO line-id, client↔Caspit memory, briefing watch, GP period filter
+SHIPPED:
+- HTML v940 (commit `5bd3c3d`) — "Attach PO to Existing Project": each PO now shows the picked project's spreadsheet line ID (G0080 / Pal0005) next to the PO number, live as you choose a project, hidden on "New Row". Client-side only — `getPendingQuote` already returned `id`.
+- HTML v941 (commit `d887789`) — the sheet-client → Caspit-contact pairing (e.g. GOLMAT → גולמט בע"מ) now PERSISTS to Clients sheet col I on an explicit pick, in both the new-quote form and the invoice tab, via shared `_persistCaspitPair` → existing `updateClientCaspitId`. Fuzzy auto-match writes nothing.
+- HTML v942 (commit `ce2f931`) — "📋 תדריך" read-only accordion on all 3 project cards showing the pre-quotation briefing's 🔧 tools / 📝 steps / 🔑 keys, from localStorage `preProjectSurveys`.
+- AS v206 → deployment **Version 336** (deployment ID `AKfycbxqbXKwg-Ekbw…`, verified not the decoy) — `getGrossProfitSummary` gained `period=day|week|month|all`. `all` (and any unknown) = byte-for-byte the pre-v206 behaviour. New helper `_gpRowDate` (תאריך סיום → תאריך התחלה). Dateless to-invoice rows summed into an `undated` bucket, surfaced not dropped.
+- HTML v943 (commit `011366f`) — segmented control יומי/שבועי/חודשי/הכל in the Gross Profit overlay; header shows the period; orange note surfaces the undated ₪ when a window is active.
+
+FACT (all 19/07/26):
+- **The Client↔Caspit pairing store already existed and was simply never written from the picker** — Clients sheet col I (`caspitId`), read by `_buildMatchMap()` as the PRIMARY source, writable via the already-live `updateClientCaspitId`. Before v941 it was only written right after CREATING a new Caspit contact, so a manual pick (`_caspitSetManualContact`) updated only the in-memory `_caspitMatchMap` and was lost on reload → the app "forgot". | evidence: v205 lines 695/1745, HTML 6644-6664
+- The v941 safeguard that MATTERS: persist on explicit pick only. `_autoMatchCaspitClient` (fuzzy, score ≥60) still calls the non-persisting `_updateQuoteContactInfo`; without that split, opening a quote form would silently cement whatever the matcher guessed. Verified with a stubbed fetch: auto-match wrote 0 calls, explicit pick wrote exactly 1 with the right URL params. | evidence: live stub test, autoMatchWroteNothing:true
+- `updateClientCaspitId` rejects an empty caspitId ({error:'Missing params'}) → CLEARING a pairing can't be persisted (stays in-memory); overwriting with another contact works. A client absent from the Clients sheet → {error:'Client not found'}, surfaced as an orange toast, not a silent no-op. | evidence: server-rejection + network-failure stub tests both toasted
+- **`getGrossProfitSummary` is a PIPELINE view, not a period report** — it filters to invoice status `להוציא חש` and had NO date dimension pre-v206. So a day/week/month selector genuinely required an AS change; there was no client-only version. The sheets already carry תאריך סיום + תאריך התחלה, so no new columns. | evidence: v205 handler, findColumns has dateStart/dateEnd
+- Dateless rows are a real hazard: **₪904 across 4 to-invoice jobs have no completion OR start date**. A naive period filter would silently drop them from the total. v206 sums them into `undated`/`undatedJobs` and the app shows them in orange. | evidence: live probe period=month → total 4800, undated 904, undatedJobs 4
+- `getGrossProfitSummary` period totals verified against the real sheet: all ₪6,204 · month ₪4,800 · day/week ₪1,800 · garbage period → normalized to `all`, total matches. | evidence: 4 live curl probes + driving the deployed UI (חודשי → ₪4,800 + undated note)
+- **The GitHub new-file editor FREEZES on a single ~254KB paste** (CodeMirror renders it synchronously; the renderer went unresponsive >60s, CDP eval timed out). This is why the `apps-script-v206.js` mirror is NOT committed. The v205 mirror went in fine at 251KB, so the threshold is near there. Paste large files in chunks, or dispatch via CodeMirror `view.dispatch` instead of ⌘V. | evidence: two Runtime.evaluate 45s timeouts, screenshot injection timeouts
+- Commit-message field is interceptable by the password-manager autofill (it polluted the HANDOFF commit `42e0353` with a generated-password prefix). Reliable method, used all of v940–v943: set the field via the native value-setter + input/change events, VERIFY `input.value` exactly, then click Commit. | evidence: all four commit messages landed clean
+
+PREFERENCE:
+- 19/07/26 | Yaniv approves each deploy via the one-approval gate, and wants the spec + a recommendation BEFORE building when a request touches a new side effect (writing to the Clients sheet, an AS deploy). Approved "marker only" / "localStorage only" / "keep to-invoice + add periods" when offered the trade-off. | seen this session
+- 19/07/26 | "Ask to verify before executing" = give the spec and the AskUserQuestion, do NOT build until answered. Honored for v941, v942, v943.
+
+OPEN:
+- ⚠ AS `apps-script-v206.js` mirror not in repo (editor froze on the 254KB paste) — retry in chunks or accept v205 as baseline. v206 is live & digest-recorded.
+- ⚠ Prune GAS versions: 195/200, ~5 deploys of headroom.
+- 🟢 v942 briefing has no server fallback: `getSurveyData` omits jobId. If a briefing must show on another device, add `jobId: row[1]` to that handler (1 line, +1 AS version).
+- 🟢 v941: one real end-to-end pick (GOLMAT + גולמט בע"מ) still to be done by Yaniv — the write path was proven with a stubbed fetch only, to avoid touching the real Clients sheet unwatched.
+- 📱 iOS execCommand fallback for 📋 העתק still unverified on a real iPhone.
+- Carried: v205 billed-stamp acceptance test on a scratch job; repairExpenseRollups dry-run→apply; 5-step ✕-delete test; cancel test quotes 900182/83/85/86 (+87); `pairs.json` provenance.
+
+RETIRED:
+- "The gross-profit drawer is a period/date report" — FALSE; it was a pure pipeline (status `להוציא חש`) sum with no date until v206 added the optional window. Killed 19/07/26.
+- "The Client↔Caspit pairing isn't stored anywhere / needs a new sheet column" — FALSE; Clients col I + `updateClientCaspitId` predate this session. v941 only wired the picker to write them. Killed 19/07/26.
+
+---
+
 ## 2026-07-18 — v934–v939 + AS v205: survey-first quotes, note clipboard, billed-expense marking
 SHIPPED:
 - HTML v934 — the journal "💰 הצעה" button now opens the Pre-Quotation Briefing FIRST (the same gate Edit/New Quotation goes through), with line 1 seeded from the note text. v933 called `switchCaspitTab('quote')` and skipped the survey entirely.
