@@ -6,12 +6,13 @@ This file was referenced by the bootstrap but did not exist until 13/07/2026 —
 
 ---
 
-## 2026-07-20 — v944–v945: Golmat "stuck quotation" — briefing→quote routing + save-for-future
+## 2026-07-20 — v944–v946: Golmat "stuck quotation" — routing + save-for-future + Add Job button
 SHIPPED:
 - HTML v944 (main squash `4dfaa50`, PR #1) — the pre-quotation briefing's finish button now routes via new `_submitBriefing()` (by `_preSurveyPendingJob._forQuotation`) instead of the runtime onclick-rebind. Quote flow always advances to the Caspit quote form; removed the fragile rebind in `_showAnalysisForm`. Fixes the report where the briefing silently ran the legacy "add to Today" handler.
 - HTML v945 (main squash `4f0a945`, PR #2) — `submitQuotationSurvey` now also calls `_saveLessonFromSurvey` (same capture the add-project flow does), so the briefing reaches Lessons Learned; `_doAddJobAsProject` backfills `jobId` onto an orphaned quote-time briefing so 📋 תדריך stays attached even when the sheet desc differs from the quote line.
+- HTML v946 (main squash `b9f70cf`, PR #4) — wired the already-built Add Job form (`openAddJobModal` / `addJobOverlay`) into the "Today's Projects" drawer as **➕ Add Job**. It had ZERO callers, so there was no way to add a new job manually. Opens with default status `ממתין להצעה` → writes to the client sheet tab → shows in Pending Quote Projects.
 - Added `.gitignore` for local acorn audit tooling (node_modules, package*.json).
-- Diagnosis + guidance delivered (no code): Golmat display-stand quote line items (1-line and 3-line splits) and the Add Job recipe (client גולמט, status `ממתין להצעה`, blank price/qty → Save to Sheet Only) to land it in Pending Quote + the Golmat tab.
+- Diagnosis + guidance delivered (no code): Golmat display-stand quote line items (1-line and 3-line splits) and the Add Job path to land it in Pending Quote + the Golmat tab.
 
 FACT (all 20/07/26):
 - **Root cause of the "stuck quotation":** the shared briefing body (`_renderPreSurveyBodyAI`) hardcoded its submit button to `submitPreProjectSurvey()` ("✓ Ready — Add to Today") and the quote flow *rebound* it at runtime in `_showAnalysisForm`. A missed rebind ran the add-to-Today handler → project pushed to Today's Projects, no quote opened, no client-sheet row. | evidence: index.html:9703 (button) + :9999 (rebind), matches every reported symptom
@@ -21,14 +22,16 @@ FACT (all 20/07/26):
 - **Server-side reuse map:** `analyzeJobForPreSurvey` reads **Lessons Learned** by category (feeds FUTURE briefings); `analyzeQuotationLines` reads client-sheet done-jobs + **Job Surveys** (feeds FUTURE quotes); the **Pre-Project Surveys** sheet feeds ONLY the current project's live tips (`getSurveyData`→getProjectTips/getAISessionTips). The quote flow saved to Pre-Project Surveys but SKIPPED `_saveLessonFromSurvey`, so the briefing never reached future projects — the exact gap v945 closes. | evidence: apps-script-v205.js:2364 / :2455 / :2326
 - **Quote email path:** Caspit's own `EmailDocument` API 500s unconditionally; the app emails the cleaned PDF via Gmail (`emailQuote`→`getDocPdf`→GmailApp) to **yanivberg@icloud.com**, best-effort/silent-on-failure, gated on `d.mailSent`. Still the fragile step. | evidence: index.html:8124 / :8657 / :8699
 - **This sandbox's egress policy DENIES `script.google.com` and the worker host** (403 to CONNECT) — cannot call the live AS/worker or write to the sheet from a session. Live-backend probes must be done in-app or via a connected browser. | evidence: proxy `/__agentproxy/status` recentRelayFailures; WebFetch getClients → 403
-- **GitHub squash-merge gotcha:** a feature branch that still holds its un-squashed commit conflicts on the NEXT PR from the same branch. Fixed by `git rebase --onto origin/main <old-branch-tip>` before the second merge. | evidence: PR #2 → 405 "merge conflicts"; rebase `9e3e836`→origin/main then force-with-lease resolved it
+- **GitHub squash-merge gotcha:** a feature branch that still holds its un-squashed commit conflicts on the NEXT PR from the same branch. Fixed by `git rebase --onto origin/main <old-branch-tip>` before the second merge — repeated cleanly for PR #2, #4. | evidence: PR #2 → 405 "merge conflicts"; rebase `9e3e836`→origin/main then force-with-lease resolved it
+- **There is NO standalone "Add Job" button in the UI (pre-v946):** the manual form `openAddJobModal` / `addJobOverlay` was fully built + functional but had zero callers. New jobs came only via "Pick from Open Tasks", "Pending Quote Projects" (both pick EXISTING sheet jobs), the quote Save & Send (`addJobsBulk`, `:8637`), or Instant Timer → New Project. My earlier "tap + → Add Job" guidance was WRONG until v946 wired the button. | evidence: `grep openAddJobModal` → def only; drawer list `:469-501`
+- **The Golmat card vanished because Yaniv deleted it** (the card carries a ✕). Deleting a card removes it from `yb_projects` only — the briefing survives under the separate `preProjectSurveys` key (+ server + this chat). The "9 אחרונות · הערה" row on the main page is the fixed יומן widget (`latestNotesCount` `:8011`), not a project card. | evidence: user confirmed "iv deleted it"; screenshot showed only the journal widget
 
 PREFERENCE:
 - 20/07/26 | Yaniv walks his own mental model of a flow ("step by step it does X→Y→Z, am I correct?") and wants an honest true/partial map, not a yes. Delivered as a ✅/⚠️ table (steps 1–4 true, step 5 needed v945). | seen this session
 - 20/07/26 | Terse go-aheads ("Yes" / "Go") are the per-deploy approval; still gave spec + audits before each deploy. Wants the fix live, same session.
 
 OPEN:
-- 🟢 Golmat still to be done BY Yaniv in-app: Add Job (גולמט / `ממתין להצעה` / full-spec desc → Save to Sheet Only) → then send the quote with the drafted line items. Verify גולמט is in the client dropdown and the Golmat↔Caspit pairing populates the doc header. Then delete the redundant original Golmat Today's-Projects card (jobId='').
+- 🟢 Golmat still to be done BY Yaniv in-app (v946 now gives the button): drawer → **➕ Add Job** → גולמט / `ממתין להצעה` / full-spec desc → Save to Sheet Only → confirm it lands in Pending Quote Projects → send the quote with the drafted line items. Verify גולמט is in the client dropdown and the Golmat↔Caspit pairing populates the doc header. (Original Golmat Today's-Projects card was already deleted by Yaniv.)
 - ⚠ v945 saves the quote-time briefing to Lessons Learned via `_saveLessonFromSurvey`, which hardcodes outcome `success` / 0h. Consistent with the existing add-project capture, but pre-work briefings now enter the top-3-by-category pool as "success/0h" — if that pollutes future briefings, add an honest outcome tag (e.g. `quoted`).
 - 🟢 The **Skip — Go straight to quotation** path (`_skipToQuotation`) still saves no briefing/lesson by design → skipping the AI step means nothing reaches future projects.
 - Carried from 19/07: AS v206 mirror not in repo (editor froze on 254KB paste); prune GAS versions (~5 headroom); `getSurveyData` omits jobId (no cross-device briefing fallback); one real GOLMAT↔גולמט בע"מ pairing pick; iOS execCommand copy unverified.
@@ -36,6 +39,7 @@ OPEN:
 RETIRED:
 - "The pre-quotation survey is saved for future projects" — FALSE before v945: the quote flow wrote only to Pre-Project Surveys (current-project tips only) and skipped Lessons Learned, so no future job ever saw it. Fixed by v945. Killed 20/07/26.
 - "A project made through the pre-quotation briefing is written to the client sheet" — FALSE; `_doAddJobAsProject` never writes a row (read-only against the sheet). Killed 20/07/26.
+- "The app has a working Add Job button" — FALSE before v946: `openAddJobModal` had zero callers, so the built form was unreachable. Wired into the drawer by v946. Killed 20/07/26.
 
 ---
 
