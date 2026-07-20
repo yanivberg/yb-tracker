@@ -1,0 +1,4 @@
+# Local audit tooling (acorn parse for JS validation) — not part of the app
+node_modules/
+package.json
+package-lock.json
