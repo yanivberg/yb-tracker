@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v947</title>
+<title>י.ב אחזקות — v948</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -470,8 +470,6 @@ input[id^="progSlider-"]::-moz-range-track {
         <svg width="52" height="52" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="44" r="28" stroke="#111" stroke-width="5"/><line x1="40" y1="44" x2="40" y2="24" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="44" x2="54" y2="54" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="34" y1="8" x2="46" y2="8" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="8" x2="40" y2="16" stroke="#111" stroke-width="5" stroke-linecap="round"/></svg>
         <span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">Instant Timer — For Quotation</span>
       </div>
-      <div onclick="closeSetupDrawer();openAddJobModal();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
-        <span style="font-size:24px;flex-shrink:0;">➕</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#2e7d32;">Add Job</div><div style="font-size:11px;color:#888;margin-top:1px;">עבודה חדשה לגיליון → ממתין להצעה</div></div></div>
       <div onclick="closeSetupDrawer();fetchOpenJobs();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📋</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a56db;">Pick from Open Tasks</span></div>
       <div onclick="closeSetupDrawer();fetchPendingQuote();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -525,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v947
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v948
 Deployed: 18/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 336)
@@ -535,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v948 · 20/07/2026 · AS v206 / Version 336
+• כפתור "➕ הוסף עבודה" הועבר ממגירת "Today's Projects" אל תוך מסך "🗂️ ניהול עבודות" (בכותרת, ליד ה-✕). פותח את אותו טופס Add Job (סטטוס ברירת-מחדל "ממתין להצעה"). המגירה הראשית התנקתה מהפריט.
+
 ─────────────────
 v947 · 20/07/2026 · AS v206 / Version 336
 • אקורדיון "📋 תדריך" מוצג עכשיו גם על עבודות ב-"Pending Quote Projects". עבודה שנוספה דרך Add Job לא נושאת jobId בשאלון — לכן ההתאמה היא לפי jobId → תיאור מדויק → השאלון האחרון (קדם-הצעה) של אותו לקוח, ואז ה-jobId "מוטבע" על השאלון כדי שהחיבור יהיה קבוע (גם _surveyForProject ימצא אותו משם, כשהעבודה תיכנס ליום). כך שלבים/כלים/חומרים נשארים מחוברים לעבודה.
@@ -1536,7 +1538,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v947</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v948</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1952,7 +1954,10 @@ SHEET SYNC
 <div id="manageJobsOverlay" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:420px;background:#eef2f6;z-index:10014;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;box-shadow:0 0 40px rgba(0,0,0,0.15);">
   <div style="background:#00695c;color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
     <div style="font-size:18px;font-weight:900;">🗂️ ניהול עבודות</div>
-    <button onclick="closeManageJobs()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:5px 12px;font-size:16px;font-weight:900;cursor:pointer;">✕</button>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button onclick="closeManageJobs();openAddJobModal();" style="background:#f0c020;border:none;color:#111;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;white-space:nowrap;">➕ הוסף עבודה</button>
+      <button onclick="closeManageJobs()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;border-radius:8px;padding:5px 12px;font-size:16px;font-weight:900;cursor:pointer;">✕</button>
+    </div>
   </div>
   <div style="padding:14px 16px 8px;flex-shrink:0;">
     <select id="mjClient" onchange="mjRenderList()" style="width:100%;padding:13px;border:1.5px solid #b2dfdb;border-radius:12px;font-size:15px;font-family:Heebo,sans-serif;background:#fff;font-weight:700;color:#00695c;">
