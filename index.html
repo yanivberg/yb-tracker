@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v943</title>
+<title>י.ב אחזקות — v944</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v943
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v944
 Deployed: 18/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 336)
@@ -533,6 +533,11 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v944 · 20/07/2026 · AS v206 / Version 336
+• תוקן: במסך "שאלון קדם-הצעה" (Pre-Quotation Briefing) כפתור הסיום היה עלול להריץ בטעות את הפעולה הישנה "הוסף ל-Today" במקום להמשיך להצעת המחיר. התוצאה שנצפתה: הפרויקט נשמר תחת Today's Projects, לא נפתח טופס הצעה, ולא נוצרה שורה בגיליון הלקוח (למשל גולמט). עכשיו כפתור התדריך מנותב לפי סוג הזרימה (_submitBriefing) — זרימת הצעה תמיד ממשיכה לטופס ההצעה בקספיט; הותקן הניתוב-מחדש השביר בזמן-ריצה.
+• התדריך שכבר מולא ממשיך להישמר כרגיל (preProjectSurveys) — התיקון מונע רק את המסלול השגוי, ולא נוגע בנתונים.
+
 ─────────────────
 v943 · 19/07/2026 · AS v206 / Version 336
 • במסך "Gross Profit — To Invoice" נוסף בורר תקופה: יומי / שבועי / חודשי / הכל. הדוח נשאר "רווח גולמי להוצאת חשבונית", והבורר מצמצם לפי תאריך סיום הפרויקט (ובהיעדרו תאריך התחלה). "הכל" זהה למה שהיה. שבוע מתחיל ביום ראשון.
@@ -1516,7 +1521,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v943</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v944</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -9568,6 +9573,9 @@ function openPreProjectSurvey(job) {
 
 function _renderPreSurveyBodyAI(descSummary, lineStepsOrAiSteps, successKeys, suggestedTools, materials, rawDesc, cat, lines) {
   var html = '';
+  // v944: is this briefing being filled as part of a QUOTATION flow? If so the final
+  // button must advance to the Caspit quote form, not the legacy "add to Today" action.
+  var _isQuot = !!(_preSurveyPendingJob && _preSurveyPendingJob._forQuotation);
 
   // Description reference
   if (rawDesc || descSummary) {
@@ -9700,7 +9708,7 @@ function _renderPreSurveyBodyAI(descSummary, lineStepsOrAiSteps, successKeys, su
       '</div>' +
       '<div id="expOnNote" style="font-size:10px;color:#aaa;margin-top:6px;text-align:center;">⚠️ לא ניתן לשנות לאחר תחילת הפרויקט</div>' +
     '</div>' +
-    '<button onclick="submitPreProjectSurvey()" style="width:100%;padding:14px;background:#f0c020;border:none;border-radius:12px;font-size:16px;font-weight:900;color:#111;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);font-family:Heebo,sans-serif;margin-bottom:8px;">✓ Ready — Add to Today</button>';
+    '<button onclick="_submitBriefing()" style="width:100%;padding:14px;background:#f0c020;border:none;border-radius:12px;font-size:16px;font-weight:900;color:#111;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);font-family:Heebo,sans-serif;margin-bottom:8px;">' + (_isQuot ? '✓ שמור ועבור להצעת מחיר' : '✓ Ready — Add to Today') + '</button>';
 
   // Pre-highlight the default expenses-on choice once the buttons exist in the DOM
   // (the markup above renders both buttons neutral; _setExpensesOn applies the actual styling).
@@ -9792,6 +9800,16 @@ function _setExpensesOn(val) {
   if (bc) { bc.style.border = val==='client' ? '2px solid #e53935' : '2px solid #e0e0e0'; bc.style.background = val==='client' ? '#ffebee' : '#fff'; bc.style.color = val==='client' ? '#c62828' : '#555'; }
   if (bm) { bm.style.border = val==='me'     ? '2px solid #2e7d32' : '2px solid #e0e0e0'; bm.style.background = val==='me'     ? '#e8f5e9' : '#fff'; bm.style.color = val==='me'     ? '#2e7d32' : '#555'; }
   if (note) note.style.color = val==='client' ? '#e65100' : val==='me' ? '#2e7d32' : '#aaa';
+}
+
+// v944: single router for the shared briefing form. The pre-quotation flow sets
+// _preSurveyPendingJob._forQuotation = true, so route there straight to the Caspit quote
+// form; otherwise fall back to the legacy add-as-project handler. Replaces the fragile
+// runtime onclick-rebinding that, if it didn't take, dumped the project into Today's
+// Projects with no quote and no client-sheet row.
+function _submitBriefing() {
+  if (_preSurveyPendingJob && _preSurveyPendingJob._forQuotation) { submitQuotationSurvey(); return; }
+  submitPreProjectSurvey();
 }
 
 function submitPreProjectSurvey() {
@@ -9995,18 +10013,9 @@ function _analyzeForQuotation() {
     try {
       body.innerHTML = errBanner + _renderPreSurveyBodyAI(ai.descSummary||'', lineSteps, keys, tools, mats, lines.join(' | '), cat, lines);
       body.querySelectorAll('[data-val]').forEach(function(el){ if(el.dataset.val) el.value = el.dataset.val; });
-      // Use .onclick assignment (more reliable than setAttribute in all browsers)
-      var submitBtn = body.querySelector('button[onclick*="submitPreProjectSurvey"]');
-      if (submitBtn) {
-        submitBtn.textContent = '✓ שמור ועבור להצעת מחיר';
-        submitBtn.onclick = function(){ submitQuotationSurvey(); };
-      } else {
-        var fb = document.createElement('button');
-        fb.textContent = '✓ עבור להצעת מחיר';
-        fb.onclick = function(){ submitQuotationSurvey(); };
-        fb.style.cssText = 'width:100%;padding:13px;background:#0d47a1;border:none;border-radius:12px;font-size:15px;font-weight:900;color:#fff;cursor:pointer;font-family:Heebo,sans-serif;margin-top:10px;';
-        body.appendChild(fb);
-      }
+      // v944: the briefing button now self-routes via _submitBriefing() (the pending job is
+      // flagged _forQuotation here), so no runtime onclick-rebind is needed. Removing that
+      // rebind closes the failure mode where a missed rebind ran the "add to Today" handler.
     } catch(e2) {
       body.innerHTML = '<div style="padding:16px;direction:rtl;">' +
         '<div style="color:#c62828;font-size:13px;margin-bottom:12px;">⚠️ ' + (e2.message||'error') + '</div>' +
