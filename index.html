@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v946</title>
+<title>י.ב אחזקות — v947</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v946
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v947
 Deployed: 18/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 336)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v947 · 20/07/2026 · AS v206 / Version 336
+• אקורדיון "📋 תדריך" מוצג עכשיו גם על עבודות ב-"Pending Quote Projects". עבודה שנוספה דרך Add Job לא נושאת jobId בשאלון — לכן ההתאמה היא לפי jobId → תיאור מדויק → השאלון האחרון (קדם-הצעה) של אותו לקוח, ואז ה-jobId "מוטבע" על השאלון כדי שהחיבור יהיה קבוע (גם _surveyForProject ימצא אותו משם, כשהעבודה תיכנס ליום). כך שלבים/כלים/חומרים נשארים מחוברים לעבודה.
+
 ─────────────────
 v946 · 20/07/2026 · AS v206 / Version 336
 • הוחזר כפתור "➕ Add Job" למגירת "Today's Projects" — הטופס (addJobOverlay) היה בנוי אך לא היה מחובר לשום כפתור, אז לא הייתה דרך להוסיף עבודה חדשה ידנית. הכפתור נפתח עם סטטוס ברירת-מחדל "ממתין להצעה": בוחרים לקוח + תיאור, שומרים, והעבודה נכתבת לגיליון הלקוח ומופיעה ב-"Pending Quote Projects".
@@ -1532,7 +1536,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v946</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v947</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3306,6 +3310,60 @@ function fetchPendingQuote() {
 
 var pendingQuoteJobs = [];
 
+// v947: attach the pre-quotation briefing to a Pending-Quote job. These jobs are created via
+// Add Job, so the saved survey has no jobId yet — match by jobId → exact desc → newest
+// unattached quotation briefing for the same client, and STAMP the jobId so the link becomes
+// permanent (afterwards _surveyForProject finds it by jobId too, e.g. when it enters the day).
+function _surveyForPendingJob(job) {
+  if (!job) return null;
+  var all = [];
+  try { all = JSON.parse(localStorage.getItem('preProjectSurveys') || '[]'); } catch(e) { return null; }
+  if (!Array.isArray(all) || !all.length) return null;
+  var jid = String(job.id || '').trim();
+  var desc = String(job.desc || '').trim();
+  var client = String(job.client || '').trim();
+  var hit = null, stamp = false;
+  if (jid) hit = all.filter(function(s){ return s && String(s.jobId||'').trim() === jid; }).pop();
+  if (!hit && desc) { hit = all.filter(function(s){ return s && String(s.desc||'').trim() === desc; }).pop(); if (hit) stamp = true; }
+  if (!hit && client) { hit = all.filter(function(s){ return s && !String(s.jobId||'').trim() && s._forQuotation && String(s.client||'').trim() === client; }).pop(); if (hit) stamp = true; }
+  if (hit && stamp && jid) { hit.jobId = jid; try { localStorage.setItem('preProjectSurveys', JSON.stringify(all)); } catch(e){} }
+  return hit || null;
+}
+
+function _togglePendingSurvey(idx) {
+  if (!pendingQuoteJobs[idx]) return;
+  pendingQuoteJobs[idx]._surveyOpen = !pendingQuoteJobs[idx]._surveyOpen;
+  showPendingQuotePicker(pendingQuoteJobs);
+}
+
+function _pendingSurveyAccordionHtml(idx, job) {
+  var s = _surveyForPendingJob(job);
+  if (!s) return '';
+  var open = !!job._surveyOpen;
+  function sec(icon, label, items, color, numbered) {
+    var list = (items || []).filter(Boolean);
+    if (!list.length) return '';
+    return '<div style="margin-bottom:8px;">' +
+      '<div style="font-size:10px;font-weight:900;color:' + color + ';margin-bottom:3px;direction:rtl;">' + icon + ' ' + label + '</div>' +
+      list.map(function(t, n){
+        return '<div style="display:flex;gap:6px;align-items:flex-start;font-size:12px;color:#111;padding:2px 0;direction:rtl;">' +
+          '<span style="flex-shrink:0;color:' + color + ';font-weight:700;">' + (numbered ? (n+1) + '.' : '•') + '</span>' +
+          '<span style="flex:1;">' + _escNote(t) + '</span></div>';
+      }).join('') + '</div>';
+  }
+  var panel = sec('🔧', 'כלים נדרשים', s.tools, '#1565c0', false) +
+              sec('📝', 'שלבי ביצוע', s.steps, '#6a1b9a', true) +
+              sec('🔑', 'מפתחות להצלחה', s.keys, '#2e7d32', false);
+  if (!panel) panel = '<div style="font-size:11px;color:#999;direction:rtl;">התדריך נשמר ריק</div>';
+  return '<div style="background:#f4f7fb;border:1px solid #e0e0e0;border-radius:10px;margin:6px 0 2px;padding:8px 12px;">' +
+    '<div onclick="_togglePendingSurvey(' + idx + ')" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;-webkit-tap-highlight-color:transparent;">' +
+      '<span style="font-size:12px;font-weight:900;color:#0d47a1;direction:rtl;">📋 תדריך</span>' +
+      '<span style="font-size:11px;color:#0d47a1;">' + (open ? '▲' : '▼') + '</span>' +
+    '</div>' +
+    '<div style="display:' + (open ? 'block' : 'none') + ';padding-top:8px;">' + (open ? panel : '') + '</div>' +
+  '</div>';
+}
+
 function showPendingQuotePicker(jobs) {
   pendingQuoteJobs = jobs || [];
   var overlay = document.getElementById('pendingQuoteOverlay');
@@ -3345,7 +3403,7 @@ function showPendingQuotePicker(jobs) {
                 '<button onclick="openCompleteForm(' + idx + ')" style="background:rgba(0,100,0,0.7);color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">✓ Complete</button>' +
               '</div>' +
             '</div>' +
-          '</div>' + _jobNotesPanelHtml('pq'+idx, true);
+          '</div>' + _pendingSurveyAccordionHtml(idx, job) + _jobNotesPanelHtml('pq'+idx, true);
         } else {
           html += '<div id="pqRow_'+idx+'" style="padding:12px 16px;' + rowStyle + '">' +
             '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
@@ -3356,7 +3414,7 @@ function showPendingQuotePicker(jobs) {
                 '<button onclick="openCompleteForm(' + idx + ')" style="background:rgba(0,0,0,0.25);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;white-space:nowrap;">✓ Complete</button>' +
               '</div>' +
             '</div>' +
-          '</div>' + _jobNotesPanelHtml('pq'+idx, true);
+          '</div>' + _pendingSurveyAccordionHtml(idx, job) + _jobNotesPanelHtml('pq'+idx, true);
         }
       });
     });
