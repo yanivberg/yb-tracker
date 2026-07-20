@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v944</title>
+<title>י.ב אחזקות — v945</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v944
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v945
 Deployed: 18/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 336)
@@ -533,6 +533,11 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v945 · 20/07/2026 · AS v206 / Version 336
+• שאלון קדם-ההצעה נשמר עכשיו גם כ"לקח" (Lessons Learned) — בדיוק כמו במסלול הוספת פרויקט. כך התדריך (שלבים/כלים/חומרים/מפתחות) מזין הצעות AI בפרויקטים עתידיים מאותה קטגוריה (analyzeJobForPreSurvey קורא את גיליון Lessons Learned). קודם מסלול ההצעה דילג על זה, והנתונים לא הגיעו לפרויקטים הבאים.
+• התדריך "מאומץ" לפרויקט לפי jobId ברגע שהעבודה נוספת ליום — כך אקורדיון 📋 תדריך נשאר מחובר גם אם תיאור השורה בגיליון שונה מהשורה שממנה נוצר השאלון (לא עוד "לא נמצא תדריך").
+
 ─────────────────
 v944 · 20/07/2026 · AS v206 / Version 336
 • תוקן: במסך "שאלון קדם-הצעה" (Pre-Quotation Briefing) כפתור הסיום היה עלול להריץ בטעות את הפעולה הישנה "הוסף ל-Today" במקום להמשיך להצעת המחיר. התוצאה שנצפתה: הפרויקט נשמר תחת Today's Projects, לא נפתח טופס הצעה, ולא נוצרה שורה בגיליון הלקוח (למשל גולמט). עכשיו כפתור התדריך מנותב לפי סוג הזרימה (_submitBriefing) — זרימת הצעה תמיד ממשיכה לטופס ההצעה בקספיט; הותקן הניתוב-מחדש השביר בזמן-ריצה.
@@ -1521,7 +1526,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v944</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v945</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3218,6 +3223,23 @@ function addJobAsProject(job) {
 function _doAddJobAsProject(job, expensesOn) {
   var name = job.desc;
   if (projects.find(function(p) { return p.jobId === job.id; })) { showToast('Job already added'); return; }
+  // v945: adopt an orphaned pre-quotation briefing (saved with empty jobId at quote time) onto
+  // this project, so its 📋 תדריך stays attached even when the sheet description differs from the
+  // quote line that seeded the survey. Prefer an exact description match; otherwise take the most
+  // recent unattached quotation briefing for the same client. localStorage-only, best-effort.
+  try {
+    if (job.id) {
+      var _pps = JSON.parse(localStorage.getItem('preProjectSurveys') || '[]');
+      var _hit = null;
+      for (var _pi = _pps.length - 1; _pi >= 0; _pi--) {
+        var _s = _pps[_pi];
+        if (!_s || String(_s.jobId || '').trim()) continue;
+        if (_s.desc && _s.desc === job.desc) { _hit = _s; break; }
+        if (!_hit && _s._forQuotation && _s.client === job.client) _hit = _s;
+      }
+      if (_hit) { _hit.jobId = job.id; localStorage.setItem('preProjectSurveys', JSON.stringify(_pps)); }
+    }
+  } catch (_e) {}
   var proj = { name: name, title: job.title || name, client: job.client, jobId: job.id, jobClient: job.client, jobDateStart: null, estHours: job.hours || 0, jobPO: job.poNumber || job.po || '', jobPrice: job.price || 0, jobIncome: parseFloat(job.income) || 0, sessionNum: projects.length + 1, totalMs: 0, prevMs: 0, active: false, activeStart: null, done: false, notes: [], noteOpen: false, editOpen: false, _expensesOn: expensesOn || 'client' };
   projects.push(proj);
   saveClient(job.client);
@@ -10058,6 +10080,15 @@ function submitQuotationSurvey() {
   surveys.push(survey);
   localStorage.setItem('preProjectSurveys', JSON.stringify(surveys));
   fetch(SHEETS_URL + '?action=savePreProjectSurvey', { method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, body:JSON.stringify(survey) }).catch(function(){});
+  // v945: also save this briefing as a Lesson Learned — the same capture the add-project flow
+  // already does. analyzeJobForPreSurvey reads the Lessons Learned sheet by category to seed
+  // FUTURE briefings; the quote flow previously skipped this, so the data never reached future
+  // projects. Best-effort (fetch inside _saveLessonFromSurvey is .catch-guarded).
+  _saveLessonFromSurvey(
+    { jobId:'', client:p.client||'', category:p.category||'', title:p.desc||'', name:p.desc||'', estHours:0 },
+    { materials:materials, steps:allSteps, successKeys:keys, tools:tools, freeNote:'' },
+    0
+  );
   // Store prefill for quotation form — stepsByLine keeps each line's own steps separate
   _quotePrefill = { client: p.client||'', lines: (p._lines && p._lines.length) ? p._lines : (p.desc ? [p.desc] : []), stepsByLine: stepsByLine, materials: materials };
   _clearPreSurveySnapshot();
