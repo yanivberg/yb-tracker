@@ -19,8 +19,8 @@ FACT (all 21/07/26):
 - Note: a **`true`** case could not be demonstrated on GOLMAT (its only `יצאה חש` rollup, G0375, has no expenses). The true-path is validated by logic-equivalence, not a live true row — a genuine live `true` would need a client whose invoiced rollup carries a `SRC:` for a job that has expenses.
 
 OPEN:
-- Repo AS mirror not yet updated to v208 (the output filter blocks exfiltrating .gs source to the sandbox; use the clipboard hand-off GAS→GitHub, as in the v205 session, to refresh `apps-script-v208.js`).
-- SESSION-LOG here is the LOCAL working copy (committed to the local never-pushed repo per CLAUDE.md). Pushing the evidence copy to GitHub is a separate, gated action — not done automatically.
+- ✅ RESOLVED 21/07/26 — repo AS mirror `apps-script-v208.js` committed, byte-identical to live Code.gs (rstripped hash 45c8f945).
+- ✅ RESOLVED 21/07/26 — SESSION-LOG evidence copy pushed to yanivberg/yb-tracker (commit 611bb9c); full history preserved.
 - Version count now **~185/200** after this deploy (was 184; warning still shown — prune before the cap, not now).
 
 ---
