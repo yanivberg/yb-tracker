@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v951</title>
+<title>י.ב אחזקות — v952</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v951
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v952
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -533,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v952 · 21/07/2026 · AS v207 / Version 337
+• לוגיקת "חויב" להוצאות פושטה לכלל אחד (לבקשת יניב): הוצאה נחשבת מחויבת אך ורק אם שורת הריכוז "הוצאות …" של העבודה בגיליון הלקוח נמצאת במצב "יצאה חש" בעמודת יצאה חשבונית. "להוציא חש" או היעדר שורת ריכוז = טרם חויב. חל על הסימון ✓ ברשימה היומית, בדוח החודשי ובסכום "טרם חויב". חותמת עמודה J כבר אינה מקור האמת. ⚠ דורש Apps Script v208 (getExpenses מחזיר invoiced); עד אז הסימון ממשיך בלוגיקה הישנה (fallback).
+
 ─────────────────
 v951 · 21/07/2026 · AS v207 / Version 337
 • תיקון: תווית הכפתור עצמה עודכנה מ-v73 · 02/5/2026 ל-v207 · 21/07/2026 (ב-v950 עודכן רק התוכן שמועתק, לא הכיתוב על הכפתור).
@@ -1550,7 +1554,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v951</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v952</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2589,8 +2593,8 @@ function _loadMonthlyExpenses() {
       jobs[key].push(e);
     });
     var total = filtered.reduce(function(s,e){ return s+(parseFloat(e.amount)||0); }, 0);
-    // v939: how much of this month hasn't been rolled up onto a client sheet yet (empty Expenses col J)
-    var unbilled = filtered.reduce(function(s,e){ return s + (String(e.invoicedDoc||'').trim() === '' ? (parseFloat(e.amount)||0) : 0); }, 0);
+    // v952: "not yet invoiced" = the job's rollup row isn't at יצאה חש (see _expIsInvoiced)
+    var unbilled = filtered.reduce(function(s,e){ return s + (_expIsInvoiced(e) ? 0 : (parseFloat(e.amount)||0)); }, 0);
     // Build flat numbered list for clipboard
     var monthHebrew = {'01':'ינואר','02':'פברואר','03':'מרץ','04':'אפריל','05':'מאי','06':'יוני','07':'יולי','08':'אוגוסט','09':'ספטמבר','10':'אוקטובר','11':'נובמבר','12':'דצמבר'};
     var monthNum = month.slice(5,7);
@@ -2621,9 +2625,9 @@ function _loadMonthlyExpenses() {
         '<div style="font-size:11px;font-weight:900;color:#0d47a1;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1.5px solid #e3f2fd;">' + headerLabel + '</div>';
       rows.forEach(function(e) {
         var catIcon = e.category==='חומרים'?'🔩':'👷';
-        // v938: same billed marker as the daily list — invoicedDoc is Expenses col J (AS v205)
-        var inv  = String(e.invoicedDoc||'').trim() !== '';
-        var mark = inv ? '<span title="חויב ' + e.invoicedDoc + '" style="color:#2e7d32;flex-shrink:0;font-weight:700;">✓</span>' : '';
+        // v952: invoiced = the job's rollup row shows יצאה חש on the client sheet (_expIsInvoiced)
+        var inv  = _expIsInvoiced(e);
+        var mark = inv ? '<span title="יצאה חשבונית" style="color:#2e7d32;flex-shrink:0;font-weight:700;">✓</span>' : '';
         var dateStr = '';
         try { var dt2=new Date(e.date); if(!isNaN(dt2)) dateStr=('0'+dt2.getDate()).slice(-2)+'/'+('0'+(dt2.getMonth()+1)).slice(-2); } catch(_){}
         html += '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid #f0f0f0;font-size:12px;' + (inv ? 'opacity:0.5;' : '') + '">' +
@@ -5065,9 +5069,9 @@ function _renderExpenses(i, exps) {
 
   var rows = exps.map(function(ex) {
     var catIcon = ex.category==='חומרים'?'🔩':'👷';
-    // v937: invoicedDoc = Expenses col J stamp (AS v205). '' = not yet rolled up onto the client sheet.
-    var inv  = String(ex.invoicedDoc||'').trim() !== '';
-    var mark = inv ? '<span title="חויב ' + ex.invoicedDoc + '" style="color:#2e7d32;flex-shrink:0;font-weight:700;">✓</span>' : '';
+    // v952: invoiced = the job's rollup row shows יצאה חש on the client sheet (_expIsInvoiced)
+    var inv  = _expIsInvoiced(ex);
+    var mark = inv ? '<span title="יצאה חשבונית" style="color:#2e7d32;flex-shrink:0;font-weight:700;">✓</span>' : '';
     var linkBtn = ex.link ? '<a href="'+ex.link+'" target="_blank" onclick="event.stopPropagation()" style="flex-shrink:0;font-size:13px;text-decoration:none;" title="פתח מייל">📧</a>' : '';
     var receiptBtn = ex.receipt ? '<a href="'+ex.receipt+'" target="_blank" onclick="event.stopPropagation()" style="flex-shrink:0;font-size:13px;text-decoration:none;" title="פתח קבלה">🧾</a>' : '';
     return '<div style="display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:0.5px solid rgba(0,0,0,0.1);font-size:11px;' + (inv ? 'opacity:0.5;' : '') + '">' +
@@ -8231,6 +8235,16 @@ function _clearCaspitLineDetails(createResult) {
 // Called AFTER _clearCaspitLineDetails resolves, so the fetched PDF shows the description once.
 // Caspit's own EmailDocument API 500s on every call, so we never use it. Silent on failure —
 // the saved Caspit doc is correct regardless of whether the courtesy email goes out.
+// v952: single source of truth for whether an expense is INVOICED.
+// New rule (per Yaniv): invoiced ⟺ the job's rollup row on the client sheet has 'יצאה חש'
+// in the יצאה חשבונית column — AS v208 getExpenses returns that as `invoiced`. Until v208 is
+// deployed the field is absent, so fall back to the old col-J stamp semantics ('' = unbilled).
+function _expIsInvoiced(ex) {
+  if (!ex) return false;
+  if (ex.invoiced !== undefined) return ex.invoiced === true || ex.invoiced === 'true';
+  return String(ex.invoicedDoc || '').trim() !== '';
+}
+
 function _emailCleanedQuote(docId, docNum, subject, body) {
   if (!docId && !docNum) return Promise.resolve();
   var payload = { action: 'emailQuote', docId: docId || '', docNum: docNum || '', to: 'yanivberg@icloud.com' };
