@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v949</title>
+<title>י.ב אחזקות — v950</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,16 +523,20 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v949
-Deployed: 18/07/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v950
+Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxqbXK…exec (Version 336)
+Apps Script: AKfycbxqbXK…exec (Version 337)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v950 · 21/07/2026 · AS v207 / Version 337
+• עודכנו כפתורי ההעתקה ב-App Information. "Copy Apps Script" מציג כעת v207 (deployment Version 337) במקום v73, עם emailQuote (subject/body), ועם אזהרה: יש לפרסם New version על ה-deployment הקיים בלבד (deployment חדש משנה את כתובת ה-exec). "Copy Caspit API Info" עודכן ל-worker v30, נוסף getDocPdf, ונוספו הערות: טוקן 10 דק׳ (cache 8), ניתוב app1/app2, EmailDocument מחזיר 500 תמיד, ו-docNum חייב קידומת סניף (01/900195).
+
 ─────────────────
 v949 · 20/07/2026 · AS v206 / Version 336
 • מייל הצעת מחיר מותאם ללקוח: אחרי יצירת הצעה נפתח דיאלוג "📧 שליחת הצעה במייל" עם נמען (הי __,), שם (עבור __ / בכותרת), נושא ותוכן — ניתנים לעריכה. תבניות מובנות: גולמט→ריקי, רולמט→ריקי, פל-ים→שירה, בילינסקי→אילנית (עוזי בילינסקי). נושא: "<שם> - הצעת מחיר - <מספר>". גוף: "הי <נמען>, / מצורפת הצעת מחיר עבור <שם> / תודה / יניב". לקוח לא-מוכר → טופס ריק שנשמר ל-localStorage לפעם הבאה. "דלג" שולח בברירת המחדל הישנה. ⚠ דורש עדכון Apps Script (emailQuote מקבל subject/body) כדי שהמותאם ייכנס לתוקף.
@@ -1542,7 +1546,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v949</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v950</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6102,8 +6106,8 @@ function copyAppScript() {
   var btn = document.getElementById('copyScriptBtn');
   var origText = btn.textContent;
   var text = [
-    '// Apps Script v73 — י.ב אחזקות',
-    '// Deploy: Web App → Anyone → New deployment each update',
+    '// Apps Script v207 · deployment Version 337 — י.ב אחזקות',
+    '// Deploy: Web App → Anyone → NEW VERSION on the EXISTING deployment (never a new deployment - it changes the exec URL)',
     '// Spreadsheet: ' + SPREADSHEET_ID,
     '// URL: ' + SHEETS_URL,
     '',
@@ -6115,6 +6119,9 @@ function copyAppScript() {
     'saveCaspitDocument (&jobIds, &docNumber, &trxTypeId, &total, &pdfLink, &note)',
     'createClient, updateClientCaspitId, getClients[&full=1]',
     'saveWorkLog, searchWorkLog, addDayNote',
+    'emailQuote (&docId, &docNum - FULL branch number, e.g. 01/900195, &to, &subject, &body)',
+    'deleteExpense, createExpenseRow, repairExpenseRollups(dryRun)',
+    'NOTE: read actions are doGet; write actions are doPost',
     'getCaspitToken'
   ].join('\n');
   function onCopied() { btn.textContent = '✓ Copied!'; setTimeout(function() { btn.textContent = origText; }, 2500); }
@@ -6124,7 +6131,7 @@ function copyAppScript() {
 function copyCaspitInfo() {
   var btn = document.getElementById('copyCaspitBtn');
   var origText = btn.textContent;
-  var text = '=== CASPIT API INFO ===\n\nWorker URL: ' + CASPIT_PROXY_URL + '\nWorker version: worker-proxy-v8-document-details\n\nActions:\n  GET  ?action=getContacts\n  POST ?action=createDocument\n  POST ?action=createContact\n  GET  ?action=getDocument&documentId=\n  GET  ?action=listDocuments&number=\n  GET  ?action=testAuth\n  GET  ?action=health\n\nTrxTypeId:\n  1  = חשבונית מס (invoice)\n  2  = קבלה (receipt) — DISABLED\n  16 = הצעת מחיר (quote)\n\nCaspitDocument fields:\n  DocumentId (YB-Q-{ts}), TrxTypeId, DocumentNumberBranch: 1, TrxCodeNumber: 3\n  ContactId, CustomerBusinessName\n  Comments — הערות שכן מוצגות ללקוח (max 5000)\n  Details  — פרטים שלא מוצגים ללקוח (max 1000)\n  DocumentLines[]: ProductName, Details, Qty, UnitPrice, ChargeVAT\n\nAuth: POST /api/v1/token/ with UserName+Password+OsekMorshe → Caspit-Token header\nToken cache: 8 min. Auto-refresh on 401/403.\n\n=== WORKER SCRIPT v8 ===\n\nconst CASPIT_BASE_URL = \'https://app.caspit.biz/api/v1\';\n\nlet tokenCache = { token: \'\', expiresAt: 0 };\n\nconst CORS_HEADERS = {\n  \'Access-Control-Allow-Origin\': \'*\',\n  \'Access-Control-Allow-Methods\': \'GET, POST, OPTIONS\',\n  \'Access-Control-Allow-Headers\': \'Content-Type, Accept\',\n  \'Access-Control-Max-Age\': \'86400\'\n};\n\nexport default {\n  async fetch(request, env) {\n    // ... see full script in Cloudflare dashboard\n    // yb-caspit-proxy.sunroof-dictate-39.workers.dev\n  }\n};\n\nKey build functions:\n- getCaspitToken(env, forceRefresh) — 8min cache\n- caspitFetch(env, path, options) — auto-retry on 401\n- createDocument(env, input) → buildCaspitDocument → POST /documents/\n- buildCaspitDocument: Details+Comments at doc level, DocumentLines at line level\n- createContact(env, input) → POST /Contacts\n- getContacts(env) — paginated, sorted by name\n- getDocument(env, documentId)\n- listDocuments(env, number, page)\n\nSecrets (Cloudflare env vars):\n  CASPIT_USER, CASPIT_PWD, CASPIT_OSEK_MORSHE';
+  var text = '=== CASPIT API INFO ===\n\nWorker URL: ' + CASPIT_PROXY_URL + '\nWorker version: worker-proxy-v30\n\nActions:\n  GET  ?action=getContacts\n  POST ?action=createDocument\n  POST ?action=createContact\n  GET  ?action=getDocument&documentId=\n  GET  ?action=listDocuments&number=\n  GET  ?action=testAuth\n  GET  ?action=getDocPdf&docNumber=&trxTypeId=16&docId=\n  GET  ?action=health\n\nTrxTypeId:\n  1  = חשבונית מס (invoice)\n  2  = קבלה (receipt) — DISABLED\n  16 = הצעת מחיר (quote)\n\nNotes:\n  - Token lives 10 min (sliding) - cache 8 min max\n  - app.caspit.biz blocks Cloudflare IPs -> worker routes via app1/app2\n  - EmailDocument API returns 500 always - quotes are emailed via Gmail (AS emailQuote)\n  - getDocPdf docNumber MUST include the branch prefix (e.g. 01/900195)\n\nCaspitDocument fields:\n  DocumentId (YB-Q-{ts}), TrxTypeId, DocumentNumberBranch: 1, TrxCodeNumber: 3\n  ContactId, CustomerBusinessName\n  Comments — הערות שכן מוצגות ללקוח (max 5000)\n  Details  — פרטים שלא מוצגים ללקוח (max 1000)\n  DocumentLines[]: ProductName, Details, Qty, UnitPrice, ChargeVAT\n\nAuth: POST /api/v1/token/ with UserName+Password+OsekMorshe → Caspit-Token header\nToken cache: 8 min. Auto-refresh on 401/403.\n\n=== WORKER SCRIPT v8 ===\n\nconst CASPIT_BASE_URL = \'https://app.caspit.biz/api/v1\';\n\nlet tokenCache = { token: \'\', expiresAt: 0 };\n\nconst CORS_HEADERS = {\n  \'Access-Control-Allow-Origin\': \'*\',\n  \'Access-Control-Allow-Methods\': \'GET, POST, OPTIONS\',\n  \'Access-Control-Allow-Headers\': \'Content-Type, Accept\',\n  \'Access-Control-Max-Age\': \'86400\'\n};\n\nexport default {\n  async fetch(request, env) {\n    // ... see full script in Cloudflare dashboard\n    // yb-caspit-proxy.sunroof-dictate-39.workers.dev\n  }\n};\n\nKey build functions:\n- getCaspitToken(env, forceRefresh) — 8min cache\n- caspitFetch(env, path, options) — auto-retry on 401\n- createDocument(env, input) → buildCaspitDocument → POST /documents/\n- buildCaspitDocument: Details+Comments at doc level, DocumentLines at line level\n- createContact(env, input) → POST /Contacts\n- getContacts(env) — paginated, sorted by name\n- getDocument(env, documentId)\n- listDocuments(env, number, page)\n\nSecrets (Cloudflare env vars):\n  CASPIT_USER, CASPIT_PWD, CASPIT_OSEK_MORSHE';
   function onCopied() { btn.textContent = '✓ Copied!'; setTimeout(function() { btn.textContent = origText; }, 2500); }
   if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(onCopied).catch(function() { fallbackCopy(text, onCopied); }); } else { fallbackCopy(text, onCopied); }
 }
