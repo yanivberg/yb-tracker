@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v948</title>
+<title>י.ב אחזקות — v949</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v948
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v949
 Deployed: 18/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 336)
@@ -533,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v949 · 20/07/2026 · AS v206 / Version 336
+• מייל הצעת מחיר מותאם ללקוח: אחרי יצירת הצעה נפתח דיאלוג "📧 שליחת הצעה במייל" עם נמען (הי __,), שם (עבור __ / בכותרת), נושא ותוכן — ניתנים לעריכה. תבניות מובנות: גולמט→ריקי, רולמט→ריקי, פל-ים→שירה, בילינסקי→אילנית (עוזי בילינסקי). נושא: "<שם> - הצעת מחיר - <מספר>". גוף: "הי <נמען>, / מצורפת הצעת מחיר עבור <שם> / תודה / יניב". לקוח לא-מוכר → טופס ריק שנשמר ל-localStorage לפעם הבאה. "דלג" שולח בברירת המחדל הישנה. ⚠ דורש עדכון Apps Script (emailQuote מקבל subject/body) כדי שהמותאם ייכנס לתוקף.
+
 ─────────────────
 v948 · 20/07/2026 · AS v206 / Version 336
 • כפתור "➕ הוסף עבודה" הועבר ממגירת "Today's Projects" אל תוך מסך "🗂️ ניהול עבודות" (בכותרת, ליד ה-✕). פותח את אותו טופס Add Job (סטטוס ברירת-מחדל "ממתין להצעה"). המגירה הראשית התנקתה מהפריט.
@@ -1538,7 +1542,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v948</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v949</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3648,7 +3652,7 @@ function savePQEdit(idx, jobId, client, oldDocNumber) {
     var docNumber  = result.number || result.DocumentNumber || (result.rawResponse && result.rawResponse.Number) || '';
     var docId      = result.documentId || result.Id || (result.rawResponse && result.rawResponse.DocumentId) || '';
     // v923: strip Caspit's auto-filled line Details, THEN email the cleaned PDF via Gmail (AS emailQuote).
-    _clearCaspitLineDetails(result).then(function(){ _emailCleanedQuote(docId, docNumber); });
+    _clearCaspitLineDetails(result).then(function(){ _composeAndEmailQuote(docId, docNumber, client); });
     var pdfLink    = (result.rawResponse && result.rawResponse.LinkToPdf) ? result.rawResponse.LinkToPdf : '';
     var createdAt  = new Date().toLocaleDateString('he-IL');
     var note       = oldDocNumber ? 'Updated quote — replaces ' + oldDocNumber : 'Updated quote';
@@ -8216,15 +8220,111 @@ function _clearCaspitLineDetails(createResult) {
 // Called AFTER _clearCaspitLineDetails resolves, so the fetched PDF shows the description once.
 // Caspit's own EmailDocument API 500s on every call, so we never use it. Silent on failure —
 // the saved Caspit doc is correct regardless of whether the courtesy email goes out.
-function _emailCleanedQuote(docId, docNum) {
+function _emailCleanedQuote(docId, docNum, subject, body) {
   if (!docId && !docNum) return Promise.resolve();
+  var payload = { action: 'emailQuote', docId: docId || '', docNum: docNum || '', to: 'yanivberg@icloud.com' };
+  if (subject) payload.subject = subject;   // v949: personalized subject (AS uses it, else its default)
+  if (body)    payload.body    = body;      // v949: personalized body (greeting + line + signature)
   return fetch(SHEETS_URL, {
     method: 'POST', headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({ action: 'emailQuote', docId: docId || '', docNum: docNum || '', to: 'yanivberg@icloud.com' })
+    body: JSON.stringify(payload)
   }).then(function(r){ return r.json(); }).then(function(d){
     if (d && d.mailSent) showToast('✉️ הצעת מחיר נשלחה למייל');
     return d;
   }).catch(function(){});
+}
+
+// ── v949: personalized quote email — greeting + subject per client ──────────
+// "name" is used both in the body ("מצורפת הצעת מחיר עבור <name>") and as the subject prefix,
+// because every configured client uses the same word for both. Greeting is the recipient's name.
+var QUOTE_MAIL_TEMPLATES = {
+  'GOLMAT':    { greeting: 'ריקי',   name: 'גולמט' },
+  'ROLLMAT':   { greeting: 'ריקי',   name: 'רולמט' },
+  'PAL YAM':   { greeting: 'שירה',   name: 'פל-ים' },
+  'BILLINSKY': { greeting: 'אילנית', name: 'עוזי בילינסקי' }
+};
+var _quoteMailCtx = null, _qmSubjDirty = false, _qmBodyDirty = false;
+function _qmEsc(s){ return String(s == null ? '' : s).replace(/"/g, '&quot;'); }
+function _quoteMailKey(client){ return String(client || '').trim().toUpperCase(); }
+function _quoteMailTemplateFor(client){
+  var key = _quoteMailKey(client);
+  if (QUOTE_MAIL_TEMPLATES[key]) return QUOTE_MAIL_TEMPLATES[key];
+  var learned = {};
+  try { learned = JSON.parse(localStorage.getItem('quoteMailTemplates') || '{}'); } catch(e){}
+  return learned[key] || null;
+}
+function _quoteMailSubject(name, docNum){ return String(name || '').trim() + ' - הצעת מחיר - ' + String(docNum || '').trim(); }
+function _quoteMailBody(greeting, name){
+  return 'הי ' + String(greeting || '').trim() + ',\n' +
+         'מצורפת הצעת מחיר עבור ' + String(name || '').trim() + '\n' +
+         'תודה\n' +
+         'יניב';
+}
+function _composeAndEmailQuote(docId, docNum, client) {
+  var tpl = _quoteMailTemplateFor(client);
+  var greeting = tpl ? tpl.greeting : '';
+  var name     = tpl ? tpl.name : String(client || '').trim();
+  _quoteMailCtx = { docId: docId, docNum: docNum, client: client, known: !!tpl };
+  _qmSubjDirty = false; _qmBodyDirty = false;
+  var ov = document.getElementById('quoteMailOverlay');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'quoteMailOverlay'; document.body.appendChild(ov); }
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:20060;display:flex;align-items:center;justify-content:center;padding:16px;font-family:Heebo,sans-serif;';
+  ov.innerHTML =
+    '<div style="background:#fff;border-radius:18px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;direction:rtl;">' +
+      '<div style="background:#0d47a1;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;">' +
+        '<div style="font-size:16px;font-weight:900;">📧 שליחת הצעה במייל</div>' +
+        '<div style="font-size:12px;opacity:0.85;">מס׳ ' + _qmEsc(docNum) + '</div>' +
+      '</div>' +
+      '<div style="padding:16px 18px;">' +
+        (tpl ? '' : '<div style="background:#fff3e0;border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#e65100;">לקוח חדש — מלא את הפרטים, ואזכור אותם לפעם הבאה.</div>') +
+        '<div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:700;color:#555;margin-bottom:4px;">הי (שם הנמען)</div>' +
+          '<input id="qmGreeting" value="' + _qmEsc(greeting) + '" oninput="_qmRefresh()" placeholder="ריקי" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
+        '<div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:700;color:#555;margin-bottom:4px;">עבור (בגוף ובכותרת)</div>' +
+          '<input id="qmName" value="' + _qmEsc(name) + '" oninput="_qmRefresh()" placeholder="גולמט" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
+        '<div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:700;color:#555;margin-bottom:4px;">נושא</div>' +
+          '<input id="qmSubject" oninput="_qmSubjDirty=true" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
+        '<div style="margin-bottom:14px;"><div style="font-size:12px;font-weight:700;color:#555;margin-bottom:4px;">תוכן המייל</div>' +
+          '<textarea id="qmBody" oninput="_qmBodyDirty=true" rows="5" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;line-height:1.6;resize:vertical;"></textarea></div>' +
+        '<div style="font-size:11px;color:#999;margin-bottom:12px;">📎 מצורפת הצעת המחיר (PDF) · נשלח ל: yanivberg@icloud.com</div>' +
+        '<div style="display:flex;gap:8px;">' +
+          '<button onclick="_sendQuoteMail()" style="flex:1;padding:13px;background:#0d47a1;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">✉️ שלח</button>' +
+          '<button onclick="_skipQuoteMail()" style="padding:13px 16px;background:#f0f0f0;color:#555;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">דלג</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  ov.style.display = 'flex';
+  _qmRefresh();
+}
+function _qmRefresh(){
+  var g = (document.getElementById('qmGreeting') || {}).value || '';
+  var n = (document.getElementById('qmName') || {}).value || '';
+  var subj = document.getElementById('qmSubject');
+  var body = document.getElementById('qmBody');
+  if (subj && !_qmSubjDirty) subj.value = _quoteMailSubject(n, _quoteMailCtx ? _quoteMailCtx.docNum : '');
+  if (body && !_qmBodyDirty) body.value = _quoteMailBody(g, n);
+}
+function _sendQuoteMail(){
+  if (!_quoteMailCtx) return;
+  var ctx = _quoteMailCtx;
+  var g = ((document.getElementById('qmGreeting') || {}).value || '').trim();
+  var n = ((document.getElementById('qmName') || {}).value || '').trim();
+  var subject = ((document.getElementById('qmSubject') || {}).value || '').trim();
+  var body = (document.getElementById('qmBody') || {}).value || '';
+  if (!ctx.known && (g || n)) {   // learn an unconfigured client for next time
+    try {
+      var learned = JSON.parse(localStorage.getItem('quoteMailTemplates') || '{}');
+      learned[_quoteMailKey(ctx.client)] = { greeting: g, name: n };
+      localStorage.setItem('quoteMailTemplates', JSON.stringify(learned));
+    } catch(e){}
+  }
+  _quoteMailCtx = null;
+  var ov = document.getElementById('quoteMailOverlay'); if (ov) ov.style.display = 'none';
+  _emailCleanedQuote(ctx.docId, ctx.docNum, subject, body);
+}
+function _skipQuoteMail(){
+  var ctx = _quoteMailCtx; _quoteMailCtx = null;
+  var ov = document.getElementById('quoteMailOverlay'); if (ov) ov.style.display = 'none';
+  if (ctx) _emailCleanedQuote(ctx.docId, ctx.docNum);   // send with the AS default subject/body
 }
 
 function _saveEditedQuote() {
@@ -8749,7 +8849,7 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
       _clearCaspitLineDetails(result).then(function(){
         var _eqId  = (result && result.rawResponse && result.rawResponse.DocumentId) || result.documentId || result.Id || '';
         var _eqNum = result.DocNo || result.docNo || result.DocumentNumber || result.documentNumber || result.number || result.Number || result.DocNumber || (result.rawResponse && result.rawResponse.Number) || '';
-        _emailCleanedQuote(_eqId, _eqNum);
+        _composeAndEmailQuote(_eqId, _eqNum, sheetClient);
       });
       // Update status on all saved rows to ניתנה הצעה
       var statusUpdates = jobIds.filter(function(jid){ return jid && jid.indexOf('Error') === -1; });
@@ -8787,7 +8887,7 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
           '&createdAt=' + encodeURIComponent(createdAt)
         ).catch(function(){});
         _caspitShowSuccess(result);
-        setTimeout(function(){ showToast('📧 Email sent → yanivberg@icloud.com'); }, 1800);
+        setTimeout(function(){ showToast('✓ הצעה נוצרה בכספית'); }, 1800);
         document.getElementById('caspitOverlay').style.display = 'none';
       } else {
         var errDetail = result.error || result.Message || result.ErrorMessage || result.message || JSON.stringify(result).slice(0,120);
