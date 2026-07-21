@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v950</title>
+<title>י.ב אחזקות — v951</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v950
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v951
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -533,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v951 · 21/07/2026 · AS v207 / Version 337
+• תיקון: תווית הכפתור עצמה עודכנה מ-v73 · 02/5/2026 ל-v207 · 21/07/2026 (ב-v950 עודכן רק התוכן שמועתק, לא הכיתוב על הכפתור).
+
 ─────────────────
 v950 · 21/07/2026 · AS v207 / Version 337
 • עודכנו כפתורי ההעתקה ב-App Information. "Copy Apps Script" מציג כעת v207 (deployment Version 337) במקום v73, עם emailQuote (subject/body), ועם אזהרה: יש לפרסם New version על ה-deployment הקיים בלבד (deployment חדש משנה את כתובת ה-exec). "Copy Caspit API Info" עודכן ל-worker v30, נוסף getDocPdf, ונוספו הערות: טוקן 10 דק׳ (cache 8), ניתוב app1/app2, EmailDocument מחזיר 500 תמיד, ו-docNum חייב קידומת סניף (01/900195).
@@ -1531,7 +1535,7 @@ SHEET SYNC
 </div>
       <div style="padding:14px 16px;border-top:1px solid #eee;flex-shrink:0;display:flex;flex-direction:column;gap:8px;">
         <button onclick="copyAppInfo()" id="copyInfoBtn" style="width:100%;padding:13px;background:#f0c020;color:#111;border:none;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">📋 Copy Summary to Clipboard</button>
-        <button onclick="copyAppScript()" id="copyScriptBtn" style="width:100%;padding:13px;background:transparent;color:#111;border:1.5px solid #111;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">📄 Copy Apps Script — v73 · 02/5/2026</button>
+        <button onclick="copyAppScript()" id="copyScriptBtn" style="width:100%;padding:13px;background:transparent;color:#111;border:1.5px solid #111;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">📄 Copy Apps Script — v207 · 21/07/2026</button>
         <button onclick="copyCaspitInfo()" id="copyCaspitBtn" style="width:100%;padding:13px;margin-top:8px;background:transparent;color:#0d47a1;border:1.5px solid #0d47a1;border-radius:12px;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">💼 Copy Caspit API Info</button>
       </div>
     </div>
@@ -1546,7 +1550,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v950</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v951</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
