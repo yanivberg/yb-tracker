@@ -6,6 +6,25 @@ This file was referenced by the bootstrap but did not exist until 13/07/2026 —
 
 ---
 
+## 2026-07-21 — AS v208: getExpenses returns `invoiced` (doGet)
+SHIPPED:
+- **AS v208 DEPLOYED — deployment Version 338, same /exec `AKfycbxqbXKwg-…` (Deployment ID unchanged, "Deployment successfully updated").** `getExpenses` (doGet, `allForClient` branch, reads the global `Expenses` sheet) now returns `invoiced: true/false` per expense. `true` iff the job's `הוצאות …` rollup row on the **client** sheet shows **`יצאה חש`** in the `invoice` column; matched primary by `SRC:<jobId>` in the `notes` column, fallback `desc == "הוצאות "+jobTitle`. The whole addition (a per-request map built from the client sheet + a per-row IIFE) is **wrapped in try/catch and defaults to `false`** — cannot break existing responses. Live PWA (v952) already reads the field and falls back when absent → fully backward-compatible. Only `getExpenses` touched.
+- Header bumped v207→v208 (changelog line added; v207 history preserved). Code.gs saved to Drive before deploy.
+
+FACT (all 21/07/26):
+- Live derived at start: PWA **v952** (reads `invoiced`, 10 refs), AS **v207**, action count **102**. Post-edit action count **102** (guardrail: unchanged). Syntax gate: V8 `new Function(src)` compiled OK (acorn-in-sandbox not possible — the Cowork output filter blocks pulling .gs source out; `new Function` is the in-page equivalent). | evidence: in-editor probes + Deploy dialog "Version 338"
+- `findColumns(data)` takes the **values array** (not the sheet) and returns column indices incl. `.desc .notes .invoice .jobId .headerRow`. Rollup contract confirmed from `_syncExpenseRollup`: `notes`=SRC back-ref, `desc`="הוצאות "+title, `invoice`=stamp (`להוציא חש`→`יצאה חש`). | evidence: findColumns def L3888, _syncExpenseRollup L3629-3638
+- VERIFY (GET `?action=getExpenses&allForClient=1&client=GOLMAT`): **15 rows, every one has `invoiced` as a boolean (0 missing).** All 15 = `false`, and that is **provably correct** — an in-page replay of the intended match logic against the live GOLMAT sheet matched the API on all 15 rows (**0 mismatches**). GOLMAT has 3 rollup rows: `G0375` invoice=`יצאה חש` (invoiced, but **no SRC** and its job has no expenses in the set), `G0394` `להוציא חש`, `G0395` `SRC:G0393` `להוציא חש`. So the 3 `G0393` expenses correctly resolve `false` (their rollup isn't invoiced yet); the rest have no rollup → `false`. | evidence: getClientJobs GOLMAT (233 rows) cross-check
+- Sample rows (jobId · desc · amount · invoiced → sheet row checked): `G0393 · קרטון גלי לכיסוי רצפה · 82 · false` → GOLMAT rollup `G0395` (`SRC:G0393`, invoice `להוציא חש`); `G0221 · פרופילי מתכת + הובלה · 1422 · false` → no rollup row for G0221; `G0372 · מסלולי וניצב 100 לגבס · 68 · false` → no rollup row for G0372.
+- Note: a **`true`** case could not be demonstrated on GOLMAT (its only `יצאה חש` rollup, G0375, has no expenses). The true-path is validated by logic-equivalence, not a live true row — a genuine live `true` would need a client whose invoiced rollup carries a `SRC:` for a job that has expenses.
+
+OPEN:
+- Repo AS mirror not yet updated to v208 (the output filter blocks exfiltrating .gs source to the sandbox; use the clipboard hand-off GAS→GitHub, as in the v205 session, to refresh `apps-script-v208.js`).
+- SESSION-LOG here is the LOCAL working copy (committed to the local never-pushed repo per CLAUDE.md). Pushing the evidence copy to GitHub is a separate, gated action — not done automatically.
+- Version count now **~185/200** after this deploy (was 184; warning still shown — prune before the cap, not now).
+
+---
+
 ## 2026-07-21 — AS v207 verified (no code change needed)
 SHIPPED:
 - Nothing. **v207 was already implemented AND already deployed** (deployment Version 337, 19/07/26 23:25, desc "v207 - emailQuote optional custom subject + body"). Re-applying the spec would have been a no-op with risk, so it was not applied.
