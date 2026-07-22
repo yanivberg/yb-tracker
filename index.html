@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v952</title>
+<title>י.ב אחזקות — v953</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v952
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v953
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -533,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v953 · 21/07/2026 · AS v208 / Version 338
+• דיאלוג המייל של הצעת המחיר: נוסף שדה "ההצעה הוזמנה על ידי" (רשות). כשממולא — נוספת השורה "ההצעה הוזמנה על ידי [שם]" שורה אחת לפני "תודה", בכל התבניות (גולמט/רולמט/פל-ים/בילינסקי/אחר). ריק = המייל יוצא בלי השורה, כמו היום. השדה מתחיל ריק בכל שליחה (המזמין משתנה מהצעה להצעה).
+
 ─────────────────
 v952 · 21/07/2026 · AS v207 / Version 337
 • לוגיקת "חויב" להוצאות פושטה לכלל אחד (לבקשת יניב): הוצאה נחשבת מחויבת אך ורק אם שורת הריכוז "הוצאות …" של העבודה בגיליון הלקוח נמצאת במצב "יצאה חש" בעמודת יצאה חשבונית. "להוציא חש" או היעדר שורת ריכוז = טרם חויב. חל על הסימון ✓ ברשימה היומית, בדוח החודשי ובסכום "טרם חויב". חותמת עמודה J כבר אינה מקור האמת. ⚠ דורש Apps Script v208 (getExpenses מחזיר invoiced); עד אז הסימון ממשיך בלוגיקה הישנה (fallback).
@@ -1554,7 +1558,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v952</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v953</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -8279,9 +8283,12 @@ function _quoteMailTemplateFor(client){
   return learned[key] || null;
 }
 function _quoteMailSubject(name, docNum){ return String(name || '').trim() + ' - הצעת מחיר - ' + String(docNum || '').trim(); }
-function _quoteMailBody(greeting, name){
+function _quoteMailBody(greeting, name, orderedBy){
+  // v953: optional "ההצעה הוזמנה על ידי <שם>" line before תודה — omitted when empty
+  var ob = String(orderedBy || '').trim();
   return 'הי ' + String(greeting || '').trim() + ',\n' +
          'מצורפת הצעת מחיר עבור ' + String(name || '').trim() + '\n' +
+         (ob ? 'ההצעה הוזמנה על ידי ' + ob + '\n' : '') +
          'תודה\n' +
          'יניב';
 }
@@ -8306,6 +8313,8 @@ function _composeAndEmailQuote(docId, docNum, client) {
           '<input id="qmGreeting" value="' + _qmEsc(greeting) + '" oninput="_qmRefresh()" placeholder="ריקי" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
         '<div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:700;color:#555;margin-bottom:4px;">עבור (בגוף ובכותרת)</div>' +
           '<input id="qmName" value="' + _qmEsc(name) + '" oninput="_qmRefresh()" placeholder="גולמט" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
+        '<div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:700;color:#555;margin-bottom:4px;">ההצעה הוזמנה על ידי <span style="font-weight:400;color:#aaa;">(רשות — ריק = בלי השורה)</span></div>' +
+          '<input id="qmOrderedBy" value="" oninput="_qmRefresh()" placeholder="שם המזמין..." style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
         '<div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:700;color:#555;margin-bottom:4px;">נושא</div>' +
           '<input id="qmSubject" oninput="_qmSubjDirty=true" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
         '<div style="margin-bottom:14px;"><div style="font-size:12px;font-weight:700;color:#555;margin-bottom:4px;">תוכן המייל</div>' +
@@ -8326,7 +8335,7 @@ function _qmRefresh(){
   var subj = document.getElementById('qmSubject');
   var body = document.getElementById('qmBody');
   if (subj && !_qmSubjDirty) subj.value = _quoteMailSubject(n, _quoteMailCtx ? _quoteMailCtx.docNum : '');
-  if (body && !_qmBodyDirty) body.value = _quoteMailBody(g, n);
+  if (body && !_qmBodyDirty) body.value = _quoteMailBody(g, n, (document.getElementById('qmOrderedBy') || {}).value || '');
 }
 function _sendQuoteMail(){
   if (!_quoteMailCtx) return;
