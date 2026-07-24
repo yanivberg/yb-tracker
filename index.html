@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v953</title>
+<title>י.ב אחזקות — v954</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v953
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v954
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -533,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v954 · 21/07/2026 · AS v208 / Version 338
+• תיקון באג: הצעת מחיר מתוך שורות "ממתין להצעה" יצרה שורות כפולות בגיליון. כעת השורות הממתינות מתעדכנות במקום — אותן שורות מקבלות את מספר ההצעה, המחיר/כמות/שעות המעודכנים והסטטוס "ניתנה הצעה". הגנה: אם מספר השורות הממתינות ≠ מספר שורות ההצעה, חוזרים ליצירת שורות חדשות + הודעה. בנוסף הוסר ה-hack ‏Details:' ' (v919 הופרך — ניקוי ה-PUT הוא שעובד).
+
 ─────────────────
 v953 · 21/07/2026 · AS v208 / Version 338
 • דיאלוג המייל של הצעת המחיר: נוסף שדה "ההצעה הוזמנה על ידי" (רשות). כשממולא — נוספת השורה "ההצעה הוזמנה על ידי [שם]" שורה אחת לפני "תודה", בכל התבניות (גולמט/רולמט/פל-ים/בילינסקי/אחר). ריק = המייל יוצא בלי השורה, כמו היום. השדה מתחיל ריק בכל שליחה (המזמין משתנה מהצעה להצעה).
@@ -1558,7 +1562,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v953</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v954</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -8832,21 +8836,46 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
   var customerName = selectedContact ? (selectedContact.Name || '') : '';
   var finalStatus  = total > 0 ? 'ניתנה הצעה' : 'ממתין להצעה';
 
-  // Step 1: Save all rows in ONE bulk call
+  // Step 1: Save rows. Two paths (v952 — quote-from-pending duplicate-row fix):
+  //  - reuse: quote seeded from existing "ממתין להצעה" rows → UPDATE them in place, no new rows.
+  //  - else:  append new rows (original behaviour, unchanged).
+  // GUARD: reuse requires a 1:1 count match, else pq[i] would not describe rowData[i] and we
+  // could write one job's price onto another job's row. On mismatch: fall back to append + warn.
   var jobIds = [];
-  var bulkRows = rowData.map(function(r) {
-    return { desc: r.desc, st: 'ממתין להצעה', pr: r.price, qt: r.qty, eh: r.hours, ca: r.cat || '' };
-  });
-  var saveSequential = fetch(SHEETS_URL + '?action=addJobsBulk&client=' + encodeURIComponent(sheetClient) + '&noDate=1&notes=' + encodeURIComponent((document.getElementById('caspitDetails')||{value:''}).value||'') + '&rows=' + encodeURIComponent(JSON.stringify(bulkRows))
-  ).then(function(r){ return r.json(); })
-  .then(function(ids){ jobIds = ids || []; });
+  var pq = (_pendingQuoteIds || []).slice();
+  var reuse = pq.length > 0 && pq.length === rowData.length;
+  var saveSequential;
+  if (reuse) {
+    jobIds = pq.slice();
+    saveSequential = Promise.all(rowData.map(function(r, i) {
+      return fetch(SHEETS_URL + '?action=updateJobFields' +
+        '&jobId='  + encodeURIComponent(pq[i]) +
+        '&client=' + encodeURIComponent(sheetClient) +
+        '&price='  + encodeURIComponent(r.price || 0) +
+        '&qty='    + encodeURIComponent(r.qty   || 1) +
+        '&hours='  + encodeURIComponent(r.hours || 0) +
+        (r.cat ? '&category=' + encodeURIComponent(r.cat) : ''));
+        // desc deliberately NOT sent — updateJobFields keeps the original description
+        // (descPresent guard in AS). Newest price/qty/hours overwrite the existing row.
+    }));
+  } else {
+    if (pq.length && pq.length !== rowData.length) {
+      showToast('⚠️ ' + pq.length + ' שורות ממתינות מול ' + rowData.length + ' שורות בהצעה — נוצרו שורות חדשות');
+    }
+    var bulkRows = rowData.map(function(r) {
+      return { desc: r.desc, st: 'ממתין להצעה', pr: r.price, qt: r.qty, eh: r.hours, ca: r.cat || '' };
+    });
+    saveSequential = fetch(SHEETS_URL + '?action=addJobsBulk&client=' + encodeURIComponent(sheetClient) + '&noDate=1&notes=' + encodeURIComponent((document.getElementById('caspitDetails')||{value:''}).value||'') + '&rows=' + encodeURIComponent(JSON.stringify(bulkRows))
+    ).then(function(r){ return r.json(); })
+    .then(function(ids){ jobIds = ids || []; });
+  }
 
   saveSequential.then(function() {
     if (!jobIds.length) { showToast('⚠️ Step 1 failed: sheet save returned no IDs'); btn.textContent = '💼 Save & Send to Caspit'; btn.disabled = false; return; }
     _pbFastRefresh();   // accumulate these lines into מחירון כללי (fast, background)
     btn.textContent = '⏳ Sending to Caspit…';
     var lines = rowData.map(function(r) {
-      return { ProductName: r.desc, Details: ' ', Qty: r.qty, UnitPrice: r.price > 0 ? r.price : 0.01, ChargeVAT: true };  // v919: line Details ' ' bypasses Caspit auto-fill
+      return { ProductName: r.desc, Qty: r.qty, UnitPrice: r.price > 0 ? r.price : 0.01, ChargeVAT: true };  // Details auto-filled by Caspit, then stripped by _clearCaspitLineDetails (the v919 space-hack was disproven — the PUT cleanup is what works)
     });
     var comments = (document.getElementById('caspitComments')||{}).value||'';
     var details  = (document.getElementById('caspitDetails')||{}).value||'';
@@ -8885,22 +8914,18 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
         var _eqNum = result.DocNo || result.docNo || result.DocumentNumber || result.documentNumber || result.number || result.Number || result.DocNumber || (result.rawResponse && result.rawResponse.Number) || '';
         _composeAndEmailQuote(_eqId, _eqNum, sheetClient);
       });
-      // Update status on all saved rows to ניתנה הצעה
-      var statusUpdates = jobIds.filter(function(jid){ return jid && jid.indexOf('Error') === -1; });
-      Promise.all(statusUpdates.map(function(jid) {
+      // Update status on the saved/updated rows. In the reuse path jobIds ARE the original
+      // pending rows, so this one block covers them — the separate _pendingQuoteIds pass that
+      // caused the duplicate-row bug is gone. v952.
+      var finalIds = jobIds.filter(function(jid){ return jid && jid.indexOf('Error') === -1; });
+      var _newStatus = reuse ? 'ניתנה הצעה' : finalStatus;
+      Promise.all(finalIds.map(function(jid) {
         return fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(jid) +
-          '&client=' + encodeURIComponent(sheetClient) + '&status=' + encodeURIComponent(finalStatus));
+          '&client=' + encodeURIComponent(sheetClient) + '&status=' + encodeURIComponent(_newStatus));
       })).then(function() {
-        if (statusUpdates.length > 0) showToast('✓ ' + statusUpdates.length + ' rows → ' + finalStatus);
+        if (finalIds.length > 0) showToast('✓ ' + finalIds.length + ' rows → ' + _newStatus);
       }).catch(function(){});
-      // Advance the original "ממתין להצעה" sheet jobs that seeded this quote → ניתנה הצעה
-      if (_pendingQuoteIds && _pendingQuoteIds.length) {
-        var _pq = _pendingQuoteIds.slice(); _pendingQuoteIds = [];
-        Promise.all(_pq.map(function(pid){
-          return fetch(SHEETS_URL + '?action=setStatus&jobId=' + encodeURIComponent(pid) +
-            '&client=' + encodeURIComponent(sheetClient) + '&status=' + encodeURIComponent('ניתנה הצעה'));
-        })).then(function(){ showToast('✓ ' + _pq.length + ' עבודות ממתינות → ניתנה הצעה'); }).catch(function(){});
-      }
+      _pendingQuoteIds = [];
       btn.textContent = '💼 Save & Send to Caspit'; btn.disabled = false;
       showCaspitLog(result);
       if (result && (result.DocumentNumber || result.number || result.Id || result.documentId)) {
