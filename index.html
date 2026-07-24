@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v955</title>
+<title>י.ב אחזקות — v956</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v955
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v956
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -534,6 +534,9 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v956 · 24/07/2026 · מיון רשימת עבודות
+• רשימת עבודות — מיון לפי מספר עבודה (חדש→ישן כברירת מחדל), עם כפתורי מיון השומרים על סדר הכרטיסים
+────────────────
 v955 · 24/07/2026 · AS v208 / Version 338
 • לקוח חדש — נוספה אפשרות "גיליון בלבד" (checkbox). מסומן → נוצר טאב גיליון חדש (משוכפל מהתבנית עם העיצוב והוולידציות) בלי ליצור איש קשר בכספית; הודעה "נוצר בגיליון בלבד"; עמודת caspitId נשארת ריקה. לא מסומן → התנהגות רגילה (גיליון + כספית + caspitId). הערה במסך: קרא לגיליון בדיוק כשם איש הקשר בכספית — ההתאמה תתבצע אוטומטית בהפקת חשבונית (התאמה מדויקת, ואז fuzzy ≥75), אין צורך בקישור ידני. ה-checkbox מתאפס בכל פתיחה של הטופס.
 
@@ -1566,7 +1569,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v955</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v956</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -11396,8 +11399,8 @@ var _fState = (function(){ try { return JSON.parse(localStorage.getItem('yb_fSta
 var _fRerenders = {};
 
 function _fGet(key) {
-  var s = _fState[key] || {};
-  return { clients: s.clients||[], time: s.time||null, cf: s.cf||'', ct: s.ct||'', waiting: !!s.waiting, sort: s.sort||null };
+  var s = _fState[key] || {}; var defSort = (key === 'jobs') ? 'desc' : null;
+  return { clients: s.clients||[], time: s.time||null, cf: s.cf||'', ct: s.ct||'', waiting: !!s.waiting, sort: s.sort||defSort };
 }
 function _fSet(key, patch) {
   var f = _fGet(key);
@@ -11442,16 +11445,27 @@ function _fApply(jobs, key) {
     }
     return true;
   });
-  if (f.sort) {
-    result.sort(function(a, b) {
-      var da = _fParseDate(a.dateStart), db = _fParseDate(b.dateStart);
-      if (!da && !db) return 0;
-      if (!da) return 1; if (!db) return -1;
-      return f.sort === 'asc' ? da - db : db - da;
-    });
+  if (f.sort && f.sort !== 'none') {
+    if (key === 'jobs') {
+      var cOrder = {}, ci = 0;
+      result.forEach(function(j){ if (cOrder[j.client] === undefined) cOrder[j.client] = ci++; });
+      result.sort(function(a, b) {
+        if (cOrder[a.client] !== cOrder[b.client]) return cOrder[a.client] - cOrder[b.client];
+        var na = _jobIdNum(a.jobId), nb = _jobIdNum(b.jobId);
+        return f.sort === 'asc' ? na - nb : nb - na;
+      });
+    } else {
+      result.sort(function(a, b) {
+        var da = _fParseDate(a.dateStart), db = _fParseDate(b.dateStart);
+        if (!da && !db) return 0;
+        if (!da) return 1; if (!db) return -1;
+        return f.sort === 'asc' ? da - db : db - da;
+      });
+    }
   }
   return result;
 }
+function _jobIdNum(id) { var m = String(id||'').match(/(\d+)\s*$/); return m ? parseInt(m[1],10) : -1; }
 function _fBarHtml(allJobs, key) {
   var f = _fGet(key);
   var clients = [];
@@ -11474,6 +11488,10 @@ function _fBarHtml(allJobs, key) {
     html += '</div>';
   }
   html += '</div>';
+  html += '<div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:4px;">';
+  html += '<span onclick="_fSetSort(\'' + key + '\',\'desc\')" style="border-radius:20px;font-size:11px;cursor:pointer;user-select:none;padding:4px 10px;' + (f.sort === 'desc' ? 'background:#555;color:#fff;' : 'background:#efefef;color:#555;') + '">חדש→ישן</span>';
+  html += '<span onclick="_fSetSort(\'' + key + '\',\'asc\')" style="border-radius:20px;font-size:11px;cursor:pointer;user-select:none;padding:4px 10px;' + (f.sort === 'asc' ? 'background:#555;color:#fff;' : 'background:#efefef;color:#555;') + '">ישן→חדש</span>';
+  html += '</div>';
   return html;
 }
 function _fToggleClient(key, client) {
@@ -11491,7 +11509,7 @@ function _fToggleWaiting(key) {
   if (_fRerenders[key]) _fRerenders[key]();
 }
 function _fSetSort(key, dir) {
-  var f = _fGet(key); _fSet(key, { sort: f.sort === dir ? null : dir });
+  var f = _fGet(key); _fSet(key, { sort: f.sort === dir ? 'none' : dir });
   if (_fRerenders[key]) _fRerenders[key]();
 }
 function _fSetCustomFrom(key, val) { _fSet(key, { cf: val, time: 'custom' }); if (_fRerenders[key]) _fRerenders[key](); }
