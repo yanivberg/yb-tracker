@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v959</title>
+<title>י.ב אחזקות — v960</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,6 +481,8 @@ input[id^="progSlider-"]::-moz-range-track {
         <span style="font-size:24px;flex-shrink:0;">💰</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#2e7d32;">Gross Profit — To Invoice</span></div>
       <div onclick="closeSetupDrawer();fetchActualPriceSummary();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🧾</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1565c0;">Actual Price — To Invoice</span></div>
+      <div onclick="closeSetupDrawer();fetchAvgPph();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">📈</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6a1b9a;">Average ₪/Hour</div><div style="font-size:11px;color:#888;margin-top:1px;">רווח ממוצע לשעה מול היעד</div></div></div>
       <div onclick="closeSetupDrawer();openDayNote();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📝</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">Day Note</div><div style="font-size:11px;color:#888;margin-top:1px;">הוסף הערת יום ליומן</div></div></div>
       <div onclick="closeSetupDrawer();openWorkLog();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -523,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v959
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v960
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -533,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v960 · 24/07/2026 · AS v211 · דוח "📈 Average ₪/Hour" חדש
+• נוסף דוח חדש למגירה: רווח ממוצע לשעה בפועל (רווח גולמי ÷ שעות בפועל) על פני עבודות שהושלמו, עם סינון תקופה (יומי/שבועי/חודשי/הכל) ולקוח (או "כל הלקוחות"). המספר הגדול צבוע ירוק כשהוא ≥ ₪500/שעה (היעד), כתום כשמתחתיו — עם אחוז מהיעד. עבודות ללא תאריך בתוך חלון תקופה מוצגות בנפרד ("ללא תאריך"), לא נבלעות. ⚠ דורש Apps Script v211 (action חדש getAvgProfitPerHour).
+
 ─────────────────
 v959 · 24/07/2026 · "ניהול עבודות" — אפשרות "כל הלקוחות"
 • בתפריט הלקוח במסך "🗂️ ניהול עבודות" נוספה אפשרות "— כל הלקוחות —": מציגה את כל העבודות מכל הלקוחות יחד, מקובצות לפי לקוח (כותרת צבעונית כמו ברשימת "עבודות ממתינות להצעה"), וממוינות בתוך כל קבוצה לפי מספר העבודה (חדש→ישן, עם אפשרות היפוך). עריכה/מחיקה/מחיקה מרובה ממשיכות לפעול נכון על הלקוח הנכון של כל עבודה.
@@ -1580,7 +1586,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v959</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v960</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1694,6 +1700,23 @@ SHEET SYNC
     <div style="padding:14px 16px;border-top:1px solid #eee;flex-shrink:0;">
       <button id="apCopyBtn" onclick="copyAP()" style="width:100%;padding:13px;background:#1a1a2e;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">📋 Copy to clipboard</button>
     </div>
+  </div>
+</div>
+
+<!-- Average ₪/Hour Overlay -->
+<div id="avgPphOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10010;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:420px;max-height:80vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;">
+    <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+      <div style="font-weight:700;font-size:17px;">📈 Average ₪/Hour</div>
+      <button onclick="document.getElementById('avgPphOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+    </div>
+    <div style="padding:12px 16px 0;flex-shrink:0;">
+      <select id="avgPphClient" onchange="fetchAvgPph()" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;background:#fff;font-weight:700;color:#333;">
+        <option value="">— כל הלקוחות —</option>
+      </select>
+    </div>
+    <div id="avgPphPeriodBar" style="display:flex;gap:5px;padding:10px 16px 0;flex-shrink:0;"></div>
+    <div id="avgPphContent" style="overflow-y:auto;flex:1;padding:16px 20px;"></div>
   </div>
 </div>
 
@@ -6378,6 +6401,70 @@ function copyAP() {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(onCopied).catch(function() { fallbackCopy(text, onCopied); });
   } else { fallbackCopy(text, onCopied); }
+}
+
+// ── Average ₪/Hour report ──────────────────────────────
+// v960: real overall profit-per-hour across completed jobs, filterable by period + client,
+// benchmarked against Yaniv's ₪500/hr target (green at/above, orange below). Mirrors the
+// Gross Profit report's period-pill pattern (v943) and getGrossProfitSummary's date logic (v206).
+var AVG_PPH_TARGET = 500;
+var _avgPphPeriod = 'all';   // day|week|month|all
+function _renderAvgPphPeriodBar() {
+  var bar = document.getElementById('avgPphPeriodBar'); if (!bar) return;
+  var opts = [['day','יומי'], ['week','שבועי'], ['month','חודשי'], ['all','הכל']];
+  bar.innerHTML = opts.map(function(o){
+    var on = _avgPphPeriod === o[0];
+    return '<button onclick="_setAvgPphPeriod(\'' + o[0] + '\')" style="flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid ' +
+      (on?'#6a1b9a':'#ddd') + ';background:' + (on?'#f3e5f5':'#fff') + ';color:' + (on?'#6a1b9a':'#888') +
+      ';font-size:12px;font-weight:800;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">' + o[1] + '</button>';
+  }).join('');
+}
+function _setAvgPphPeriod(p) {
+  if (_avgPphPeriod === p) return;
+  _avgPphPeriod = p;
+  _renderAvgPphPeriodBar();
+  fetchAvgPph();
+}
+function fetchAvgPph() {
+  var overlay = document.getElementById('avgPphOverlay');
+  var content = document.getElementById('avgPphContent');
+  var clientSel = document.getElementById('avgPphClient');
+  overlay.style.display = 'flex';
+  _renderAvgPphPeriodBar();
+  if (clientSel.options.length <= 1 && SHEETS_URL) {
+    fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(cs){
+      (cs || []).forEach(function(c){ var o = document.createElement('option'); o.value = c; o.textContent = c; clientSel.appendChild(o); });
+    }).catch(function(){});
+  }
+  content.innerHTML = '<div style="text-align:center;padding:32px;color:#aaa;"><div style="font-size:28px;margin-bottom:10px;">⏳</div><div style="font-size:14px;">טוען נתונים…</div></div>';
+  var client = clientSel.value || '';
+  fetch(SHEETS_URL + '?action=getAvgProfitPerHour&period=' + encodeURIComponent(_avgPphPeriod) + '&client=' + encodeURIComponent(client))
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+      if (!data || data.error) { content.innerHTML = '<div style="text-align:center;padding:32px;color:#c62828;font-size:14px;">שגיאה בטעינת הנתונים</div>'; return; }
+      var _periodLabel = { day:'היום', week:'השבוע', month:'החודש', all:'הכל' }[data.period || 'all'] || 'הכל';
+      if (!data.jobCount) {
+        content.innerHTML = '<div style="text-align:center;color:#aaa;font-size:14px;padding:24px 0;">אין עבודות שהושלמו עם שעות בפועל בתקופה זו' + (client ? (' עבור ' + client) : '') + '</div>';
+        return;
+      }
+      var atTarget = data.profitPerHour >= AVG_PPH_TARGET;
+      var pctOfTarget = Math.round((data.profitPerHour / AVG_PPH_TARGET) * 100);
+      var html = '<div style="text-align:center;margin-bottom:18px;">' +
+        '<div style="font-size:13px;color:#888;margin-bottom:4px;">רווח ממוצע לשעה · ' + _periodLabel + (client ? (' · ' + client) : '') + '</div>' +
+        '<div style="font-size:40px;font-weight:900;color:' + (atTarget ? '#2e7d32' : '#e65100') + ';">₪' + data.profitPerHour.toLocaleString() + '<span style="font-size:16px;font-weight:700;color:#aaa;">/hr</span></div>' +
+        '<div style="font-size:12px;font-weight:700;color:' + (atTarget ? '#2e7d32' : '#e65100') + ';margin-top:4px;">' +
+          (atTarget ? '✓ מעל היעד (₪' + AVG_PPH_TARGET + '/hr)' : '⚠️ ' + pctOfTarget + '% מהיעד (₪' + AVG_PPH_TARGET + '/hr)') +
+        '</div>' +
+        ((data.undated) ? '<div style="font-size:11px;color:#e65100;margin-top:6px;">+ ' + data.undatedJobs + ' עבודות ללא תאריך — לא נכללו בתקופה</div>' : '') +
+      '</div>' +
+      '<div style="border-top:1px solid #f0f0f0;padding-top:14px;display:flex;flex-direction:column;gap:10px;">' +
+        '<div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:#888;">עבודות שהושלמו</span><span style="font-size:14px;font-weight:800;color:#111;">' + data.jobCount + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:#888;">סה״כ שעות בפועל</span><span style="font-size:14px;font-weight:800;color:#111;">' + data.totalHours + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;"><span style="font-size:13px;color:#888;">סה״כ רווח גולמי</span><span style="font-size:14px;font-weight:800;color:#2e7d32;">₪' + data.totalProfit.toLocaleString() + '</span></div>' +
+      '</div>';
+      content.innerHTML = html;
+    })
+    .catch(function(){ content.innerHTML = '<div style="text-align:center;padding:32px;color:#c62828;font-size:14px;">שגיאה בטעינת הנתונים</div>'; });
 }
 
 // ── Day Note (Global) ─────────────────────────────────

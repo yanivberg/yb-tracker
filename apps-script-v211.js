@@ -1,4 +1,9 @@
-// Apps Script — v210
+// Apps Script — v211
+// v211: new action getAvgProfitPerHour — real overall profit-per-hour across completed jobs
+//       (status בוצע, with logged actual hours), optionally scoped to one client and/or a
+//       period window (day|week|month|all), same date logic as getGrossProfitSummary (v206).
+//       Powers the HTML "📈 Average ₪/Hour" report (v960) so Yaniv can check his real yield
+//       against the ₪500/hr target from v210's pricing prompt.
 // v210: getAIPriceSuggestion + getAIPriceRows now share PRICING_PHILOSOPHY_PROMPT, replacing the
 //       flat "Israeli labor rate ~₪90-120/hour per worker" anchor. Yaniv's rules: solo operator,
 //       ₪500/hr target before tax for labor only, materials excluded by default, price against
@@ -1412,6 +1417,63 @@ if (action === 'getYoman') {
     result.total = Math.round(result.total);
     result.undated = Math.round(result.undated);
     Object.keys(result.clients).forEach(function(k) { result.clients[k] = Math.round(result.clients[k]); });
+    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+  }
+
+
+  // v211: real overall profit-per-hour across COMPLETED jobs (status בוצע, with logged actual
+  // hours), optionally scoped to one client and/or a period window — same date logic as
+  // getGrossProfitSummary (v206): תאריך סיום, falling back to תאריך התחלה. Jobs in-window with
+  // no date are surfaced via undated/undatedJobs (not silently dropped), matching the v206
+  // pattern. Jobs with no actual hours logged can't yield a rate and are skipped entirely
+  // (not counted as undated — that field is reserved for the period-date gap specifically).
+  if (action === 'getAvgProfitPerHour') {
+    var pphPeriod = String(e.parameter.period || 'all').toLowerCase();
+    var pphFrom = null;
+    if (pphPeriod === 'day' || pphPeriod === 'week' || pphPeriod === 'month') {
+      var pphNow = new Date();
+      if (pphPeriod === 'month') {
+        pphFrom = new Date(pphNow.getFullYear(), pphNow.getMonth(), 1);
+      } else {
+        pphFrom = new Date(pphNow.getFullYear(), pphNow.getMonth(), pphNow.getDate());
+        if (pphPeriod === 'week') pphFrom.setDate(pphFrom.getDate() - pphFrom.getDay());
+      }
+    } else {
+      pphPeriod = 'all';
+    }
+    var pphClient = String(e.parameter.client || '').trim();
+    var result = { period: pphPeriod, client: pphClient, jobCount: 0, totalHours: 0, totalProfit: 0, totalIncome: 0, profitPerHour: 0, undated: 0, undatedJobs: 0 };
+    var sheetsToScan = pphClient ? [ss.getSheetByName(pphClient)].filter(Boolean) : ss.getSheets();
+    sheetsToScan.forEach(function(sheet) {
+      var name = sheet.getName();
+      if (!pphClient && isSystemSheet(name)) return;
+      var data = sheet.getDataRange().getValues();
+      var cols = findColumns(data);
+      if (cols.headerRow === -1) return;
+      for (var r = cols.headerRow + 1; r < data.length; r++) {
+        var jobId  = String(data[r][cols.jobId] || '').trim();
+        var status = cols.status !== -1 ? String(data[r][cols.status] || '').trim() : '';
+        if (!jobId || status !== 'בוצע') continue;
+        var hrs = cols.hoursActual !== -1 ? (parseFloat(data[r][cols.hoursActual]) || 0) : 0;
+        if (!hrs) continue;   // no actual hours logged — can't compute a rate for this job
+        var gp  = cols.grossProfit !== -1 ? (parseFloat(data[r][cols.grossProfit]) || 0) : 0;
+        var inc = cols.income      !== -1 ? (parseFloat(data[r][cols.income])      || 0) : 0;
+        if (pphFrom) {
+          var pphDate = _gpRowDate(data[r], cols);
+          if (!pphDate) { result.undated += gp; result.undatedJobs++; continue; }
+          if (pphDate < pphFrom) continue;
+        }
+        result.jobCount++;
+        result.totalHours  += hrs;
+        result.totalProfit += gp;
+        result.totalIncome += inc;
+      }
+    });
+    result.totalHours   = Math.round(result.totalHours * 10) / 10;
+    result.totalProfit  = Math.round(result.totalProfit);
+    result.totalIncome  = Math.round(result.totalIncome);
+    result.undated       = Math.round(result.undated);
+    result.profitPerHour = result.totalHours > 0 ? Math.round(result.totalProfit / result.totalHours) : 0;
     return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
   }
 
