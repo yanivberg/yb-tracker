@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v960</title>
+<title>י.ב אחזקות — v961</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v960
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v961
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v961 · 25/07/2026 · AS v212 · תיקון "לקוח חדש — גיליון בלבד" נתקע
+• תוקן באג: יצירת לקוח חדש (בעיקר "גיליון בלבד") הייתה נתקעת על "⏳ Creating…" לצמיתות. הסיבה: אם גיליון "New Template" לא נמצא, השרת שיכפל בשקט את גיליון GOLMAT האמיתי (226+ שורות) כ"תבנית", ואז ניקה אותו תא-תא (כ-8000 קריאות נפרדות) — איטי מספיק כדי שהחיבור מהטלפון יתנתק לפני שהשרת סיים, אף שהגיליון כן נוצר בפועל בצד השרת. עכשיו: (1) גיליון חסר יוצר טאב ריק עם הכותרות הרגילות במקום לשכפל לקוח אמיתי, (2) הניקוי במקבץ אחד במקום תא-תא. בנוסף בצד האפליקציה: הקריאה חסומה ל-25 שניות עם הודעה כנה אם עדיין איטית ("ייתכן שכבר נוצר — בדוק ב-Manage Jobs") — הכפתור כבר לא יכול להישאר תקוע לצמיתות.
+
 ─────────────────
 v960 · 24/07/2026 · AS v211 · דוח "📈 Average ₪/Hour" חדש
 • נוסף דוח חדש למגירה: רווח ממוצע לשעה בפועל (רווח גולמי ÷ שעות בפועל) על פני עבודות שהושלמו, עם סינון תקופה (יומי/שבועי/חודשי/הכל) ולקוח (או "כל הלקוחות"). המספר הגדול צבוע ירוק כשהוא ≥ ₪500/שעה (היעד), כתום כשמתחתיו — עם אחוז מהיעד. עבודות ללא תאריך בתוך חלון תקופה מוצגות בנפרד ("ללא תאריך"), לא נבלעות. ⚠ דורש Apps Script v211 (action חדש getAvgProfitPerHour).
@@ -1586,7 +1590,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v960</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v961</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -4153,8 +4157,18 @@ function submitNewClient() {
   var sheetOnly = !!(document.getElementById('newClientSheetOnly')||{}).checked;
   var btn = document.querySelector('#newClientOverlay button:last-child');
   btn.textContent = '⏳ Creating…'; btn.disabled = true;
-  fetch(SHEETS_URL + '?action=createClient&name=' + encodeURIComponent(name) + '&clientType=' + encodeURIComponent(_newClientType) + '&contactName=' + encodeURIComponent(contactName) + '&taxId=' + encodeURIComponent(taxId) + '&phone=' + encodeURIComponent(phone) + '&email=' + encodeURIComponent(email) + '&street=' + encodeURIComponent(street) + '&city=' + encodeURIComponent(city))
-  .then(function(r) { return r.text(); })
+  // v961: bound the createClient call. AS v212 fixed the actual root cause (a slow per-cell
+  // clear loop that could take long enough for the connection to time out even though the
+  // sheet WAS created successfully server-side, leaving this button stuck on "Creating…"
+  // forever). This abort-after-25s is just a safety net for any future slow call — it never
+  // leaves the button disabled indefinitely again, and it tells the truth: the sheet may well
+  // have been created anyway, so it doesn't claim outright failure.
+  var _ncCtrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  var _ncTimedOut = false;
+  var _ncTimer = setTimeout(function(){ _ncTimedOut = true; if (_ncCtrl) _ncCtrl.abort(); }, 25000);
+  fetch(SHEETS_URL + '?action=createClient&name=' + encodeURIComponent(name) + '&clientType=' + encodeURIComponent(_newClientType) + '&contactName=' + encodeURIComponent(contactName) + '&taxId=' + encodeURIComponent(taxId) + '&phone=' + encodeURIComponent(phone) + '&email=' + encodeURIComponent(email) + '&street=' + encodeURIComponent(street) + '&city=' + encodeURIComponent(city),
+    _ncCtrl ? { signal: _ncCtrl.signal } : undefined)
+  .then(function(r) { clearTimeout(_ncTimer); return r.text(); })
   .then(function(res) {
     if (res.indexOf('Error') !== -1) throw new Error(res);
     saveClient(name);
@@ -4171,7 +4185,12 @@ function submitNewClient() {
     if (caspitId) { fetch(SHEETS_URL + '?action=updateClientCaspitId&name=' + encodeURIComponent(name) + '&caspitId=' + encodeURIComponent(caspitId)).catch(function(){}); }
     showToast('✓ Client "' + name + '" created' + (caspitId ? ' + Caspit ✓' : ' (Caspit ID pending)'));
   })
-  .catch(function(e) { btn.textContent = '✓ Create Client'; btn.disabled = false; showToast('Failed: ' + e.message); });
+  .catch(function(e) {
+    clearTimeout(_ncTimer);
+    btn.textContent = '✓ Create Client'; btn.disabled = false;
+    if (_ncTimedOut) { showToast('⏳ לוקח יותר מדי זמן — ייתכן שהלקוח כבר נוצר בגיליון. בדוק ב-Manage Jobs או רענן ונסה שוב'); }
+    else { showToast('Failed: ' + e.message); }
+  });
 }
 
 function openAddJobModal() {

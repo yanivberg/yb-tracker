@@ -1,4 +1,14 @@
-// Apps Script — v211
+// Apps Script — v212
+// v212: createClient — fixed "stuck on Creating…" bug. Root cause: template lookup silently
+//       fell back to duplicating GOLMAT (a real ~226-row client sheet) whenever "New Template"
+//       was missing, then a per-cell clear loop (~8000 individual Apps Script calls) took long
+//       enough that the mobile client's connection timed out before this function returned —
+//       even though the sheet WAS created successfully server-side. Fixed: (1) missing template
+//       now creates a blank sheet with the standard headers instead of copying GOLMAT: (2) the
+//       clear loop is now one batched range clearContent() + one batched ID-column setValues(),
+//       not one Apps Script call per cell. Formulas are safe to blanket-clear — every job-add
+//       path (addJob/addJobsBulk/createExpenseRow) calls copyProfitFormulasDown per new row
+//       regardless, so nothing relies on template rows having pre-seeded formulas.
 // v211: new action getAvgProfitPerHour — real overall profit-per-hour across completed jobs
 //       (status בוצע, with logged actual hours), optionally scoped to one client and/or a
 //       period window (day|week|month|all), same date logic as getGrossProfitSummary (v206).
@@ -1818,12 +1828,17 @@ if (action === 'scanPOEmails') {
     if (newSheet) return ContentService.createTextOutput(JSON.stringify({status:'exists'})).setMimeType(ContentService.MimeType.JSON);
 
 
-    // ── v80 FIX: Case-insensitive template lookup ──────────────────────
+    // v212: template lookup NO LONGER falls back to a real client sheet (was: || GOLMAT).
+    // That fallback silently copied GOLMAT's ~226 real data rows as the "template" whenever
+    // "New Template"/"New Tamplate" was missing, then the old per-cell clear loop below took
+    // thousands of individual Apps Script calls to clean it up — slow enough that the mobile
+    // client's connection timed out before this function returned, even though the sheet WAS
+    // created successfully server-side (the "stuck on Creating…, but the tab appears" symptom).
+    // Missing template now falls through to the blank-sheet branch below instead.
     var templateSheet = ss.getSheets().find(function(s) {
       var n = s.getName().toLowerCase();
       return n === 'new tamplate' || n === 'new template';
-    }) || ss.getSheetByName('GOLMAT');
-    // ───────────────────────────────────────────────────────────────────
+    });
 
 
     // ── v81: Hardcoded headers — never rely on template row 1 values ──────
@@ -1837,34 +1852,34 @@ if (action === 'scanPOEmails') {
     // ──────────────────────────────────────────────────────────────────────
 
 
+    var HEADER_ROW = 2; var HEADER_COL = 2;
+    var prefix = clientName.replace(/\s+/g, '').substring(0, 3).toUpperCase();
+
     if (templateSheet) {
       // Duplicate template — copies formatting, data validations, column widths
       newSheet = templateSheet.copyTo(ss);
       newSheet.setName(clientName);
-    } else {
-      newSheet = ss.insertSheet(clientName);
-    }
-
-
-    // v83: write headers to row 2, col B — matching GOLMAT structure
-    var HEADER_ROW = 2; var HEADER_COL = 2;
-    newSheet.getRange(HEADER_ROW, HEADER_COL, 1, CLIENT_HEADERS.length).setValues([CLIENT_HEADERS]);
-    newSheet.getRange(HEADER_ROW, HEADER_COL, 1, CLIENT_HEADERS.length).setFontWeight('bold');
-    newSheet.setFrozenRows(HEADER_ROW);
-
-
-    // Generate ID prefix: first 3 letters of client name (no spaces)
-    var prefix = clientName.replace(/\s+/g, '').substring(0, 3).toUpperCase();
-
-
-    // Clear data rows (row 3+), set IDs in col B
-    var lastRow = newSheet.getLastRow();
-    for (var row = HEADER_ROW + 1; row <= lastRow; row++) {
-      for (var col = 1; col <= newSheet.getLastColumn(); col++) {
-        var cell = newSheet.getRange(row, col);
-        if (!cell.getFormula()) cell.clearContent();
+      newSheet.getRange(HEADER_ROW, HEADER_COL, 1, CLIENT_HEADERS.length).setValues([CLIENT_HEADERS]);
+      newSheet.getRange(HEADER_ROW, HEADER_COL, 1, CLIENT_HEADERS.length).setFontWeight('bold');
+      newSheet.setFrozenRows(HEADER_ROW);
+      // v212: batch clear instead of one getRange()+clearContent() PER CELL (was ~8000 individual
+      // Apps Script calls on a 226-row template — the root cause of the timeout). Formulas in the
+      // template's data rows are rare/unwanted here (this sheet has no computed data rows to
+      // preserve below the header), so a single range clear is safe and equivalent in effect.
+      var lastRow = newSheet.getLastRow();
+      var lastCol = newSheet.getLastColumn();
+      if (lastRow > HEADER_ROW) {
+        newSheet.getRange(HEADER_ROW + 1, 1, lastRow - HEADER_ROW, lastCol).clearContent();
+        var idCol = [];
+        for (var row = HEADER_ROW + 1; row <= lastRow; row++) idCol.push([prefix + String(row - HEADER_ROW).padStart(3, '0')]);
+        newSheet.getRange(HEADER_ROW + 1, HEADER_COL, idCol.length, 1).setValues(idCol);
       }
-      newSheet.getRange(row, HEADER_COL).setValue(prefix + String(row - HEADER_ROW).padStart(3, '0'));
+    } else {
+      // Blank sheet — no template rows to clear, nothing slow here.
+      newSheet = ss.insertSheet(clientName);
+      newSheet.getRange(HEADER_ROW, HEADER_COL, 1, CLIENT_HEADERS.length).setValues([CLIENT_HEADERS]);
+      newSheet.getRange(HEADER_ROW, HEADER_COL, 1, CLIENT_HEADERS.length).setFontWeight('bold');
+      newSheet.setFrozenRows(HEADER_ROW);
     }
 
 
