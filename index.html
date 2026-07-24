@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v958</title>
+<title>י.ב אחזקות — v959</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v958
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v959
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -533,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v959 · 24/07/2026 · "ניהול עבודות" — אפשרות "כל הלקוחות"
+• בתפריט הלקוח במסך "🗂️ ניהול עבודות" נוספה אפשרות "— כל הלקוחות —": מציגה את כל העבודות מכל הלקוחות יחד, מקובצות לפי לקוח (כותרת צבעונית כמו ברשימת "עבודות ממתינות להצעה"), וממוינות בתוך כל קבוצה לפי מספר העבודה (חדש→ישן, עם אפשרות היפוך). עריכה/מחיקה/מחיקה מרובה ממשיכות לפעול נכון על הלקוח הנכון של כל עבודה.
+
 ─────────────────
 v958 · 24/07/2026 · מיון "ניהול עבודות" — תוקן בפועל
 • תיקון: המיון "חדש→ישן" ברשימת "ניהול עבודות" שתואר ב-v956 לא היה קיים בפועל בקוד — לא ב-mjRenderList/mjApplyFilter ולא בשרת (getClientJobs מחזיר בסדר הגיליון, ישן→חדש). v957 תיקן בעיית קאש אמיתית אבל לא את זה — לכן העבודה הראשונה (G0001) המשיכה להופיע ראשונה. עכשיו יש מיון אמיתי: לפי הספרות במספר העבודה (חדש→ישן כברירת מחדל), עם כפתור "חדש→ישן ↓ / ישן→חדש ↑" ליד החיפוש להיפוך הסדר.
@@ -1576,7 +1580,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v958</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v959</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3739,12 +3743,17 @@ var _mjClient = null, _mjJobs = [], _mjIdx = -1;
 var _MJ_CATS = ['אחר','איטום','אינסטלציה','אספקת חומרים','הובלות','הנדימן','מסגרות','נגרות','עיצוב','פיקוח','פיתוח מוצר','צבע','קבלנות'];
 var _MJ_STATS = ['ממתין להצעה','ניתנה הצעה','ממתין לביצוע','בתהליך ביצוע','בוצע'];
 var _MJ_INVS = ['','להוציא חש','הופקה'];
+var _mjAllClients = [];
 function openManageJobs() {
   document.getElementById('manageJobsOverlay').style.display = 'flex';
   var sel = document.getElementById('mjClient');
   if (sel.options.length <= 1 && SHEETS_URL) {
     fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(cs){
-      (cs || []).forEach(function(c){ var o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
+      _mjAllClients = cs || [];
+      var allOpt = document.createElement('option');
+      allOpt.value = '__ALL__'; allOpt.textContent = '— כל הלקוחות —';
+      sel.appendChild(allOpt);
+      _mjAllClients.forEach(function(c){ var o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
     }).catch(function(){});
   }
 }
@@ -3761,7 +3770,13 @@ function _mjBadge(s) {
 var _mjSortDesc = true;
 function _mjJobNum(id) { var m = String(id||'').match(/(\d+)\s*$/); return m ? parseInt(m[1], 10) : 0; }
 function _mjSortJobs() {
-  _mjJobs.sort(function(a, b) { return _mjSortDesc ? (_mjJobNum(b.id) - _mjJobNum(a.id)) : (_mjJobNum(a.id) - _mjJobNum(b.id)); });
+  // v959: in "All Clients" mode, group by client first (numeric job ids aren't comparable
+  // across different clients' independent sequences) — then apply the newest/oldest toggle
+  // within each client group.
+  _mjJobs.sort(function(a, b) {
+    if (_mjClient === '__ALL__' && a.client !== b.client) return String(a.client||'').localeCompare(String(b.client||''), 'he');
+    return _mjSortDesc ? (_mjJobNum(b.id) - _mjJobNum(a.id)) : (_mjJobNum(a.id) - _mjJobNum(b.id));
+  });
 }
 function mjToggleSort() {
   _mjSortDesc = !_mjSortDesc;
@@ -3776,7 +3791,21 @@ function mjRenderList() {
   _mjSelected = {}; mjUpdateBulkBar();
   if (!_mjClient) { _mjJobs = []; list.innerHTML = ''; document.getElementById('mjCount').textContent = ''; document.getElementById('mjChips').innerHTML = ''; return; }
   list.innerHTML = '<div style="text-align:center;color:#90a4ae;padding:30px;">⏳ טוען…</div>';
-  fetch(SHEETS_URL + '?action=getClientJobs&client=' + encodeURIComponent(_mjClient)).then(function(r){ return r.json(); }).then(function(jobs){
+  var fetchJobs;
+  if (_mjClient === '__ALL__') {
+    var clients = _mjAllClients.length ? _mjAllClients : [];
+    fetchJobs = Promise.all(clients.map(function(c) {
+      return fetch(SHEETS_URL + '?action=getClientJobs&client=' + encodeURIComponent(c))
+        .then(function(r){ return r.json(); })
+        .then(function(jobs){ return (jobs||[]).map(function(j){ j.client = c; return j; }); })
+        .catch(function(){ return []; });
+    })).then(function(perClient){ return [].concat.apply([], perClient); });
+  } else {
+    fetchJobs = fetch(SHEETS_URL + '?action=getClientJobs&client=' + encodeURIComponent(_mjClient))
+      .then(function(r){ return r.json(); })
+      .then(function(jobs){ return (jobs||[]).map(function(j){ j.client = _mjClient; return j; }); });
+  }
+  fetchJobs.then(function(jobs){
     _mjJobs = jobs || [];
     _mjSortJobs();
     mjResetFilterControls();
@@ -3816,14 +3845,15 @@ function _mjIsEmpty(j) {
 }
 function mjApplyFilter() {
   var list = document.getElementById('mjList');
-  if (!_mjJobs.length) { document.getElementById('mjCount').textContent = _mjClient ? '0 עבודות' : ''; document.getElementById('mjChips').innerHTML = ''; if (_mjClient) list.innerHTML = '<div style="text-align:center;color:#90a4ae;padding:30px;">אין עבודות ללקוח זה</div>'; return; }
+  var isAll = _mjClient === '__ALL__';
+  if (!_mjJobs.length) { document.getElementById('mjCount').textContent = _mjClient ? '0 עבודות' : ''; document.getElementById('mjChips').innerHTML = ''; if (_mjClient) list.innerHTML = '<div style="text-align:center;color:#90a4ae;padding:30px;">' + (isAll ? 'אין עבודות' : 'אין עבודות ללקוח זה') + '</div>'; return; }
   var q = (document.getElementById('mjQ').value || '').toLowerCase().trim();
   var st = document.getElementById('mjFStatus').value;
   var cat = document.getElementById('mjFCat').value;
   var inv = document.getElementById('mjFInv').value;
   var from = document.getElementById('mjFFrom').value;
   var to = document.getElementById('mjFTo').value;
-  var html = '', shown = 0, base = 0;
+  var html = '', shown = 0, base = 0, lastClient = null;
   _mjJobs.forEach(function(j, i){
     if (_mjIsEmpty(j)) return;   // hide fully empty sheet rows
     base++;
@@ -3833,6 +3863,7 @@ function mjApplyFilter() {
     if (inv === '__none') { if (j.invoice) return; } else if (inv !== '__all') { if ((j.invoice || '') !== inv) return; }
     if (from || to) { var ds = _mjDateISO(j.dateStart); if (!ds) return; if (from && ds < from) return; if (to && ds > to) return; }
     shown++;
+    if (isAll && j.client !== lastClient) { html += clientGroupHeader(j.client); lastClient = j.client; }
     var _sel = !!_mjSelected[j.id];
     var _selMode = Object.keys(_mjSelected).length > 0;
     var _check = _selMode ? ('<div style="flex-shrink:0;width:24px;height:24px;border-radius:7px;border:2px solid ' + (_sel?'#c62828':'#cfd8dc') + ';background:' + (_sel?'#c62828':'#fff') + ';display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:900;">' + (_sel?'✓':'') + '</div>') : '';
@@ -3864,7 +3895,7 @@ function _mjRow(a, b) { return '<div style="display:flex;gap:10px;">'+a+b+'</div
 function _mjGrp(t, first) { return '<div style="font-size:11px;font-weight:900;color:#00695c;text-transform:uppercase;letter-spacing:0.5px;margin:'+(first?'0':'6px')+' 0 9px;'+(first?'':'border-top:1px solid #eee;padding-top:12px;')+'">'+t+'</div>'; }
 function mjOpenEdit(i) {
   _mjIdx = i; var j = _mjJobs[i]; if (!j) return;
-  document.getElementById('mjEditId').textContent = j.id + ' · ' + _mjClient;
+  document.getElementById('mjEditId').textContent = j.id + ' · ' + (j.client || _mjClient);
   var gross = j.grossProfit !== '' && j.grossProfit != null ? j.grossProfit : ((parseFloat(j.income)||0) - (parseFloat(j.costs)||0));
   var pph = j.profitPerHour;
   document.getElementById('mjForm').innerHTML =
@@ -3897,7 +3928,7 @@ function mjSave() {
     dateStart: g('mj_dateStart'), dateEnd: g('mj_dateEnd'),
     po: g('mj_po'), quote: g('mj_quote'), invoice: g('mj_invoice'), notes: g('mj_notes')
   };
-  var qs = '?action=updateJobFull&jobId=' + encodeURIComponent(j.id) + '&client=' + encodeURIComponent(_mjClient);
+  var qs = '?action=updateJobFull&jobId=' + encodeURIComponent(j.id) + '&client=' + encodeURIComponent(j.client || _mjClient);
   for (var k in params) qs += '&' + k + '=' + encodeURIComponent(params[k]);
   mjCloseEdit();
   fetch(SHEETS_URL + qs).then(function(r){ return r.text(); }).then(function(res){
@@ -3973,7 +4004,7 @@ function mjDoBulkDelete() {
       return;
     }
     var j = jobs[k];
-    fetch(SHEETS_URL + '?action=deleteJob&jobId=' + encodeURIComponent(j.id) + '&client=' + encodeURIComponent(_mjClient))
+    fetch(SHEETS_URL + '?action=deleteJob&jobId=' + encodeURIComponent(j.id) + '&client=' + encodeURIComponent(j.client || _mjClient))
       .then(function(r){ return r.text(); })
       .then(function(res){ if (res === 'OK') done++; else failed++; next(k+1); })
       .catch(function(){ failed++; next(k+1); });
@@ -3998,7 +4029,7 @@ function mjDoDelete() {
   var j = _mjJobs[_mjIdx]; if (!j) return;
   document.getElementById('mjConfirmOverlay').style.display = 'none';
   mjCloseEdit();
-  fetch(SHEETS_URL + '?action=deleteJob&jobId=' + encodeURIComponent(j.id) + '&client=' + encodeURIComponent(_mjClient)).then(function(r){ return r.text(); }).then(function(res){
+  fetch(SHEETS_URL + '?action=deleteJob&jobId=' + encodeURIComponent(j.id) + '&client=' + encodeURIComponent(j.client || _mjClient)).then(function(r){ return r.text(); }).then(function(res){
     showToast(res === 'OK' ? '🗑️ ' + j.id + ' — נמחק' : 'מחיקה: ' + res);
     mjRenderList();
   }).catch(function(){ showToast('⚠️ מחיקה נכשלה'); });
