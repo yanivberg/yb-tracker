@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v957</title>
+<title>י.ב אחזקות — v958</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v957
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v958
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -533,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v958 · 24/07/2026 · מיון "ניהול עבודות" — תוקן בפועל
+• תיקון: המיון "חדש→ישן" ברשימת "ניהול עבודות" שתואר ב-v956 לא היה קיים בפועל בקוד — לא ב-mjRenderList/mjApplyFilter ולא בשרת (getClientJobs מחזיר בסדר הגיליון, ישן→חדש). v957 תיקן בעיית קאש אמיתית אבל לא את זה — לכן העבודה הראשונה (G0001) המשיכה להופיע ראשונה. עכשיו יש מיון אמיתי: לפי הספרות במספר העבודה (חדש→ישן כברירת מחדל), עם כפתור "חדש→ישן ↓ / ישן→חדש ↑" ליד החיפוש להיפוך הסדר.
+
 ─────────────────
 v957 · 24/07/2026 · תיקון קאש (Service Worker)
 • תיקון: גרסאות חדשות לא הגיעו למכשירים — ה-SW הגיש שכבת אפליקציה מהקאש. עכשיו network-first לדף, מפתחות קאש מנוקים מ-query, ושם קאש מגורסן עם ניקוי ישן. פותר את "מיון חדש→ישן לא נתפס" (היה גרסה v955 מהקאש)
@@ -1572,7 +1576,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v957</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v958</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1998,8 +2002,11 @@ SHEET SYNC
       <option value="">— בחר לקוח —</option>
     </select>
     <div style="background:#fff;border:1px solid #e0e7ec;border-radius:14px;padding:10px 12px;margin-top:10px;">
-      <div style="display:flex;align-items:center;gap:8px;border:1.5px solid #ddd;border-radius:10px;padding:8px 10px;">
-        <span>🔍</span><input id="mjQ" type="text" placeholder="חיפוש לפי תיאור או מספר עבודה…" oninput="mjApplyFilter()" style="border:none;outline:none;flex:1;font-size:14.5px;font-family:Heebo,sans-serif;background:transparent;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;border:1.5px solid #ddd;border-radius:10px;padding:8px 10px;flex:1;">
+          <span>🔍</span><input id="mjQ" type="text" placeholder="חיפוש לפי תיאור או מספר עבודה…" oninput="mjApplyFilter()" style="border:none;outline:none;flex:1;font-size:14.5px;font-family:Heebo,sans-serif;background:transparent;">
+        </div>
+        <button id="mjSortBtn" onclick="mjToggleSort()" type="button" style="flex-shrink:0;padding:9px 12px;border:1.5px solid #00897b;border-radius:10px;background:#e0f2f1;color:#00695c;font-weight:900;font-size:12.5px;font-family:Heebo,sans-serif;cursor:pointer;white-space:nowrap;">חדש→ישן ↓</button>
       </div>
       <div onclick="mjToggleFilters()" style="display:flex;align-items:center;justify-content:center;gap:7px;margin-top:9px;background:#e0f2f1;border:1.5px solid #00897b;border-radius:11px;padding:10px;cursor:pointer;color:#00695c;font-weight:900;font-size:13.5px;">
         🔧 סינון <span id="mjFBadge" style="display:none;background:#00897b;color:#fff;border-radius:999px;font-size:10px;padding:1px 7px;font-weight:900;"></span><span id="mjFArrow" style="margin-right:auto;color:#00695c;font-size:12px;">▴</span>
@@ -3747,6 +3754,22 @@ function _mjBadge(s) {
   var c = m[s] || ['#eceff1','#607d8b'];
   return '<span style="font-size:10px;font-weight:900;padding:3px 9px;border-radius:8px;white-space:nowrap;flex-shrink:0;background:'+c[0]+';color:'+c[1]+';">'+(s||'—')+'</span>';
 }
+// v958: Manage Jobs sort — jobs come back from getClientJobs in raw sheet order (oldest first).
+// Sort by the NUMERIC suffix of the job id (e.g. G0226 -> 226) so ordering is correct regardless
+// of id width/prefix; string sort alone would put G10 before G2. Default newest-first per Yaniv;
+// mjToggleSort() flips it and re-renders. State persists across client switches in this session.
+var _mjSortDesc = true;
+function _mjJobNum(id) { var m = String(id||'').match(/(\d+)\s*$/); return m ? parseInt(m[1], 10) : 0; }
+function _mjSortJobs() {
+  _mjJobs.sort(function(a, b) { return _mjSortDesc ? (_mjJobNum(b.id) - _mjJobNum(a.id)) : (_mjJobNum(a.id) - _mjJobNum(b.id)); });
+}
+function mjToggleSort() {
+  _mjSortDesc = !_mjSortDesc;
+  var btn = document.getElementById('mjSortBtn');
+  if (btn) btn.textContent = _mjSortDesc ? 'חדש→ישן ↓' : 'ישן→חדש ↑';
+  _mjSortJobs();
+  mjApplyFilter();
+}
 function mjRenderList() {
   _mjClient = document.getElementById('mjClient').value;
   var list = document.getElementById('mjList');
@@ -3755,6 +3778,7 @@ function mjRenderList() {
   list.innerHTML = '<div style="text-align:center;color:#90a4ae;padding:30px;">⏳ טוען…</div>';
   fetch(SHEETS_URL + '?action=getClientJobs&client=' + encodeURIComponent(_mjClient)).then(function(r){ return r.json(); }).then(function(jobs){
     _mjJobs = jobs || [];
+    _mjSortJobs();
     mjResetFilterControls();
     mjPopulateCategories();
     mjApplyFilter();
