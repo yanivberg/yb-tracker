@@ -1,18 +1,13 @@
-// YB Tracker service worker — sw-v1
-// Strategy: network-first with cache fallback. Online users ALWAYS get the
-// newest deployed version; the cache is only used when the network fails.
-// No per-release edits needed here — the cache refreshes on every successful load.
-var CACHE = 'yb-shell-v1';
+// YB Tracker service worker — v957: network-first HTML shell, normalized (query-stripped) cache keys, versioned cache with activate-purge.
+const CACHE = 'yb-shell-v957';
+const INDEX_URL = self.registration.scope + 'index.html';
 
-self.addEventListener('install', function (e) {
-  self.skipWaiting();
-});
+self.addEventListener('install', function (e) { self.skipWaiting(); });
 
 self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys().then(function (keys) {
-      return Promise.all(keys.filter(function (k) { return k !== CACHE; })
-        .map(function (k) { return caches.delete(k); }));
+      return Promise.all(keys.map(function (k) { return k === CACHE ? null : caches.delete(k); }));
     }).then(function () { return self.clients.claim(); })
   );
 });
@@ -20,21 +15,30 @@ self.addEventListener('activate', function (e) {
 self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET') return;
-  var url = new URL(req.url);
-  // Same-origin only — never intercept Apps Script / Worker / Caspit calls.
+  var url;
+  try { url = new URL(req.url); } catch (err) { return; }
   if (url.origin !== self.location.origin) return;
 
+  var isNav = req.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('/index.html');
+
+  if (isNav) {
+    e.respondWith(
+      fetch(req).then(function (res) {
+        if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(INDEX_URL, copy); }); }
+        return res;
+      }).catch(function () {
+        return caches.match(INDEX_URL).then(function (m) { return m || caches.match(new Request(url.origin + url.pathname)); });
+      })
+    );
+    return;
+  }
+
+  var key = new Request(url.origin + url.pathname);
   e.respondWith(
-    fetch(req).then(function (res) {
-      if (res && res.ok) {
-        var copy = res.clone();
-        caches.open(CACHE).then(function (c) { c.put(req, copy); });
-      }
-      return res;
-    }).catch(function () {
-      // ignoreSearch so index.html?v=NNN still matches the cached copy
-      return caches.match(req, { ignoreSearch: true }).then(function (hit) {
-        return hit || Response.error();
+    caches.match(key).then(function (m) {
+      return m || fetch(req).then(function (res) {
+        if (res && res.ok) { var copy = res.clone(); caches.open(CACHE).then(function (c) { c.put(key, copy); }); }
+        return res;
       });
     })
   );
