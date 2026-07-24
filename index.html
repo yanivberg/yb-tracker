@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v954</title>
+<title>י.ב אחזקות — v955</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v954
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v955
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -533,6 +533,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v955 · 24/07/2026 · AS v208 / Version 338
+• לקוח חדש — נוספה אפשרות "גיליון בלבד" (checkbox). מסומן → נוצר טאב גיליון חדש (משוכפל מהתבנית עם העיצוב והוולידציות) בלי ליצור איש קשר בכספית; הודעה "נוצר בגיליון בלבד"; עמודת caspitId נשארת ריקה. לא מסומן → התנהגות רגילה (גיליון + כספית + caspitId). הערה במסך: קרא לגיליון בדיוק כשם איש הקשר בכספית — ההתאמה תתבצע אוטומטית בהפקת חשבונית (התאמה מדויקת, ואז fuzzy ≥75), אין צורך בקישור ידני. ה-checkbox מתאפס בכל פתיחה של הטופס.
+
 ─────────────────
 v954 · 21/07/2026 · AS v208 / Version 338
 • תיקון באג: הצעת מחיר מתוך שורות "ממתין להצעה" יצרה שורות כפולות בגיליון. כעת השורות הממתינות מתעדכנות במקום — אותן שורות מקבלות את מספר ההצעה, המחיר/כמות/שעות המעודכנים והסטטוס "ניתנה הצעה". הגנה: אם מספר השורות הממתינות ≠ מספר שורות ההצעה, חוזרים ליצירת שורות חדשות + הודעה. בנוסף הוסר ה-hack ‏Details:' ' (v919 הופרך — ניקוי ה-PUT הוא שעובד).
@@ -1562,7 +1566,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v954</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v955</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2106,10 +2110,17 @@ SHEET SYNC
     </div>
 
     <!-- Caspit badge -->
-    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#e8f5e9;border-radius:10px;border:1.5px solid #2e7d32;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#e8f5e9;border-radius:10px;border:1.5px solid #2e7d32;margin-bottom:12px;">
       <span>💼</span>
       <span style="font-size:12px;color:#1b5e20;font-weight:700;">Will also be created in Caspit automatically</span>
     </div>
+
+    <!-- v955: spreadsheet-only option — create the sheet tab without a Caspit contact -->
+    <label style="display:flex;align-items:center;gap:8px;margin:0 0 4px 0;font-size:13px;cursor:pointer;direction:rtl;">
+      <input type="checkbox" id="newClientSheetOnly" style="width:18px;height:18px;flex:none;">
+      <span>גיליון בלבד — ללא יצירת לקוח בכספית</span>
+    </label>
+    <div style="font-size:11px;color:#888;direction:rtl;margin:0 0 16px 26px;">קרא לגיליון בדיוק כשם איש הקשר בכספית — ההתאמה תתבצע אוטומטית בזמן הפקת חשבונית</div>
 
     <button onclick="submitNewClient()" style="width:100%;padding:14px;background:#f0c020;color:#111;border:none;border-radius:12px;font-size:16px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">✓ Create Client</button>
   </div>
@@ -4008,6 +4019,7 @@ function savePartialJobFields() { if (!_currentCompleteJob) return; var job = _c
 
 function openNewClientModal() {
   ['newClientName','newClientContact','newClientTaxId','newClientPhone','newClientEmail','newClientStreet','newClientCity'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  var _so=document.getElementById('newClientSheetOnly'); if(_so) _so.checked=false;   // v955: never let sheet-only persist between creations
   document.getElementById('clientPrefixPreview').textContent = '';
   setNewClientType('Business');
   document.getElementById('newClientOverlay').style.display = 'flex';
@@ -4051,6 +4063,10 @@ function submitNewClient() {
   var street      = (document.getElementById('newClientStreet')||{}).value||'';
   var city        = (document.getElementById('newClientCity')||{}).value||'';
   if (!name) { showToast('Please enter a client name'); return; }
+  // v955: spreadsheet-only mode — createClient still duplicates the template sheet & applies
+  // headers; we simply DON'T chain into Caspit. Sheet-only clients auto-match to a Caspit
+  // contact by name at invoice time (exact, then fuzzy >=75), so no backfill UI is needed.
+  var sheetOnly = !!(document.getElementById('newClientSheetOnly')||{}).checked;
   var btn = document.querySelector('#newClientOverlay button:last-child');
   btn.textContent = '⏳ Creating…'; btn.disabled = true;
   fetch(SHEETS_URL + '?action=createClient&name=' + encodeURIComponent(name) + '&clientType=' + encodeURIComponent(_newClientType) + '&contactName=' + encodeURIComponent(contactName) + '&taxId=' + encodeURIComponent(taxId) + '&phone=' + encodeURIComponent(phone) + '&email=' + encodeURIComponent(email) + '&street=' + encodeURIComponent(street) + '&city=' + encodeURIComponent(city))
@@ -4058,15 +4074,17 @@ function submitNewClient() {
   .then(function(res) {
     if (res.indexOf('Error') !== -1) throw new Error(res);
     saveClient(name);
+    if (sheetOnly) return null;                            // stop after the sheet — no Caspit call
     btn.textContent = '⏳ Creating in Caspit…';
     var caspitPayload = { name: name, type: _newClientType === 'Business' ? 1 : 2, phone: phone||undefined, email: email||undefined, taxId: taxId||undefined, contactName: contactName||undefined, address: street||undefined, city: city||undefined };
     return fetch(CASPIT_PROXY_URL + '?action=createContact', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(caspitPayload) }).then(function(r){ return r.json(); });
   })
   .then(function(caspitResult) {
     btn.textContent = '✓ Create Client'; btn.disabled = false;
+    document.getElementById('newClientOverlay').style.display = 'none';
+    if (sheetOnly) { showToast('✓ לקוח "' + name + '" נוצר בגיליון בלבד'); return; }
     var caspitId = (caspitResult && (caspitResult.contactId || caspitResult.Id || caspitResult.id)) || '';
     if (caspitId) { fetch(SHEETS_URL + '?action=updateClientCaspitId&name=' + encodeURIComponent(name) + '&caspitId=' + encodeURIComponent(caspitId)).catch(function(){}); }
-    document.getElementById('newClientOverlay').style.display = 'none';
     showToast('✓ Client "' + name + '" created' + (caspitId ? ' + Caspit ✓' : ' (Caspit ID pending)'));
   })
   .catch(function(e) { btn.textContent = '✓ Create Client'; btn.disabled = false; showToast('Failed: ' + e.message); });
