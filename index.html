@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v956</title>
+<title>י.ב אחזקות — v957</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -523,7 +523,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v956
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v957
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -534,6 +534,9 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v957 · 24/07/2026 · תיקון קאש (Service Worker)
+• תיקון: גרסאות חדשות לא הגיעו למכשירים — ה-SW הגיש שכבת אפליקציה מהקאש. עכשיו network-first לדף, מפתחות קאש מנוקים מ-query, ושם קאש מגורסן עם ניקוי ישן. פותר את "מיון חדש→ישן לא נתפס" (היה גרסה v955 מהקאש)
+────────────────
 v956 · 24/07/2026 · מיון רשימת עבודות
 • רשימת עבודות — מיון לפי מספר עבודה (חדש→ישן כברירת מחדל), עם כפתורי מיון השומרים על סדר הכרטיסים
 ────────────────
@@ -1569,7 +1572,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v956</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v957</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
