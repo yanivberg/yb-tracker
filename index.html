@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v962</title>
+<title>י.ב אחזקות — v963</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v962
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v963
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,11 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v963 · 01/08/2026 · AS v211
+• תיקון ל-v962: הנעילה הוחלה על הטופס הלא נכון. כעת במסך "Pending Quote Projects" — בטופס העריכה עם PO/קטגוריה (הכפתור הכתום) — שדות מחיר וכמות נעולים לקריאה בלבד (אפורים). המחיר והכמות נקבעים בהצעת המחיר ואינם ניתנים לשינוי כאן. תיאור, שעות, סטטוס, PO וקטגוריה נשארו ניתנים לעריכה.
+⚠️ שים לב: שינוי סטטוס דורש PO + מחיר + כמות. אם למשימה אין מחיר/כמות מראש, יש להזין אותם במסך ניהול עבודות.
+
 ─────────────────
 v962 · 25/07/2026 · AS v211
 • "Pending Quote Projects" (מהתפריט): טופס העריכה המוטבע הפך לקריאה בלבד — כמות, מחיר, תיאור, שעות וסטטוס מוצגים באפור ואינם ניתנים לעריכה במסך הזה. עריכת שדות מתבצעת במסך ניהול עבודות. כפתור "Save & Send to Caspit" ממשיך לעבוד ושולח את ההצעה לכספית כרגיל.
@@ -1594,7 +1599,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v962</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v963</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3572,6 +3577,11 @@ function openCompleteForm(idx) {
       '<button onclick="saveCompleteForm('+idx+',null)" style="width:100%;padding:9px;background:rgba(0,0,0,0.2);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;cursor:pointer;">💾 Save fields only (no status change)</button>' +
       '<div id="cf_hint_'+idx+'" style="font-size:11px;color:rgba(255,200,0,0.8);margin-top:6px;text-align:center;display:none;">⚠️ Fill PO + Category to change status</div>';
     rowEl.appendChild(form);
+    // v963: Pending Quote Projects — Price & Qty are set by the quote, not editable here.
+    ['cf_pr_','cf_qt_'].forEach(function(_p){
+      var _el=document.getElementById(_p+idx);
+      if(_el){ _el.readOnly=true; _el.setAttribute('tabindex','-1'); _el.style.background='rgba(0,0,0,0.18)'; _el.style.color='rgba(255,255,255,0.55)'; _el.style.cursor='not-allowed'; }
+    });
   }).catch(function(){ showToast('Failed to load job details'); });
 }
 
@@ -3687,12 +3697,11 @@ function pendingQuoteEdit(idx) {
       // v962: Pending Quote Projects — inline edit form is READ-ONLY (view only).
       // Qty/Price/Desc/Hours/Status are shown for reference but cannot be changed here.
       // 'Save & Send to Caspit' still works (sends the quote; values unchanged).
-      ['pqd_','pqq_','pqp_','pqh_'].forEach(function(_p){
+      ['pqq_','pqp_'].forEach(function(_p){
         var _el=document.getElementById(_p+idx);
         if(_el){ _el.readOnly=true; _el.setAttribute('tabindex','-1'); _el.style.background='rgba(0,0,0,0.06)'; _el.style.color='#666'; _el.style.cursor='not-allowed'; }
       });
-      var _pqSel=document.getElementById('pqs_'+idx);
-      if(_pqSel){ _pqSel.disabled=true; _pqSel.style.background='rgba(0,0,0,0.06)'; _pqSel.style.color='#666'; _pqSel.style.cursor='not-allowed'; }
+      // v963: status/desc/hours remain EDITABLE here — only qty & price are locked.
     }).catch(function(){ showToast('Failed to load job details'); });
 }
 
