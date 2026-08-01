@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v963</title>
+<title>י.ב אחזקות — v964</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v963
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v964
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v964 · 02/08/2026 · AS v214
+• דוח רווח גולמי: נוסף פירוט כמה מתוך הסכום הוא החזר הוצאות. מתחת לסה״כ מוצג "מתוכו הוצאות: ₪X (Y%)", ולצד כל לקוח "מתוכו הוצאות ₪X". הסה״כ עצמו לא השתנה — שורות ההוצאות עדיין נכללות בו, ההצגה היא אינפורמטיבית בלבד (שורות הוצאה מזוהות לפי SRC: בהערות או תיאור שמתחיל ב"הוצאות").
+
 ─────────────────
 v963 · 01/08/2026 · AS v211
 • תיקון ל-v962: הנעילה הוחלה על הטופס הלא נכון. כעת במסך "Pending Quote Projects" — בטופס העריכה עם PO/קטגוריה (הכפתור הכתום) — שדות מחיר וכמות נעולים לקריאה בלבד (אפורים). המחיר והכמות נקבעים בהצעת המחיר ואינם ניתנים לשינוי כאן. תיאור, שעות, סטטוס, PO וקטגוריה נשארו ניתנים לעריכה.
@@ -1599,7 +1603,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v963</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v964</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6339,6 +6343,8 @@ function fetchGrossProfitSummary() {
       var html = '<div style="text-align:center;margin-bottom:20px;">' +
         '<div style="font-size:13px;color:#888;margin-bottom:4px;">סה״כ רווח גולמי · להוציא חש · ' + _periodLabel + '</div>' +
         '<div style="font-size:36px;font-weight:900;color:#2e7d32;">₪' + data.total.toLocaleString() + '</div>' +
+        // v964: how much of that total is reimbursed expenses (total itself unchanged)
+        ((data.expenses) ? '<div style="font-size:12px;color:#e65100;margin-top:2px;">מתוכו הוצאות: ₪' + data.expenses.toLocaleString() + ' (' + Math.round(data.expenses / (data.total||1) * 100) + '%)</div>' : '') +
         ((data.period && data.period !== 'all' && data.undated) ?
           '<div style="font-size:11px;color:#e65100;margin-top:4px;">+ ₪' + data.undated.toLocaleString() + ' ללא תאריך (' + (data.undatedJobs||0) + ') — לא נכלל בתקופה</div>' : '') +
         '</div>';
@@ -6354,7 +6360,11 @@ function fetchGrossProfitSummary() {
             '<div style="font-size:14px;font-weight:700;color:#111;">' + client + '</div>' +
             '<div style="font-size:11px;color:#aaa;">(' + pct + '%)</div>' +
             '</div>' +
-            '<div style="font-size:16px;font-weight:800;color:#2e7d32;">₪' + data.clients[client].toLocaleString() + '</div>' +
+            '<div style="text-align:left;">' +
+              '<div style="font-size:16px;font-weight:800;color:#2e7d32;">₪' + data.clients[client].toLocaleString() + '</div>' +
+              // v964: expense share for this client
+              ((data.clientsExpenses && data.clientsExpenses[client]) ? '<div style="font-size:10px;color:#e65100;">מתוכו הוצאות ₪' + data.clientsExpenses[client].toLocaleString() + '</div>' : '') +
+            '</div>' +
             '</div>';
         });
         html += '</div>';
