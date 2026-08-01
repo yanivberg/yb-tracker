@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v961</title>
+<title>י.ב אחזקות — v962</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v961
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v962
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v962 · 25/07/2026 · AS v211
+• "Pending Quote Projects" (מהתפריט): טופס העריכה המוטבע הפך לקריאה בלבד — כמות, מחיר, תיאור, שעות וסטטוס מוצגים באפור ואינם ניתנים לעריכה במסך הזה. עריכת שדות מתבצעת במסך ניהול עבודות. כפתור "Save & Send to Caspit" ממשיך לעבוד ושולח את ההצעה לכספית כרגיל.
+
 ─────────────────
 v961 · 25/07/2026 · AS v212 · תיקון "לקוח חדש — גיליון בלבד" נתקע
 • תוקן באג: יצירת לקוח חדש (בעיקר "גיליון בלבד") הייתה נתקעת על "⏳ Creating…" לצמיתות. הסיבה: אם גיליון "New Template" לא נמצא, השרת שיכפל בשקט את גיליון GOLMAT האמיתי (226+ שורות) כ"תבנית", ואז ניקה אותו תא-תא (כ-8000 קריאות נפרדות) — איטי מספיק כדי שהחיבור מהטלפון יתנתק לפני שהשרת סיים, אף שהגיליון כן נוצר בפועל בצד השרת. עכשיו: (1) גיליון חסר יוצר טאב ריק עם הכותרות הרגילות במקום לשכפל לקוח אמיתי, (2) הניקוי במקבץ אחד במקום תא-תא. בנוסף בצד האפליקציה: הקריאה חסומה ל-25 שניות עם הודעה כנה אם עדיין איטית ("ייתכן שכבר נוצר — בדוק ב-Manage Jobs") — הכפתור כבר לא יכול להישאר תקוע לצמיתות.
@@ -1590,7 +1594,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v961</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v962</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3680,6 +3684,15 @@ function pendingQuoteEdit(idx) {
           '<button onclick="savePQEdit('+idx+',\''+j.id+'\',\''+j.client.replace(/'/g,"\\'")+'\',\''+oldDoc+'\')" style="flex:1;padding:9px;background:rgba(0,0,0,0.4);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">✓ Save & Send to Caspit</button>' +
         '</div>';
       rowEl.appendChild(div);
+      // v962: Pending Quote Projects — inline edit form is READ-ONLY (view only).
+      // Qty/Price/Desc/Hours/Status are shown for reference but cannot be changed here.
+      // 'Save & Send to Caspit' still works (sends the quote; values unchanged).
+      ['pqd_','pqq_','pqp_','pqh_'].forEach(function(_p){
+        var _el=document.getElementById(_p+idx);
+        if(_el){ _el.readOnly=true; _el.setAttribute('tabindex','-1'); _el.style.background='rgba(0,0,0,0.06)'; _el.style.color='#666'; _el.style.cursor='not-allowed'; }
+      });
+      var _pqSel=document.getElementById('pqs_'+idx);
+      if(_pqSel){ _pqSel.disabled=true; _pqSel.style.background='rgba(0,0,0,0.06)'; _pqSel.style.color='#666'; _pqSel.style.cursor='not-allowed'; }
     }).catch(function(){ showToast('Failed to load job details'); });
 }
 
