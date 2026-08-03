@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v964</title>
+<title>י.ב אחזקות — v965</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v964
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v965
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v965 · 03/08/2026 · AS v215
+• תגיות לעבודות. במסך "ניהול עבודות": בעריכת עבודה נוסף אזור "תגיות" — לוחצים על תגית קיימת כדי לסמן/לבטל, או על ＋ כדי ליצור תגית חדשה (היצירה גם מסמנת אותה). התגיות נשמרות יחד עם שאר השדות. בנוסף נוסף מסנן "תגית" בפאנל הסינון — בחירת תגית מציגה רק עבודות שנושאות אותה. התגיות נשמרות בגיליון נפרד בשם Tags (JobId | Client | Tag | CreatedAt) — אף גיליון לקוח לא נגע. רשימת התגיות נבנית מעצמה מהתגיות הקיימות.
+
 ─────────────────
 v964 · 02/08/2026 · AS v214
 • דוח רווח גולמי: נוסף פירוט כמה מתוך הסכום הוא החזר הוצאות. מתחת לסה״כ מוצג "מתוכו הוצאות: ₪X (Y%)", ולצד כל לקוח "מתוכו הוצאות ₪X". הסה״כ עצמו לא השתנה — שורות ההוצאות עדיין נכללות בו, ההצגה היא אינפורמטיבית בלבד (שורות הוצאה מזוהות לפי SRC: בהערות או תיאור שמתחיל ב"הוצאות").
@@ -1603,7 +1607,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v964</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v965</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2059,7 +2063,7 @@ SHEET SYNC
         <div style="display:flex;gap:8px;margin-bottom:8px;">
           <div style="flex:1;"><div style="font-size:10.5px;color:#90a4ae;font-weight:700;margin-bottom:3px;">סטטוס</div>
             <select id="mjFStatus" onchange="mjApplyFilter()" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;background:#fff;"><option value="">הכול</option><option>ממתין להצעה</option><option>ניתנה הצעה</option><option>ממתין לביצוע</option><option>בתהליך ביצוע</option><option>בוצע</option></select></div>
-          <div style="flex:1;"><div style="font-size:10.5px;color:#90a4ae;font-weight:700;margin-bottom:3px;">קטגוריה</div>
+          <div style="flex:1;"><div style="font-size:10.5px;color:#90a4ae;font-weight:700;margin-bottom:3px;">תגית</div><select id="mjFTag" onchange="mjApplyFilter()" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;background:#fff;"><option value="">הכול</option></select></div><div style="flex:1;"><div style="font-size:10.5px;color:#90a4ae;font-weight:700;margin-bottom:3px;">קטגוריה</div>
             <select id="mjFCat" onchange="mjApplyFilter()" style="width:100%;padding:9px;border:1px solid #ddd;border-radius:9px;font-size:13px;font-family:Heebo,sans-serif;background:#fff;"><option value="">הכול</option></select></div>
         </div>
         <div style="display:flex;gap:8px;margin-bottom:8px;">
@@ -3799,6 +3803,7 @@ var _MJ_INVS = ['','להוציא חש','הופקה'];
 var _mjAllClients = [];
 function openManageJobs() {
   document.getElementById('manageJobsOverlay').style.display = 'flex';
+  tagsLoad();
   var sel = document.getElementById('mjClient');
   if (sel.options.length <= 1 && SHEETS_URL) {
     fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(cs){
@@ -3903,6 +3908,7 @@ function mjApplyFilter() {
   var q = (document.getElementById('mjQ').value || '').toLowerCase().trim();
   var st = document.getElementById('mjFStatus').value;
   var cat = document.getElementById('mjFCat').value;
+  var _tagF = (document.getElementById('mjFTag')||{value:''}).value;
   var inv = document.getElementById('mjFInv').value;
   var from = document.getElementById('mjFFrom').value;
   var to = document.getElementById('mjFTo').value;
@@ -3913,6 +3919,7 @@ function mjApplyFilter() {
     if (q && ((j.desc || '') + ' ' + (j.id || '')).toLowerCase().indexOf(q) === -1) return;
     if (st && j.status !== st) return;
     if (cat && (j.category || '') !== cat) return;
+    if (_tagF && (_tagsByJob[j.id]||[]).indexOf(_tagF) < 0) return;
     if (inv === '__none') { if (j.invoice) return; } else if (inv !== '__all') { if ((j.invoice || '') !== inv) return; }
     if (from || to) { var ds = _mjDateISO(j.dateStart); if (!ds) return; if (from && ds < from) return; if (to && ds > to) return; }
     shown++;
@@ -3968,11 +3975,64 @@ function mjOpenEdit(i) {
     _mjSelect('יצאה חשבונית','mj_invoice', j.invoice, _MJ_INVS) +
     _mjGrp('הערות') +
     '<div style="margin-bottom:4px;"><textarea id="mj_notes" style="width:100%;min-height:64px;resize:vertical;padding:11px;border:1px solid #ddd;border-radius:10px;font-size:14.5px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;">'+(j.notes||'')+'</textarea></div>';
+  _tagsInjectPicker(j);
   document.getElementById('mjEditOverlay').style.display = 'flex';
 }
 function mjCloseEdit() { document.getElementById('mjEditOverlay').style.display = 'none'; }
+/* ===== v965 TAGS ===== stored in the 'Tags' sheet via AS v215 (getTags/setJobTags). */
+var _tagsAll = [], _tagsByJob = {}, _tagSel = [];
+function tagsLoad(cb){
+  if (!SHEETS_URL) { if(cb) cb(); return; }
+  fetch(SHEETS_URL + '?action=getTags&r=' + Date.now()).then(function(r){return r.json();}).then(function(d){
+    _tagsAll = (d && d.tags) || []; _tagsByJob = (d && d.byJob) || {};
+    _tagsFillFilter(); if(cb) cb();
+  }).catch(function(){ if(cb) cb(); });
+}
+function _tagsFillFilter(){
+  var s = document.getElementById('mjFTag'); if(!s) return;
+  var cur = s.value;
+  s.innerHTML = '<option value="">הכול</option>' + _tagsAll.map(function(x){return '<option>'+x+'</option>';}).join('');
+  if (cur && _tagsAll.indexOf(cur) >= 0) s.value = cur;
+}
+function _tagChip(txt, on, onclick){
+  return '<span onclick="' + onclick + '" style="display:inline-block;padding:5px 11px;margin:3px 3px 0 0;border-radius:14px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid ' +
+    (on ? '#1565c0;background:#1565c0;color:#fff' : '#cfd8dc;background:#fff;color:#546e7a') + ';">' + txt + '</span>';
+}
+function _tagsRenderPicker(){
+  var box = document.getElementById('mjTagBox'); if(!box) return;
+  var html = _tagsAll.map(function(x){ return _tagChip(x, _tagSel.indexOf(x)>=0, 'tagsToggle(\''+String(x).replace(/'/g,"\\'")+'\')'); }).join('');
+  html += '<span onclick="tagsAddNew()" style="display:inline-block;padding:5px 12px;margin:3px 3px 0 0;border-radius:14px;font-size:13px;font-weight:900;cursor:pointer;border:1.5px dashed #90a4ae;color:#546e7a;background:#fff;">＋</span>';
+  box.innerHTML = html;
+}
+function tagsToggle(tag){ var i=_tagSel.indexOf(tag); if(i>=0) _tagSel.splice(i,1); else _tagSel.push(tag); _tagsRenderPicker(); }
+function tagsAddNew(){
+  var name = (prompt('שם התגית החדשה:') || '').trim();
+  if (!name) return;
+  if (_tagsAll.indexOf(name) < 0) { _tagsAll.push(name); _tagsAll.sort(); }
+  if (_tagSel.indexOf(name) < 0) _tagSel.push(name);
+  _tagsFillFilter(); _tagsRenderPicker();
+}
+function _tagsInjectPicker(job){
+  _tagSel = (_tagsByJob[job.id] || []).slice();
+  var notes = document.getElementById('mj_notes'); if(!notes) return;
+  var host = notes.parentNode.parentNode;
+  var old = document.getElementById('mjTagWrap'); if(old) old.remove();
+  var d = document.createElement('div');
+  d.id = 'mjTagWrap'; d.style.cssText = 'margin-top:10px;';
+  d.innerHTML = '<div style="font-size:12px;font-weight:800;color:#37474f;margin:4px 0 2px;">תגיות</div><div id="mjTagBox"></div>';
+  host.appendChild(d);
+  if (!_tagsAll.length) tagsLoad(function(){ _tagsRenderPicker(); }); else _tagsRenderPicker();
+}
+function _tagsSaveFor(job){
+  if (!job || !job.id) return;
+  _tagsByJob[job.id] = _tagSel.slice();
+  fetch(SHEETS_URL + '?action=setJobTags&jobId=' + encodeURIComponent(job.id) +
+    '&client=' + encodeURIComponent(job.client || _mjClient || '') +
+    '&tags=' + encodeURIComponent(_tagSel.join(','))).catch(function(){});
+}
 function mjSave() {
   var j = _mjJobs[_mjIdx]; if (!j) return;
+  _tagsSaveFor(j);   // v965: persist tags alongside the field save
   var g = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
   var params = {
     desc: g('mj_desc'), category: g('mj_category'), status: g('mj_status'),
