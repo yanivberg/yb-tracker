@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v966</title>
+<title>י.ב אחזקות — v967</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v966
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v967
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v967 · 04/08/2026 · AS v215
+• תיקון: רשימת הלקוחות נראתה ריקה. הקריאה לשרת לרשימת הלקוחות לוקחת 7 עד 35 שניות (התעוררות של Google Apps Script), והתפריט התמלא רק אחרי המתנה ארוכה. עכשיו הרשימה נשמרת מקומית ומוצגת מיד בכל תפריטי בחירת הלקוח באפליקציה, ומתרעננת ברקע. יצירת לקוח חדש מנקה את המטמון אוטומטית.
+
 ─────────────────
 v966 · 03/08/2026 · AS v215
 • תיוג בשלב הצעת המחיר: במסך יצירת ההצעה לכספית, ליד "פרטים", נוסף אזור "תגיות (לכל שורה)" — לכל שורה בהצעה רשימת תגיות משלה (לחיצה מסמנת/מבטלת, ＋ יוצר תגית חדשה). בשליחה התגיות נשמרות לכל עבודה בנפרד — עובד גם משורות ממתינות קיימות וגם כשנוצרות שורות חדשות. התיוג בניהול עבודות נשאר כפי שהוא.
@@ -1611,7 +1615,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v966</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v967</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3185,6 +3189,40 @@ function showScreen(name) { document.querySelectorAll('.screen').forEach(s => s.
 
 // ── Google Sheets Integration ─────────────────────────
 var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxqbXKwg-EkbwKxtmulN_u_RpUi_HLn3Q8Hbw1VkBsl5Go7dRPjIJM2ulJUxZuS01tuVw/exec';
+
+/* v967: client-list cache. getClients on this backend takes 7-35s (GAS cold start),
+   so every client dropdown looked empty. One fetch-layer interceptor serves the
+   cached list instantly and refreshes in the background; covers all call sites. */
+var _CLK = 'yb_clients_cache_v1';
+function _clientsCached(){ try { var r = JSON.parse(localStorage.getItem(_CLK) || 'null'); return (r && typeof r.d === 'string' && r.d.charAt(0) === '[') ? r : null; } catch(e){ return null; } }
+function _clientsStore(txt){ try { if (typeof txt === 'string' && txt.charAt(0) === '[') localStorage.setItem(_CLK, JSON.stringify({ t: Date.now(), d: txt })); } catch(e){} }
+function _clientsBust(){ try { localStorage.removeItem(_CLK); } catch(e){} }
+setTimeout(function(){
+  if (window.__ybCliWrap) return; window.__ybCliWrap = 1;
+  var _f = window.fetch;
+  window.__ybRawFetch = _f;
+  window.fetch = function(u, o){
+    var s = '';
+    try { s = String(u); } catch(e){ return _f.apply(this, arguments); }
+    if (s.indexOf('createClient') >= 0) { _clientsBust(); return _f.apply(this, arguments); }
+    if (s.indexOf('getClients') < 0) return _f.apply(this, arguments);
+    var live = _f.apply(this, arguments).then(function(r){
+      try { r.clone().text().then(_clientsStore).catch(function(){}); } catch(e){}
+      return r;
+    });
+    var c = _clientsCached();
+    if (!c) return live;
+    live.catch(function(){});
+    return Promise.resolve(new Response(c.d, { status: 200, headers: { 'Content-Type': 'application/json' } }));
+  };
+  setTimeout(function(){
+    try {
+      if (typeof SHEETS_URL !== 'string' || !SHEETS_URL) return;
+      _f.call(window, SHEETS_URL + '?action=getClients&_p=' + Date.now())
+        .then(function(r){ return r.text(); }).then(_clientsStore).catch(function(){});
+    } catch(e){}
+  }, 2500);
+}, 0);
 
 function fetchOpenJobs() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
