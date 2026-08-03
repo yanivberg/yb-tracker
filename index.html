@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v965</title>
+<title>י.ב אחזקות — v966</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v965
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v966
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v966 · 03/08/2026 · AS v215
+• תיוג בשלב הצעת המחיר: במסך יצירת ההצעה לכספית, ליד "פרטים", נוסף אזור "תגיות (לכל שורה)" — לכל שורה בהצעה רשימת תגיות משלה (לחיצה מסמנת/מבטלת, ＋ יוצר תגית חדשה). בשליחה התגיות נשמרות לכל עבודה בנפרד — עובד גם משורות ממתינות קיימות וגם כשנוצרות שורות חדשות. התיוג בניהול עבודות נשאר כפי שהוא.
+
 ─────────────────
 v965 · 03/08/2026 · AS v215
 • תגיות לעבודות. במסך "ניהול עבודות": בעריכת עבודה נוסף אזור "תגיות" — לוחצים על תגית קיימת כדי לסמן/לבטל, או על ＋ כדי ליצור תגית חדשה (היצירה גם מסמנת אותה). התגיות נשמרות יחד עם שאר השדות. בנוסף נוסף מסנן "תגית" בפאנל הסינון — בחירת תגית מציגה רק עבודות שנושאות אותה. התגיות נשמרות בגיליון נפרד בשם Tags (JobId | Client | Tag | CreatedAt) — אף גיליון לקוח לא נגע. רשימת התגיות נבנית מעצמה מהתגיות הקיימות.
@@ -1607,7 +1611,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v965</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v966</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3981,6 +3985,33 @@ function mjOpenEdit(i) {
 function mjCloseEdit() { document.getElementById('mjEditOverlay').style.display = 'none'; }
 /* ===== v965 TAGS ===== stored in the 'Tags' sheet via AS v215 (getTags/setJobTags). */
 var _tagsAll = [], _tagsByJob = {}, _tagSel = [];
+/* v966: per-LINE tags while building a Caspit quote. _cqTags[lineIndex] = [tags] */
+var _cqTags = {};
+function cqTagToggle(i, tag){ if(!_cqTags[i]) _cqTags[i]=[]; var k=_cqTags[i].indexOf(tag); if(k>=0) _cqTags[i].splice(k,1); else _cqTags[i].push(tag); cqTagsRender(); }
+function cqTagAdd(i){ var name=(prompt('שם התגית החדשה:')||'').trim(); if(!name) return; if(_tagsAll.indexOf(name)<0){ _tagsAll.push(name); _tagsAll.sort(); } if(!_cqTags[i]) _cqTags[i]=[]; if(_cqTags[i].indexOf(name)<0) _cqTags[i].push(name); try{_tagsFillFilter();}catch(e){} cqTagsRender(); }
+function cqTagsRender(){
+  var det=document.getElementById('caspitDetails'); if(!det||!det.parentNode) return;
+  var box=document.getElementById('cqTagsBox');
+  if(!box){ box=document.createElement('div'); box.id='cqTagsBox'; box.style.cssText='margin:10px 0;'; det.parentNode.insertBefore(box, det); }
+  var rows=document.getElementById('caspitQuoteRows');
+  var n=rows?rows.children.length:0;
+  if(!n){ box.innerHTML=''; return; }
+  var html='<div style="font-size:12px;font-weight:800;color:#37474f;margin-bottom:4px;">תגיות (לכל שורה)</div>';
+  for(var i=0;i<n;i++){
+    var d=((rows.children[i].querySelector('.cq-desc')||{}).value||'').trim();
+    var sel=_cqTags[i]||[];
+    html+='<div style="padding:6px 8px;margin-bottom:5px;background:rgba(0,0,0,0.03);border-radius:8px;">';
+    html+='<div style="font-size:11px;color:#546e7a;font-weight:700;margin-bottom:2px;">'+((d||('שורה '+(i+1))).slice(0,42))+'</div>';
+    for(var q=0;q<_tagsAll.length;q++){
+      var tg=_tagsAll[q], on=sel.indexOf(tg)>=0;
+      html+='<span onclick="cqTagToggle('+i+',\''+String(tg).replace(/'/g,"\\'")+'\')" style="display:inline-block;padding:4px 10px;margin:2px 2px 0 0;border-radius:13px;font-size:11.5px;font-weight:700;cursor:pointer;border:1.5px solid '+(on?'#1565c0;background:#1565c0;color:#fff':'#cfd8dc;background:#fff;color:#546e7a')+';">'+tg+'</span>';
+    }
+    html+='<span onclick="cqTagAdd('+i+')" style="display:inline-block;padding:4px 11px;margin:2px 2px 0 0;border-radius:13px;font-size:12px;font-weight:900;cursor:pointer;border:1.5px dashed #90a4ae;color:#546e7a;background:#fff;">＋</span>';
+    html+='</div>';
+  }
+  box.innerHTML=html;
+}
+
 function tagsLoad(cb){
   if (!SHEETS_URL) { if(cb) cb(); return; }
   fetch(SHEETS_URL + '?action=getTags&r=' + Date.now()).then(function(r){return r.json();}).then(function(d){
@@ -9028,6 +9059,7 @@ function calcCaspitTotal() {
   if (lbl)  { lbl.style.color = isZero ? '#e65100' : '#2e7d32'; lbl.textContent = isZero ? 'Total = 0 — prices TBD' : 'Total (excl. VAT)'; }
   if (val)  { val.style.color = isZero ? '#e65100' : '#1b5e20'; val.textContent = '₪' + total.toLocaleString(); }
   if (hint) hint.innerHTML = 'Status after sending: <strong style="color:' + (isZero?'#e65100':'#0d47a1') + '">' + (isZero?'Waiting for Quote':'Quote Given') + '</strong>';
+  try { if(!_tagsAll.length) tagsLoad(function(){ cqTagsRender(); }); else cqTagsRender(); } catch(e){}
   if (cnt)  { cnt.textContent = rows.length + ' row' + (rows.length!==1?'s':''); }
 }
 
@@ -9148,6 +9180,15 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
   }
 
   saveSequential.then(function() {
+    try {
+      jobIds.forEach(function(jid, _i){
+        var tg = _cqTags[_i] || [];
+        if (!jid || String(jid).indexOf('Error') !== -1 || !tg.length) return;
+        _tagsByJob[jid] = tg.slice();
+        fetch(SHEETS_URL + '?action=setJobTags&jobId=' + encodeURIComponent(jid) + '&client=' + encodeURIComponent(sheetClient) + '&tags=' + encodeURIComponent(tg.join(','))).catch(function(){});
+      });
+      _cqTags = {};
+    } catch(e){}
     if (!jobIds.length) { showToast('⚠️ Step 1 failed: sheet save returned no IDs'); btn.textContent = '💼 Save & Send to Caspit'; btn.disabled = false; return; }
     _pbFastRefresh();   // accumulate these lines into מחירון כללי (fast, background)
     btn.textContent = '⏳ Sending to Caspit…';
