@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v967</title>
+<title>י.ב אחזקות — v968</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v967
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v968
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,11 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v968 · 04/08/2026 · AS v218
+• תיקון תצוגת תשובות ה-AI: הדירוג הממוספר (1, 2, 3) של היועץ נשמר כפי שהוא — קודם הוא הומר לנקודות והסדר לפי חשיבות אבד.
+• נוקה קוד מת: תבנית הפרומפט בצד האפליקציה מעולם לא נשלחה לשרת (הפרומפט האמיתי יושב ב-Apps Script). היא הוסרה כדי שלא יהיו שתי גרסאות סותרות.
+
 ─────────────────
 v967 · 04/08/2026 · AS v215
 • תיקון: רשימת הלקוחות נראתה ריקה. הקריאה לשרת לרשימת הלקוחות לוקחת 7 עד 35 שניות (התעוררות של Google Apps Script), והתפריט התמלא רק אחרי המתנה ארוכה. עכשיו הרשימה נשמרת מקומית ומוצגת מיד בכל תפריטי בחירת הלקוח באפליקציה, ומתרעננת ברקע. יצירת לקוח חדש מנקה את המטמון אוטומטית.
@@ -1615,7 +1620,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v967</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v968</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -9363,15 +9368,9 @@ function runAIQuickAnalysis() {
       }
       body.innerHTML = '<div style="text-align:center;padding:20px 0;"><div style="font-size:32px;">🤖</div><div style="color:#555;font-size:14px;font-weight:700;margin-top:8px;">שולח ל-AI לניתוח…</div></div>';
 
-      var prompt = 'You are a business advisor for a field maintenance company in Israel. ' +
-        'Analyze the following profitability data by job category and provide clear, actionable insights in Hebrew. ' +
-        'Data is from completed jobs: category name, job count, total gross profit (₪), total hours worked, and profit per hour (₪). ' +
-        'Be direct and specific. Format your response with: ' +
-        '1. Which category is most profitable and why ' +
-        '2. Which category to avoid or reprice ' +
-        '3. One clear action to take this week. ' +
-        'Keep it under 150 words. Use ₪ for currency. ' +
-        'Data: ' + JSON.stringify(data);
+      /* v968: the client-side prompt that used to sit here was never sent — the fetch
+         below posts only `data`, and the real prompt lives in Apps Script (getAIAnalysis).
+         Two prompts, one dead, no single source of truth: tune the backend one. */
 
       fetch(SHEETS_URL + '?action=getAIAnalysis&data=' + encodeURIComponent(JSON.stringify(data)))
       .then(function(r){ return r.json(); })
@@ -9379,7 +9378,7 @@ function runAIQuickAnalysis() {
         var text = result.text || result.error || 'שגיאה';
         // Strip markdown formatting Gemini sometimes adds
         text = text.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/\*([^*]+)\*/g, '$1')
-                   .replace(/#{1,3} /g, '').replace(/^\d+\.\s/gm, '• ')
+                   .replace(/#{1,3} /g, '')
                    .trim();
         var topCat = data[0];
         var bottomCat = data[data.length - 1];
