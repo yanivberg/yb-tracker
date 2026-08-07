@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v969</title>
+<title>י.ב אחזקות — v970</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v969
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v970
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v970 · 04/08/2026 · תיקון: הצעת מחיר נמחקת תוך כדי מילוי
+• תוקן באג יסודי: בכל פתיחה של "ניהול לקוח", האפליקציה טוענת ברקע 3 בקשות (עבודות, לקוחות, אנשי קשר בכספית). כשכולן מסתיימות — לעיתים שניות ארוכות אח"כ, ולעיתים 7-35 שנ' על "התעוררות" קרה של Apps Script (כפי שתועד ב-v967) — הקוד היה בונה מחדש את הלשונית הפעילה מאפס, ומוחק כל מה שהוזן בטופס הצעת המחיר עד כה בלי אזהרה. זו הייתה הסיבה ל"נזרק החוצה תוך כמה שניות" ול"לא תמיד שומר את כל ההצעה" — תזמון לא עקבי (מרוץ), לא באג קבוע. לשונית ההצעה טוענת את הנתונים שהיא צריכה בעצמה ולא תלויה בטעינה הזו — כעת היא לא נבנית מחדש ברקע ולא נמחקת.
+
 ─────────────────
 v969 · 04/08/2026 · תיקון: הצעת מחיר נאפסה ברענון דף
 • תוקנה מנגנון שחזור טופס "הצעת מחיר חדשה" שלא עבד בפועל, על אף שהיה קיים בקוד: (1) ברענון דף, לשונית ה"הצעה" הייתה מדולגת בטעות בשחזור הלשוניות — הטופס מעולם לא נבנה מחדש כדי שיהיה למה לשחזר. (2) שחזור הטופס הניח שהטעינה מכספית תסתיים תוך כ-0.7 שנ' — בעוד היא עשויה לקחת 7-35 שנ' (כפי שתועד ב-v967); עכשיו ממתין בפועל עד שהטופס קיים (עד כ-45 שנ') במקום טיימר קבוע. (3) שחזור שורות נוספות (מעבר לשורה הראשונה) חיפש כפתור בשם שגוי ומעולם לא עבד — תוקן לשם הפונקציה האמיתי.
@@ -1624,7 +1628,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v969</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v970</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -7162,7 +7166,21 @@ function _caspitLoadData() {
   var body = getCaspitBody();
   if (body) body.innerHTML = '<div style="padding:32px;text-align:center;color:#aaa;">⏳ Loading Caspit contacts…</div>';
   var sheetDone = false, contactsDone = false, clientsDone = false, rendered = false;
-  function tryRender() { if (sheetDone && contactsDone && clientsDone && !rendered) { rendered = true; _buildMatchMap(); _renderCaspitBody(); } }
+  // v970: this fires seconds later, whenever the slowest of the 3 fetches finally lands (can be
+  // long — v967 documented 7-35s on a cold Apps Script wake-up). It used to call
+  // _renderCaspitBody() unconditionally, which WIPES AND REBUILDS whatever tab is on screen —
+  // including mid-typed quote lines, or a form _restoreCqSnapshotIfAny() just finished restoring.
+  // The quote tab already loads what it needs on its own (_renderCaspitQuoteTab has its own
+  // Caspit-contacts fetch) and doesn't depend on this 3-way load finishing, so it's safe — and
+  // necessary — to just skip the rebuild there. _buildMatchMap() still runs either way (harmless,
+  // no DOM writes) so client auto-matching stays fresh for when the user actually picks a client.
+  function tryRender() {
+    if (sheetDone && contactsDone && clientsDone && !rendered) {
+      rendered = true;
+      _buildMatchMap();
+      if (_caspitTab !== 'quote') _renderCaspitBody();
+    }
+  }
 
   // Load sheet jobs (getInvoiceReadyJobs with fallback to getInvoices)
   fetch(SHEETS_URL + '?action=getInvoiceReadyJobs&_t=' + Date.now())
