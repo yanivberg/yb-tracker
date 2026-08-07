@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v968</title>
+<title>י.ב אחזקות — v969</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v968
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v969
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v969 · 04/08/2026 · תיקון: הצעת מחיר נאפסה ברענון דף
+• תוקנה מנגנון שחזור טופס "הצעת מחיר חדשה" שלא עבד בפועל, על אף שהיה קיים בקוד: (1) ברענון דף, לשונית ה"הצעה" הייתה מדולגת בטעות בשחזור הלשוניות — הטופס מעולם לא נבנה מחדש כדי שיהיה למה לשחזר. (2) שחזור הטופס הניח שהטעינה מכספית תסתיים תוך כ-0.7 שנ' — בעוד היא עשויה לקחת 7-35 שנ' (כפי שתועד ב-v967); עכשיו ממתין בפועל עד שהטופס קיים (עד כ-45 שנ') במקום טיימר קבוע. (3) שחזור שורות נוספות (מעבר לשורה הראשונה) חיפש כפתור בשם שגוי ומעולם לא עבד — תוקן לשם הפונקציה האמיתי.
+
 ─────────────────
 v968 · 04/08/2026 · AS v218
 • תיקון תצוגת תשובות ה-AI: הדירוג הממוספר (1, 2, 3) של היועץ נשמר כפי שהוא — קודם הוא הומר לנקודות והסדר לפי חשיבות אבד.
@@ -1620,7 +1624,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v968</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v969</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2840,6 +2844,18 @@ function _clearCqSnapshot() {
   try { localStorage.removeItem(CQ_SNAPSHOT_KEY); } catch(e) {}
 }
 
+// v969: poll for an element instead of guessing a fixed delay. _renderCaspitQuoteTab() gates
+// the quote form's DOM behind a Caspit contacts fetch that v967 documented as taking 7-35s on
+// a cold Apps Script wake-up — a blind ~700ms timer chain (the old code) essentially never won
+// that race, which is why restore silently did nothing. 300ms/attempt, ~45s ceiling.
+function _waitForEl(id, cb, attempts) {
+  attempts = attempts || 0;
+  var el = document.getElementById(id);
+  if (el) { cb(el); return; }
+  if (attempts > 150) return;   // ~45s ceiling — give up quietly, snapshot stays for next load
+  setTimeout(function(){ _waitForEl(id, cb, attempts + 1); }, 300);
+}
+
 function _restoreCqSnapshotIfAny() {
   try {
     var raw = localStorage.getItem(CQ_SNAPSHOT_KEY);
@@ -2847,16 +2863,16 @@ function _restoreCqSnapshotIfAny() {
     var snap = JSON.parse(raw);
     if (!snap || !snap.ts || (Date.now() - snap.ts) > 6*60*60*1000) { localStorage.removeItem(CQ_SNAPSHOT_KEY); return; }
     if (!snap.sheetClient) return;
-    setTimeout(function() {
-      var sheetSel = document.getElementById('caspitQuoteSheetClient');
-      if (!sheetSel) return;
+    _waitForEl('caspitQuoteSheetClient', function(sheetSel) {
       sheetSel.value = snap.sheetClient;
       try { sheetSel.dispatchEvent(new Event('change')); } catch(_){}
       setTimeout(function() {
         var existingRows = document.querySelectorAll('.cq-desc').length;
         var need = (snap.rows||[]).length;
         for (var k = existingRows; k < need; k++) {
-          var addBtn = document.querySelector('[onclick*="_cqAddRow"], [onclick*="addQuoteRow"]');
+          // v969: the real row-add button calls addCaspitQuoteRow() — the old selector
+          // (_cqAddRow / addQuoteRow) matched nothing, so rows past the first never came back.
+          var addBtn = document.querySelector('[onclick*="addCaspitQuoteRow"]');
           if (addBtn) addBtn.click();
         }
         setTimeout(function() {
@@ -2879,7 +2895,7 @@ function _restoreCqSnapshotIfAny() {
           showToast('📋 טופס הצעת מחיר שוחזר');
         }, 250);
       }, 400);
-    }, 300);
+    });
   } catch(e) { try{ localStorage.removeItem(CQ_SNAPSHOT_KEY); }catch(_){} }
 }
 
@@ -3139,7 +3155,11 @@ function init() {
       openCaspitOverlay();
       if (savedCaspitTab === 'txlog') {
         _caspitTab = 'txlog'; _caspitAccordionVisuals('txlog'); _renderTransactionLogForm();
-      } else if (savedCaspitTab !== 'quote') {
+      } else {
+        // v969: 'quote' used to be skipped here (assumed switchCaspitTab('quote') would
+        // re-trigger the pre-survey gate — it doesn't; that gate lives in toggleCaspitAccordion,
+        // not switchCaspitTab). Skipping it meant the quote form's DOM was never rebuilt on
+        // refresh, so _restoreCqSnapshotIfAny() always found nothing to restore into.
         switchCaspitTab(savedCaspitTab);
       }
     }, 400);
