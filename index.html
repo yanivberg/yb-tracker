@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v975</title>
+<title>י.ב אחזקות — v976</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v975
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v976
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v976 · 08/08/2026 · AS v223
+• Pending Quote Projects: בכותרת של כל לקוח מוצג עכשיו סיכום — מספר עבודות וסך השווי (מחיר × כמות), כמו במסך Open Tasks. עבודות ללא מחיר נספרות בנפרד.
+
 ─────────────────
 v975 · 08/08/2026 · לא לשמור שיוך כספית עבור "occasional client"
 • "occasional client" הוא טאב משותף ללקוחות חד-פעמיים — איש הקשר בכספית שנבחר שם הוא תמיד מקרי לאותה עבודה, ולא באמת מתאים ללקוח הבא. השיוך האוטומטי (מאז v971) עלול היה לשמור בטעות התאמה שגויה ולהציע אותה שוב ללקוח מזדמן הבא. כעת השיוך לא נשמר (לא בזיכרון ולא בגיליון) כשנבחר "occasional client" בשדה Sheet Client.
@@ -1644,7 +1648,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v975</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v976</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3481,6 +3485,50 @@ function _doAddJobAsProject(job, expensesOn) {
   if (dayStartTime) { renderProjectBtns(); silentSaveProjectsShortcut(); } else renderSetup();
   showToast('✓ ' + job.id + ' added');
 }
+
+/* ═══ v976: per-client totals in the Pending Quote headers ══════════════════════
+   Mirrors the Open Tasks header (jobs N · ₪X). Values come from the pendingQuoteJobs
+   array (price x qty), not the DOM, because pending cards do not display a price.
+   Jobs with no price are counted separately rather than silently treated as 0 —
+   otherwise a client with unpriced rows looks cheaper than it is.
+   Additive: a MutationObserver re-applies after every re-render (client chips,
+   sort toggles), so no existing render code is touched. */
+function _pqSummarize() {
+  try {
+    var L = document.getElementById('pendingQuoteList');
+    if (!L || typeof pendingQuoteJobs === 'undefined' || !pendingQuoteJobs) return;
+    var agg = {};
+    pendingQuoteJobs.forEach(function (j) {
+      var c = String(j.client || '').trim(); if (!c) return;
+      var p = parseFloat(j.price) || 0;
+      var q = parseFloat(j.qty); if (!q && q !== 0) q = 1;
+      var o = agg[c] || (agg[c] = { n: 0, sum: 0, noPrice: 0 });
+      o.n++;
+      if (p > 0) o.sum += p * q; else o.noPrice++;
+    });
+    [].slice.call(L.children).forEach(function (el) {
+      var tx = (el.textContent || '').trim();
+      var a = agg[tx];
+      if (!a || el.querySelector('.pqSum')) return;
+      var s = document.createElement('span');
+      s.className = 'pqSum';
+      s.style.cssText = 'float:left;font-weight:700;font-size:12.5px;opacity:.95;';
+      s.textContent = 'jobs ' + a.n + ' · ₪' + Math.round(a.sum).toLocaleString()
+        + (a.noPrice ? (' · ' + a.noPrice + ' ללא מחיר') : '');
+      el.appendChild(s);
+    });
+  } catch (e) {}
+}
+try {
+  var _pqObsStarted = false;
+  setInterval(function () {
+    var L = document.getElementById('pendingQuoteList');
+    if (!L || _pqObsStarted) return;
+    _pqObsStarted = true;
+    _pqSummarize();
+    try { new MutationObserver(function () { _pqSummarize(); }).observe(L, { childList: true, subtree: false }); } catch (e2) {}
+  }, 1200);
+} catch (e) {}
 
 function fetchPendingQuote() {
   if (!SHEETS_URL) { showToast('Set SHEETS_URL first'); return; }
