@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v974</title>
+<title>י.ב אחזקות — v975</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v974
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v975
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,9 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v975 · 08/08/2026 · לא לשמור שיוך כספית עבור "occasional client"
+• "occasional client" הוא טאב משותף ללקוחות חד-פעמיים — איש הקשר בכספית שנבחר שם הוא תמיד מקרי לאותה עבודה, ולא באמת מתאים ללקוח הבא. השיוך האוטומטי (מאז v971) עלול היה לשמור בטעות התאמה שגויה ולהציע אותה שוב ללקוח מזדמן הבא. כעת השיוך לא נשמר (לא בזיכרון ולא בגיליון) כשנבחר "occasional client" בשדה Sheet Client.
 ─────────────────
 v974 · 08/08/2026 · הסרת טוסט "נשמר: שיוך" בבחירת לקוח
 • הוסרה הודעת "🔗 נשמר: ... ← ..." שהופיעה בכל בחירת לקוח בגיליון (מאז v971 השיוך נשמר אוטומטית, לא רק בבחירה ידנית של איש קשר) — נהפכה למיותרת/מפריעה. השמירה עצמה ממשיכה לקרות בשקט; הודעת שגיאה במקרה כשלון נשארה.
@@ -1641,7 +1644,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v974</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v975</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -9095,6 +9098,11 @@ function _autoMatchCaspitClient() {
 // which would cement a wrong match as if it had been confirmed.
 function _persistCaspitPair(clientName, contactId) {
   if (!clientName || !contactId) return;   // updateClientCaspitId rejects an empty id — clearing stays in-memory
+  // v975: "occasional client" is a shared catch-all sheet tab for one-off customers —
+  // whichever Caspit contact gets picked there is arbitrary per-job, never a real match,
+  // so it must never be remembered (in-memory or persisted) or it would wrongly auto-fill
+  // for the next, unrelated occasional customer.
+  if (clientName.trim().toLowerCase() === 'occasional client') return;
   _caspitMatchMap[clientName] = contactId;
   fetch(SHEETS_URL + '?action=updateClientCaspitId&name=' + encodeURIComponent(clientName) +
         '&caspitId=' + encodeURIComponent(contactId) + '&_t=' + Date.now())
