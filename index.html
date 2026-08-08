@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v977</title>
+<title>י.ב אחזקות — v978</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v977
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v978
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v978 · 08/08/2026 · AS v223
+• תיקון: סכום "סה"כ" בכותרות לא הופיע. הכותרת "Pending Quote Projects" קיימת גם כפריט מוסתר בתפריט, והסכום נכתב לשם. עכשיו נבחר רק האלמנט הגלוי.
+
 ─────────────────
 v977 · 08/08/2026 · AS v223
 • בכותרת של Pending Quote Projects ושל Open Tasks מוצג עכשיו סך הכל של כל הפרויקטים יחד — מספר עבודות וסכום. הסכום תמיד מלא ואינו מושפע מסינון לפי לקוח. עבודות ללא מחיר נספרות בנפרד.
@@ -1652,7 +1656,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v977</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v978</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3511,7 +3515,11 @@ function _hdrLeaf(txt) {
   var all = document.querySelectorAll('div,span,h1,h2,h3');
   for (var i = 0; i < all.length; i++) {
     var e = all[i];
-    if (e.children.length === 0 && (e.textContent || '').trim() === txt) return e;
+    /* v978: must be the VISIBLE one. 'Pending Quote Projects' also exists as a hidden
+       menu item inside #setupDrawer (display:none); v977 matched that first and wrote
+       the total into an invisible 0x0 element, so nothing appeared on screen. */
+    if (e.children.length === 0 && (e.textContent || '').trim() === txt
+        && e.offsetParent && e.offsetHeight > 0) return e;
   }
   return null;
 }
