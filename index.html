@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v976</title>
+<title>י.ב אחזקות — v977</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v976
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v977
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v977 · 08/08/2026 · AS v223
+• בכותרת של Pending Quote Projects ושל Open Tasks מוצג עכשיו סך הכל של כל הפרויקטים יחד — מספר עבודות וסכום. הסכום תמיד מלא ואינו מושפע מסינון לפי לקוח. עבודות ללא מחיר נספרות בנפרד.
+
 ─────────────────
 v976 · 08/08/2026 · AS v223
 • Pending Quote Projects: בכותרת של כל לקוח מוצג עכשיו סיכום — מספר עבודות וסך השווי (מחיר × כמות), כמו במסך Open Tasks. עבודות ללא מחיר נספרות בנפרד.
@@ -1648,7 +1652,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v976</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v977</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3493,6 +3497,73 @@ function _doAddJobAsProject(job, expensesOn) {
    otherwise a client with unpriced rows looks cheaper than it is.
    Additive: a MutationObserver re-applies after every re-render (client chips,
    sort toggles), so no existing render code is touched. */
+/* ═══ v977: grand totals in the overlay titles ═════════════════════════════════
+   Owner decisions 08/08/26: the grand total ALWAYS shows the full figure (it does
+   NOT follow the client-chip filter), and unpriced jobs are counted separately
+   rather than treated as ₪0.
+   Pending: computed from pendingQuoteJobs (price × qty).
+   Open Tasks: summed from the per-client group headers the app already renders
+   ('jobs N · HH:MM · ₪X') — reusing its own numbers, so the total can never
+   disagree with the rows on screen.
+   Additive: title elements are found by exact text and the total is appended to
+   their PARENT, so the title's own textContent stays clean and re-matchable. */
+function _hdrLeaf(txt) {
+  var all = document.querySelectorAll('div,span,h1,h2,h3');
+  for (var i = 0; i < all.length; i++) {
+    var e = all[i];
+    if (e.children.length === 0 && (e.textContent || '').trim() === txt) return e;
+  }
+  return null;
+}
+function _hdrSet(titleText, label, cls) {
+  try {
+    var leaf = _hdrLeaf(titleText);
+    if (!leaf || !leaf.parentElement) return;
+    var p = leaf.parentElement, s = p.querySelector('.' + cls);
+    if (!label) { if (s) s.textContent = ''; return; }
+    if (!s) {
+      s = document.createElement('div');
+      s.className = cls;
+      s.style.cssText = 'width:100%;text-align:center;font-size:12.5px;font-weight:700;opacity:.9;margin-top:2px;';
+      p.appendChild(s);
+    }
+    if (s.textContent !== label) s.textContent = label;
+  } catch (e) {}
+}
+function _fmtGrand(n, sum, np) {
+  return 'סה"כ: ' + n + ' עבודות · ₪' + Math.round(sum).toLocaleString()
+    + (np ? (' · ' + np + ' ללא מחיר') : '');
+}
+function _pqGrandTotal() {
+  try {
+    if (typeof pendingQuoteJobs === 'undefined' || !pendingQuoteJobs) return;
+    if (!document.getElementById('pendingQuoteList')) return;
+    var s = 0, n = 0, np = 0;
+    pendingQuoteJobs.forEach(function (j) {
+      var p = parseFloat(j.price) || 0;
+      var q = parseFloat(j.qty); if (!q && q !== 0) q = 1;
+      n++; if (p > 0) s += p * q; else np++;
+    });
+    _hdrSet('Pending Quote Projects', _fmtGrand(n, s, np), 'pqGrand');
+  } catch (e) {}
+}
+function _otGrandTotal() {
+  try {
+    var L = document.getElementById('jobPickerList');
+    if (!L) return;
+    var txt = L.textContent || '';
+    var re = /jobs\s*(\d+)[^₪]*₪\s*([\d,]+)/g, m, n = 0, sum = 0;
+    while ((m = re.exec(txt))) {
+      n += parseInt(m[1], 10) || 0;
+      sum += parseFloat(String(m[2]).replace(/,/g, '')) || 0;
+    }
+    _hdrSet('Open Tasks', n ? _fmtGrand(n, sum, 0) : '', 'otGrand');
+  } catch (e) {}
+}
+try {
+  setInterval(function () { _pqGrandTotal(); _otGrandTotal(); }, 1200);
+} catch (e) {}
+
 function _pqSummarize() {
   try {
     var L = document.getElementById('pendingQuoteList');
