@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v973</title>
+<title>י.ב אחזקות — v974</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v973
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v974
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,9 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v974 · 08/08/2026 · הסרת טוסט "נשמר: שיוך" בבחירת לקוח
+• הוסרה הודעת "🔗 נשמר: ... ← ..." שהופיעה בכל בחירת לקוח בגיליון (מאז v971 השיוך נשמר אוטומטית, לא רק בבחירה ידנית של איש קשר) — נהפכה למיותרת/מפריעה. השמירה עצמה ממשיכה לקרות בשקט; הודעת שגיאה במקרה כשלון נשארה.
 ─────────────────
 v973 · 08/08/2026 · תיקון: "טעינה נכשלה" בבחירת לקוח/קטגוריה במסך Pre-Quotation Briefing
 • תוקן: כשפותחים "הצעת מחיר חדשה" (+ חדש), התפריטים "לקוח" ו"קטגוריה" טענו נתונים ללא כל הגנה — כישלון חד-פעמי (למשל תחרות עם 3 הטעינות ברקע של מסך ניהול לקוח שכבר פתוח) הציג "⚠️ טעינה נכשלה" קבוע וללא דרך להתאושש מלבד סגירת המסך ופתיחתו מחדש. נוספו: ניסיון חוזר אוטומטי אחד לפני הצגת שגיאה, וקישור "נסה שוב" אם זה עדיין נכשל.
@@ -1638,7 +1641,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v973</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v974</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -9093,8 +9096,6 @@ function _autoMatchCaspitClient() {
 function _persistCaspitPair(clientName, contactId) {
   if (!clientName || !contactId) return;   // updateClientCaspitId rejects an empty id — clearing stays in-memory
   _caspitMatchMap[clientName] = contactId;
-  var c = _caspitContacts.filter(function(x){ return (x.Id||x.ContactId||'') === contactId; })[0];
-  var label = (c && c.Name) ? c.Name : contactId;
   fetch(SHEETS_URL + '?action=updateClientCaspitId&name=' + encodeURIComponent(clientName) +
         '&caspitId=' + encodeURIComponent(contactId) + '&_t=' + Date.now())
     .then(function(r){ return r.json(); })
@@ -9102,7 +9103,6 @@ function _persistCaspitPair(clientName, contactId) {
       if (res && res.status === 'OK') {
         var row = _sheetClientsData.filter(function(x){ return x && x.name === clientName; })[0];
         if (row) row.caspitId = contactId;   // keep the snapshot in step so a re-render can't revert the pick
-        showToast('🔗 נשמר: ' + clientName + ' ← ' + label);
       } else {
         showToast('⚠️ השיוך לא נשמר (' + ((res && res.error) || 'שגיאה') + ') — ' + clientName + ' יזוהה מחדש בכל פעם', 6000);
       }
