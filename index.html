@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v972</title>
+<title>י.ב אחזקות — v973</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v972
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v973
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,9 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v973 · 08/08/2026 · תיקון: "טעינה נכשלה" בבחירת לקוח/קטגוריה במסך Pre-Quotation Briefing
+• תוקן: כשפותחים "הצעת מחיר חדשה" (+ חדש), התפריטים "לקוח" ו"קטגוריה" טענו נתונים ללא כל הגנה — כישלון חד-פעמי (למשל תחרות עם 3 הטעינות ברקע של מסך ניהול לקוח שכבר פתוח) הציג "⚠️ טעינה נכשלה" קבוע וללא דרך להתאושש מלבד סגירת המסך ופתיחתו מחדש. נוספו: ניסיון חוזר אוטומטי אחד לפני הצגת שגיאה, וקישור "נסה שוב" אם זה עדיין נכשל.
 ─────────────────
 v972 · 08/08/2026 · תיקון: יצירת לקוח חדש נתקעת / שגיאות חוזרות
 • תוקן באג בטופס "לקוח חדש": הקוד איתר את כפתור השליחה לפי מיקומו היחסי (button:last-child), אבל בפועל זה תפס את כפתור הסגירה (✕) ולא את כפתור "✓ Create Client" — כך שבזמן היצירה לא הופיעה אינדיקציה על הכפתור האמיתי, וכל לחיצה חוזרת (כי נראה שכלום לא קרה) פתחה בקשת יצירה נוספת ומקבילה שהתנגשה עם הקודמת — זה מה שגרם לשגיאות חוזרות ולתחושת "תקוע". הכפתור מזוהה כעת לפי מזהה ייחודי, ונוספה הגנה שמונעת לחיצה כפולה.
@@ -1635,7 +1638,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v972</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v973</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -10590,7 +10593,8 @@ function openQuotationWithSurvey() {
     '</div>' +
     '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">' +
       '<div><div style="font-size:11px;color:#888;margin-bottom:4px;direction:rtl;">לקוח</div>' +
-      '<select id="qsClient" style="width:100%;padding:9px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;background:#fff;"><option value="">⏳ טוען לקוחות…</option></select></div>' +
+      '<select id="qsClient" style="width:100%;padding:9px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;background:#fff;"><option value="">⏳ טוען לקוחות…</option></select>' +
+      '<div id="qsClientRetry" style="display:none;font-size:11px;color:#c00;margin-top:4px;direction:rtl;">⚠️ טעינה נכשלה — <span onclick="_loadQsClients()" style="text-decoration:underline;cursor:pointer;">נסה שוב</span></div></div>' +
       '<div>' +
         '<div style="font-size:11px;color:#888;margin-bottom:4px;direction:rtl;">שורות להצעת מחיר <span style="color:#0d47a1;font-weight:700;">— כל שורה = פריט נפרד</span></div>' +
         '<div id="qsLinesList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px;">' +
@@ -10601,32 +10605,43 @@ function openQuotationWithSurvey() {
         '<button onclick="_addQsLine()" type="button" style="width:100%;padding:8px;background:none;border:1.5px dashed #0d47a1;border-radius:8px;color:#0d47a1;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">+ הוסף שורה</button>' +
       '</div>' +
       '<div><div style="font-size:11px;color:#888;margin-bottom:4px;direction:rtl;">קטגוריה</div>' +
-      '<select id="qsCat" style="width:100%;padding:9px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;"><option value="">⏳ טוען קטגוריות…</option></select></div>' +
+      '<select id="qsCat" style="width:100%;padding:9px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;"><option value="">⏳ טוען קטגוריות…</option></select>' +
+      '<div id="qsCatRetry" style="display:none;font-size:11px;color:#c00;margin-top:4px;direction:rtl;">⚠️ טעינה נכשלה — <span onclick="_loadQsCategories(document.getElementById(\'qsClient\').value)" style="text-decoration:underline;cursor:pointer;">נסה שוב</span></div></div>' +
     '</div>' +
     '<button onclick="_analyzeForQuotation()" style="width:100%;padding:13px;background:#0d47a1;border:none;border-radius:12px;font-size:15px;font-weight:900;color:#fff;cursor:pointer;font-family:Heebo,sans-serif;margin-bottom:8px;">🤖 נתח ועבור להצעת מחיר</button>' +
     '<button onclick="_skipToQuotation()" style="width:100%;padding:10px;background:transparent;border:none;font-size:13px;color:#aaa;cursor:pointer;font-family:Heebo,sans-serif;">Skip — Go straight to quotation</button>';
 
   // Always fetch the real client list fresh — same pattern as the quote form's own
   // Sheet Client dropdown, so this screen never shows a stale or empty list either.
-  if (SHEETS_URL) {
-    fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(clients){
-      var sel = document.getElementById('qsClient');
-      if (!sel) return; // user navigated away before the fetch resolved
-      var prevVal = sel.value;
-      var opts = '<option value="">בחר לקוח…</option>';
-      (clients||[]).forEach(function(c){ opts += '<option value="' + c.replace(/"/g,'&quot;') + '">' + c + '</option>'; });
-      sel.innerHTML = opts;
-      if (prevVal && (clients||[]).indexOf(prevVal) !== -1) sel.value = prevVal;
-      sel.onchange = function(){ _loadQsCategories(sel.value); };
-    }).catch(function(){
-      var sel = document.getElementById('qsClient');
-      if (sel) sel.innerHTML = '<option value="">⚠️ טעינה נכשלה</option>';
-    });
-  }
+  _loadQsClients();
   _loadQsCategories('');
 }
 
-function _loadQsCategories(client) {
+function _loadQsClients(_isRetry) {
+  var sel = document.getElementById('qsClient');
+  if (!sel || !SHEETS_URL) return;
+  fetch(SHEETS_URL + '?action=getClients').then(function(r){ return r.json(); }).then(function(clients){
+    var sel = document.getElementById('qsClient');
+    if (!sel) return; // user navigated away before the fetch resolved
+    var prevVal = sel.value;
+    var opts = '<option value="">בחר לקוח…</option>';
+    (clients||[]).forEach(function(c){ opts += '<option value="' + c.replace(/"/g,'&quot;') + '">' + c + '</option>'; });
+    sel.innerHTML = opts;
+    if (prevVal && (clients||[]).indexOf(prevVal) !== -1) sel.value = prevVal;
+    sel.onchange = function(){ _loadQsCategories(sel.value); };
+    var r2 = document.getElementById('qsClientRetry'); if (r2) r2.style.display = 'none';
+  }).catch(function(){
+    // v972: one silent auto-retry before surfacing a manual retry link — this fetch
+    // competes with the Account Manager's own background loads and can drop transiently.
+    if (!_isRetry) { setTimeout(function(){ _loadQsClients(true); }, 1500); return; }
+    var sel = document.getElementById('qsClient');
+    var retryEl = document.getElementById('qsClientRetry');
+    if (sel) sel.innerHTML = '<option value="">בחר לקוח…</option>';
+    if (retryEl) retryEl.style.display = 'block';
+  });
+}
+
+function _loadQsCategories(client, _isRetry) {
   if (!SHEETS_URL) return;
   fetch(SHEETS_URL + '?action=getCategories&client=' + encodeURIComponent(client||''))
     .then(function(r){ return r.json(); }).then(function(cats){
@@ -10637,9 +10652,14 @@ function _loadQsCategories(client) {
       (cats||[]).forEach(function(c){ opts += '<option value="' + c.replace(/"/g,'&quot;') + '">' + c + '</option>'; });
       sel.innerHTML = opts;
       if (prevVal && (cats||[]).indexOf(prevVal) !== -1) sel.value = prevVal;
+      var retryEl = document.getElementById('qsCatRetry'); if (retryEl) retryEl.style.display = 'none';
     }).catch(function(){
+      // v972: one silent auto-retry before surfacing a manual retry link — same rationale as _loadQsClients.
+      if (!_isRetry) { setTimeout(function(){ _loadQsCategories(client, true); }, 1500); return; }
       var sel = document.getElementById('qsCat');
-      if (sel) sel.innerHTML = '<option value="">⚠️ טעינה נכשלה</option>';
+      var retryEl = document.getElementById('qsCatRetry');
+      if (sel) sel.innerHTML = '<option value="">בחר קטגוריה</option>';
+      if (retryEl) retryEl.style.display = 'block';
     });
 }
 
