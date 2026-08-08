@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v971</title>
+<title>י.ב אחזקות — v972</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v971
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v972
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,9 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v972 · 08/08/2026 · תיקון: יצירת לקוח חדש נתקעת / שגיאות חוזרות
+• תוקן באג בטופס "לקוח חדש": הקוד איתר את כפתור השליחה לפי מיקומו היחסי (button:last-child), אבל בפועל זה תפס את כפתור הסגירה (✕) ולא את כפתור "✓ Create Client" — כך שבזמן היצירה לא הופיעה אינדיקציה על הכפתור האמיתי, וכל לחיצה חוזרת (כי נראה שכלום לא קרה) פתחה בקשת יצירה נוספת ומקבילה שהתנגשה עם הקודמת — זה מה שגרם לשגיאות חוזרות ולתחושת "תקוע". הכפתור מזוהה כעת לפי מזהה ייחודי, ונוספה הגנה שמונעת לחיצה כפולה.
 ─────────────────
 v971 · 05/08/2026 · AS v223
 • בחירת לקוח בגיליון בוחרת אוטומטית את איש הקשר בכספית. השיוך תמיד נשמר אך מעולם לא נקרא חזרה — לכן הלקוח זוהה מחדש בכל הצעה. נשמר מקומית ליום, ומתרענן מהשרת ברקע.
@@ -1632,7 +1635,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v971</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v972</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2208,7 +2211,7 @@ SHEET SYNC
     </label>
     <div style="font-size:11px;color:#888;direction:rtl;margin:0 0 16px 26px;">קרא לגיליון בדיוק כשם איש הקשר בכספית — ההתאמה תתבצע אוטומטית בזמן הפקת חשבונית</div>
 
-    <button onclick="submitNewClient()" style="width:100%;padding:14px;background:#f0c020;color:#111;border:none;border-radius:12px;font-size:16px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">✓ Create Client</button>
+    <button id="newClientSubmitBtn" onclick="submitNewClient()" style="width:100%;padding:14px;background:#f0c020;color:#111;border:none;border-radius:12px;font-size:16px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">✓ Create Client</button>
   </div>
 </div>
 
@@ -4343,7 +4346,8 @@ function submitNewClient() {
   // headers; we simply DON'T chain into Caspit. Sheet-only clients auto-match to a Caspit
   // contact by name at invoice time (exact, then fuzzy >=75), so no backfill UI is needed.
   var sheetOnly = !!(document.getElementById('newClientSheetOnly')||{}).checked;
-  var btn = document.querySelector('#newClientOverlay button:last-child');
+  var btn = document.getElementById('newClientSubmitBtn');
+  if (btn.disabled) return;   // v972: re-entrancy guard against double-tap
   btn.textContent = '⏳ Creating…'; btn.disabled = true;
   // v961: bound the createClient call. AS v212 fixed the actual root cause (a slow per-cell
   // clear loop that could take long enough for the connection to time out even though the
