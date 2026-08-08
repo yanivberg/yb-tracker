@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v970</title>
+<title>י.ב אחזקות — v971</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v970
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v971
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v971 · 05/08/2026 · AS v223
+• בחירת לקוח בגיליון בוחרת אוטומטית את איש הקשר בכספית. השיוך תמיד נשמר אך מעולם לא נקרא חזרה — לכן הלקוח זוהה מחדש בכל הצעה. נשמר מקומית ליום, ומתרענן מהשרת ברקע.
+
 ─────────────────
 v970 · 04/08/2026 · תיקון: הצעת מחיר נמחקת תוך כדי מילוי
 • תוקן באג יסודי: בכל פתיחה של "ניהול לקוח", האפליקציה טוענת ברקע 3 בקשות (עבודות, לקוחות, אנשי קשר בכספית). כשכולן מסתיימות — לעיתים שניות ארוכות אח"כ, ולעיתים 7-35 שנ' על "התעוררות" קרה של Apps Script (כפי שתועד ב-v967) — הקוד היה בונה מחדש את הלשונית הפעילה מאפס, ומוחק כל מה שהוזן בטופס הצעת המחיר עד כה בלי אזהרה. זו הייתה הסיבה ל"נזרק החוצה תוך כמה שניות" ול"לא תמיד שומר את כל ההצעה" — תזמון לא עקבי (מרוץ), לא באג קבוע. לשונית ההצעה טוענת את הנתונים שהיא צריכה בעצמה ולא תלויה בטעינה הזו — כעת היא לא נבנית מחדש ברקע ולא נמחקת.
@@ -1628,7 +1632,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v970</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v971</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -9002,6 +9006,63 @@ function _renderCaspitQuoteForm() {
       if (sel) sel.innerHTML = '<option value="">— Error loading clients —</option>';
     });
 }
+
+/* ═══ v971: auto-select the Caspit contact from the Sheet Client ═══════════════
+   The pairing was always WRITTEN (updateClientCaspitId) but never READ back, so every
+   quote re-identified the contact. AS v220+ exposes getClientCaspitMap; this consumes it.
+   Deliberately additive: a delegated listener, no edits to _autoMatchCaspitClient or
+   _onQuoteContactPicked, so if the map is empty nothing changes and the manual picker
+   behaves exactly as before. */
+var _cspMap = null;
+function _cspNorm(s) { return String(s == null ? '' : s).toLowerCase().replace(/[^a-z0-9]/g, ''); }
+function _cspLoadMap(cb) {
+  try {
+    var c = JSON.parse(localStorage.getItem('yb_caspit_map') || 'null');
+    if (c && c.m && c.t && (Date.now() - c.t < 86400000)) { _cspMap = c.m; if (cb) cb(); }
+  } catch (e) {}
+  try {
+    fetch(SHEETS_URL + '?action=getClientCaspitMap&_=' + Date.now())
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.map) return;
+        _cspMap = j.map;
+        try { localStorage.setItem('yb_caspit_map', JSON.stringify({ t: Date.now(), m: j.map })); } catch (e2) {}
+        if (cb) cb();
+      }).catch(function () {});
+  } catch (e3) {}
+}
+function _cspApply() {
+  try {
+    var sc = document.getElementById('caspitQuoteSheetClient');
+    var cc = document.getElementById('caspitQuoteContact');
+    if (!sc || !cc || !_cspMap || !cc.options || !cc.options.length) return false;
+    var nm = String(sc.value || '').trim();
+    if (!nm) return false;
+    var id = _cspMap[nm] || _cspMap[_cspNorm(nm)];
+    if (!id) return false;
+    id = String(id).trim();
+    for (var i = 0; i < cc.options.length; i++) {
+      if (String(cc.options[i].value || '').trim() === id) {
+        if (cc.selectedIndex !== i) {
+          cc.selectedIndex = i;
+          try { cc.dispatchEvent(new Event('change', { bubbles: true })); } catch (e4) {}
+        }
+        return true;
+      }
+    }
+    return false;
+  } catch (e) { return false; }
+}
+function _cspTry(n) {
+  /* the contact list fills asynchronously — retry briefly, then give up quietly */
+  if (_cspApply()) return;
+  if ((n || 0) < 12) setTimeout(function () { _cspTry((n || 0) + 1); }, 400);
+}
+document.addEventListener('change', function (ev) {
+  if (!ev || !ev.target || ev.target.id !== 'caspitQuoteSheetClient') return;
+  if (!_cspMap) _cspLoadMap(function () { _cspTry(0); }); else _cspTry(0);
+});
+try { setTimeout(function () { _cspLoadMap(function () { _cspTry(0); }); }, 3000); } catch (e) {}
 
 function _autoMatchCaspitClient() {
   var sheetSel = document.getElementById('caspitQuoteSheetClient');
