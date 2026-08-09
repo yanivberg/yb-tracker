@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v979</title>
+<title>י.ב אחזקות — v980</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v979
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v980
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v980 · 09/08/2026 · AS v223
+• תיקון נוסף לסכום ב-Open Tasks: קודם הוצג סכום של לקוח אחד בלבד. עכשיו מזוהות כל כותרות הלקוחות לפי המבנה שלהן ומסוכמות יחד.
+
 ─────────────────
 v979 · 09/08/2026 · AS v223
 • תיקון: הסכום בכותרת Open Tasks היה שגוי (הצטלבו מספרים משורות שונות). עכשיו נסרקת כל כותרת לקוח בנפרד, ואם לא ניתן לחשב בוודאות לא מוצג סכום כלל.
@@ -1660,7 +1664,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v979</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v980</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3571,19 +3575,21 @@ function _otGrandTotal() {
        contains BOTH a 'jobs N' and a ₪ amount — i.e. it is a group header. Cross-element
        matches become impossible. Parse nothing confidently => show nothing, never a
        wrong number. */
+    /* v980: v979 assumed one child per client group. In reality the whole list sits in a
+       SINGLE child, so the loop matched once and read only the FIRST header's numbers
+       (observed: '1 עבודות · ₪21,085' = one client's total, not a sum).
+       Element boundaries are unreliable here, so match the header SHAPE instead:
+       'jobs N ·' then at most 20 non-₪ chars then the amount — e.g. 'jobs 9 · 19:00 · ₪9,078'.
+       A job row cannot satisfy it: the gap between a description and its price is far
+       wider than 20 chars. Verified against a header-only string and a headers+rows
+       string before shipping. */
     var n = 0, sum = 0, groups = 0;
-    var kids = L.children;
-    for (var i = 0; i < kids.length; i++) {
-      var ktxt = (kids[i].textContent || '');
-      var mj = ktxt.match(/jobs\s*(\d+)/);
-      var mv = ktxt.match(/₪\s*([\d,]+)/);
-      if (!mj || !mv) continue;
-      /* a group header is short; a whole client block would also match, so require the
-         jobs-count and the ₪ to sit close together in the same header line */
-      if (Math.abs(ktxt.indexOf('₪') - ktxt.indexOf('jobs')) > 40) continue;
+    var txt = L.textContent || '';
+    var re = /jobs\s*(\d+)\s*·[^₪]{0,20}₪\s*([\d,]+)/g, m;
+    while ((m = re.exec(txt))) {
       groups++;
-      n += parseInt(mj[1], 10) || 0;
-      sum += parseFloat(String(mv[1]).replace(/,/g, '')) || 0;
+      n += parseInt(m[1], 10) || 0;
+      sum += parseFloat(String(m[2]).replace(/,/g, '')) || 0;
     }
     _hdrSet('Open Tasks', groups ? _fmtGrand(n, sum, 0) : '', 'otGrand');
   } catch (e) {}
