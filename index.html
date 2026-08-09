@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v978</title>
+<title>י.ב אחזקות — v979</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v978
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v979
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v979 · 09/08/2026 · AS v223
+• תיקון: הסכום בכותרת Open Tasks היה שגוי (הצטלבו מספרים משורות שונות). עכשיו נסרקת כל כותרת לקוח בנפרד, ואם לא ניתן לחשב בוודאות לא מוצג סכום כלל.
+
 ─────────────────
 v978 · 08/08/2026 · AS v223
 • תיקון: סכום "סה"כ" בכותרות לא הופיע. הכותרת "Pending Quote Projects" קיימת גם כפריט מוסתר בתפריט, והסכום נכתב לשם. עכשיו נבחר רק האלמנט הגלוי.
@@ -1656,7 +1660,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v978</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v979</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3559,13 +3563,29 @@ function _otGrandTotal() {
   try {
     var L = document.getElementById('jobPickerList');
     if (!L) return;
-    var txt = L.textContent || '';
-    var re = /jobs\s*(\d+)[^₪]*₪\s*([\d,]+)/g, m, n = 0, sum = 0;
-    while ((m = re.exec(txt))) {
-      n += parseInt(m[1], 10) || 0;
-      sum += parseFloat(String(m[2]).replace(/,/g, '')) || 0;
+    /* v979: v978 ran the regex over the WHOLE list text — group headers AND job rows
+       together. Every job row carries a ₪ amount, so a match could start in one element
+       and finish in another, pairing a job count with an unrelated price (observed:
+       '1 עבודות · ₪170,000' while GOLMAT alone read 'jobs 9 · ₪9,078').
+       Now: scan each DIRECT CHILD separately and accept it only if that one element
+       contains BOTH a 'jobs N' and a ₪ amount — i.e. it is a group header. Cross-element
+       matches become impossible. Parse nothing confidently => show nothing, never a
+       wrong number. */
+    var n = 0, sum = 0, groups = 0;
+    var kids = L.children;
+    for (var i = 0; i < kids.length; i++) {
+      var ktxt = (kids[i].textContent || '');
+      var mj = ktxt.match(/jobs\s*(\d+)/);
+      var mv = ktxt.match(/₪\s*([\d,]+)/);
+      if (!mj || !mv) continue;
+      /* a group header is short; a whole client block would also match, so require the
+         jobs-count and the ₪ to sit close together in the same header line */
+      if (Math.abs(ktxt.indexOf('₪') - ktxt.indexOf('jobs')) > 40) continue;
+      groups++;
+      n += parseInt(mj[1], 10) || 0;
+      sum += parseFloat(String(mv[1]).replace(/,/g, '')) || 0;
     }
-    _hdrSet('Open Tasks', n ? _fmtGrand(n, sum, 0) : '', 'otGrand');
+    _hdrSet('Open Tasks', groups ? _fmtGrand(n, sum, 0) : '', 'otGrand');
   } catch (e) {}
 }
 try {
