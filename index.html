@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v980</title>
+<title>י.ב אחזקות — v981</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v980
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v981
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v981 · 09/08/2026 · AS v223
+• תיקון סופי לסכום ב-Open Tasks: רווחים ושורות חדשות בין רכיבי הכותרת מנעו את הזיהוי. עכשיו הטקסט מנורמל לפני החישוב.
+
 ─────────────────
 v980 · 09/08/2026 · AS v223
 • תיקון נוסף לסכום ב-Open Tasks: קודם הוצג סכום של לקוח אחד בלבד. עכשיו מזוהות כל כותרות הלקוחות לפי המבנה שלהן ומסוכמות יחד.
@@ -1664,7 +1668,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v980</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v981</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3584,8 +3588,14 @@ function _otGrandTotal() {
        wider than 20 chars. Verified against a header-only string and a headers+rows
        string before shipping. */
     var n = 0, sum = 0, groups = 0;
-    var txt = L.textContent || '';
-    var re = /jobs\s*(\d+)\s*·[^₪]{0,20}₪\s*([\d,]+)/g, m;
+    /* v981: the header pieces are separate elements, so textContent carries the HTML
+       indentation between them — 'jobs 8\n   ·\n   18:30\n   ·\n   ₪9,078'. That blew past
+       the character gap and NOTHING matched (header rendered blank). Collapse whitespace
+       first, then the gap is ~11 chars. Verified against a whitespace-laden sample:
+       raw => 0 matches, normalised => jobs 8/₪9,078 and jobs 3/₪21,085, row price
+       ₪2,800 correctly ignored. The '·' is no longer required — some headers may omit it. */
+    var txt = String(L.textContent || '').replace(/\s+/g, ' ');
+    var re = /jobs\s*(\d+)[^₪]{0,25}₪\s*([\d,]+)/g, m;
     while ((m = re.exec(txt))) {
       groups++;
       n += parseInt(m[1], 10) || 0;
