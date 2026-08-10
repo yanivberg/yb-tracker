@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v981</title>
+<title>י.ב אחזקות — v982</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v981
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v982
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v982 · 10/08/2026 · AS v223 · תיקון אמיתי לסכום ב-Open Tasks
+• הסכום חושב עד כה על ידי קריאת המספרים בחזרה מתוך הטקסט שמוצג על המסך. זה לא יכול היה לעבוד: הכותרת נבנית בסדר '₪9,078 · 18:30 · 8 jobs' (הסכום ראשון, jobs אחרון), בעוד שהחיפוש ציפה ל-'jobs N … ₪סכום' — כלומר הסדר החזותי בעברית, לא הסדר האמיתי במסמך. לכן אף כותרת אמיתית לא זוהתה, ומה שכן נתפס היה צירוף מקרי בין שורות שונות — מכאן "1 עבודות · ₪170,000" בזמן ש-GOLMAT לבדו הציג ₪9,078. גם לקוח עם עבודה אחת ('job' ללא s) לא זוהה כלל.
+• כעת הסכום מחושב ישירות מהנתונים של העבודות, כמו שכבר נעשה במסך Pending Quote Projects. אותו בסיס חישוב כמו בכותרות הלקוחות, ולכן הסכום הכולל תמיד שווה לסכום הכרטיסים שמתחתיו. הסכום נשאר מלא ואינו מושפע מסינון לפי לקוח; עבודות ללא מחיר נספרות בנפרד.
 ─────────────────
 v981 · 09/08/2026 · AS v223
 • תיקון סופי לסכום ב-Open Tasks: רווחים ושורות חדשות בין רכיבי הכותרת מנעו את הזיהוי. עכשיו הטקסט מנורמל לפני החישוב.
@@ -1668,7 +1672,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v981</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v982</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3567,41 +3571,29 @@ function _pqGrandTotal() {
     _hdrSet('Pending Quote Projects', _fmtGrand(n, s, np), 'pqGrand');
   } catch (e) {}
 }
+/* v982: computed from _jobsMaster, the array showJobPicker already renders from —
+   NOT scraped back out of the rendered text.
+   v978-v981 each tweaked a regex that read the numbers off the screen. It could never
+   work: the header is built as '₪9,078 · 18:30 · 8 jobs' (money FIRST, 'jobs' LAST —
+   see showJobPicker), while the pattern looked for 'jobs N … ₪amount'. It read the
+   RTL *visual* order instead of the DOM order, so it never matched a real header and
+   only ever caught accidental cross-row collisions — hence '1 עבודות · ₪170,000'
+   alongside a GOLMAT card reading ₪9,078. Single-job clients render 'job' (no 's')
+   and were invisible to it regardless.
+   Same price basis as the per-client headers (income || price), so the grand total is
+   always exactly the sum of the cards below it. Deliberately uses _jobsMaster, not the
+   filtered set: the total stays the full book regardless of the client chip (v977). */
 function _otGrandTotal() {
   try {
-    var L = document.getElementById('jobPickerList');
-    if (!L) return;
-    /* v979: v978 ran the regex over the WHOLE list text — group headers AND job rows
-       together. Every job row carries a ₪ amount, so a match could start in one element
-       and finish in another, pairing a job count with an unrelated price (observed:
-       '1 עבודות · ₪170,000' while GOLMAT alone read 'jobs 9 · ₪9,078').
-       Now: scan each DIRECT CHILD separately and accept it only if that one element
-       contains BOTH a 'jobs N' and a ₪ amount — i.e. it is a group header. Cross-element
-       matches become impossible. Parse nothing confidently => show nothing, never a
-       wrong number. */
-    /* v980: v979 assumed one child per client group. In reality the whole list sits in a
-       SINGLE child, so the loop matched once and read only the FIRST header's numbers
-       (observed: '1 עבודות · ₪21,085' = one client's total, not a sum).
-       Element boundaries are unreliable here, so match the header SHAPE instead:
-       'jobs N ·' then at most 20 non-₪ chars then the amount — e.g. 'jobs 9 · 19:00 · ₪9,078'.
-       A job row cannot satisfy it: the gap between a description and its price is far
-       wider than 20 chars. Verified against a header-only string and a headers+rows
-       string before shipping. */
-    var n = 0, sum = 0, groups = 0;
-    /* v981: the header pieces are separate elements, so textContent carries the HTML
-       indentation between them — 'jobs 8\n   ·\n   18:30\n   ·\n   ₪9,078'. That blew past
-       the character gap and NOTHING matched (header rendered blank). Collapse whitespace
-       first, then the gap is ~11 chars. Verified against a whitespace-laden sample:
-       raw => 0 matches, normalised => jobs 8/₪9,078 and jobs 3/₪21,085, row price
-       ₪2,800 correctly ignored. The '·' is no longer required — some headers may omit it. */
-    var txt = String(L.textContent || '').replace(/\s+/g, ' ');
-    var re = /jobs\s*(\d+)[^₪]{0,25}₪\s*([\d,]+)/g, m;
-    while ((m = re.exec(txt))) {
-      groups++;
-      n += parseInt(m[1], 10) || 0;
-      sum += parseFloat(String(m[2]).replace(/,/g, '')) || 0;
-    }
-    _hdrSet('Open Tasks', groups ? _fmtGrand(n, sum, 0) : '', 'otGrand');
+    if (!document.getElementById('jobPickerList')) return;
+    if (typeof _jobsMaster === 'undefined' || !_jobsMaster) return;
+    var n = 0, sum = 0, np = 0;
+    _jobsMaster.forEach(function (j) {
+      n++;
+      var p = parseFloat(j.income) || parseFloat(j.price) || 0;
+      if (p > 0) sum += p; else np++;
+    });
+    _hdrSet('Open Tasks', n ? _fmtGrand(n, sum, np) : '', 'otGrand');
   } catch (e) {}
 }
 try {
