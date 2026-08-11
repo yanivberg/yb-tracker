@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v982</title>
+<title>י.ב אחזקות — v983</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v982
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v983
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -536,9 +536,15 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v983 · 11/08/2026 · AS v224 / gmail-po-import v225
+• דיאלוג המייל של הצעת המחיר: נוסף שדה "כותרת העבודה" (רשות). ממולא אוטומטית מתיאור השורה הראשונה בהצעה — וניתן לעריכה. כשממולא, הכותרת מופיעה כפסקה נפרדת (שורה ריקה מעליה ומתחתיה) מתחת לשורת "מצורפת הצעת מחיר עבור", לפני "ההצעה הוזמנה על ידי". ריק = המייל יוצא בלי השורה, בדיוק כמו היום.
+• מכיל גם את v982 שנוסף ישירות ב-GitHub.
+
+─────────────────
 v982 · 10/08/2026 · AS v223 · תיקון אמיתי לסכום ב-Open Tasks
-• הסכום חושב עד כה על ידי קריאת המספרים בחזרה מתוך הטקסט שמוצג על המסך. זה לא יכול היה לעבוד: הכותרת נבנית בסדר '₪9,078 · 18:30 · 8 jobs' (הסכום ראשון, jobs אחרון), בעוד שהחיפוש ציפה ל-'jobs N … ₪סכום' — כלומר הסדר החזותי בעברית, לא הסדר האמיתי במסמך. לכן אף כותרת אמיתית לא זוהתה, ומה שכן נתפס היה צירוף מקרי בין שורות שונות — מכאן "1 עבודות · ₪170,000" בזמן ש-GOLMAT לבדו הציג ₪9,078. גם לקוח עם עבודה אחת ('job' ללא s) לא זוהה כלל.
-• כעת הסכום מחושב ישירות מהנתונים של העבודות, כמו שכבר נעשה במסך Pending Quote Projects. אותו בסיס חישוב כמו בכותרות הלקוחות, ולכן הסכום הכולל תמיד שווה לסכום הכרטיסים שמתחתיו. הסכום נשאר מלא ואינו מושפע מסינון לפי לקוח; עבודות ללא מחיר נספרות בנפרד.
+• הסכום חושב עד כה מקריאת המספרים בחזרה מתוך הטקסט שעל המסך. זה לא יכול היה לעבוד: הכותרת נבנית בסדר ₪9,078 · 18:30 · 8 jobs — הסכום ראשון, jobs אחרון — בעוד שהחיפוש ציפה לסדר ההפוך, כלומר לסדר החזותי בעברית ולא לסדר האמיתי במסמך. לכן אף כותרת אמיתית לא זוהתה, ומה שכן נתפס היה צירוף מקרי בין שורות שונות. גם לקוח עם עבודה אחת לא זוהה כלל.
+• כעת הסכום מחושב ישירות מהנתונים, כמו במסך Pending Quote Projects. אותו בסיס חישוב כמו בכותרות הלקוחות, ולכן הסכום הכולל תמיד שווה לסכום הכרטיסים שמתחתיו.
+
 ─────────────────
 v981 · 09/08/2026 · AS v223
 • תיקון סופי לסכום ב-Open Tasks: רווחים ושורות חדשות בין רכיבי הכותרת מנעו את הזיהוי. עכשיו הטקסט מנורמל לפני החישוב.
@@ -1672,7 +1678,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v982</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v983</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3571,20 +3577,18 @@ function _pqGrandTotal() {
     _hdrSet('Pending Quote Projects', _fmtGrand(n, s, np), 'pqGrand');
   } catch (e) {}
 }
-/* v982: computed from _jobsMaster, the array showJobPicker already renders from —
-   NOT scraped back out of the rendered text.
-   v978-v981 each tweaked a regex that read the numbers off the screen. It could never
-   work: the header is built as '₪9,078 · 18:30 · 8 jobs' (money FIRST, 'jobs' LAST —
-   see showJobPicker), while the pattern looked for 'jobs N … ₪amount'. It read the
-   RTL *visual* order instead of the DOM order, so it never matched a real header and
-   only ever caught accidental cross-row collisions — hence '1 עבודות · ₪170,000'
-   alongside a GOLMAT card reading ₪9,078. Single-job clients render 'job' (no 's')
-   and were invisible to it regardless.
-   Same price basis as the per-client headers (income || price), so the grand total is
-   always exactly the sum of the cards below it. Deliberately uses _jobsMaster, not the
-   filtered set: the total stays the full book regardless of the client chip (v977). */
 function _otGrandTotal() {
   try {
+    /* v982 (PR #22): summed from _jobsMaster — the same array showJobPicker renders
+       from — NOT scraped back out of the rendered text. v978-v981 each tweaked a regex
+       that read the numbers off the screen; none could work, because the header is built
+       ₪9,078 · 18:30 · 8 jobs (money FIRST, jobs LAST) while every pattern looked for
+       jobs N … ₪amount — the RTL *visual* order, not the DOM order. It never matched a
+       real header; what it caught were accidental cross-row collisions (hence
+       1 עבודות · ₪170,000). Single-job clients render job with no s and were invisible
+       regardless. Same price basis as the per-client headers, so the grand total always
+       equals the sum of the cards below. Deliberately _jobsMaster, not the filtered set:
+       the total stays the full book regardless of the client chip (v977). */
     if (!document.getElementById('jobPickerList')) return;
     if (typeof _jobsMaster === 'undefined' || !_jobsMaster) return;
     var n = 0, sum = 0, np = 0;
@@ -3999,7 +4003,7 @@ function savePQEdit(idx, jobId, client, oldDocNumber) {
     var docNumber  = result.number || result.DocumentNumber || (result.rawResponse && result.rawResponse.Number) || '';
     var docId      = result.documentId || result.Id || (result.rawResponse && result.rawResponse.DocumentId) || '';
     // v923: strip Caspit's auto-filled line Details, THEN email the cleaned PDF via Gmail (AS emailQuote).
-    _clearCaspitLineDetails(result).then(function(){ _composeAndEmailQuote(docId, docNumber, client); });
+    _clearCaspitLineDetails(result).then(function(){ _composeAndEmailQuote(docId, docNumber, client, desc); });  // v982: desc = the quote line description, prefills כותרת העבודה
     var pdfLink    = (result.rawResponse && result.rawResponse.LinkToPdf) ? result.rawResponse.LinkToPdf : '';
     var createdAt  = new Date().toLocaleDateString('he-IL');
     var note       = oldDocNumber ? 'Updated quote — replaces ' + oldDocNumber : 'Updated quote';
@@ -8848,19 +8852,27 @@ function _quoteMailTemplateFor(client){
   return learned[key] || null;
 }
 function _quoteMailSubject(name, docNum){ return String(name || '').trim() + ' - הצעת מחיר - ' + String(docNum || '').trim(); }
-function _quoteMailBody(greeting, name, orderedBy){
+function _quoteMailBody(greeting, name, orderedBy, jobTitle){
   // v953: optional "ההצעה הוזמנה על ידי <שם>" line before תודה — omitted when empty
+  // v982: optional job-title paragraph after the "מצורפת" line — blank line above AND below,
+  //       so it stands alone. Prefilled from the first quote line, editable. Empty = no line.
   var ob = String(orderedBy || '').trim();
+  var jt = String(jobTitle  || '').trim();
   return 'הי ' + String(greeting || '').trim() + ',\n' +
          'מצורפת הצעת מחיר עבור ' + String(name || '').trim() + '\n' +
+         (jt ? '\n' + jt + '\n\n' : '') +
          (ob ? 'ההצעה הוזמנה על ידי ' + ob + '\n' : '') +
          'תודה\n' +
          'יניב';
 }
-function _composeAndEmailQuote(docId, docNum, client) {
+function _composeAndEmailQuote(docId, docNum, client, jobTitle) {
   var tpl = _quoteMailTemplateFor(client);
   var greeting = tpl ? tpl.greeting : '';
   var name     = tpl ? tpl.name : String(client || '').trim();
+  // v982: jobTitle is OPTIONAL — callers that omit it behave exactly as before.
+  // '—' is the placeholder the Caspit payload uses for an empty description; never show it.
+  var jobT = String(jobTitle || '').trim();
+  if (jobT === '—') jobT = '';
   _quoteMailCtx = { docId: docId, docNum: docNum, client: client, known: !!tpl };
   _qmSubjDirty = false; _qmBodyDirty = false;
   var ov = document.getElementById('quoteMailOverlay');
@@ -8878,6 +8890,8 @@ function _composeAndEmailQuote(docId, docNum, client) {
           '<input id="qmGreeting" value="' + _qmEsc(greeting) + '" oninput="_qmRefresh()" placeholder="ריקי" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
         '<div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:700;color:#555;margin-bottom:4px;">עבור (בגוף ובכותרת)</div>' +
           '<input id="qmName" value="' + _qmEsc(name) + '" oninput="_qmRefresh()" placeholder="גולמט" style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
+        '<div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:700;color:#555;margin-bottom:4px;">כותרת העבודה <span style="font-weight:400;color:#aaa;">(רשות — ריק = בלי השורה)</span></div>' +
+          '<input id="qmJobTitle" value="' + _qmEsc(jobT) + '" oninput="_qmRefresh()" placeholder="לקיבוע מכסה ביוב מבטון..." style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
         '<div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:700;color:#555;margin-bottom:4px;">ההצעה הוזמנה על ידי <span style="font-weight:400;color:#aaa;">(רשות — ריק = בלי השורה)</span></div>' +
           '<input id="qmOrderedBy" value="" oninput="_qmRefresh()" placeholder="שם המזמין..." style="width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;"></div>' +
         '<div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:700;color:#555;margin-bottom:4px;">נושא</div>' +
@@ -8900,7 +8914,9 @@ function _qmRefresh(){
   var subj = document.getElementById('qmSubject');
   var body = document.getElementById('qmBody');
   if (subj && !_qmSubjDirty) subj.value = _quoteMailSubject(n, _quoteMailCtx ? _quoteMailCtx.docNum : '');
-  if (body && !_qmBodyDirty) body.value = _quoteMailBody(g, n, (document.getElementById('qmOrderedBy') || {}).value || '');
+  if (body && !_qmBodyDirty) body.value = _quoteMailBody(g, n,
+        (document.getElementById('qmOrderedBy') || {}).value || '',
+        (document.getElementById('qmJobTitle') || {}).value || '');   // v982
 }
 function _sendQuoteMail(){
   if (!_quoteMailCtx) return;
@@ -9542,7 +9558,11 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
       _clearCaspitLineDetails(result).then(function(){
         var _eqId  = (result && result.rawResponse && result.rawResponse.DocumentId) || result.documentId || result.Id || '';
         var _eqNum = result.DocNo || result.docNo || result.DocumentNumber || result.documentNumber || result.number || result.Number || result.DocNumber || (result.rawResponse && result.rawResponse.Number) || '';
-        _composeAndEmailQuote(_eqId, _eqNum, sheetClient);
+        // v982: prefill כותרת העבודה from the FIRST quote line. Defensive — multi-line quotes
+        // have no single "job title", so the first line is the sensible default and stays editable.
+        var _eqTitle = '';
+        try { _eqTitle = (lines && lines[0] && (lines[0].ProductName || '')) || ''; } catch (_e) { _eqTitle = ''; }
+        _composeAndEmailQuote(_eqId, _eqNum, sheetClient, _eqTitle);
       });
       // Update status on the saved/updated rows. In the reuse path jobIds ARE the original
       // pending rows, so this one block covers them — the separate _pendingQuoteIds pass that
