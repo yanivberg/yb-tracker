@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v983</title>
+<title>י.ב אחזקות — v984</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -525,7 +525,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v983
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v984
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +535,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v984 · 11/08/2026 · AS v224 / gmail-po-import v225
+• "כותרת העבודה" מופיעה עכשיו גם בנושא המייל, בין "הצעת מחיר" למספר ההצעה — כמו במיילים הקיימים: "גולמט - הצעת מחיר להקמת תצוגה בקומה 2 לצנרת קירור - 01/900214". ריק = הנושא נשאר בדיוק כמו קודם.
+
 ─────────────────
 v983 · 11/08/2026 · AS v224 / gmail-po-import v225
 • דיאלוג המייל של הצעת המחיר: נוסף שדה "כותרת העבודה" (רשות). ממולא אוטומטית מתיאור השורה הראשונה בהצעה — וניתן לעריכה. כשממולא, הכותרת מופיעה כפסקה נפרדת (שורה ריקה מעליה ומתחתיה) מתחת לשורת "מצורפת הצעת מחיר עבור", לפני "ההצעה הוזמנה על ידי". ריק = המייל יוצא בלי השורה, בדיוק כמו היום.
@@ -1678,7 +1682,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v983</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v984</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -8851,7 +8855,14 @@ function _quoteMailTemplateFor(client){
   try { learned = JSON.parse(localStorage.getItem('quoteMailTemplates') || '{}'); } catch(e){}
   return learned[key] || null;
 }
-function _quoteMailSubject(name, docNum){ return String(name || '').trim() + ' - הצעת מחיר - ' + String(docNum || '').trim(); }
+/* v984: the job title now also goes in the SUBJECT, between "הצעת מחיר" and the doc
+   number — matching the convention Yaniv's own quote threads already use, e.g.
+   "גולמט - הצעת מחיר להקמת תצוגה בקומה 2 לצנרת קירור - 01/900214" (seen live in the
+   11/08 PO scan). Empty title => byte-identical to the pre-v984 subject. */
+function _quoteMailSubject(name, docNum, jobTitle){
+  var jt = String(jobTitle || '').trim();
+  return String(name || '').trim() + ' - הצעת מחיר' + (jt ? ' ' + jt : '') + ' - ' + String(docNum || '').trim();
+}
 function _quoteMailBody(greeting, name, orderedBy, jobTitle){
   // v953: optional "ההצעה הוזמנה על ידי <שם>" line before תודה — omitted when empty
   // v982: optional job-title paragraph after the "מצורפת" line — blank line above AND below,
@@ -8913,7 +8924,8 @@ function _qmRefresh(){
   var n = (document.getElementById('qmName') || {}).value || '';
   var subj = document.getElementById('qmSubject');
   var body = document.getElementById('qmBody');
-  if (subj && !_qmSubjDirty) subj.value = _quoteMailSubject(n, _quoteMailCtx ? _quoteMailCtx.docNum : '');
+  if (subj && !_qmSubjDirty) subj.value = _quoteMailSubject(n, _quoteMailCtx ? _quoteMailCtx.docNum : '',
+        (document.getElementById('qmJobTitle') || {}).value || '');   // v984
   if (body && !_qmBodyDirty) body.value = _quoteMailBody(g, n,
         (document.getElementById('qmOrderedBy') || {}).value || '',
         (document.getElementById('qmJobTitle') || {}).value || '');   // v982
