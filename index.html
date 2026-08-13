@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v994</title>
+<title>י.ב אחזקות — v995</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -568,7 +568,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v994
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v995
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -578,6 +578,12 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v995 · 12/08/2026 · AS v226b
+• דוח הרווח הגולמי: נוסף בתחתית בלוק "התמונה המלאה" — רווח גולמי, מתוכו החזר הוצאות לקוח, הוצאות כלליות, ורווח נקי משוער. מתעדכן לפי התקופה שנבחרה בדוח.
+• חשוב: החזר הוצאות הלקוח כבר כלול ברווח הגולמי ולכן מוצג כפירוט בלבד ואינו מופחת — הפחתה שלו הייתה ספירה כפולה. רק ההוצאות הכלליות מופחתות, ולפי הערך לפני מע"מ, כי המע"מ מתקזז ואינו עלות.
+• הרווח הגולמי עצמו לא השתנה. אם טעינת ההוצאות נכשלת — הבלוק פשוט לא מוצג.
+
 ─────────────────
 v994 · 12/08/2026 · AS v226b
 • מגירה: Day Note, Work Log ו-My Toolbox מקובצים תחת אקורדיון 🧰 Tools.
@@ -1772,7 +1778,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v994</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v995</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -12608,6 +12614,78 @@ try {
   if (!_geEnabled()) {
     var _geItem = document.getElementById('geDrawerItem');
     if (_geItem) _geItem.style.display = 'none';
+  }
+} catch (e) {}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v995 — Gross Profit report: full picture block.
+
+   ACCOUNTING NOTE, do not "simplify" this:
+   `total` from getGrossProfitSummary ALREADY INCLUDES the reimbursed client
+   expense rows (v214 added the breakdown but deliberately left the total
+   unchanged). So client expenses are shown as a component OF gross profit and
+   are NOT subtracted — subtracting them would double-count and understate the
+   result. Only GENERAL expenses (overhead) are deducted, at their pre-VAT value,
+   because input VAT is reclaimable and is therefore not a cost to the business.
+
+   Additive: an observer appends this under the existing report. It never edits
+   the report's own render, and if the expenses call fails it renders NOTHING —
+   a blank beats a wrong number on a money figure.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var _gpxBusy = false;
+
+function _gpxMoney(n) { return '₪' + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString(); }
+
+function _gpxSync() {
+  var c = document.getElementById('gpContent');
+  if (!c || _gpxBusy) return;
+  if (c.querySelector('#gpxBlock')) return;          /* already appended */
+  if (!_gpData || typeof _gpData.total !== 'number') return;
+  if (typeof _geEnabled === 'function' && !_geEnabled()) return;
+  _gpxBusy = true;
+
+  var per = (typeof _gpPeriod === 'string') ? _gpPeriod : 'all';
+  var gross = Number(_gpData.total) || 0;
+  var reimb = Number(_gpData.expenses) || 0;
+
+  _geGet('getGeneralExpensesSummary', { period: per }).then(function (res) {
+    _gpxBusy = false;
+    if (!res || res.ok !== true || !res.totals) return;      /* silent: no block */
+    var c2 = document.getElementById('gpContent');
+    if (!c2 || c2.querySelector('#gpxBlock')) return;
+    var oh  = Number(res.totals.amountExVat) || 0;
+    var net = gross - oh;
+    var row = function (label, val, opts) {
+      opts = opts || {};
+      return '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;' +
+        (opts.pad ? 'padding-right:14px;' : '') + 'margin-bottom:' + (opts.gap || 4) + 'px;">' +
+        '<span style="font-size:' + (opts.small ? '11px' : '13px') + ';color:' + (opts.small ? '#999' : '#555') + ';">' + label + '</span>' +
+        '<span style="font-size:' + (opts.big ? '17px' : '13px') + ';font-weight:' + (opts.big ? '900' : '700') +
+        ';color:' + (opts.color || '#333') + ';white-space:nowrap;">' + val + '</span></div>';
+    };
+    var d = document.createElement('div');
+    d.id = 'gpxBlock';
+    d.style.cssText = 'margin-top:16px;padding:14px;border:1px solid #e8e8e8;border-radius:14px;background:#fbfbfb;direction:rtl;font-family:Heebo,sans-serif;';
+    d.innerHTML =
+      '<div style="font-size:11px;font-weight:900;color:#999;letter-spacing:0.06em;margin-bottom:9px;">התמונה המלאה</div>' +
+      row('רווח גולמי להוצאת חשבונית', _gpxMoney(gross), { color: '#2e7d32' }) +
+      row('מתוכו החזר הוצאות לקוח', _gpxMoney(reimb), { small: true, pad: true, gap: 9 }) +
+      '<div style="border-top:1px solid #eee;margin:8px 0;"></div>' +
+      row('הוצאות כלליות (לפני מע״מ)', '−' + _gpxMoney(oh), { color: '#ad1457', gap: 9 }) +
+      '<div style="border-top:2px solid #ddd;margin:8px 0;"></div>' +
+      row('רווח נקי משוער', _gpxMoney(net), { big: true, color: net >= 0 ? '#1b5e20' : '#c62828' }) +
+      '<div style="font-size:10px;color:#bbb;margin-top:8px;line-height:1.5;">' +
+      'החזר הוצאות הלקוח כבר כלול ברווח הגולמי ולכן אינו מופחת שוב. ' +
+      'ההוצאות הכלליות מוצגות לפני מע״מ — זו העלות האמיתית, כי המע״מ מתקזז.</div>';
+    c2.appendChild(d);
+  }).catch(function () { _gpxBusy = false; });
+}
+
+try {
+  var _gpxTarget = document.getElementById('gpContent');
+  if (_gpxTarget && window.MutationObserver) {
+    new MutationObserver(function () { setTimeout(_gpxSync, 60); })
+      .observe(_gpxTarget, { childList: true });
   }
 } catch (e) {}
 
