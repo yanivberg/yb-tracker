@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v993</title>
+<title>י.ב אחזקות — v994</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -505,10 +505,20 @@ input[id^="progSlider-"]::-moz-range-track {
       <div onclick="closeSetupDrawer();openMonthlyExpenses();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🧾</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#c62828;">Monthly Expenses</div><div style="font-size:11px;color:#888;margin-top:1px;">דוח הוצאות חודשי ללקוח</div></div></div>
       </div>
+      <!-- v994: Tools — day note, work log, toolbox. Same accordion pattern. -->
+      <div id="tlHeader" onclick="_tlToggle()" style="background:#fff;border:0.5px solid #e0e0e0;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">🧰</span>
+        <div style="flex:1;"><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Tools</div><div style="font-size:11px;color:#888;margin-top:1px;">הערת יום · יומן עבודה · ארגז כלים</div></div>
+        <span id="tlChevron" style="font-size:15px;color:#bbb;display:inline-block;transition:transform 0.18s;">&#9656;</span>
+      </div>
+      <div id="tlBody" style="display:none;margin:0 6px 8px 0;padding-right:10px;border-right:2px solid #f0f0f0;">
       <div onclick="closeSetupDrawer();openDayNote();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📝</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">Day Note</div><div style="font-size:11px;color:#888;margin-top:1px;">הוסף הערת יום ליומן</div></div></div>
       <div onclick="closeSetupDrawer();openWorkLog();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📓</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Work Log</span></div>
+      <div onclick="closeSetupDrawer();openMyToolbox();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">🧰</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#333;">My Toolbox</div><div style="font-size:11px;color:#888;margin-top:1px;">Manage your tools</div></div></div>
+      </div>
       <div onclick="closeSetupDrawer();_openWeeklyPlanningDrawer();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📅</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1565c0;">Weekly Planning</div><div style="font-size:11px;color:#888;margin-top:1px;">תכנון שבועי</div></div></div>
       <!-- v993: Account Manager — same accordion pattern as Task Manager / Business Data.
@@ -532,8 +542,6 @@ input[id^="progSlider-"]::-moz-range-track {
       </div>
       <div onclick="closeSetupDrawer();openAIAdvisor();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">💫</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">AI Business Advisor</div><div style="font-size:11px;color:#888;margin-top:1px;">Most Profitable Category</div></div></div>
-      <div onclick="closeSetupDrawer();openMyToolbox();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
-        <span style="font-size:24px;flex-shrink:0;">🧰</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#333;">My Toolbox</div><div style="font-size:11px;color:#888;margin-top:1px;">Manage your tools</div></div></div>
       <div onclick="closeSetupDrawer();hardReset();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🗑</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#ccc;">Reset All</span></div>
     </div>
@@ -560,7 +568,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v993
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v994
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -570,6 +578,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v994 · 12/08/2026 · AS v226b
+• מגירה: Day Note, Work Log ו-My Toolbox מקובצים תחת אקורדיון 🧰 Tools.
+
 ─────────────────
 v993 · 12/08/2026 · AS v226b
 • Account Manager הפך לאקורדיון במגירה, באותו עיצוב כמו Task Manager ו-Business Data. חמשת המסכים — Create New Client, Invoice / Receipt, Edit/New Quotation, Last Invoices, יומן תנועות — נפתחים ישירות מהמגירה, כל אחד לטאב שלו, בלי לעבור דרך מסך הביניים.
@@ -1760,7 +1772,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v993</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v994</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -12596,6 +12608,23 @@ try {
   if (!_geEnabled()) {
     var _geItem = document.getElementById('geDrawerItem');
     if (_geItem) _geItem.style.display = 'none';
+  }
+} catch (e) {}
+
+/* v994: Tools accordion — its own remembered state. */
+function _tlToggle() {
+  var b = document.getElementById('tlBody'), c = document.getElementById('tlChevron');
+  if (!b) return;
+  var wasOpen = b.style.display !== 'none';
+  b.style.display = wasOpen ? 'none' : 'block';
+  if (c) c.style.transform = wasOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+  try { localStorage.setItem('yb_tl_open', wasOpen ? '0' : '1'); } catch (e) {}
+}
+try {
+  if (localStorage.getItem('yb_tl_open') === '1') {
+    var _tlB = document.getElementById('tlBody'), _tlC = document.getElementById('tlChevron');
+    if (_tlB) _tlB.style.display = 'block';
+    if (_tlC) _tlC.style.transform = 'rotate(90deg)';
   }
 } catch (e) {}
 
