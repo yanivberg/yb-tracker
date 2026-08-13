@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v988</title>
+<title>י.ב אחזקות — v989</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,8 +481,6 @@ input[id^="progSlider-"]::-moz-range-track {
         <span style="font-size:24px;flex-shrink:0;">💰</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#2e7d32;">Gross Profit — To Invoice</span></div>
       <div onclick="closeSetupDrawer();fetchActualPriceSummary();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🧾</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1565c0;">Actual Price — To Invoice</span></div>
-      <div id="geDrawerItem" onclick="closeSetupDrawer();_geOpen();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
-        <span style="font-size:24px;flex-shrink:0;">💸</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#ad1457;">General Expenses</div><div style="font-size:11px;color:#888;margin-top:1px;">הוצאות כלליות — לא משויכות לפרויקט</div></div></div>
       <div onclick="closeSetupDrawer();fetchAvgPph();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📈</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6a1b9a;">Average ₪/Hour</div><div style="font-size:11px;color:#888;margin-top:1px;">רווח ממוצע לשעה מול היעד</div></div></div>
       <div onclick="closeSetupDrawer();openDayNote();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -499,6 +497,10 @@ input[id^="progSlider-"]::-moz-range-track {
         <span style="font-size:24px;flex-shrink:0;">🧰</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#333;">My Toolbox</div><div style="font-size:11px;color:#888;margin-top:1px;">Manage your tools</div></div></div>
       <div onclick="closeSetupDrawer();runPOImportScan();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📧</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6a1b9a;">Import PO Emails</span></div>
+      <!-- v989: both expense reports under one header -->
+      <div style="font-size:11px;font-weight:900;color:#999;text-transform:uppercase;letter-spacing:0.09em;margin:16px 4px 7px;display:flex;align-items:center;gap:8px;direction:ltr;"><span>Expenses</span><span style="flex:1;height:1px;background:#e8e8e8;"></span></div>
+      <div id="geDrawerItem" onclick="closeSetupDrawer();_geOpen();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">💸</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#ad1457;">General Expenses</div><div style="font-size:11px;color:#888;margin-top:1px;">הוצאות כלליות — לא משויכות לפרויקט</div></div></div>
       <div onclick="closeSetupDrawer();openMonthlyExpenses();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🧾</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#c62828;">Monthly Expenses</div><div style="font-size:11px;color:#888;margin-top:1px;">דוח הוצאות חודשי ללקוח</div></div></div>
       <div onclick="closeSetupDrawer();hardReset();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -527,7 +529,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v988
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v989
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -537,6 +539,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v989 · 12/08/2026 · AS v226b
+• מגירה: "General Expenses" ו-"Monthly Expenses" מקובצים עכשיו תחת כותרת אחת — Expenses.
+
 ─────────────────
 v988 · 12/08/2026 · AS v226b / general-expenses v4
 • חימום מראש: 9 שניות אחרי טעינת האפליקציה נטענים נתוני ההוצאות ברקע פעם אחת, כך שגם הפתיחה הראשונה ביום מיידית. מושהה בכוונה — Apps Script מטפל בבקשה אחת בכל רגע לכל משתמש, ובקשה מוקדמת מדי הייתה מאטה את המסך הראשי (זו גם הסיבה שבאייפון זה מרגיש איטי יותר מהמק).
@@ -1707,7 +1713,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v988</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v989</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
