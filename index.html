@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v985</title>
+<title>י.ב אחזקות — v986</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -527,7 +527,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v985
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v986
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -537,6 +537,12 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v986 · 12/08/2026 · AS v226 / general-expenses v2
+• תיקון: מסך ההוצאות הכלליות נתקע ב"טוען…" והציג שגיאת JSON. הסיבה — שלוש קריאות במקביל לאותו שרת; Apps Script חוסם קריאות מקבילות ומחזיר דף שגיאה במקום נתונים. עכשיו קריאה אחת בלבד, שמחזירה גם את הקטגוריות וגם את סכום היום — וגם נטען פי שלושה מהר יותר.
+• כפתור "＋ הוצאה" נעול עד שהנתונים נטענים, במקום חלון התראה חוסם.
+• אם השרת בכל זאת מחזיר תשובה לא תקינה — ניסיון חוזר אוטומטי, ואז כפתור "נסה שוב".
+
 ─────────────────
 v985 · 12/08/2026 · AS v224 / gmail-po-import v225 / general-expenses v1
 • חדש: הוצאות כלליות (💸 במגירה) — הוצאות שוטפות שאינן משויכות לפרויקט. סכום רץ להיום, סינון יומי/שבועי/חודשי/הכל, פירוט לפי קטגוריה, הוספה מהירה, עריכת קטגוריות (⚙) והעתקה כטקסט לרואה החשבון.
@@ -1691,7 +1697,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v985</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v986</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1823,7 +1829,7 @@ SHEET SYNC
     <div id="gePeriodBar" style="display:flex;gap:5px;padding:6px 16px 0;flex-shrink:0;"></div>
     <div id="geContent" style="overflow-y:auto;flex:1;padding:14px 20px;"></div>
     <div style="padding:12px 16px;border-top:1px solid #eee;flex-shrink:0;display:flex;gap:8px;">
-      <button onclick="_geAddForm()" style="flex:1;padding:13px;background:#ad1457;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">＋ הוצאה</button>
+      <button id="geAddBtn" onclick="_geAddForm()" disabled style="flex:1;padding:13px;background:#ad1457;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;opacity:0.5;">＋ הוצאה</button>
       <button onclick="_geCopy()" style="padding:13px 16px;background:#1a1a2e;color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">📋 העתק</button>
     </div>
   </div>
@@ -12230,12 +12236,23 @@ function _geEnabled() {
 function _geMoney(n) { return '₪' + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString(); }
 function _geEsc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-function _geGet(action, params) {
+function _geGet(action, params, _retried) {
   var u = SHEETS_URL + '?action=' + encodeURIComponent(action);
   for (var k in params) if (params[k] !== undefined && params[k] !== null && params[k] !== '') {
     u += '&' + k + '=' + encodeURIComponent(params[k]);
   }
-  return fetch(u).then(function (r) { return r.json(); });
+  return fetch(u).then(function (r) { return r.text(); }).then(function (t) {
+    try { return JSON.parse(t); }
+    catch (e) {
+      /* Apps Script answers an HTML error page when it throttles a request
+         ("Unexpected token '<'"). Wait and try once more before giving up. */
+      if (!_retried) {
+        return new Promise(function (res) { setTimeout(res, 1400); })
+          .then(function () { return _geGet(action, params, true); });
+      }
+      throw new Error('השרת החזיר תשובה לא תקינה — נסה שוב');
+    }
+  });
 }
 /* POST with a plain-text body: no preflight, and Hebrew/long text never hits the URL. */
 function _gePost(action, payload) {
@@ -12271,17 +12288,22 @@ function _geLoad() {
   if (!c) return;
   _gePeriodBar();
   c.innerHTML = '<div style="text-align:center;padding:30px;color:#aaa;"><div style="font-size:26px;margin-bottom:8px;">⏳</div><div style="font-size:14px;">טוען…</div></div>';
-  Promise.all([
-    _geGet('getGECategories', {}),
-    _geGet('getGeneralExpenses', { period: _gePeriod }),
-    _geGet('getGeneralExpensesSummary', { period: 'day' })
-  ]).then(function (res) {
-    _geCats = (res[0] && res[0].categories) || [];
-    _geData = res[1] || null;
-    _geTodayBar((res[2] && res[2].totals) || null);
+  /* ONE request. Three parallel calls made Apps Script throttle and return an HTML
+     error page, and were ~3x slower. getGeneralExpenses now carries categories and
+     today's totals with it. */
+  _geSetAdd(false);
+  _geGet('getGeneralExpenses', { period: _gePeriod }).then(function (res) {
+    if (!res || res.ok !== true) throw new Error((res && res.error) || 'תשובה לא תקינה');
+    _geCats = res.categories || [];
+    _geData = res;
+    _geTodayBar(res.today || null);
     _geRender();
+    _geSetAdd(true);
   }).catch(function (err) {
-    c.innerHTML = '<div style="text-align:center;padding:26px;color:#c62828;font-size:13px;">שגיאה בטעינה<div style="font-size:11px;color:#999;margin-top:6px;">' + _geEsc(err) + '</div></div>';
+    _geSetAdd(false);
+    c.innerHTML = '<div style="text-align:center;padding:26px;color:#c62828;font-size:13px;">שגיאה בטעינה' +
+      '<div style="font-size:11px;color:#999;margin-top:6px;">' + _geEsc(err && err.message ? err.message : err) + '</div>' +
+      '<button onclick="_geLoad()" style="margin-top:12px;padding:9px 18px;background:#ad1457;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">נסה שוב</button></div>';
   });
 }
 
@@ -12346,8 +12368,17 @@ function _geToggle(i) {
 /* ── quick add ─────────────────────────────────────────────────────────────
    You type the TOTAL from the receipt; the backend derives ex-VAT and VAT so
    the arithmetic lives in exactly one place. */
+/* The + button stays disabled until data is in, so it can never open a form with
+   no categories — the old code raised a blocking alert() that froze the page. */
+function _geSetAdd(on) {
+  var b = document.getElementById('geAddBtn');
+  if (!b) return;
+  b.disabled = !on;
+  b.style.opacity = on ? '1' : '0.5';
+}
+
 function _geAddForm() {
-  if (!_geCats.length) { alert('לא נטענו קטגוריות'); return; }
+  if (!_geCats.length) { _geLoad(); return; }
   var c = document.getElementById('geContent');
   var today = new Date().toISOString().slice(0, 10);
   var opts = _geCats.filter(function (x) { return x.active; })
