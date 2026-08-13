@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v990</title>
+<title>י.ב אחזקות — v992</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -466,6 +466,13 @@ input[id^="progSlider-"]::-moz-range-track {
   <div id="setupDrawer" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:420px;z-index:10001;flex-direction:column;background:#fff;border-radius:0;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,0.15);">
     <div style="flex:1;overflow-y:auto;padding:12px 12px 0;">
 
+      <!-- v991: Task Manager — collapsible group for the job/quote entry points. -->
+      <div id="tmHeader" onclick="_tmToggle()" style="background:#fff;border:0.5px solid #e0e0e0;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">🗂️</span>
+        <div style="flex:1;"><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1a1a2e;">Task Manager</div><div style="font-size:11px;color:#888;margin-top:1px;">טיימר · משימות · הצעות · ניהול עבודות · ייבוא רכש</div></div>
+        <span id="tmChevron" style="font-size:15px;color:#bbb;display:inline-block;transition:transform 0.18s;">&#9656;</span>
+      </div>
+      <div id="tmBody" style="display:none;margin:0 6px 8px 0;padding-right:10px;border-right:2px solid #f0f0f0;">
       <div id="drawerPreTimerItem" onclick="closeSetupDrawer();openPreTimerPicker();" style="background:#f8f9fa;border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;justify-content:flex-start;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <svg width="52" height="52" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="44" r="28" stroke="#111" stroke-width="5"/><line x1="40" y1="44" x2="40" y2="24" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="44" x2="54" y2="54" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="34" y1="8" x2="46" y2="8" stroke="#111" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="8" x2="40" y2="16" stroke="#111" stroke-width="5" stroke-linecap="round"/></svg>
         <span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">Instant Timer — For Quotation</span>
@@ -476,6 +483,9 @@ input[id^="progSlider-"]::-moz-range-track {
         <span style="font-size:24px;flex-shrink:0;">📋</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#b07d00;">Pending Quote Projects</span></div>
       <div onclick="closeSetupDrawer();openManageJobs();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🗂️</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#00695c;">Manage Jobs</div><div style="font-size:11px;color:#888;margin-top:1px;">ניהול עבודות — ערוך/מחק</div></div></div>
+      <div onclick="closeSetupDrawer();runPOImportScan();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">📧</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6a1b9a;">Import PO Emails</span></div>
+      </div>
 
       <!-- v990: Business Data — one collapsible group for the five report screens. -->
       <div id="bdHeader" onclick="_bdToggle()" style="background:#fff;border:0.5px solid #e0e0e0;border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -507,8 +517,6 @@ input[id^="progSlider-"]::-moz-range-track {
         <span style="font-size:24px;flex-shrink:0;">💫</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">AI Business Advisor</div><div style="font-size:11px;color:#888;margin-top:1px;">Most Profitable Category</div></div></div>
       <div onclick="closeSetupDrawer();openMyToolbox();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🧰</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#333;">My Toolbox</div><div style="font-size:11px;color:#888;margin-top:1px;">Manage your tools</div></div></div>
-      <div onclick="closeSetupDrawer();runPOImportScan();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
-        <span style="font-size:24px;flex-shrink:0;">📧</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6a1b9a;">Import PO Emails</span></div>
       <div onclick="closeSetupDrawer();hardReset();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🗑</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#ccc;">Reset All</span></div>
     </div>
@@ -535,7 +543,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v990
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v992
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -545,6 +553,14 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v992 · 12/08/2026 · AS v226b
+• Import PO Emails הועבר לתוך אקורדיון Task Manager.
+
+─────────────────
+v991 · 12/08/2026 · AS v226b
+• מגירה: ארבעת מסכי העבודה — Instant Timer, Pick from Open Tasks, Pending Quote Projects, Manage Jobs — מקובצים תחת אקורדיון 🗂️ Task Manager. זוכר אם השארת אותו פתוח, בנפרד מ-Business Data.
+
 ─────────────────
 v990 · 12/08/2026 · AS v226b
 • מגירה: חמשת מסכי הנתונים — Gross Profit, Actual Price, Average ₪/Hour, General Expenses, Monthly Expenses — מקובצים תחת אקורדיון אחד: 📊 Business Data. נפתח בלחיצה וזוכר אם השארת אותו פתוח.
@@ -1723,7 +1739,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v990</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v992</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -12559,6 +12575,23 @@ try {
   if (!_geEnabled()) {
     var _geItem = document.getElementById('geDrawerItem');
     if (_geItem) _geItem.style.display = 'none';
+  }
+} catch (e) {}
+
+/* v991: Task Manager accordion — same pattern as Business Data, own remembered state. */
+function _tmToggle() {
+  var b = document.getElementById('tmBody'), c = document.getElementById('tmChevron');
+  if (!b) return;
+  var wasOpen = b.style.display !== 'none';
+  b.style.display = wasOpen ? 'none' : 'block';
+  if (c) c.style.transform = wasOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+  try { localStorage.setItem('yb_tm_open', wasOpen ? '0' : '1'); } catch (e) {}
+}
+try {
+  if (localStorage.getItem('yb_tm_open') === '1') {
+    var _tmB = document.getElementById('tmBody'), _tmC = document.getElementById('tmChevron');
+    if (_tmB) _tmB.style.display = 'block';
+    if (_tmC) _tmC.style.transform = 'rotate(90deg)';
   }
 } catch (e) {}
 
