@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v984</title>
+<title>י.ב אחזקות — v985</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -481,6 +481,8 @@ input[id^="progSlider-"]::-moz-range-track {
         <span style="font-size:24px;flex-shrink:0;">💰</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#2e7d32;">Gross Profit — To Invoice</span></div>
       <div onclick="closeSetupDrawer();fetchActualPriceSummary();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">🧾</span><span style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1565c0;">Actual Price — To Invoice</span></div>
+      <div id="geDrawerItem" onclick="closeSetupDrawer();_geOpen();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+        <span style="font-size:24px;flex-shrink:0;">💸</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#ad1457;">General Expenses</div><div style="font-size:11px;color:#888;margin-top:1px;">הוצאות כלליות — לא משויכות לפרויקט</div></div></div>
       <div onclick="closeSetupDrawer();fetchAvgPph();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📈</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#6a1b9a;">Average ₪/Hour</div><div style="font-size:11px;color:#888;margin-top:1px;">רווח ממוצע לשעה מול היעד</div></div></div>
       <div onclick="closeSetupDrawer();openDayNote();" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
@@ -525,7 +527,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v984
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v985
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 337)
@@ -535,6 +537,13 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v985 · 12/08/2026 · AS v224 / gmail-po-import v225 / general-expenses v1
+• חדש: הוצאות כלליות (💸 במגירה) — הוצאות שוטפות שאינן משויכות לפרויקט. סכום רץ להיום, סינון יומי/שבועי/חודשי/הכל, פירוט לפי קטגוריה, הוספה מהירה, עריכת קטגוריות (⚙) והעתקה כטקסט לרואה החשבון.
+• מזינים את הסכום ששולם מהקבלה; המערכת מחשבת לבד לפני מע"מ ומע"מ (18% או פטור). המספר שמוצג כהוצאה הוא לפני מע"מ — זו העלות האמיתית שלך, כי המע"מ מתקזז.
+• נשמר בשני גיליונות נפרדים משלו, ללא עמודת לקוח וללא jobId — כך שהוצאה כללית לא יכולה בשום מצב להתגלגל לחשבונית של לקוח. שורות נוספות בלבד; מחיקה מסמנת ולא מוחקת.
+• דוח הרווח הגולמי לא השתנה בשלב זה.
+
 ─────────────────
 v984 · 11/08/2026 · AS v224 / gmail-po-import v225
 • "כותרת העבודה" מופיעה עכשיו גם בנושא המייל, בין "הצעת מחיר" למספר ההצעה — כמו במיילים הקיימים: "גולמט - הצעת מחיר להקמת תצוגה בקומה 2 לצנרת קירור - 01/900214". ריק = הנושא נשאר בדיוק כמו קודם.
@@ -1682,7 +1691,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v984</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v985</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1795,6 +1804,27 @@ SHEET SYNC
     <div id="apContent" style="overflow-y:auto;flex:1;padding:16px 20px;"></div>
     <div style="padding:14px 16px;border-top:1px solid #eee;flex-shrink:0;">
       <button id="apCopyBtn" onclick="copyAP()" style="width:100%;padding:13px;background:#1a1a2e;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">📋 Copy to clipboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- v985: General Expenses (overhead) overlay. Reads/writes ONLY the two
+     'General Expense' sheets via general-expenses.gs. Never touches a client sheet. -->
+<div id="geOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:10010;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:440px;max-height:88vh;display:flex;flex-direction:column;font-family:Heebo,sans-serif;direction:rtl;">
+    <div style="padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;">
+      <div style="font-weight:700;font-size:17px;">💸 הוצאות כלליות</div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button onclick="_geCatEditor()" title="ניהול קטגוריות" style="background:none;border:none;font-size:19px;cursor:pointer;color:#888;">⚙</button>
+        <button onclick="document.getElementById('geOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+      </div>
+    </div>
+    <div id="geTodayBar" style="padding:14px 20px 6px;flex-shrink:0;"></div>
+    <div id="gePeriodBar" style="display:flex;gap:5px;padding:6px 16px 0;flex-shrink:0;"></div>
+    <div id="geContent" style="overflow-y:auto;flex:1;padding:14px 20px;"></div>
+    <div style="padding:12px 16px;border-top:1px solid #eee;flex-shrink:0;display:flex;gap:8px;">
+      <button onclick="_geAddForm()" style="flex:1;padding:13px;background:#ad1457;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">＋ הוצאה</button>
+      <button onclick="_geCopy()" style="padding:13px 16px;background:#1a1a2e;color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">📋 העתק</button>
     </div>
   </div>
 </div>
@@ -12184,6 +12214,263 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(function () {});
   });
 }
+/* ═══════════════════════════════════════════════════════════════════════════
+   v985 — GENERAL EXPENSES (overhead). Stage 2 UI. spec: SPEC-general-expenses.md
+
+   Additive block. It defines only _ge* symbols, adds one drawer item and one
+   overlay, and talks exclusively to the six actions in general-expenses.gs.
+   It calls NOTHING that exists elsewhere in this file, so it cannot alter any
+   existing behaviour. Kill switch: localStorage.yb_ge_enabled = 'off'.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var _geCats = [], _geData = null, _gePeriod = 'day', _geBusy = false;
+
+function _geEnabled() {
+  try { return localStorage.getItem('yb_ge_enabled') !== 'off'; } catch (e) { return true; }
+}
+function _geMoney(n) { return '₪' + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString(); }
+function _geEsc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function _geGet(action, params) {
+  var u = SHEETS_URL + '?action=' + encodeURIComponent(action);
+  for (var k in params) if (params[k] !== undefined && params[k] !== null && params[k] !== '') {
+    u += '&' + k + '=' + encodeURIComponent(params[k]);
+  }
+  return fetch(u).then(function (r) { return r.json(); });
+}
+/* POST with a plain-text body: no preflight, and Hebrew/long text never hits the URL. */
+function _gePost(action, payload) {
+  payload = payload || {}; payload.action = action;
+  return fetch(SHEETS_URL, { method: 'POST', body: JSON.stringify(payload) })
+    .then(function (r) { return r.json(); });
+}
+
+function _geOpen() {
+  if (!_geEnabled()) return;
+  var ov = document.getElementById('geOverlay');
+  if (!ov) return;
+  ov.style.display = 'flex';
+  _geLoad();
+}
+
+function _geSetPeriod(p) { if (_gePeriod !== p) { _gePeriod = p; _geLoad(); } }
+
+function _gePeriodBar() {
+  var bar = document.getElementById('gePeriodBar');
+  if (!bar) return;
+  var opts = [['day','יומי'], ['week','שבועי'], ['month','חודשי'], ['all','הכל']];
+  bar.innerHTML = opts.map(function (o) {
+    var on = _gePeriod === o[0];
+    return '<button onclick="_geSetPeriod(\'' + o[0] + '\')" style="flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid ' +
+      (on ? '#ad1457' : '#e0e0e0') + ';background:' + (on ? '#ad1457' : '#fff') + ';color:' + (on ? '#fff' : '#666') +
+      ';font-size:13px;font-weight:' + (on ? '900' : '700') + ';cursor:pointer;font-family:Heebo,sans-serif;">' + o[1] + '</button>';
+  }).join('');
+}
+
+function _geLoad() {
+  var c = document.getElementById('geContent');
+  if (!c) return;
+  _gePeriodBar();
+  c.innerHTML = '<div style="text-align:center;padding:30px;color:#aaa;"><div style="font-size:26px;margin-bottom:8px;">⏳</div><div style="font-size:14px;">טוען…</div></div>';
+  Promise.all([
+    _geGet('getGECategories', {}),
+    _geGet('getGeneralExpenses', { period: _gePeriod }),
+    _geGet('getGeneralExpensesSummary', { period: 'day' })
+  ]).then(function (res) {
+    _geCats = (res[0] && res[0].categories) || [];
+    _geData = res[1] || null;
+    _geTodayBar((res[2] && res[2].totals) || null);
+    _geRender();
+  }).catch(function (err) {
+    c.innerHTML = '<div style="text-align:center;padding:26px;color:#c62828;font-size:13px;">שגיאה בטעינה<div style="font-size:11px;color:#999;margin-top:6px;">' + _geEsc(err) + '</div></div>';
+  });
+}
+
+/* Today's running total — the headline figure, always the day window. */
+function _geTodayBar(t) {
+  var el = document.getElementById('geTodayBar');
+  if (!el) return;
+  var sum = t ? t.amountExVat : 0, cnt = t ? t.count : 0;
+  el.innerHTML =
+    '<div style="background:#fce4ec;border:1px solid #f8bbd0;border-radius:14px;padding:12px 16px;">' +
+      '<div style="font-size:11px;font-weight:700;color:#ad1457;letter-spacing:0.4px;">היום — לפני מע״מ</div>' +
+      '<div style="font-size:26px;font-weight:900;color:#880e4f;line-height:1.25;">' + _geMoney(sum) + '</div>' +
+      '<div style="font-size:11px;color:#999;">' + cnt + ' הוצאות' + (t ? ' · סה״כ ששולם ' + _geMoney(t.total) : '') + '</div>' +
+    '</div>';
+}
+
+function _geRender() {
+  var c = document.getElementById('geContent');
+  if (!c) return;
+  var d = _geData;
+  if (!d || !d.totals) { c.innerHTML = '<div style="text-align:center;padding:26px;color:#aaa;font-size:13px;">אין נתונים</div>'; return; }
+  if (!d.totals.count) {
+    c.innerHTML = '<div style="text-align:center;padding:30px;color:#aaa;"><div style="font-size:30px;margin-bottom:8px;">💸</div>' +
+      '<div style="font-size:14px;">אין הוצאות בתקופה הזו</div></div>';
+    return;
+  }
+  var h = '';
+  (d.groups || []).forEach(function (g, i) {
+    var pct = d.totals.amountExVat ? Math.round(g.amountExVat / d.totals.amountExVat * 100) : 0;
+    h += '<div style="margin-bottom:10px;border:1px solid #eee;border-radius:12px;overflow:hidden;">' +
+      '<div onclick="_geToggle(' + i + ')" style="padding:11px 13px;background:#fafafa;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;">' +
+        '<div style="min-width:0;"><div style="font-size:13px;font-weight:800;color:#333;">' + _geEsc(g.category) + '</div>' +
+        '<div style="font-size:10px;color:#999;">' + g.count + ' הוצאות · ' + pct + '%</div></div>' +
+        '<div style="font-size:15px;font-weight:900;color:#ad1457;white-space:nowrap;">' + _geMoney(g.amountExVat) + '</div>' +
+      '</div>' +
+      '<div id="geG' + i + '" style="display:none;">' +
+        (g.rows || []).map(function (r) {
+          return '<div style="padding:9px 13px;border-top:1px solid #f2f2f2;display:flex;justify-content:space-between;align-items:center;gap:8px;">' +
+            '<div style="min-width:0;"><div style="font-size:12px;color:#333;">' + _geEsc(r.desc || '—') + '</div>' +
+            '<div style="font-size:10px;color:#aaa;">' + _geEsc(r.date) + (r.link ? ' · <a href="' + _geEsc(r.link) + '" target="_blank" style="color:#1565c0;">קבלה</a>' : '') + '</div></div>' +
+            '<div style="display:flex;align-items:center;gap:8px;white-space:nowrap;">' +
+              '<div style="text-align:left;"><div style="font-size:13px;font-weight:700;">' + _geMoney(r.amountExVat) + '</div>' +
+              '<div style="font-size:9px;color:#bbb;">מע״מ ' + _geMoney(r.vat) + '</div></div>' +
+              '<button onclick="_geDel(\'' + _geEsc(r.id) + '\')" style="background:none;border:none;color:#c62828;font-size:15px;cursor:pointer;">✕</button>' +
+            '</div></div>';
+        }).join('') +
+      '</div></div>';
+  });
+  h += '<div style="margin-top:12px;border-top:2px solid #eee;padding-top:10px;font-size:13px;">' +
+    '<div style="display:flex;justify-content:space-between;"><span style="color:#666;">סה״כ לפני מע״מ</span><b>' + _geMoney(d.totals.amountExVat) + '</b></div>' +
+    '<div style="display:flex;justify-content:space-between;"><span style="color:#666;">מע״מ</span><span>' + _geMoney(d.totals.vat) + '</span></div>' +
+    '<div style="display:flex;justify-content:space-between;font-weight:900;color:#880e4f;"><span>סה״כ ששולם</span><span>' + _geMoney(d.totals.total) + '</span></div>' +
+    '</div>';
+  c.innerHTML = h;
+}
+
+function _geToggle(i) {
+  var el = document.getElementById('geG' + i);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+/* ── quick add ─────────────────────────────────────────────────────────────
+   You type the TOTAL from the receipt; the backend derives ex-VAT and VAT so
+   the arithmetic lives in exactly one place. */
+function _geAddForm() {
+  if (!_geCats.length) { alert('לא נטענו קטגוריות'); return; }
+  var c = document.getElementById('geContent');
+  var today = new Date().toISOString().slice(0, 10);
+  var opts = _geCats.filter(function (x) { return x.active; })
+    .map(function (x) { return '<option value="' + _geEsc(x.id) + '">' + _geEsc(x.name) + '</option>'; }).join('');
+  var inp = 'width:100%;padding:10px 12px;border:1.5px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;direction:rtl;';
+  var lbl = 'font-size:12px;font-weight:700;color:#555;margin-bottom:4px;';
+  c.innerHTML =
+    '<div style="' + lbl + '">קטגוריה</div><select id="geFCat" style="' + inp + 'margin-bottom:9px;">' + opts + '</select>' +
+    '<div style="' + lbl + '">סכום ששולם (כולל מע״מ)</div><input id="geFTotal" type="number" inputmode="decimal" step="0.01" placeholder="0.00" style="' + inp + 'margin-bottom:9px;">' +
+    '<div style="' + lbl + '">מע״מ</div><select id="geFVat" style="' + inp + 'margin-bottom:9px;"><option value="18">18%</option><option value="0">פטור / 0%</option></select>' +
+    '<div style="' + lbl + '">תיאור</div><input id="geFDesc" type="text" placeholder="תיאור…" style="' + inp + 'margin-bottom:9px;">' +
+    '<div style="' + lbl + '">תאריך</div><input id="geFDate" type="date" value="' + today + '" style="' + inp + 'margin-bottom:9px;">' +
+    '<div style="' + lbl + '">קישור לקבלה <span style="font-weight:400;color:#aaa;">(רשות)</span></div><input id="geFLink" type="text" placeholder="https://…" style="' + inp + 'margin-bottom:12px;">' +
+    '<div style="background:#fff8e1;border-radius:9px;padding:8px 11px;font-size:11px;color:#8d6e00;margin-bottom:12px;">כלי או חומר שנקנה עבור פרויקט מסוים — רשום אותו כהוצאת פרויקט, לא כאן. אחרת הרווח של אותה עבודה ייראה גבוה ממה שהיה.</div>' +
+    '<div style="display:flex;gap:8px;">' +
+      '<button onclick="_geSubmit()" style="flex:1;padding:12px;background:#ad1457;color:#fff;border:none;border-radius:11px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">שמור</button>' +
+      '<button onclick="_geLoad()" style="padding:12px 16px;background:#f0f0f0;color:#555;border:none;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">ביטול</button>' +
+    '</div>';
+}
+
+function _geSubmit() {
+  if (_geBusy) return;
+  var total = parseFloat((document.getElementById('geFTotal') || {}).value || '0');
+  if (!(total > 0)) { alert('סכום חייב להיות גדול מ-0'); return; }
+  _geBusy = true;
+  _gePost('addGeneralExpense', {
+    categoryId: (document.getElementById('geFCat') || {}).value || '',
+    total: total,
+    vatRate: (document.getElementById('geFVat') || {}).value || '18',
+    desc: (document.getElementById('geFDesc') || {}).value || '',
+    date: (document.getElementById('geFDate') || {}).value || '',
+    link: (document.getElementById('geFLink') || {}).value || ''
+  }).then(function (res) {
+    _geBusy = false;
+    if (!res || res.ok !== true) { alert('שגיאה: ' + ((res && res.error) || 'לא נשמר')); return; }
+    _geLoad();
+  }).catch(function (e) { _geBusy = false; alert('שגיאה: ' + e); });
+}
+
+/* Soft delete — the row is flagged, never removed. */
+function _geDel(id) {
+  if (!confirm('למחוק את ההוצאה?')) return;
+  _gePost('deleteGeneralExpense', { id: id }).then(function (res) {
+    if (!res || res.ok !== true) { alert('שגיאה: ' + ((res && res.error) || '')); return; }
+    _geLoad();
+  }).catch(function (e) { alert('שגיאה: ' + e); });
+}
+
+/* ── category editor ───────────────────────────────────────────────────────
+   Renaming changes the display name only. Rows reference an immutable
+   categoryId, so history is never rewritten. Hiding keeps old rows readable. */
+function _geCatEditor() {
+  var ov = document.getElementById('geOverlay');
+  if (ov) ov.style.display = 'flex';
+  var c = document.getElementById('geContent');
+  if (!c) return;
+  if (!_geCats.length) { _geGet('getGECategories', {}).then(function (r) { _geCats = (r && r.categories) || []; _geCatEditor(); }); return; }
+  var inp = 'flex:1;padding:8px 10px;border:1.5px solid #ddd;border-radius:9px;font-size:14px;font-family:Heebo,sans-serif;direction:rtl;';
+  var h = '<div style="font-size:12px;color:#888;margin-bottom:10px;">שינוי שם משנה תצוגה בלבד — הוצאות קודמות נשארות מקושרות ומקבלות את השם החדש.</div>';
+  _geCats.forEach(function (x) {
+    h += '<div style="display:flex;gap:6px;align-items:center;margin-bottom:7px;">' +
+      '<input id="geC_' + _geEsc(x.id) + '" value="' + _geEsc(x.name) + '" style="' + inp + (x.active ? '' : 'opacity:0.45;') + '">' +
+      '<button onclick="_geCatSave(\'' + _geEsc(x.id) + '\')" style="padding:8px 10px;background:#ad1457;color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">שמור</button>' +
+      '<button onclick="_geCatHide(\'' + _geEsc(x.id) + '\',' + (x.active ? 'false' : 'true') + ')" title="' + (x.active ? 'הסתר' : 'הצג') + '" style="padding:8px 9px;background:#f0f0f0;color:#555;border:none;border-radius:9px;font-size:12px;cursor:pointer;">' + (x.active ? '🚫' : '↩') + '</button>' +
+    '</div>';
+  });
+  h += '<div style="display:flex;gap:6px;align-items:center;margin-top:12px;border-top:1px solid #eee;padding-top:12px;">' +
+    '<input id="geCNew" placeholder="קטגוריה חדשה…" style="' + inp + '">' +
+    '<button onclick="_geCatAdd()" style="padding:8px 12px;background:#2e7d32;color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">＋</button></div>' +
+    '<button onclick="_geLoad()" style="width:100%;margin-top:14px;padding:11px;background:#f0f0f0;color:#555;border:none;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">חזרה לדוח</button>';
+  c.innerHTML = h;
+}
+function _geCatSave(id) {
+  var el = document.getElementById('geC_' + id);
+  if (!el) return;
+  _gePost('saveGECategory', { id: id, name: el.value })
+    .then(function () { _geGet('getGECategories', {}).then(function (r) { _geCats = (r && r.categories) || []; _geCatEditor(); }); })
+    .catch(function (e) { alert('שגיאה: ' + e); });
+}
+function _geCatHide(id, makeActive) {
+  _gePost('saveGECategory', { id: id, active: makeActive })
+    .then(function () { _geGet('getGECategories', {}).then(function (r) { _geCats = (r && r.categories) || []; _geCatEditor(); }); })
+    .catch(function (e) { alert('שגיאה: ' + e); });
+}
+function _geCatAdd() {
+  var el = document.getElementById('geCNew');
+  if (!el || !el.value.trim()) return;
+  _gePost('saveGECategory', { name: el.value.trim() })
+    .then(function () { _geGet('getGECategories', {}).then(function (r) { _geCats = (r && r.categories) || []; _geCatEditor(); }); })
+    .catch(function (e) { alert('שגיאה: ' + e); });
+}
+
+/* Numbered plain-text summary — same shape as the monthly materials report. */
+function _geCopy() {
+  var d = _geData;
+  if (!d || !d.totals || !d.totals.count) { alert('אין מה להעתיק'); return; }
+  var label = { day: 'היום', week: 'השבוע', month: 'החודש', all: 'הכל' }[_gePeriod] || '';
+  var t = 'הוצאות כלליות — ' + label + '\n\n';
+  var n = 0;
+  (d.groups || []).forEach(function (g) {
+    t += g.category + ' — ' + _geMoney(g.amountExVat) + '\n';
+    (g.rows || []).forEach(function (r) {
+      n++;
+      t += '  ' + n + '. ' + r.date + ' · ' + (r.desc || '—') + ' · ' + _geMoney(r.amountExVat) + ' (מע״מ ' + _geMoney(r.vat) + ')\n';
+    });
+    t += '\n';
+  });
+  t += 'סה״כ לפני מע״מ: ' + _geMoney(d.totals.amountExVat) + '\n';
+  t += 'מע״מ: ' + _geMoney(d.totals.vat) + '\n';
+  t += 'סה״כ ששולם: ' + _geMoney(d.totals.total) + '\n';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(t).then(function () { alert('הועתק'); }).catch(function () { prompt('העתק:', t); });
+  } else { prompt('העתק:', t); }
+}
+
+/* Flag off => remove the entry point entirely. */
+try {
+  if (!_geEnabled()) {
+    var _geItem = document.getElementById('geDrawerItem');
+    if (_geItem) _geItem.style.display = 'none';
+  }
+} catch (e) {}
+
 </script>
 
 
