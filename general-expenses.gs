@@ -1,6 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    general-expenses.gs — YB Tracker · general business expenses (overhead)
    Stage 1 · 12/08/2026 · spec: SPEC-general-expenses.md
+   v5 · 14/08/2026 · _geWindow accepts 'year' — without it the v995 net-profit block would
+   subtract ALL-TIME overhead from a one-year gross (unknown period => null window => all).
 
    ISOLATION CONTRACT — read before editing:
    1. This file owns TWO sheets and touches nothing else:
@@ -112,6 +114,7 @@ function _geWindow(period) {
     case 'day':   start = new Date(now.getFullYear(), now.getMonth(), now.getDate()); break;
     case 'week':  start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay()); break;
     case 'month': start = new Date(now.getFullYear(), now.getMonth(), 1); break;
+    case 'year':  start = new Date(now.getFullYear(), 0, 1); break;   /* v5: matches AS v231's gross-profit year window */
     default:      return null;   /* 'all' */
   }
   return { start: _geFmtDate(start), end: _geFmtDate(end) };

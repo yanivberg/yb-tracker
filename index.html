@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v999</title>
+<title>י.ב אחזקות — v1000</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -568,16 +568,22 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v999
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1000
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxqbXK…exec (Version 360)
+Apps Script: AKfycbxqbXK…exec (Version 361)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v1000 · 14/08/2026 · AS v231 / general-expenses v5
+• בדוח הרווח הגולמי נוסף בורר "שנתי" — מ-1 בינואר של השנה הנוכחית ועד היום. שאר הבוררים לא השתנו.
+• אותו בורר נוסף גם לדוח הרווח הממוצע לשעה, כדי ששני הדוחות יתנהגו אותו דבר.
+• בלוק "התמונה המלאה" מקבל את אותה תקופה גם עבור ההוצאות הכלליות. בלי התיקון הזה, "שנתי" היה מקזז את כל ההוצאות הכלליות מאז ומעולם מול רווח של שנה אחת, ומציג רווח נקי נמוך מדי.
+
 ─────────────────
 v999 · 14/08/2026 · AS v230
 • כפתור 🤖 מוסתר לפי בקשה. העוזר עצמו נשאר בקוד ופועל — רק הכפתור לא מוצג. להחזרה: להסיר display:none מ-ybAiFab.
@@ -1801,7 +1807,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v999</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1000</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -6787,10 +6793,10 @@ var _poAttachPendingJobs = [];
 // ── Gross Profit Summary ──────────────────────────────
 var _gpData = null;
 
-var _gpPeriod = 'all';   // v943: day|week|month|all — selected period for the gross-profit report
+var _gpPeriod = 'all';   // v943: day|week|month|all · v1000: +year — selected period for the gross-profit report
 function _renderGpPeriodBar() {
   var bar = document.getElementById('gpPeriodBar'); if (!bar) return;
-  var opts = [['day','יומי'], ['week','שבועי'], ['month','חודשי'], ['all','הכל']];
+  var opts = [['day','יומי'], ['week','שבועי'], ['month','חודשי'], ['year','שנתי'], ['all','הכל']];
   bar.innerHTML = opts.map(function(o){
     var on = _gpPeriod === o[0];
     return '<button onclick="_setGpPeriod(\'' + o[0] + '\')" style="flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid ' +
@@ -6941,7 +6947,7 @@ var AVG_PPH_TARGET = 500;
 var _avgPphPeriod = 'all';   // day|week|month|all
 function _renderAvgPphPeriodBar() {
   var bar = document.getElementById('avgPphPeriodBar'); if (!bar) return;
-  var opts = [['day','יומי'], ['week','שבועי'], ['month','חודשי'], ['all','הכל']];
+  var opts = [['day','יומי'], ['week','שבועי'], ['month','חודשי'], ['year','שנתי'], ['all','הכל']];
   bar.innerHTML = opts.map(function(o){
     var on = _avgPphPeriod === o[0];
     return '<button onclick="_setAvgPphPeriod(\'' + o[0] + '\')" style="flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid ' +
