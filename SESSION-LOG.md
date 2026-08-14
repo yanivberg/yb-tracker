@@ -11,6 +11,7 @@ SHIPPED:
 - **All five GAS project files committed to the repo**, each SHA-256-verified against the live editor after the commit landed: `apps-script-v226b.js` (= live Code.gs, 320,112 bytes, sha16 `693aa30d7d14c152`), `general-expenses.gs` (17,251, `8bccf826c95507c6`), `gmail-po-import.gs` (16,145, `acc6138f670be61d`), `AuthHelper.gs` (194, `3f13618f31ba3b8a`), `appsscript.json` (694, `5ce4191bda361533`). All four JS files acorn-clean (ecmaVersion 2020); appsscript.json parses. Action count 106, matching the live editor.
 - HANDOFF.md rewritten from live state (was dated 19/07/26 and claimed HTML v943 / AS v206 — two of three numbers wrong).
 - This SESSION-LOG block, closing a 24-day gap.
+- **`repairExpenseRollups(true)` dry run RUN by Yaniv (15:42) — result: nothing to repair.** Item closed after ~1 month open; `repairExpenseRollups(false)` deliberately NOT run.
 FACT (all 14/08/26):
 - Live derived at bootstrap: **HTML v995** (title probe + repo commit c950a1a, deployed 13/08 23:44) · **AS deployment Version 356** (13/08 23:05) · **Worker v30** (`?action=health` → `worker-proxy-30`, activeBase app1.caspit.biz). | evidence: title grep, worker health JSON, Manage deployments DOM
 - Project identity confirmed: Deployment ID `AKfycbxqbXKwg-EkbwKxtmulN_u_…` read from the DOM — correct project, not the decoy. | evidence: DOM string compare, matchesExpected true
@@ -26,17 +27,23 @@ FACT (all 14/08/26):
 - **`file_upload` DOES accept container paths under `/mnt/user-data/outputs/`** — it rejects device paths (`/Users/…`, even in a connected folder) with "only files this session is allowed to read". Write the file in the session workspace, copy it to outputs, upload from there. This is far simpler than the clipboard hop for anything Claude authored itself; the clipboard hop is only needed for bytes that live in the GAS editor. | evidence: /Users path rejected, /mnt/user-data/outputs path accepted, same input, same session
 - **`raw.githubusercontent.com` serves a stale cached copy for minutes after a commit** — it reported SESSION-LOG.md unchanged (old hash, 5 blocks) while the commit had in fact landed. Cache-busting query params did NOT defeat it. Verify a fresh commit with `git fetch` + `git show origin/main:<file>`, not raw. | evidence: raw said 12,847 bytes / 5 blocks; git showed 17,783 bytes / 6 blocks, hash matching the local build
 - **GitHub's editor internals moved:** `.cm-content` no longer carries `cmView` (only a `cmTile` key), so the HANDOFF-documented `el.cmView.view → view.dispatch` injection path is dead as written. The upload page + `DataTransfer` route is unaffected. | evidence: probed both on /edit/main/SESSION-LOG.md
+- **`repairExpenseRollups` dry run: 0 duplicates, 0 price corrections, 0 deletions — 7 UNRESOLVED lines only.** The duplicate/stale rollup damage from the pre-v204 unconditional-append bug **does not exist** on the live sheets. Do not run the apply path; there is nothing for it to write. | evidence: Execution log 14/08 15:42:12, full output
+- The 7 unresolved rollup lines are legacy pre-SRC rows, **all `יצאה חש` + `בוצע`** (invoiced and closed): GOLMAT G0375 ₪145, G0394 ₪134; ROLLMAT R0361 ₪1550, R0367 ₪1025, R0375 ₪112, R0376 ₪52, R0378 ₪100. ⚠ "UNRESOLVED" means the function never compared them — they are **unverified, not verified-correct**. Left alone deliberately: backfilling SRC onto issued tax documents buys nothing. | evidence: getClientJobs GOLMAT (266 rows) + ROLLMAT (320 rows), filtered to desc starting 'הוצאות'
+- The 3 SRC-tagged rollup lines (G0395→G0393, G0397→G0396, R0379→R0369) came back clean — their prices already equal the Expenses totals. | evidence: no price lines in the dry-run output
+- ⚠ **LATENT BUG in `repairExpenseRollups`'s apply path** (never fired, because this run has 0 deletions): it deletes with `sh.deleteRow(r2+1)` using indices from the `dat` snapshot taken at line 3942, with no offset counter. After the first delete every row below shifts up by one, so the next delete and every subsequent price write land on the WRONG row — on client billing sheets. Same row-shift trap as v931. If this function is ever needed, fix it first (iterate bottom-up, or collect and delete in reverse). It also rewrites prices without checking invoice status. | evidence: read lines 3929-3973 of the live source
+- Container proxy **403s `script.google.com`** — read-only /exec probes have to run from the browser (fetch inside the live github.io app page works; the app's own origin is fine). | evidence: curl CONNECT tunnel failed 403, in-page fetch returned 266/320 rows
 PREFERENCE:
 - 14/08/26 | "what u suggest?" / "what todo?" = wants a ranked recommendation with the reason and the trade-off stated, then a single yes/no — not a menu of equal options. | seen twice this session
 OPEN:
 - ⚠ **GAS version pruning (188/200)** — irreversible, Yaniv-only.
 - ⚠ **Code.gs header bump** — backend not following changelog-first discipline.
 - ⚠ **Worker has no repo mirror** — now the only unmirrored component.
-- Carried, still unrun: 5-step ✕-delete acceptance test on a SCRATCH job · `repairExpenseRollups(true)`→`(false)` · v205 billed-stamp acceptance test · iOS execCommand clipboard fallback · cancel test quotes 900182/83/85/86/87.
+- Carried, still unrun: 5-step ✕-delete acceptance test on a SCRATCH job · v205 billed-stamp acceptance test · iOS execCommand clipboard fallback · cancel test quotes 900182/83/85/86/87. (`repairExpenseRollups` — CLOSED today, see FACT above.)
 - SESSION-LOG has **no blocks for v952 → v995** (~43 HTML versions, 21/07–13/08). This block does not reconstruct them; the changelog in index.html is the only record of that period.
 RETIRED:
 - "The GAS project is one file (Code.gs) plus config" — FALSE, it is five. Killed 14/08/26.
 - "Repo mirror `apps-script-v212.js` is the latest backend source of truth" — superseded by `apps-script-v226b.js`. Killed 14/08/26.
+- "Legacy client sheets likely hold duplicate/stale הוצאות rollup lines from the old unconditional-append bug" — FALSE on the live data: the dry run found none. Carried unexamined since 17/07/26. Killed 14/08/26.
 
 ---
 
