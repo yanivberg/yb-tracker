@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v995</title>
+<title>י.ב אחזקות — v996</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -568,16 +568,24 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v995
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v996
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxqbXK…exec (Version 337)
+Apps Script: AKfycbxqbXK…exec (Version 357)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v996 · 14/08/2026 · AS v227
+• חדש: עוזר AI בתוך האפליקציה. כפתור 🤖 צף בפינה, בכל מסך — נפתחת שיחה בעברית ואפשר לשאול הכל על העסק.
+• העוזר מקבל את כל הנתונים בכל שאלה: כל העבודות של כל הלקוחות (מחיר, עלות, רווח, שעות, תאריכים, סטטוס חשבונית, הערות), ההוצאות לפי עבודה, ההוצאות הכלליות והיעדים. לכן הוא עונה גם על שאלות נקודתיות וגם על ניתוח והשוואות בין לקוחות.
+• קורא בלבד — אין לו שום דרך לכתוב, לשנות או לשלוח משהו. גם אם תבקש. הנתונים נשלחים ל-Gemini כמו בשאר מסכי ה-AI הקיימים.
+• תשובה לוקחת בערך 5 עד 12 שניות, כי כל הנתונים נשלחים בכל פעם. הנתונים נשמרים במטמון לחצי שעה — כפתור 🔄 מרענן מיד אחרי שהוספת עבודה.
+• אם אין נתון, העוזר אומר שאין לו אותו במקום להמציא. כשהוא מציין עבודה מסוימת הוא מציין את מספר העבודה כדי שאפשר יהיה לבדוק.
+
 ─────────────────
 v995 · 12/08/2026 · AS v226b
 • דוח הרווח הגולמי: נוסף בתחתית בלוק "התמונה המלאה" — רווח גולמי, מתוכו החזר הוצאות לקוח, הוצאות כלליות, ורווח נקי משוער. מתעדכן לפי התקופה שנבחרה בדוח.
@@ -1778,7 +1786,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v995</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v996</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -12972,6 +12980,154 @@ try {
     </div>
   </div>
 </div>
+
+<!-- ══ v996: in-app AI assistant (read-only) ══ -->
+<button id="ybAiFab" onclick="ybAiOpen()" aria-label="AI assistant"
+  style="position:fixed;bottom:calc(18px + env(safe-area-inset-bottom));left:max(16px,calc(50% - 194px));z-index:9000;width:52px;height:52px;border-radius:50%;border:none;background:#111;color:#fff;font-size:24px;line-height:1;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,0.28);-webkit-tap-highlight-color:transparent;">🤖</button>
+
+<div id="ybAiPanel" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:420px;z-index:30000;flex-direction:column;background:#fff;box-shadow:0 0 40px rgba(0,0,0,0.2);">
+  <div style="padding:calc(14px + env(safe-area-inset-top)) 18px 12px;border-bottom:2px solid #111;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <div style="display:flex;align-items:baseline;gap:8px;">
+      <span style="font-size:18px;font-weight:900;">🤖 עוזר</span>
+      <span id="ybAiAge" style="font-size:10px;color:#aaa;"></span>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <button onclick="ybAiRefresh()" title="רענן נתונים" style="padding:7px 10px;background:#f5f5f5;border:none;border-radius:9px;font-size:14px;cursor:pointer;">🔄</button>
+      <button onclick="ybAiClear()" title="נקה שיחה" style="padding:7px 10px;background:#f5f5f5;border:none;border-radius:9px;font-size:13px;cursor:pointer;font-family:Heebo,sans-serif;">נקה</button>
+      <button onclick="ybAiClose()" style="padding:7px 12px;background:#111;color:#fff;border:none;border-radius:9px;font-size:14px;cursor:pointer;">✕</button>
+    </div>
+  </div>
+  <div id="ybAiBody" style="flex:1;overflow-y:auto;padding:16px 18px;background:#fafafa;"></div>
+  <div style="padding:10px 14px;padding-bottom:max(10px,env(safe-area-inset-bottom));border-top:1px solid #eee;display:flex;gap:8px;flex-shrink:0;background:#fff;">
+    <textarea id="ybAiInput" rows="1" placeholder="שאל אותי על העסק…" oninput="ybAiGrow(this)" onkeydown="ybAiKey(event)"
+      style="flex:1;resize:none;max-height:110px;padding:11px 13px;border:1.5px solid #ddd;border-radius:12px;font-family:Heebo,sans-serif;font-size:15px;line-height:1.4;box-sizing:border-box;"></textarea>
+    <button id="ybAiSend" onclick="ybAiSend()" style="padding:0 18px;background:#111;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;flex-shrink:0;">שלח</button>
+  </div>
+</div>
+
+<script>
+/* v996 — in-app assistant. Read-only: the only endpoint it calls is aiAsk, which
+   writes nothing. History is kept on the device and replayed to the stateless backend. */
+var ybAiHist = [];
+var ybAiBusy = false;
+var ybAiForceRefresh = false;
+
+try { ybAiHist = JSON.parse(localStorage.getItem('ybAiChat') || '[]') || []; } catch (e) { ybAiHist = []; }
+
+function ybAiSave() {
+  try { localStorage.setItem('ybAiChat', JSON.stringify(ybAiHist.slice(-20))); } catch (e) {}
+}
+function ybAiEsc(t) {
+  return String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function ybAiRender() {
+  var b = document.getElementById('ybAiBody');
+  if (!b) return;
+  if (!ybAiHist.length) {
+    b.innerHTML = '<div style="color:#bbb;font-size:13px;text-align:center;padding:34px 10px;line-height:1.9;">' +
+      'שאל אותי כל דבר על העסק.<br>למשל: כמה הרווחתי החודש · איזה לקוח הכי רווחי ·<br>אילו הצעות תקועות · על מה כדאי לי להתמקד</div>';
+    return;
+  }
+  var h = '';
+  for (var i = 0; i < ybAiHist.length; i++) {
+    var m = ybAiHist[i];
+    if (m.role === 'user') {
+      h += '<div style="margin-bottom:12px;display:flex;justify-content:flex-start;"><div style="max-width:85%;background:#111;color:#fff;padding:10px 13px;border-radius:14px 14px 14px 4px;font-size:14px;line-height:1.6;white-space:pre-wrap;">' + ybAiEsc(m.text) + '</div></div>';
+    } else {
+      h += '<div style="margin-bottom:14px;display:flex;justify-content:flex-end;"><div style="max-width:92%;background:#fff;border:1px solid #e5e5e5;padding:11px 13px;border-radius:14px 14px 4px 14px;font-size:14px;line-height:1.75;white-space:pre-wrap;">' + ybAiEsc(m.text) + '</div></div>';
+    }
+  }
+  if (ybAiBusy) {
+    h += '<div style="display:flex;justify-content:flex-end;"><div style="background:#fff;border:1px solid #e5e5e5;padding:11px 14px;border-radius:14px;font-size:13px;color:#999;">חושב… (הנתונים המלאים נשלחים, זה לוקח כמה שניות)</div></div>';
+  }
+  b.innerHTML = h;
+  b.scrollTop = b.scrollHeight;
+}
+function ybAiOpen() {
+  var p = document.getElementById('ybAiPanel');
+  if (!p) return;
+  p.style.display = 'flex';
+  ybAiRender();
+  setTimeout(function () { var i = document.getElementById('ybAiInput'); if (i) i.focus(); }, 120);
+}
+function ybAiClose() {
+  var p = document.getElementById('ybAiPanel');
+  if (p) p.style.display = 'none';
+}
+function ybAiClear() {
+  ybAiHist = [];
+  ybAiSave();
+  ybAiRender();
+}
+function ybAiRefresh() {
+  ybAiForceRefresh = true;
+  var a = document.getElementById('ybAiAge');
+  if (a) a.textContent = 'ירוענן בשאלה הבאה';
+}
+function ybAiGrow(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(110, el.scrollHeight) + 'px';
+}
+function ybAiKey(ev) {
+  if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); ybAiSend(); }
+}
+function ybAiCtx() {
+  var bits = [];
+  try {
+    var sc = document.querySelector('.screen.active');
+    if (sc && sc.id) bits.push('screen=' + sc.id);
+    if (typeof currentClient !== 'undefined' && currentClient) bits.push('client=' + currentClient);
+    if (typeof currentJobId !== 'undefined' && currentJobId) bits.push('job=' + currentJobId);
+  } catch (e) {}
+  return bits.join(' ');
+}
+function ybAiSend() {
+  if (ybAiBusy) return;
+  var inp = document.getElementById('ybAiInput');
+  var q = inp ? String(inp.value || '').trim() : '';
+  if (!q) return;
+  inp.value = '';
+  ybAiGrow(inp);
+  ybAiHist.push({ role: 'user', text: q });
+  ybAiSave();
+  ybAiBusy = true;
+  ybAiRender();
+
+  /* last 6 turns, hard-capped — this rides in the query string */
+  var hist = ybAiHist.slice(-7, -1).map(function (m) {
+    return (m.role === 'user' ? 'Yaniv: ' : 'Assistant: ') + String(m.text).slice(0, 300);
+  }).join('\n').slice(-1800);
+
+  var url = SHEETS_URL + '?action=aiAsk&q=' + encodeURIComponent(q) +
+    '&history=' + encodeURIComponent(hist) +
+    '&ctx=' + encodeURIComponent(ybAiCtx()) +
+    (ybAiForceRefresh ? '&refresh=1' : '');
+
+  fetch(url)
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      ybAiBusy = false;
+      ybAiForceRefresh = false;
+      if (d && d.error) {
+        ybAiHist.push({ role: 'ai', text: 'שגיאה: ' + d.error });
+      } else {
+        ybAiHist.push({ role: 'ai', text: (d && d.text) ? d.text : 'לא התקבלה תשובה.' });
+        var a = document.getElementById('ybAiAge');
+        if (a && d && typeof d.dataAgeSec === 'number') {
+          a.textContent = d.dataAgeSec < 60 ? 'נתונים עדכניים' : ('נתונים מלפני ' + Math.round(d.dataAgeSec / 60) + ' דק׳');
+        }
+      }
+      ybAiSave();
+      ybAiRender();
+    })
+    .catch(function (err) {
+      ybAiBusy = false;
+      ybAiHist.push({ role: 'ai', text: 'התקשורת נכשלה. נסה שוב. (' + err + ')' });
+      ybAiSave();
+      ybAiRender();
+    });
+}
+</script>
 
 </body>
 </html>
