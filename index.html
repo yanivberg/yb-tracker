@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v996</title>
+<title>י.ב אחזקות — v997</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -568,7 +568,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v996
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v997
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 357)
@@ -578,6 +578,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v997 · 14/08/2026 · AS v227
+• תיקון מיקום: כפתור 🤖 הוסט מעלה כדי שלא יכסה את כפתור Start Work Session בתחתית המסך.
+
 ─────────────────
 v996 · 14/08/2026 · AS v227
 • חדש: עוזר AI בתוך האפליקציה. כפתור 🤖 צף בפינה, בכל מסך — נפתחת שיחה בעברית ואפשר לשאול הכל על העסק.
@@ -1786,7 +1790,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v996</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v997</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -12983,7 +12987,7 @@ try {
 
 <!-- ══ v996: in-app AI assistant (read-only) ══ -->
 <button id="ybAiFab" onclick="ybAiOpen()" aria-label="AI assistant"
-  style="position:fixed;bottom:calc(18px + env(safe-area-inset-bottom));left:max(16px,calc(50% - 194px));z-index:9000;width:52px;height:52px;border-radius:50%;border:none;background:#111;color:#fff;font-size:24px;line-height:1;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,0.28);-webkit-tap-highlight-color:transparent;">🤖</button>
+  style="position:fixed;bottom:calc(84px + env(safe-area-inset-bottom));left:max(16px,calc(50% - 194px));z-index:9000;width:52px;height:52px;border-radius:50%;border:none;background:#111;color:#fff;font-size:24px;line-height:1;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,0.28);-webkit-tap-highlight-color:transparent;">🤖</button>
 
 <div id="ybAiPanel" style="display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:420px;z-index:30000;flex-direction:column;background:#fff;box-shadow:0 0 40px rgba(0,0,0,0.2);">
   <div style="padding:calc(14px + env(safe-area-inset-top)) 18px 12px;border-bottom:2px solid #111;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
