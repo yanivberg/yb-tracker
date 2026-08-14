@@ -6,6 +6,33 @@ This file was referenced by the bootstrap but did not exist until 13/07/2026 —
 
 ---
 
+## 2026-08-14 — In-app AI assistant shipped (HTML v996/v997 · AS v227→v229) (Cowork)
+SHIPPED:
+- **HTML v996** — floating 🤖 on every screen → Hebrew RTL chat panel (history, 🔄 refresh, clear, data-age line). History in localStorage, replayed to a stateless backend, capped 6 turns / 1800 chars so the GET query string stays sane. **v997** — moved the button up (`bottom: 84px`); v996 put it directly on top of "Start Work Session".
+- **AS v227** (deployment Version 357) — new `aiAsk` action in doGet + `ybFullDump()` + chunked cache helpers. **READ-ONLY BY CONSTRUCTION**: the action contains no write path at all, so no prompt can talk it into touching a sheet, Caspit or Gmail.
+- **AS v228** (Version 358) — prompt rule 9 after v227 mislabelled a figure (see FACT).
+- **AS v229** (Version 359) — **EXACT TOTALS computed in code**; the model is now forbidden from summing rows at all.
+- Mirrors committed for all three: `apps-script-v227.js`, `-v228.js`, `-v229.js`. Header discipline resumed (was stuck at v224 through v225/v226).
+FACT (all 14/08/26):
+- **The whole business fits in one prompt.** 1,705 job rows across 7 client sheets compact to ~110k chars ≈ 6% of Gemini 2.5 Flash's 1M window. No retrieval, no chunked search, no vector store — every question carries everything. | evidence: measured live before designing (GOLMAT 266 · ROLLMAT 320 · BILLINSKY 325 · MODUL PLADA 334 · PAL-YAM 15 · SONIC BEAT 14 · OCCASIONAL 431)
+- ⚠ **THE BIG ONE — a model cannot sum hundreds of rows.** v228 told it to compute totals from the raw rows. Asked for GOLMAT's gross profit it answered income 401,199 / costs 3,377 / gross 397,822. Truth: **564,285 / 36,518 / 527,767**. Off by 130k, stated confidently, with a correct-sounding derivation. Prompt wording cannot fix this — only precomputed aggregates can. | evidence: hand-summed the same rows via getClientJobs
+- **v229 fix, verified exact:** `ybFullDump` now accumulates per-client, per-category, per-month, whole-business and pipeline totals IN CODE during the pass it already makes, and rule 9 says never add rows up — if a total is not in EXACT TOTALS, answer אין לי את הנתון הזה. Post-deploy: GOLMAT **527,767 / 564,285 / 36,518** and whole business **710,940** — both **delta 0** against an independent hand computation. | evidence: two live probes cross-checked against summed getClientJobs rows
+- **ybAIContext declares itself "authoritative" and is not.** It skips every job with `hoursActual < YB_MIN_HOURS` (0.25) and reports trueMargin = gross MINUS job expenses. That is why v227 said GOLMAT 393,822 — a real number under the wrong label (רווח גולמי). Rules 9–10 now demote it to per-hour/target use only, with a mandatory caveat clause. | evidence: read ybAIContext L4426-4435
+- **Latency:** cold call (dump rebuild) 26–29s; warm 6.8–10s. Apps Script serialises per user, so a second request while one is in flight returns an **HTML error page, not JSON** — the same trap as v986. The panel disables send while busy, which covers the single-user case.
+- Verified correct on: job count **1705** (exact), row lookup **G0393 = ₪2,000** + description (exact), per-client and whole-business totals (exact), monthly totals (July 10,650 / Aug 2,945).
+- **GAS deploy dialog does not always paint** — it is present in the DOM (`[role=dialog]`, correct Deployment ID) while the screenshot shows only the editor, so coordinate clicks land on the page beneath and silently do nothing. Drive it from the DOM: click the ✏️ Edit button first (the form is disabled in view mode — that is why fields look stuck), then `combo.click()` → the `New version` `[role=option]`, set the description with the native value setter + `input`/`change` events, and **assert the combobox reads "New version" before clicking Deploy** — one attempt had silently selected Version 356, which would have rolled the endpoint back. | evidence: three failed coordinate passes, then a clean DOM-driven deploy
+PREFERENCE:
+- 14/08/26 | "it must be accurate!" — correctness of figures outranks latency, cost and version-slot economy. Spend the slot. | seen this session
+OPEN:
+- **GAS versions now 191/200** after three deploys today. ~9 left. Pruning is irreversible and Yaniv-only.
+- Assistant is v1: read-only, no actions, no proactive alerts. Next candidates if wanted: per-period totals beyond month, tag/category deep dives, "what changed since last week".
+- Cost: every question ships ~110k chars to Gemini. Fine at Flash pricing, worth watching if usage grows.
+- HTML info panel now claims "Version 357"; live is 359. Cosmetic, fix on the next HTML bump.
+RETIRED:
+- "Prompt rules can make the model's arithmetic reliable" — FALSE, demonstrated at 130k error. Killed 14/08/26.
+
+---
+
 ## 2026-08-14 — GAS project fully mirrored to the repo (Cowork)
 SHIPPED:
 - **All five GAS project files committed to the repo**, each SHA-256-verified against the live editor after the commit landed: `apps-script-v226b.js` (= live Code.gs, 320,112 bytes, sha16 `693aa30d7d14c152`), `general-expenses.gs` (17,251, `8bccf826c95507c6`), `gmail-po-import.gs` (16,145, `acc6138f670be61d`), `AuthHelper.gs` (194, `3f13618f31ba3b8a`), `appsscript.json` (694, `5ce4191bda361533`). All four JS files acorn-clean (ecmaVersion 2020); appsscript.json parses. Action count 106, matching the live editor.
