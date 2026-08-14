@@ -6,6 +6,31 @@ This file was referenced by the bootstrap but did not exist until 13/07/2026 —
 
 ---
 
+## 2026-08-14 (late) — assistant tuned, then hidden; Gemini free-tier ceiling found (Cowork)
+SHIPPED:
+- **AS v230** (deployment Version 360) + **HTML v998** — day/week/month totals computed in code; text dates parsed; brevity rules; auto-retry on the busy-server HTML page.
+- **HTML v999** — 🤖 button hidden at Yaniv's request (`display:none` on `#ybAiFab`). The assistant, its panel and `aiAsk` are untouched and still work; un-hiding is deleting that one declaration. No AS deploy, so no version slot spent.
+FACT (all 14/08/26):
+- ⚠ **The real ceiling is Google's free tier: 20 requests/day on gemini-2.5-flash** (`generate_content_free_tier_requests, limit: 20`). Every question is one request, and the five older AI actions share the same quota — they just never hit it. Nothing in the app can work around this; it needs billing enabled on the Gemini API key. At ~110k tokens a question that is roughly $0.03 per question. | evidence: live quota error after ~20 questions
+- **Weekly totals verified exact after v230:** "כמה הרווחתי השבוע" → **33,913** for the week starting 09/08, matching a hand sum of 15 jobs across GOLMAT+BILLINSKY+ROLLMAT, delta 0. The pre-v230 answer was 3,600. | evidence: two independent computations
+- **Text dates were the hidden cause.** The sheets store dates both as real Date cells and as text ('11.8.2026', '10.8.26', RTL-marked '12/8/26'). v229 bucketed only real Dates, so every period total silently undercounted. `ybPDate` now parses both, and an 'undated' line surfaces what still has no usable date. | evidence: v229 reported July 10,650 / Aug 2,945 — too low
+- ⚠ **OPEN BUG (live, but currently unreachable since the button is hidden): rule 9 over-applies.** Its escape hatch — "if a total is not in EXACT TOTALS say אין לי את הנתון הזה" — is worded for numbers but the model applies it to PLANNING questions, which need no totals. "תן לי תוכנית עבודה לשבוע הבא" → bare refusal, and "איזה נתון חסר לך?" → the same refusal again, a loop. Fix drafted, NOT deployed: scope the hatch to numeric figures only, state that planning / prioritising / suggesting are always allowed, and forbid a bare refusal without naming what is missing. | evidence: three consecutive refusals in live use
+- **Why weekly planning is weak — it is a data problem, not a model problem.** Across the 6 main clients (1,274 rows) only **23 jobs are open** (10 ממתין לביצוע · 4 בתהליך ביצוע · 3 ניתנה הצעה · 6 ממתין להצעה), while **866 rows carry no status at all** — that noise is what the assistant was ranking, which is why it proposed "Testing" and ₪0 jobs. Of the 23 open: 83% have an hours estimate, 87% a price, 61% a PO, but **only 22% have any date**. There is no due date, no promise date, no priority, and `getClientJobs` does not return the location column, so no site grouping — the biggest lever for a one-man field business. | evidence: live probe over all 6 client sheets
+- **Recommendation on record (deferred by Yaniv):** build the weekly plan **in code** — rank the 23 open jobs by committed-first (has PO), then ₪ per estimated hour, then age; fit to declared daily hours; show what does not fit. Deterministic, instant, and costs zero Gemini requests. The model should discuss the plan, not generate it. Same lesson as EXACT TOTALS.
+PREFERENCE:
+- 14/08/26 | "to complicated - make it shorter" — wants the answer, not the working. Applies to the assistant's output AND to Claude's replies.
+- 14/08/26 | "it must be accurate!" — correctness outranks latency, cost and version-slot economy.
+OPEN:
+- **v231 rule-9 fix drafted, not deployed.** Do this before un-hiding the button.
+- **GAS versions 192/200** after four deploys today (357–360). ~8 left. Irreversible pruning, Yaniv-only.
+- Gemini billing decision — Yaniv's, involves his card; Claude must not touch payment details.
+- Weekly planner screen — specced verbally, deferred.
+- HTML info panel prints "Version 357"; live is 360. Cosmetic.
+RETIRED:
+- "The assistant's weak planning is a prompt-quality problem" — FALSE. 866 status-less rows and 22% date coverage; the data has no schedule dimension to plan against. Killed 14/08/26.
+
+---
+
 ## 2026-08-14 — In-app AI assistant shipped (HTML v996/v997 · AS v227→v229) (Cowork)
 SHIPPED:
 - **HTML v996** — floating 🤖 on every screen → Hebrew RTL chat panel (history, 🔄 refresh, clear, data-age line). History in localStorage, replayed to a stateless backend, capped 6 turns / 1800 chars so the GET query string stays sane. **v997** — moved the button up (`bottom: 84px`); v996 put it directly on top of "Start Work Session".
