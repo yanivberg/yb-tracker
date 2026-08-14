@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v1000</title>
+<title>י.ב אחזקות — v1001</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -568,16 +568,23 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1000
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1001
 Deployed: 21/07/2026
 URL: https://yanivberg.github.io/yb-tracker
-Apps Script: AKfycbxqbXK…exec (Version 361)
+Apps Script: AKfycbxqbXK…exec (Version 362)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 
 ⚠️ CASPIT: כל קריאות ה-API עוברות דרך app1.caspit.biz (לא app.caspit.biz) — חומת האש/LB של כספית חוסמת את כתובות ה-IP של Cloudflare. ראה תקלה 240174 ופירוט בלוג למטה.
 
 ─────────────────
 CHANGELOG (recent)
+─────────────────
+v1001 · 15/08/2026 · AS v232
+• בדוח הרווח הגולמי נוסף בורר היקף: "להוציא חש" (כמו עד היום — מה שממתין לחיוב) או "הכל שבוצע" (כל עבודה בסטטוס בוצע בתקופה, בלי קשר לחשבונית).
+• יחד עם "שנתי" זו התשובה לשאלה כמה העסק הרוויח השנה בפועל, ולא רק כמה ממתין לחיוב.
+• ברירת המחדל לא השתנתה — הדוח נפתח ב"להוציא חש" בדיוק כמו קודם, והכותרת מציינת איזה היקף מוצג.
+• תוקן: בחירת "שנתי" הציגה "הכל" בכותרת בשני הדוחות.
+
 ─────────────────
 v1000 · 14/08/2026 · AS v231 / general-expenses v5
 • בדוח הרווח הגולמי נוסף בורר "שנתי" — מ-1 בינואר של השנה הנוכחית ועד היום. שאר הבוררים לא השתנו.
@@ -1807,7 +1814,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1000</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1001</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -1902,7 +1909,8 @@ SHEET SYNC
       <div style="font-weight:700;font-size:17px;">💰 Gross Profit — To Invoice</div>
       <button onclick="document.getElementById('gpOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
     </div>
-    <div id="gpPeriodBar" style="display:flex;gap:5px;padding:12px 16px 0;flex-shrink:0;"></div>
+    <div id="gpScopeBar" style="display:flex;gap:5px;padding:12px 16px 0;flex-shrink:0;"></div>
+    <div id="gpPeriodBar" style="display:flex;gap:5px;padding:8px 16px 0;flex-shrink:0;"></div>
     <div id="gpContent" style="overflow-y:auto;flex:1;padding:16px 20px;"></div>
     <div style="padding:14px 16px;border-top:1px solid #eee;flex-shrink:0;">
       <button id="gpCopyBtn" onclick="copyGP()" style="width:100%;padding:13px;background:#1a1a2e;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">📋 Copy to clipboard</button>
@@ -6810,23 +6818,44 @@ function _setGpPeriod(p) {
   _renderGpPeriodBar();
   fetchGrossProfitSummary();   // reload for the chosen window; overlay stays open
 }
+/* v1001: scope — 'toinvoice' (pipeline, the original report) or 'done' (everything
+   actually completed in the window, whatever its invoice status). */
+var _gpScope = 'toinvoice';
+function _renderGpScopeBar() {
+  var bar = document.getElementById('gpScopeBar'); if (!bar) return;
+  var opts = [['toinvoice','להוציא חש'], ['done','הכל שבוצע']];
+  bar.innerHTML = opts.map(function(o){
+    var on = _gpScope === o[0];
+    return '<button onclick="_setGpScope(\'' + o[0] + '\')" style="flex:1;padding:7px 4px;border-radius:9px;border:1.5px solid ' +
+      (on?'#1565c0':'#ddd') + ';background:' + (on?'#e3f2fd':'#fff') + ';color:' + (on?'#1565c0':'#888') +
+      ';font-size:12px;font-weight:800;cursor:pointer;font-family:Heebo,sans-serif;-webkit-tap-highlight-color:transparent;">' + o[1] + '</button>';
+  }).join('');
+}
+function _setGpScope(sc) {
+  if (_gpScope === sc) return;
+  _gpScope = sc;
+  _renderGpScopeBar();
+  fetchGrossProfitSummary();
+}
 
 function fetchGrossProfitSummary() {
   var overlay = document.getElementById('gpOverlay');
   var content = document.getElementById('gpContent');
   overlay.style.display = 'flex';
   _renderGpPeriodBar();
+  _renderGpScopeBar();
   content.innerHTML = '<div style="text-align:center;padding:32px;color:#aaa;"><div style="font-size:28px;margin-bottom:10px;">⏳</div><div style="font-size:14px;">טוען נתונים…</div></div>';
   _gpData = null;
 
-  fetch(SHEETS_URL + '?action=getGrossProfitSummary&period=' + encodeURIComponent(_gpPeriod))
+  fetch(SHEETS_URL + '?action=getGrossProfitSummary&period=' + encodeURIComponent(_gpPeriod) + '&scope=' + encodeURIComponent(_gpScope))
     .then(function(r) { return r.json(); })
     .then(function(data) {
       _gpData = data;
       var clients = Object.keys(data.clients).sort(function(a,b) { return data.clients[b] - data.clients[a]; });
-      var _periodLabel = { day:'היום', week:'השבוע', month:'החודש', all:'הכל' }[data.period || 'all'] || 'הכל';
+      var _periodLabel = { day:'היום', week:'השבוע', month:'החודש', year:'השנה', all:'הכל' }[data.period || 'all'] || 'הכל';
+      var _scopeLabel = (data.scope === 'done') ? 'הכל שבוצע' : 'להוציא חש';
       var html = '<div style="text-align:center;margin-bottom:20px;">' +
-        '<div style="font-size:13px;color:#888;margin-bottom:4px;">סה״כ רווח גולמי · להוציא חש · ' + _periodLabel + '</div>' +
+        '<div style="font-size:13px;color:#888;margin-bottom:4px;">סה״כ רווח גולמי · ' + _scopeLabel + ' · ' + _periodLabel + '</div>' +
         '<div style="font-size:36px;font-weight:900;color:#2e7d32;">₪' + data.total.toLocaleString() + '</div>' +
         // v964: how much of that total is reimbursed expenses (total itself unchanged)
         ((data.expenses) ? '<div style="font-size:12px;color:#e65100;margin-top:2px;">מתוכו הוצאות: ₪' + data.expenses.toLocaleString() + ' (' + Math.round(data.expenses / (data.total||1) * 100) + '%)</div>' : '') +
@@ -6978,7 +7007,7 @@ function fetchAvgPph() {
     .then(function(r){ return r.json(); })
     .then(function(data) {
       if (!data || data.error) { content.innerHTML = '<div style="text-align:center;padding:32px;color:#c62828;font-size:14px;">שגיאה בטעינת הנתונים</div>'; return; }
-      var _periodLabel = { day:'היום', week:'השבוע', month:'החודש', all:'הכל' }[data.period || 'all'] || 'הכל';
+      var _periodLabel = { day:'היום', week:'השבוע', month:'החודש', year:'השנה', all:'הכל' }[data.period || 'all'] || 'הכל';
       if (!data.jobCount) {
         content.innerHTML = '<div style="text-align:center;color:#aaa;font-size:14px;padding:24px 0;">אין עבודות שהושלמו עם שעות בפועל בתקופה זו' + (client ? (' עבור ' + client) : '') + '</div>';
         return;
