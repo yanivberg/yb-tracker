@@ -6,6 +6,37 @@ This file was referenced by the bootstrap but did not exist until 13/07/2026 —
 
 ---
 
+## 2026-08-14 — GAS project fully mirrored to the repo (Cowork)
+SHIPPED:
+- **All five GAS project files committed to the repo**, each SHA-256-verified against the live editor after the commit landed: `apps-script-v226b.js` (= live Code.gs, 320,112 bytes, sha16 `693aa30d7d14c152`), `general-expenses.gs` (17,251, `8bccf826c95507c6`), `gmail-po-import.gs` (16,145, `acc6138f670be61d`), `AuthHelper.gs` (194, `3f13618f31ba3b8a`), `appsscript.json` (694, `5ce4191bda361533`). All four JS files acorn-clean (ecmaVersion 2020); appsscript.json parses. Action count 106, matching the live editor.
+- HANDOFF.md rewritten from live state (was dated 19/07/26 and claimed HTML v943 / AS v206 — two of three numbers wrong).
+- This SESSION-LOG block, closing a 24-day gap.
+FACT (all 14/08/26):
+- Live derived at bootstrap: **HTML v995** (title probe + repo commit c950a1a, deployed 13/08 23:44) · **AS deployment Version 356** (13/08 23:05) · **Worker v30** (`?action=health` → `worker-proxy-30`, activeBase app1.caspit.biz). | evidence: title grep, worker health JSON, Manage deployments DOM
+- Project identity confirmed: Deployment ID `AKfycbxqbXKwg-EkbwKxtmulN_u_…` read from the DOM — correct project, not the decoy. | evidence: DOM string compare, matchesExpected true
+- **Version cap is 188/200**, not at the limit as feared — ~12 deploys of headroom. | evidence: literal warning text in Manage deployments
+- **The GAS project has FIVE files, not one.** Every mirror before today tracked only Code.gs; `general-expenses.gs`, `gmail-po-import.gs` and `AuthHelper.gs` had never existed anywhere but inside the editor. | evidence: monaco.editor.getModels() + file tree DOM
+- **Code.gs's header still reads `v224`** though v226 shipped (`/* v226: general-expenses.gs owns a few actions of its own` at line 158). The §3 changelog-first version discipline is applied to the HTML but not the backend. Trust the deployment Version number, not the backend header. | evidence: line 1 + line 158 of the live model
+- **Large-file transfer out of the GAS editor, proven on 313,422 chars:** clipboard `writeText` in the (focused) GAS tab → on the GitHub `/upload/main` tab append a `<textarea>`, focus, send a real `cmd+v` keystroke → read `.value` → `File` objects → `DataTransfer` → `input[type=file].files` → dispatch `change`. Byte-identical, and it never enters Claude's context. | evidence: SHA-256 equal at both ends
+- `navigator.clipboard.readText()` on the GitHub tab **hangs the CDP call for 45s** (permission prompt) — the keystroke paste needs no permission and is the correct route. | evidence: Runtime.evaluate timeout, then success via keystroke
+- `clipboard.writeText` throws `NotAllowedError: Document is not focused` unless that tab is the ACTIVE tab. Click the page first. | evidence: failed while a second tab was foreground, succeeded after
+- After `input.files = dt.files` + `change`, reading `input.files` back returns `[]` — GitHub's uploader consumes and clears it. **Empty is success**; verify by screenshot of the staged file list, not by the return value. | evidence: 5 files listed in the UI while the read-back was empty
+- **Commit-silently-no-ops, second form:** once files stage, GitHub inserts a "ProTip!" line that shifts the Commit button ~14px down; the first click hit dead space. (The known first form is the unselected commit-choice radio.) | evidence: post-click screenshot showed the form still open, second click at the new coordinate navigated to /blob/
+- **Page-triggered blob downloads to ~/Downloads silently never landed** — 6 attempts (bundle + 5 individual), no file, no error, directory listing confirms nothing written today. Unexplained; do not rely on page downloads for this workflow. | evidence: device_bash find -newermt on the mounted Downloads folder
+PREFERENCE:
+- 14/08/26 | "what u suggest?" / "what todo?" = wants a ranked recommendation with the reason and the trade-off stated, then a single yes/no — not a menu of equal options. | seen twice this session
+OPEN:
+- ⚠ **GAS version pruning (188/200)** — irreversible, Yaniv-only.
+- ⚠ **Code.gs header bump** — backend not following changelog-first discipline.
+- ⚠ **Worker has no repo mirror** — now the only unmirrored component.
+- Carried, still unrun: 5-step ✕-delete acceptance test on a SCRATCH job · `repairExpenseRollups(true)`→`(false)` · v205 billed-stamp acceptance test · iOS execCommand clipboard fallback · cancel test quotes 900182/83/85/86/87.
+- SESSION-LOG has **no blocks for v952 → v995** (~43 HTML versions, 21/07–13/08). This block does not reconstruct them; the changelog in index.html is the only record of that period.
+RETIRED:
+- "The GAS project is one file (Code.gs) plus config" — FALSE, it is five. Killed 14/08/26.
+- "Repo mirror `apps-script-v212.js` is the latest backend source of truth" — superseded by `apps-script-v226b.js`. Killed 14/08/26.
+
+---
+
 ## 2026-07-21 — AS v208: getExpenses returns `invoiced` (doGet)
 SHIPPED:
 - **AS v208 DEPLOYED — deployment Version 338, same /exec `AKfycbxqbXKwg-…` (Deployment ID unchanged, "Deployment successfully updated").** `getExpenses` (doGet, `allForClient` branch, reads the global `Expenses` sheet) now returns `invoiced: true/false` per expense. `true` iff the job's `הוצאות …` rollup row on the **client** sheet shows **`יצאה חש`** in the `invoice` column; matched primary by `SRC:<jobId>` in the `notes` column, fallback `desc == "הוצאות "+jobTitle`. The whole addition (a per-request map built from the client sheet + a per-row IIFE) is **wrapped in try/catch and defaults to `false`** — cannot break existing responses. Live PWA (v952) already reads the field and falls back when absent → fully backward-compatible. Only `getExpenses` touched.
