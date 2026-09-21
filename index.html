@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v1002</title>
+<title>י.ב אחזקות — v1003</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -568,8 +568,8 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1002
-Deployed: 21/07/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1003
+Deployed: 21/09/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 364)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
@@ -579,6 +579,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v1003 · 21/09/2026 · AS v235
+• תוקן באג שקט: סקר סיום פרויקט (saveProjectSurvey) ותדריך קדם-פרויקט (savePreProjectSurvey) נשלחו עם Content-Type: application/json, שמפעיל preflight ש-Apps Script לא עונה לו. הבקשה נכשלה ו-.catch ריק בלע את השגיאה, כך שהמשתמש ראה "נשמר" בכל פעם. גיליון Job Surveys מעולם לא נוצר (0 שורות). הוחלף ל-text/plain;charset=UTF-8 כמו במסלול הצעת המחיר שעבד תמיד.
+• שתי הקריאות מציגות עכשיו אזהרה כשהשמירה לשרת נכשלת, במקום להיכשל בשקט.
+
 v1002 · 15/08/2026 · AS v234
 • בדוח הרווח הגולמי נוסף מתג "כולל ללא תאריך": מכניס לסכום גם עבודות שבוצעו ואין להן תאריך בגיליון. כבוי כברירת מחדל.
 • רקע: 118 עבודות שבוצעו, בשווי כ-319 אלף ש"ח, פשוט אין להן תאריך התחלה או סיום. זו לא תקלה בקריאת התאריך — התאים ריקים. בלי המתג הן לא נספרות באף תקופה.
@@ -1821,7 +1825,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1002</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1003</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -10567,8 +10571,8 @@ function submitProjectSurvey() {
 
   // Save to Apps Script
   fetch(SHEETS_URL + '?action=saveProjectSurvey', {
-    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(survey)
-  }).catch(function(){});
+    method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, body:JSON.stringify(survey)
+  }).catch(function(){ showToast('\u26A0\uFE0F \u05D4\u05E1\u05E7\u05E8 \u05E0\u05E9\u05DE\u05E8 \u05D1\u05DE\u05DB\u05E9\u05D9\u05E8 \u05D1\u05DC\u05D1\u05D3 \u2014 \u05D4\u05E9\u05DE\u05D9\u05E8\u05D4 \u05DC\u05E9\u05E8\u05EA \u05E0\u05DB\u05E9\u05DC\u05D4'); });
 
   document.getElementById('projectSurveyOverlay').style.display = 'none';
   toggleDone(_surveyIdx);
@@ -10941,8 +10945,8 @@ function submitPreProjectSurvey() {
 
   // Save to Apps Script
   fetch(SHEETS_URL + '?action=savePreProjectSurvey', {
-    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(survey)
-  }).catch(function(){});
+    method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, body:JSON.stringify(survey)
+  }).catch(function(){ showToast('\u26A0\uFE0F \u05D4\u05EA\u05D3\u05E8\u05D9\u05DA \u05E0\u05E9\u05DE\u05E8 \u05D1\u05DE\u05DB\u05E9\u05D9\u05E8 \u05D1\u05DC\u05D1\u05D3 \u2014 \u05D4\u05E9\u05DE\u05D9\u05E8\u05D4 \u05DC\u05E9\u05E8\u05EA \u05E0\u05DB\u05E9\u05DC\u05D4'); });
 
   // Save lesson learned (async, non-blocking)
   if (!job._forQuotation) {
