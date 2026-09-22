@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v1003</title>
+<title>י.ב אחזקות — v1004</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -533,7 +533,7 @@ input[id^="progSlider-"]::-moz-range-track {
         <span style="font-size:24px;flex-shrink:0;">🏢</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#2e7d32;">Create New Client</div><div style="font-size:11px;color:#888;margin-top:1px;">לקוח חדש — כספית + גיליון</div></div></div>
       <div onclick="closeSetupDrawer();openCaspitOverlay('invoice');" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📄</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#0d47a1;">Invoice / Receipt</div><div style="font-size:11px;color:#888;margin-top:1px;">הפקת חשבונית / קבלה</div></div></div>
-      <div onclick="closeSetupDrawer();openCaspitOverlay('quote');" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
+      <div onclick="closeSetupDrawer();openCaspitOverlay();toggleCaspitAccordion('quote');" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">💬</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#b07d00;">Edit/New Quotation</div><div style="font-size:11px;color:#888;margin-top:1px;">הצעת מחיר — חדשה או עריכה</div></div></div>
       <div onclick="closeSetupDrawer();openCaspitOverlay('invoicelist');" style="background:var(--color-background-secondary,#f8f9fa);border:0.5px solid #e0e0e0;border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:8px;cursor:pointer;direction:ltr;">
         <span style="font-size:24px;flex-shrink:0;">📋</span><div><div style="font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#1565c0;">Last Invoices</div><div style="font-size:11px;color:#888;margin-top:1px;">חשבוניות אחרונות</div></div></div>
@@ -568,7 +568,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1003
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1004
 Deployed: 21/09/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 364)
@@ -579,6 +579,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v1004 · 23/09/2026 · AS v236
+• תוקן: כפתור "Edit/New Quotation" במגירה קרא ל-openCaspitOverlay('quote') → switchCaspitTab('quote') → רינדור טופס ההצעה ישירות. שער התדריך יושב רק ב-toggleCaspitAccordion, ולכן התדריך לפני הצעת מחיר פשוט לא נפתח מהכניסה הראשית. עכשיו: openCaspitOverlay() ואז toggleCaspitAccordion('quote'), בדיוק כמו לחיצה על כותרת האקורדיון.
+• הערה: גם עריכת הצעה קיימת תעבור עכשיו דרך התדריך — יש "Skip" בלחיצה אחת.
+
 v1003 · 21/09/2026 · AS v235
 • תוקן באג שקט: סקר סיום פרויקט (saveProjectSurvey) ותדריך קדם-פרויקט (savePreProjectSurvey) נשלחו עם Content-Type: application/json, שמפעיל preflight ש-Apps Script לא עונה לו. הבקשה נכשלה ו-.catch ריק בלע את השגיאה, כך שהמשתמש ראה "נשמר" בכל פעם. גיליון Job Surveys מעולם לא נוצר (0 שורות). הוחלף ל-text/plain;charset=UTF-8 כמו במסלול הצעת המחיר שעבד תמיד.
 • שתי הקריאות מציגות עכשיו אזהרה כשהשמירה לשרת נכשלת, במקום להיכשל בשקט.
@@ -1825,7 +1829,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1003</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1004</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
