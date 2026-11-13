@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v1004</title>
+<title>י.ב אחזקות — v1005</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -568,8 +568,8 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1004
-Deployed: 21/09/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1005
+Deployed: 13/11/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 364)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
@@ -579,6 +579,16 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v1005 · 13/11/2026 · AS v236
+• חדש: עריכת זמן היום בפרויקט במהלך יום העבודה. ליד השעון בכרטיס הפרויקט (פעיל או מושהה) יש ✏️ שפותח חלונית קטנה: כפתורי ‎−15 / −5 / +5 / +15‎ דקות, שדה להקלדת זמן מדויק (אפשר להקליד 140 במקום 01:40), שמור / ביטול.
+• נערך רק הזמן של היום (totalMs). ימים קודמים (prevMs) לא משתנים, ו-Till now מתעדכן מעצמו. עובד גם כשהשעון רץ — הוא ממשיך לרוץ אחרי השמירה.
+• זמן שהורד נמחק (לא עובר ל-Setup). אורך היום הכולל נשאר לפי השעון (התחלה עד סיום) — רק סך זמן העבודה מתקצר.
+• כל תיקון משאיר עקבות: שורת "✏️ תיקון ידני" בסיכום היום (טקסט + מסך הסיכום). פסי ציר הזמן נשארים כפי שנמדדו בפועל.
+• הגיליון מקבל את השעות המתוקנות ב-End Day או בסימון ✓, כרגיל. ⚠ ידוע: אם עבודה סומנה ✓, הוחזרה, ואז הזמן הורד — הגיליון ישמור את המספר הגבוה (הסנכרון לוקח תמיד את הגדול מבין השניים). לא שונה בגרסה זו.
+• תיקון קטן נלווה: בזמן הקלדת הערה השעון הגדול קפץ מזמן היום לסה״כ של כל הימים. עכשיו הוא מציג תמיד את זמן היום.
+• תוקן באג קיים: בכל End Day נזרקה שגיאה (totalDay is not defined) ולכן ציר הזמן של היום בתחתית מסך הסיכום לא הופיע אף פעם. השמירה והסנכרון לגיליון לא נפגעו — רק התצוגה. עכשיו ציר הזמן מוצג.
+• ללא שינוי ב-Apps Script.
+
 v1004 · 23/09/2026 · AS v236
 • תוקן: כפתור "Edit/New Quotation" במגירה קרא ל-openCaspitOverlay('quote') → switchCaspitTab('quote') → רינדור טופס ההצעה ישירות. שער התדריך יושב רק ב-toggleCaspitAccordion, ולכן התדריך לפני הצעת מחיר פשוט לא נפתח מהכניסה הראשית. עכשיו: openCaspitOverlay() ואז toggleCaspitAccordion('quote'), בדיוק כמו לחיצה על כותרת האקורדיון.
 • הערה: גם עריכת הצעה קיימת תעבור עכשיו דרך התדריך — יש "Skip" בלחיצה אחת.
@@ -1829,7 +1839,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1004</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1005</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -5183,13 +5193,91 @@ function tick() {
   var focusedEl = document.activeElement;
   var isTypingNote = focusedEl && focusedEl.id && focusedEl.id.indexOf('noteInp-') === 0;
   var anyExpenseOpen = projects.some(function(p) { return p._expOpen; });
-  if (isTypingNote || anyExpenseOpen || window.__progDrag) {
+  if (isTypingNote || anyExpenseOpen || window.__progDrag || _teOpen()) {
     for (var i = 0; i < projects.length; i++) {
       var p = projects[i]; var ms = p.totalMs;
       if (p.active && p.activeStart) ms += now - p.activeStart;
-      var el = document.getElementById('ptime-' + i); if (el) el.textContent = formatMs(ms + (p.prevMs || 0));
+      var el = document.getElementById('ptime-' + i); if (el) el.textContent = formatMs(ms); /* v1005: today only, same as the card render (was today+prev → the timer jumped while typing a note) */
     }
   } else { renderProjectBtns(); }
+}
+
+// ── v1005: edit TODAY's time on a project (prevMs is never touched) ─────
+var _teProj = null, _teDraft = 0;
+function _teOpen() { return !!(_teProj && projects.indexOf(_teProj) !== -1 && !_teProj.done); }
+function _teTodayMs(p) { var ms = p.totalMs || 0; if (p.active && p.activeStart) ms += Date.now() - p.activeStart; return ms; }
+function _teParse(str) {
+  var s = String(str == null ? '' : str).replace(/[\u200e\u200f\u202a-\u202e\s]/g, '');
+  if (!s) return null;
+  var h, mi, m = s.match(/^(\d{1,2})[:.,](\d{1,2})$/);
+  if (m) { h = parseInt(m[1], 10); mi = parseInt(m[2], 10); if (mi > 59) return null; }
+  else if (/^\d{1,2}$/.test(s)) { h = 0; mi = parseInt(s, 10); }
+  else if (/^\d{3,4}$/.test(s)) { h = parseInt(s.slice(0, -2), 10); mi = parseInt(s.slice(-2), 10); if (mi > 59) return null; }
+  else return null;
+  var ms = (h * 60 + mi) * 60000;
+  return ms > 24 * 3600000 ? null : ms;
+}
+function _tePreviewText(valid) {
+  if (!_teProj) return '';
+  if (!valid) return '⚠️ זמן לא תקין';
+  var before = Math.floor(_teTodayMs(_teProj) / 60000) * 60000;
+  var diffMin = Math.round((_teDraft - before) / 60000);
+  return formatMsHHMM(before) + ' → ' + formatMsHHMM(_teDraft) + (diffMin ? ' (' + (diffMin > 0 ? '+' : '−') + Math.abs(diffMin) + ' דק׳)' : '');
+}
+function _teRefresh(valid) { var el = document.getElementById('tePrev'); if (el) { el.textContent = _tePreviewText(valid); el.style.color = valid ? '#333' : '#c62828'; } }
+function openTimeEdit(i) {
+  var p = projects[i]; if (!p || p.done) return;
+  if (_teProj === p) { _teProj = null; renderProjectBtns(); return; }
+  _teProj = p; _teDraft = Math.floor(_teTodayMs(p) / 60000) * 60000;
+  renderProjectBtns();
+}
+function closeTimeEdit() { _teProj = null; renderProjectBtns(); }
+function nudgeTimeEdit(mins) {
+  var inp = document.getElementById('teInp');
+  if (inp) { var cur = _teParse(inp.value); if (cur !== null) _teDraft = cur; }
+  _teDraft = Math.max(0, Math.min(_teDraft + mins * 60000, 24 * 3600000));
+  if (inp) inp.value = formatMsHHMM(_teDraft);
+  _teRefresh(true);
+}
+function _teOnInput(v) { var ms = _teParse(v); if (ms !== null) _teDraft = ms; _teRefresh(ms !== null); }
+function saveTimeEdit() {
+  var p = _teProj; if (!_teOpen()) { _teProj = null; renderProjectBtns(); return; }
+  var inp = document.getElementById('teInp');
+  if (inp) { var v = _teParse(inp.value); if (v === null) { _teRefresh(false); showToast('⚠️ זמן לא תקין — לדוגמה 01:40'); return; } _teDraft = v; }
+  var now = Date.now(); var before = _teTodayMs(p);
+  if (Math.floor(before / 60000) * 60000 === _teDraft) { _teProj = null; renderProjectBtns(); return; }
+  // Timer running: close the run so far as a normal session record (the timeline stays true), then keep running from now.
+  if (p.active && p.activeStart) {
+    if (!p.sessions) p.sessions = [];
+    p.sessions.push({ start: p.activeStart, end: now, startStr: formatTime(p.activeStart), endStr: formatTime(now), dateStr: formatDate(now), ms: now - p.activeStart });
+    p.activeStart = now;
+  }
+  p.totalMs = _teDraft;
+  if (!p.adjustments) p.adjustments = [];
+  p.adjustments.push({ at: now, dateStr: formatDate(now), timeStr: formatTime(now), fromMs: before, toMs: _teDraft });
+  _teProj = null; saveState(); renderProjectBtns();
+  showToast('✓ זמן היום עודכן: ' + 'מ-' + formatMsHHMM(before) + ' ל-' + formatMsHHMM(_teDraft));
+}
+function _tePencilHtml(i, p) {
+  if (p.done) return '';
+  return '<button onclick="event.stopPropagation();openTimeEdit(' + i + ')" aria-label="עריכת זמן היום" style="background:' + (_teProj === p ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.08)') + ';border:none;border-radius:8px;font-size:14px;line-height:1;padding:6px 8px;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;">✏️</button>';
+}
+function _tePanelHtml(i, p) {
+  if (_teProj !== p || p.done) return '';
+  var nb = function(mins) { return '<button onclick="event.stopPropagation();nudgeTimeEdit(' + mins + ')" style="flex:1;padding:11px 0;border:1.5px solid rgba(0,0,0,0.2);border-radius:10px;background:#fff;color:#111;font-size:15px;font-weight:900;font-family:Heebo,sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;">' + (mins > 0 ? '+' : '−') + Math.abs(mins) + '</button>'; };
+  return '<div onclick="event.stopPropagation()" style="background:rgba(255,255,255,0.8);border:1.5px solid rgba(0,0,0,0.18);border-radius:12px;padding:10px 12px;margin:6px 0 10px;direction:rtl;text-align:right;">' +
+    '<div style="font-size:11px;font-weight:900;color:#333;margin-bottom:8px;">✏️ עריכת זמן היום (דקות)</div>' +
+    '<div style="display:flex;gap:6px;margin-bottom:8px;direction:ltr;">' + nb(-15) + nb(-5) + nb(5) + nb(15) + '</div>' +
+    '<div style="display:flex;gap:8px;align-items:center;margin-bottom:4px;">' +
+      '<input id="teInp" type="text" inputmode="numeric" autocomplete="off" value="' + formatMsHHMM(_teDraft) + '" onclick="event.stopPropagation()" onfocus="this.select()" oninput="_teOnInput(this.value)" onkeypress="if(event.key===\'Enter\')saveTimeEdit()" style="width:96px;padding:9px 8px;border:1.5px solid rgba(0,0,0,0.25);border-radius:10px;font-size:18px;font-weight:900;font-family:Heebo,sans-serif;text-align:center;direction:ltr;background:#fff;color:#000;">' +
+      '<span id="tePrev" style="font-size:13px;font-weight:700;color:#333;direction:ltr;unicode-bidi:isolate;">' + _tePreviewText(true) + '</span>' +
+    '</div>' +
+    '<div style="font-size:10px;color:#777;margin-bottom:8px;">אפשר להקליד 140 במקום 01:40 · ימים קודמים לא משתנים</div>' +
+    '<div style="display:flex;gap:6px;">' +
+      '<button onclick="event.stopPropagation();saveTimeEdit()" style="flex:2;padding:11px 0;border:none;border-radius:10px;background:#1b5e20;color:#fff;font-size:15px;font-weight:900;font-family:Heebo,sans-serif;cursor:pointer;">שמור</button>' +
+      '<button onclick="event.stopPropagation();closeTimeEdit()" style="flex:1;padding:11px 0;border:1.5px solid rgba(0,0,0,0.2);border-radius:10px;background:#fff;color:#333;font-size:15px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">ביטול</button>' +
+    '</div>' +
+  '</div>';
 }
 
 // ── Project toggle ─────────────────────────────────────
@@ -5277,9 +5365,11 @@ function renderProjectBtns() {
                 '<span style="font-size:14px;font-weight:700;color:' + (cc.solid||'#333') + ';">' + displayName + '</span>' +
                 (actualFmt2 ? '<span style="font-size:12px;font-weight:700;color:rgba(0,0,0,0.45);"> · ' + actualFmt2 + '</span>' : '') +
               '</div>' +
+              _tePencilHtml(i, p) +
               '<button onclick="event.stopPropagation();openProjectAI('+i+')" style="background:#0d47a1;color:#fff;border:none;border-radius:10px;padding:4px 9px;font-size:11px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;white-space:nowrap;flex-shrink:0;-webkit-tap-highlight-color:transparent;">💫 AI</button>' +
               '<button onclick="event.stopPropagation();toggleProject('+i+')" style="background:' + (cc.solid||'#333') + ';color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:14px;font-weight:900;flex-shrink:0;cursor:pointer;-webkit-tap-highlight-color:transparent;">▶</button>' +
             '</div>' +
+            _tePanelHtml(i, p) +
             (po ? '<div style="margin-bottom:6px;"><span style="font-size:11px;color:' + (cc.solid||'#333') + ';background:rgba(0,0,0,0.08);padding:3px 8px;border-radius:6px;font-weight:700;">' + po + '</span></div>' : '') +
             (p._expensesOn === 'client' ? '<div style="margin-bottom:5px;"><span style="font-size:10px;font-weight:700;background:#ffebee;color:#c62828;padding:3px 8px;border-radius:6px;border:1px solid #ef9a9a;">💰 הוצאות → לקוח</span></div>' : (p._expensesOn === 'me' ? '<div style="margin-bottom:5px;"><span style="font-size:10px;font-weight:700;background:#e8f5e9;color:#2e7d32;padding:3px 8px;border-radius:6px;border:1px solid #a5d6a7;">💸 הוצאות → עלי</span></div>' : '')) +
             '<div style="border-top:1.5px solid rgba(0,0,0,0.12);padding-top:4px;">' +
@@ -5382,7 +5472,9 @@ function renderProjectBtns() {
       '</div>' +
       '<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:8px;">' +
         '<div style="font-size:36px;font-weight:700;letter-spacing:2px;color:#000;" id="ptime-'+i+'">' + formatMs(todayMs) + '</div>' +
+        _tePencilHtml(i, p) +
       '</div>' +
+      _tePanelHtml(i, p) +
       (tillNowMs > todayMs ? '<div style="background:rgba(0,0,0,0.12);border-radius:8px;padding:5px 12px;display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="font-size:10px;font-weight:900;color:#333;text-transform:uppercase;letter-spacing:0.5px;">Till now</span><span style="font-size:15px;font-weight:900;color:#000;">' + formatMs(tillNowMs) + '</span></div>' : '<div style="margin-bottom:12px;"></div>') +
       '<div style="margin-bottom:12px;">' +
         '<button onclick="toggleProject('+i+')" style="width:100%;padding:18px;border:none;border-radius:12px;font-size:22px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;background:' + (cc.solid||'#333') + ';color:#fff;box-shadow:0 6px 20px rgba(0,0,0,0.25);position:relative;z-index:2;">' +
@@ -5867,7 +5959,7 @@ function autoSaveSummary() {
   var date = new Date().toLocaleDateString('he-IL'); var time = new Date().toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'});
   var totalMs = dayStartTime ? (Date.now() - dayStartTime) : 0;
   var text = 'Work Summary — ' + date + ' ' + time + '\n─────────────────\n';
-  projects.forEach(function(p) { text += (p.done ? '✓ ' : '  ') + p.name; if (p.client) text += ' (' + p.client + ')'; text += '\t' + formatMs(p.totalMs) + '\n'; if (p.sessions && p.sessions.length > 0) { p.sessions.forEach(function(s) { text += '    ' + s.dateStr + ' ' + s.startStr + ' → ' + s.endStr + '\t' + formatMs(s.ms) + '\n'; }); } });
+  projects.forEach(function(p) { text += (p.done ? '✓ ' : '  ') + p.name; if (p.client) text += ' (' + p.client + ')'; text += '\t' + formatMs(p.totalMs) + '\n'; if (p.sessions && p.sessions.length > 0) { p.sessions.forEach(function(s) { text += '    ' + s.dateStr + ' ' + s.startStr + ' → ' + s.endStr + '\t' + formatMs(s.ms) + '\n'; }); } (p.adjustments || []).forEach(function(a) { if (!dayStartTime || a.at >= dayStartTime) text += '    \u270F\uFE0F \u05EA\u05D9\u05E7\u05D5\u05DF \u05D9\u05D3\u05E0\u05D9 ' + a.timeStr + '\tמ-' + formatMsHHMM(a.fromMs) + ' ל-' + formatMsHHMM(a.toMs) + '\n'; }); });
   text += '─────────────────\nזמן התארגנות\t' + formatMs(arrangementMs) + (drivingMs > 0 ? '\nנסיעות\t' + formatMs(drivingMs) : '') + '\nסה"כ\t' + formatMs(totalMs);
   var history = JSON.parse(localStorage.getItem('yb_history') || '[]');
   history.unshift({ date: date, time: time, text: text });
@@ -5904,7 +5996,8 @@ function saveSessionToHistory() {
         name:     p.name,
         client:   p.client || '',
         totalMs:  p.totalMs,
-        sessions: (p.sessions || []).map(function(s){ return { start: s.start, end: s.end, ms: s.ms }; })
+        sessions: (p.sessions || []).map(function(s){ return { start: s.start, end: s.end, ms: s.ms }; }),
+        adjustments: (p.adjustments || []).filter(function(a){ return a.at >= sessionStart; }).map(function(a){ return { at: a.at, fromMs: a.fromMs, toMs: a.toMs }; })
       };
     }),
     arrangementMs: arrangementMs,
@@ -6004,6 +6097,7 @@ function renderSummary() {
             '<span style="color:#333;">' + p.name + '</span>' +
             '<span style="color:#666;font-weight:600;">' + fmtMs(p.totalMs) + '</span>' +
           '</div>';
+          (p.adjustments || []).forEach(function(a){ html += '<div style="font-size:11px;color:#999;padding:0 0 3px;">\u270F\uFE0F \u05EA\u05D9\u05E7\u05D5\u05DF \u05D9\u05D3\u05E0\u05D9 ' + tsToHM(a.at) + ' \u00B7 מ-' + formatMsHHMM(a.fromMs) + ' ל-' + formatMsHHMM(a.toMs) + '</div>'; });
         });
         html += '</div>';
       }
@@ -6131,6 +6225,9 @@ function renderTimelineSection() {
   }
 
   // Total row
+  // v1005: totalDay lived only inside renderSummary, so this line threw 'totalDay is not defined' on every End Day and the timeline below the summary never rendered.
+  var tlEndTime = parseInt(localStorage.getItem('yb_dayEndTime') || '0', 10);
+  var totalDay = dayStartTime ? ((tlEndTime > 0 ? tlEndTime : Date.now()) - dayStartTime) : 0;
   var totalHtml = '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 8px;border-top:2px solid #111;margin-top:4px;">' +
     '<div style="font-size:13px;font-weight:700;color:#333;">סה״כ יום</div>' +
     '<div style="font-size:22px;font-weight:900;color:#111;letter-spacing:-0.5px;">' + msToH(totalDay) + '</div>' +
