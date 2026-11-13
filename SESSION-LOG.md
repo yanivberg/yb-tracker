@@ -6,6 +6,86 @@ This file was referenced by the bootstrap but did not exist until 13/07/2026 —
 
 ---
 
+## 2026-11-13 — v1005: edit today's time on a project card + End Day crash fixed (Cowork)
+SHIPPED:
+- **HTML v1005** (commit `2c93adc`, 14/11/2026 00:10 +0200, "Add files via upload" — Yaniv uploaded the build himself; the committed file is SHA-256-identical to the tested build, `476c46ff…`; live GitHub Pages title, app-info line and top changelog entry all read v1005 a few minutes after the commit). No Apps Script change, no version slot spent.
+  - ✏️ beside the timer on running and paused cards (not on done cards) opens a small panel: −15 / −5 / +5 / +15 minutes, an exact field (accepts `1:40`, `01:40`, `140`, `1.40`; 1–2 bare digits = minutes), Save / Cancel. Closed by default; only the pencil opens it.
+  - Edits **today's time only** (`totalMs`). `prevMs` is never touched. Floor at 00:00, no upper cap except 24h (so time worked before pressing Start can be added).
+  - Timer running at save: the run so far is pushed to `p.sessions` as a normal record and `activeStart` restarts at now — the timeline stays true and the timer keeps running.
+  - Removed time is deleted, not moved to Setup (Yaniv's choice).
+  - Every edit is recorded in `p.adjustments[] = {at, dateStr, timeStr, fromMs, toMs}` and printed as `✏️ תיקון ידני` in the text summary (work log / clipboard / `yb_history`), in `yb_sessionHistory`, and on the summary screen.
+  - Panel state lives in module variables (`_teProj`, `_teDraft`), not on the project object, so nothing transient is persisted by `saveState()`.
+- **End Day fix (pre-existing bug, shipped in the same version on Yaniv's approval):** `renderTimelineSection()` used `totalDay`, a local of `renderSummary()`. Every End Day threw `ReferenceError: totalDay is not defined` and the day-timeline block under the summary never rendered. Saving and sheet sync run before that line, so only the display was lost. Now computed inside the function.
+- **Tick fix:** in the "don't re-render" branch of the 1-second tick (typing a note / expense panel open) the big timer was written as today + prev, while the card render shows today only — the number jumped while typing a note. Now today only.
+FACT:
+- 2026-11-13 | Live before this session was **HTML v1004** (commit `eac1d60`, 23/09/2026, uploaded by Yaniv outside a session): the drawer's "Edit/New Quotation" button now goes through `toggleCaspitAccordion('quote')` so the pre-quotation briefing gate actually opens | evidence: `git log`, changelog | conf:0.95
+- 2026-11-13 | The v1003 and v1004 changelogs are labelled "AS v235" and "AS v236". **Still nothing in the repo backs either**: newest mirror is `apps-script-v234.js`, and the app-info panel still reads "Version 364". v1005 carries the "AS v236" label forward only to keep the format; it is NOT a verified backend version | evidence: `ls apps-script-v23*.js`, grep of the info panel | conf:0.9
+- 2026-11-13 | **Day total is clock-based**: `totalDay = dayEnd − dayStart`, not a sum of parts. Lowering a project's time shrinks only "worked time"; the removed time shows as a gap in the day. I first told Yaniv the day total would shrink — wrong, corrected in the spec before the build | evidence: `renderSummary`, `autoSaveSummary` | conf:0.95
+- 2026-11-13 | `syncJobToSheets` and `syncDoneJobToSheets` write `Math.max(local hours, sheet hours)`. Normally harmless for a downward edit (the sheet still holds only previous days until End Day / ✓). **It bites in one case:** mark ✓ (sheet synced) → un-✓ → lower the time → the sheet keeps the higher number. Left unchanged deliberately; it is a billing-adjacent sync | evidence: lines ~4869–4880 of v1004 | conf:0.9
+- 2026-11-13 | The app's login gate is an overlay (`#loginScreen`, z-index 99999) plus `visibility:hidden` on every `.screen`; the app underneath is fully loaded. A headless test of a LOCAL copy with all network aborted can exercise the day screen by un-hiding the screens and calling `showScreen('day'); startMainLoop(); renderProjectBtns()` — no credentials and no backend involved | evidence: Playwright run | conf:0.95
+- 2026-11-13 | Tested in headless Chromium (390×844, he-IL, every non-file request aborted): running card, paused card, typing, invalid input, floor at zero, cancel, done card, tick survival, End Day text + history + screen trace, and the outgoing `updateJob` hours (3.6667 = 2h prev + 1:40 today). **Not tested on the iPhone** — the numeric keypad and the paused card's grayscale look are the things to eyeball | evidence: test output | conf:0.9
+- 2026-11-13 | Deploy route facts: the Claude-in-Chrome extension was not connected; "Control Chrome" (AppleScript) could open the upload URL but Chrome was **not signed in to GitHub** (redirect to /login); `gh` in the container has no access to the repo (`add_repo` would be needed). `git clone` over HTTPS works. The build was written to the Mac at `~/Downloads/claude-builds/v1005/index.html` (Downloads is the only connected folder) and Yaniv uploaded it | evidence: tool results | conf:0.95
+- 2026-11-13 | A tool-call parameter is JSON-decoded before it reaches the shell: a `\uXXXX` typed inside a heredoc arrives as the literal character, including INVISIBLE bidi controls inside a regex class. Build such strings in Python with `chr()` and assert the block contains no U+200E/200F/202A–202E | evidence: `ascii()` dump of the patched file | conf:0.95
+PREFERENCE:
+- 2026-11-13 | "ask me" — when he says it, he wants multiple-choice questions before a spec, and answers them fast | seen:1 | conf:0.8
+- 2026-11-13 | Reads screenshots literally: a screenshot of the panel open read as "it is always open". Send the default (closed) state first, then the interaction | seen:1 | conf:0.7
+- 2026-11-13 | Uploads builds himself via the GitHub web UI when the browser route is not ready ("commited") — three versions in a row now | seen:3 | conf:0.85
+OPEN:
+- **Verify "AS v235 / v236"** in the GAS editor (Code.gs header, current deployment Version, cap warning). Still blocks any backend work.
+- iPhone check of the ✏️ panel (keypad, grayscale paused card).
+- The ✓ → un-✓ → lower case above, if it ever matters.
+- The `HANDOFF.md` / `SESSION-LOG.md` refresh from 22/09 was delivered as files but never committed; this block and that one travel together.
+- Carried: pricing comparables filter (deferred again 22/09) · 118 dateless completed jobs · weekly planner · worker-count selector wired to a dead parameter · 🤖 button hidden · GAS version pruning.
+RETIRED:
+- "Deleting time from a project shortens the day total" — FALSE, the day total is clock-based. Killed 13/11/26.
+- "End Day works" — FALSE for v1004: it threw on every run (reproduced on the untouched v1004 file; how many versions back it goes was not checked). Fixed in v1005.
+
+---
+
+## 2026-09-22 — v1003 landed outside a session; repo docs caught up (Cowork)
+SHIPPED:
+- Nothing deployed. This was a state re-derivation + documentation catch-up. `HANDOFF.md` refreshed to v1003; this block and the 15/08 block below close the gap that ran from v1000.
+FACT:
+- 2026-09-22 | **Live is HTML v1003** — commit `8ceebc7`, 21/09/2026 20:08 +0300, message "Add files via upload". Uploaded by Yaniv directly through the GitHub web UI, not through a session and not through `github-deploy-tool.html` | evidence: `git log`, live page title probe | conf:0.98
+- 2026-09-22 | v1003 is a 12-insertion / 8-deletion diff against v1002 and changes exactly two behaviours plus the version markers. `submitProjectSurvey` and `submitPreProjectSurvey` were POSTing with `Content-Type: application/json`, which triggers a CORS preflight Apps Script never answers; the request failed every time and an empty `.catch(function(){})` swallowed it, so the user saw a success path on every survey while the `Job Surveys` sheet was never created (0 rows, ever). Both now send `text/plain;charset=UTF-8` — the same Content-Type the quote path has always used — and surface a warning toast on failure | evidence: `git diff e4c5d49 8ceebc7` | conf:0.97
+- 2026-09-22 | **The v1003 changelog's "AS v235" label has no backing in the repo and no verified backend change behind it.** There is no `apps-script-v235.js` mirror, and the fix needed no backend change: the v234 handlers for both survey actions read `request.postData.contents` and `JSON.parse` it, which is Content-Type-agnostic. Either a v235 was deployed for something unrelated, or the label is decorative | evidence: `ls apps-script-v235.js` (absent); `sed -n '2671,2700p' apps-script-v234.js` | conf:0.85
+- 2026-09-22 | HTML v1003's inline JS parses clean (2 inline blocks, 0 failures) | evidence: `new Function()` over both blocks | conf:0.95
+- 2026-09-22 | **The container proxy denies `yanivberg.github.io` to `curl` but `WebFetch` reaches it, and `git clone` over HTTPS to `github.com` works.** So a fresh container can bootstrap the HTML side from the repo and confirm the live version via WebFetch, without any browser | evidence: curl exit 56 `connect_rejected` vs. successful clone + WebFetch | conf:0.9
+- 2026-09-22 | The `script.google.com` 403 still stands — backend version and deployment Version **cannot** be probed from the container. Any AS claim in this block is repo-derived, not live-verified | evidence: prior session, unchanged | conf:0.9
+OPEN:
+- **Verify what "AS v235" actually is.** Needs the GAS editor: Code.gs header, Manage deployments → current Version number, and the version-cap warning. If a v235 was deployed, the cap reading below is one higher and the mirror is one behind.
+- `HANDOFF.md` had been carrying `repairExpenseRollups(true)` as an open Yaniv-only item for five weeks after the 14/08 block closed it. Removed in this pass. Watch for the same drift on the other two v931 items.
+RETIRED:
+- (none this session)
+
+---
+
+## 2026-08-15 — gross profit gets a year, a scope and an undated toggle; the pricing filter found broken (Cowork)
+SHIPPED:
+- **HTML v1000 / AS v231 / general-expenses v5** (deployment Version 361) — `year` period in `getGrossProfitSummary` AND `getAvgProfitPerHour`. ⚠ The load-bearing half was `_geWindow` in general-expenses.gs: without `case 'year'` an unknown period falls to `default: return null` = ALL-TIME overhead subtracted from ONE YEAR's gross. Also scoped `aiAsk` rule 9 to NUMBERS only — it had been producing bare `אין לי את הנתון הזה` refusals on planning questions, which are not numeric claims.
+- **HTML v1001 / AS v232** (Version 362) — gross-profit `scope=toinvoice|done`. `toinvoice` keeps the original `invoice === 'להוציא חש'` filter; `done` counts every row with status `בוצע` regardless of invoice state. Yaniv's ask: "how much did my business gross this year", not "what is waiting to be invoiced".
+- **AS v233** (Version 363) — `_gpRowDate` delegates to `ybPDate`. The old parser required a 4-digit year, so `1.3.26` and RTL-marked strings counted as undated.
+- **HTML v1002 / AS v234** (Version 364) — `undated=include|separate`. Off by default; `result.undated` / `result.undatedJobs` are reported either way so the UI can show how much of a total is dateless.
+FACT:
+- 2026-08-15 | **I misdiagnosed the undated jobs as a date-parsing problem.** v233 shipped the robust parser and recovered 3 jobs / ₪750. The real number: **95 of GOLMAT's 255 completed jobs have BOTH date cells empty**, ₪300,676; across all clients **118 completed jobs / ~₪319k have no date at all**. Zero unparseable formats. Code cannot fix this — the cells need filling | evidence: direct sheet count via aiAsk dump | conf:0.95
+- 2026-08-15 | **The AI price suggestion is running on almost no comparables.** `getAIPriceSuggestion` and `getAIPriceRows` both filter similar jobs with `['הצעה ניתנה','בתהליך ביצוע','הסתיים'].indexOf(jStat2) === -1 → continue`. Two of those three strings do not exist in the sheets: the real values are `בוצע` and `ניתנה הצעה`. Result: GOLMAT returns **2 similar jobs out of 266 rows**, ROLLMAT **0 out of 320** | evidence: read live code + row counts | conf:0.95
+- 2026-08-15 | `getAIPriceSuggestion` reads `var workers2 = parseInt(e.parameter.workers || '1')` and **never references it again** (grep count 1). The worker-count selector in the quote form feeds a dead parameter — it cannot be affecting the price | evidence: grep | conf:0.95
+- 2026-08-15 | Weekly planning is a **data** problem, not a prompt problem: 23 open jobs are buried in 866 status-less rows, only ~22% of rows carry any date, and there are no due dates, no priority and no site grouping. A code-computed planner is the fix; better prompting is not | evidence: full dump inspection | conf:0.85
+PREFERENCE:
+- 2026-08-15 | Wants short answers from the assistant and short answers from Claude — "to copmlicated - make it shorter" | seen:>=2 | conf:0.9
+- 2026-08-15 | Defers cleanly and often: "Leave it for now" on the weekly planner, the worker-count selector, and the pricing filter. Offer once with the value stated, then drop it | seen:>=4 | conf:0.9
+OPEN:
+- **Pricing filter fix** (offered twice, declined for now): `'הסתיים'` → `'בוצע'` and `'הצעה ניתנה'` → `'ניתנה הצעה'` in BOTH `getAIPriceSuggestion` and `getAIPriceRows`. One line each; opens hundreds of real priced jobs to the pricing engine.
+- **118 dateless completed jobs (~₪319k)** — Yaniv-only, the dates have to be typed in. The v1002 toggle is a workaround, not a fix.
+- Weekly planner screen (code-computed) — deferred.
+- The worker-count selector is wired to a dead parameter — either wire it or remove it. Yaniv works alone and asked for a zero-workers option; deferred.
+- 🤖 AI button is still hidden (`display:none` on `#ybAiFab`, v999). Un-hiding is deleting that one declaration.
+RETIRED:
+- "The undated jobs are a date-parsing failure" — FALSE, the cells are empty. Killed 15/08/26.
+- "Prompt rules can make the model's arithmetic reliable" — FALSE, already tombstoned 14/08/26; v229's code-computed EXACT TOTALS is the only reason the assistant's numbers are trustworthy.
+
+---
+
 ## 2026-08-14 (late) — assistant tuned, then hidden; Gemini free-tier ceiling found (Cowork)
 SHIPPED:
 - **AS v230** (deployment Version 360) + **HTML v998** — day/week/month totals computed in code; text dates parsed; brevity rules; auto-retry on the busy-server HTML page.
