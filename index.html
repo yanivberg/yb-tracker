@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v1007</title>
+<title>י.ב אחזקות — v1008</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -568,7 +568,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1007
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1008
 Deployed: 14/11/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 364)
@@ -579,6 +579,13 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v1008 · 14/11/2026 · AS v236
+• הצעת מחיר: אזור התגיות הוא עכשיו שורה אחת לכל ההצעה. לכל שורה בהצעה יש צ'יפ אחד ליד השני: מספר השורה + התגיות שנבחרו לה (עד 2 בשמם, ואז "+N"), או "הוסף" אם עדיין אין לה תגיות. הקשה על צ'יפ פותחת את מגירת התגיות של אותה שורה, שבה מופיע גם הטקסט של השורה. בהצעה עם שורה אחת אין מספר על הצ'יפ.
+• סדר התחתית בטופס ההצעה: קודם שורת התגיות, אחריה הערות ללקוח (Notes), ומתחתן ההערות הפנימיות — שני שדות ההערות צמודים.
+• שני שדות ההערות (ללקוח ופנימיות) הוקטנו באותה צורה: כשהוא ריק — שורה אחת. כשיש בו טקסט — שתי שורות עם גלילה. כשמקלידים בו — הוא גדל לפי הטקסט (עד כ-10 שורות) וחוזר לגודל הקטן כשיוצאים ממנו. התוכן עצמו ומה שנשמר לא השתנו. (החלק הזה של הטופס קבוע בתחתית המסך, לכן כל שורה שנחסכת בו משאירה יותר מקום לשורות ההצעה.)
+• אין שינוי במגירה ובשמירה.
+• ללא שינוי ב-Apps Script.
+
 v1007 · 14/11/2026 · AS v236
 • הצעת מחיר: אזור התגיות הוקטן. עד עכשיו כל שורה בהצעה הציגה את כל רשימת התגיות (26 תגיות לכל שורה — שלוש שורות מילאו את המסך). עכשיו לכל שורה יש שורה קצרה אחת: הטקסט שלה, רק התגיות שנבחרו לה, וכפתור 🏷.
 • הקשה על השורה פותחת מגירה מלמטה עם כל התגיות לאותה שורה: הקשה מדליקה/מכבה תגית, שדה להוספת תגית חדשה (במקום חלון השאלה הקופץ), כפתורי "הקודמת"/"הבאה" למעבר בין שורות ההצעה בלי לסגור, ו"סיום" או הקשה על הרקע הכהה לסגירה.
@@ -1859,7 +1866,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1007</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1008</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2132,12 +2139,12 @@ SHEET SYNC
           <label style="font-size:11px;font-weight:700;color:#555;margin-bottom:0;">Notes <span style="color:#2e7d32;font-size:10px;font-weight:400;">👁 visible to client</span></label>
           <span style="font-size:10px;color:#aaa;">הערות שכן מוצגות ללקוח</span>
         </div>
-        <textarea id="caspitComments" placeholder="Payment terms, warranty…" style="width:100%;padding:8px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;box-sizing:border-box;resize:vertical;min-height:48px;line-height:1.5;margin-bottom:6px;"></textarea>
+        <textarea id="caspitComments" rows="1" placeholder="Payment terms, warranty…" onfocus="_cqDetFit(this)" oninput="_cqDetFit(this)" onblur="_cqDetFit(this)" style="width:100%;padding:6px 10px;border:1.5px solid #ddd;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;box-sizing:border-box;resize:none;height:32px;min-height:0;overflow-y:auto;line-height:1.5;margin-bottom:6px;"></textarea>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
           <label style="font-size:11px;font-weight:700;color:#555;margin-bottom:0;">Internal notes <span style="color:#888;font-size:10px;font-weight:400;">🔒 not shown to client</span></label>
           <span style="font-size:10px;color:#aaa;">פרטים שלא מוצגים ללקוח</span>
         </div>
-        <textarea id="caspitDetails" placeholder="Internal reminders…" style="width:100%;padding:8px 10px;border:1.5px solid #eee;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;box-sizing:border-box;resize:vertical;min-height:48px;line-height:1.5;background:#fafafa;margin-bottom:8px;"></textarea>
+        <textarea id="caspitDetails" rows="1" placeholder="Internal reminders…" onfocus="_cqDetFit(this)" oninput="_cqDetFit(this)" onblur="_cqDetFit(this)" style="width:100%;padding:6px 10px;border:1.5px solid #eee;border-radius:8px;font-size:12px;font-family:Heebo,sans-serif;box-sizing:border-box;resize:none;height:32px;min-height:0;overflow-y:auto;line-height:1.5;background:#fafafa;margin-bottom:6px;"></textarea>
       </div>
       <button id="caspitCreateBtn" onclick="caspitCreateDispatch()" style="width:100%;padding:14px;background:#0d47a1;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:Heebo,sans-serif;">💼 Create Document</button>
     </div>
@@ -3146,8 +3153,8 @@ function _restoreCqSnapshotIfAny() {
             if (hrsEls[i]) hrsEls[i].value = r.hours || '';
             if (cats[i])   cats[i].value   = r.cat   || '';
           });
-          var comm = document.getElementById('caspitComments'); if (comm && snap.comments) comm.value = snap.comments;
-          var det  = document.getElementById('caspitDetails');  if (det  && snap.details)  det.value  = snap.details;
+          var comm = document.getElementById('caspitComments'); if (comm && snap.comments) { comm.value = snap.comments; _cqDetFit(comm); }   // v1008
+          var det  = document.getElementById('caspitDetails');  if (det  && snap.details) { det.value  = snap.details; _cqDetFit(det); }   // v1008
           var contact = document.getElementById('caspitQuoteContactSelect'); if (contact && snap.caspitContact) contact.value = snap.caspitContact;
           if (typeof calcCaspitTotal === 'function') calcCaspitTotal();
           showToast('📋 טופס הצעת מחיר שוחזר');
@@ -4429,29 +4436,37 @@ function cqTagAdd(i){
   try{_tagsFillFilter();}catch(e){}
   cqTagsRender(); _cqDrawerRender();
 }
+// v1008: the internal-reminders box stays small. Empty = one line. With text = two lines (scrolls). While typing = grows to fit, up to ~10 lines.
+function _cqDetFit(el){
+  if(!el) return;
+  var focused = document.activeElement === el, empty = !String(el.value||'').trim();
+  el.style.height = '0px';
+  var full = el.scrollHeight + 3;
+  el.style.height = (focused ? Math.max(64, Math.min(full, 200)) : (empty ? 32 : Math.min(full, 52))) + 'px';
+}
 function cqTagsRender(){
   var det=document.getElementById('caspitDetails'); if(!det||!det.parentNode) return;
+  _cqDetFit(det); _cqDetFit(document.getElementById('caspitComments'));   // v1008: text may have been filled in by code
   var box=document.getElementById('cqTagsBox');
-  if(!box){ box=document.createElement('div'); box.id='cqTagsBox'; box.style.cssText='margin:10px 0;'; det.parentNode.insertBefore(box, det); }
+  if(!box){ box=document.createElement('div'); box.id='cqTagsBox'; box.style.cssText='margin:2px 0 8px;';
+    var area=document.getElementById('caspitNotesArea');   // v1008: tags first, then the two note boxes together
+    if(area) area.insertBefore(box, area.firstChild); else det.parentNode.insertBefore(box, det); }
   var n=_cqLineCount();
   if(!n){ box.innerHTML=''; return; }
-  var html='<div style="font-size:12px;font-weight:800;color:#37474f;margin-bottom:4px;direction:rtl;text-align:right;">תגיות (לכל שורה)</div>';
+  // v1008: ONE line for the whole quotation — a chip per quotation line, side by side (wraps only when there are many).
+  // The chip shows the line number and its tags; tapping it opens the drawer for that line (line text is shown there).
+  var html='<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;direction:rtl;">';
+  html+='<span style="font-size:12px;font-weight:800;color:#37474f;white-space:nowrap;margin-left:2px;">🏷 תגיות</span>';
   for(var i=0;i<n;i++){
-    var sel=_cqTags[i]||[];
-    html+='<div onclick="cqTagDrawerOpen('+i+')" style="display:flex;align-items:center;gap:8px;padding:7px 9px;margin-bottom:4px;background:rgba(0,0,0,0.03);border-radius:8px;cursor:pointer;direction:rtl;-webkit-tap-highlight-color:transparent;">';
-    html+='<div style="flex:1;min-width:0;text-align:right;">';
-    html+='<div style="font-size:11px;color:#546e7a;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_cqEsc(_cqLineText(i))+'</div>';
-    if(sel.length){
-      html+='<div style="margin-top:3px;">';
-      for(var q=0;q<sel.length;q++) html+='<span style="display:inline-block;padding:2px 8px;margin:2px 0 0 3px;border-radius:11px;font-size:11px;font-weight:700;background:#1565c0;color:#fff;">'+_cqEsc(sel[q])+'</span>';
-      html+='</div>';
-    } else {
-      html+='<div style="font-size:11px;color:#b0bec5;margin-top:2px;">ללא תגיות</div>';
-    }
-    html+='</div>';
-    html+='<span style="flex-shrink:0;border:1.5px solid '+(sel.length?'#1565c0':'#b0bec5')+';border-radius:14px;padding:5px 11px;font-size:12px;font-weight:800;color:'+(sel.length?'#1565c0':'#546e7a')+';background:#fff;white-space:nowrap;">🏷 '+(sel.length?sel.length:'הוסף')+'</span>';
-    html+='</div>';
+    var sel=_cqTags[i]||[], has=sel.length>0;
+    var label=has ? sel.slice(0,2).join(' · ') : 'הוסף', more=sel.length>2 ? sel.length-2 : 0;
+    html+='<span onclick="cqTagDrawerOpen('+i+')" title="'+_cqEsc(_cqLineText(i))+'" style="display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:5px 10px;border-radius:15px;font-size:12px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1.5px solid '+(has?'#1565c0;background:#1565c0;color:#fff':'#b0bec5;background:#fff;color:#546e7a')+';">';
+    if(n>1) html+='<span style="font-size:10px;font-weight:900;border-radius:9px;padding:0 6px;'+(has?'background:rgba(255,255,255,0.25);':'background:#eceff1;')+'">'+(i+1)+'</span>';
+    html+='<span style="overflow:hidden;text-overflow:ellipsis;">'+_cqEsc(label)+'</span>';
+    if(more) html+='<span style="direction:ltr;unicode-bidi:isolate;font-weight:900;">+'+more+'</span>';   // isolated, or RTL shows it as "1+"
+    html+='</span>';
   }
+  html+='</div>';
   box.innerHTML=html;
 }
 // v1007: tags follow their line. A fresh quotation form starts with no tags; removing a row shifts the tags of the rows below it up by one.
@@ -7694,8 +7709,8 @@ function toggleCaspitAccordion(tab) {
 
 function openCaspitOverlay(tab) {
   _caspitSelected = {}; _caspitDocType = 1;
-  var c = document.getElementById('caspitComments'); if(c) c.value='';
-  var d = document.getElementById('caspitDetails');  if(d) d.value='';
+  var c = document.getElementById('caspitComments'); if(c) { c.value=''; _cqDetFit(c); }   // v1008
+  var d = document.getElementById('caspitDetails');  if(d) { d.value=''; _cqDetFit(d); }   // v1008
   document.getElementById('caspitOverlay').style.display = 'flex';
   _caspitTab = '';
   _caspitAccordionVisuals('');
@@ -9520,6 +9535,7 @@ function _renderCaspitQuoteForm() {
       var detailsEl = document.getElementById('caspitDetails');
       if (detailsEl && !detailsEl.value) {
         detailsEl.value = steps.map(function(s, idx) { return (idx+1) + '. ' + s; }).join('\n');
+        _cqDetFit(detailsEl);   // v1008
       }
     }
 
@@ -9538,6 +9554,7 @@ function _renderCaspitQuoteForm() {
       if (detailsEl2) {
         var existing2 = detailsEl2.value ? detailsEl2.value + '\n\n' : '';
         detailsEl2.value = existing2 + pendingNotes.join('\n');
+        _cqDetFit(detailsEl2);   // v1008
       }
     }
 
