@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v1009</title>
+<title>י.ב אחזקות — v1010</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -568,7 +568,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1009
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1010
 Deployed: 14/11/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 364)
@@ -579,6 +579,12 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v1010 · 14/11/2026 · AS v236
+• ניהול עבודות: שכפול עבודה. לחיצה ארוכה על עבודה בוחרת אותה (כמו היום), ובשורת הבחירה, ליד "מחק נבחרים", מופיע כפתור "📄 שכפל" — רק כשנבחרה עבודה אחת בדיוק.
+• העותק מקבל מהמקור: תיאור, קטגוריה ותגיות. לא מועתקים: מחיר, כמות, שעות, מספר הזמנת רכש, מספר הצעת מחיר, הערות ותאריכים. העותק נוצר בסטטוס "ממתין לביצוע" עם מספר עבודה חדש, הרשימה מתרעננת והעותק נפתח מיד לעריכה.
+• ⚠ טופס "עבודה חדשה" נועל את הסטטוס "ממתין לביצוע" עד שממלאים מחיר, כמות, שעות ו-PO. השכפול יוצר אותו בלי השדות האלה — כדאי למלא אותם בעריכה שנפתחת.
+• ללא שינוי ב-Apps Script.
+
 v1009 · 14/11/2026 · AS v236
 • ניהול עבודות ← עבודה חדשה (Add Project to Sheet): נוסף שדה תגיות בתחתית הטופס, ממש לפני כפתור השמירה. הקשה על השדה פותחת את אותה מגירת תגיות של הצעת המחיר — הדלקה/כיבוי בהקשה, ותגית חדשה בשדה בתחתית המגירה.
 • חובה לבחור לפחות תגית אחת: בלי תגית השמירה נעצרת, השדה נצבע באדום והמסך גולל אליו.
@@ -1872,7 +1878,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1009</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1010</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2372,6 +2378,7 @@ SHEET SYNC
     </div>
     <div id="mjBulkBar" style="display:none;align-items:center;justify-content:space-between;background:#ffebee;border:1.5px solid #ef9a9a;border-radius:12px;padding:9px 12px;margin-top:8px;">
       <button onclick="mjBulkDelete()" style="background:#c62828;color:#fff;border:none;border-radius:9px;padding:9px 14px;font-size:13.5px;font-weight:900;font-family:Heebo,sans-serif;cursor:pointer;">🗑️ מחק נבחרים (<span id="mjSelCount">0</span>)</button>
+      <button id="mjDupBtn" onclick="mjDuplicateSelected()" style="display:none;background:#fff;color:#2e5e55;border:1.5px solid #2e7d6b;border-radius:9px;padding:8px 13px;font-size:13.5px;font-weight:900;font-family:Heebo,sans-serif;cursor:pointer;">📄 שכפל</button>
       <button onclick="mjClearSelection()" style="background:none;border:none;color:#c62828;font-weight:900;font-size:13px;cursor:pointer;font-family:Heebo,sans-serif;">ביטול</button>
     </div>
   </div>
@@ -4288,7 +4295,7 @@ function mjToggleSort() {
   _mjSortJobs();
   mjApplyFilter();
 }
-function mjRenderList() {
+function mjRenderList(after) {   // v1010: optional callback once the list is loaded
   _mjClient = document.getElementById('mjClient').value;
   var list = document.getElementById('mjList');
   _mjSelected = {}; mjUpdateBulkBar();
@@ -4314,6 +4321,7 @@ function mjRenderList() {
     mjResetFilterControls();
     mjPopulateCategories();
     mjApplyFilter();
+    if (typeof after === 'function') { try { after(); } catch (eAfter) {} }
   }).catch(function(){ list.innerHTML = '<div style="text-align:center;color:#c62828;padding:30px;">שגיאה בטעינה</div>'; });
 }
 function mjResetFilterControls() {
@@ -4683,6 +4691,7 @@ function mjUpdateBulkBar() {
   var cnt = document.getElementById('mjSelCount');
   if (bar) bar.style.display = n > 0 ? 'flex' : 'none';
   if (cnt) cnt.textContent = n;
+  var dup = document.getElementById('mjDupBtn'); if (dup) dup.style.display = n === 1 ? 'inline-block' : 'none';   // v1010: duplicate = exactly one job
 }
 
 function mjBulkDelete() {
@@ -4698,6 +4707,44 @@ function mjBulkDelete() {
 }
 
 var _mjBulkPending = null;
+
+/* v1010: duplicate ONE job (long-press → select → 📄 שכפל). Yaniv's choices: the copy takes the description,
+   category and tags only (no price/qty/hours/PO/quote/notes), starts as ממתין לביצוע, and opens in the editor. */
+var _mjDupBusy = false;
+function mjDuplicateSelected() {
+  var ids = Object.keys(_mjSelected);
+  if (ids.length !== 1 || _mjDupBusy) return;
+  var j = _mjJobs.filter(function(x){ return x.id === ids[0]; })[0]; if (!j) return;
+  var client = j.client || _mjClient;
+  if (!client || client === '__ALL__') { showToast('⚠️ לא ידוע לאיזה לקוח שייכת העבודה'); return; }
+  var tags = (_tagsByJob[j.id] || []).slice();
+  var btn = document.getElementById('mjDupBtn');
+  _mjDupBusy = true; if (btn) { btn.disabled = true; btn.textContent = '⏳ משכפל…'; }
+  var done = function(){ _mjDupBusy = false; if (btn) { btn.disabled = false; btn.textContent = '📄 שכפל'; } };
+  fetch(SHEETS_URL + '?action=addJob&client=' + encodeURIComponent(client) +
+        '&desc=' + encodeURIComponent(j.desc || '') + '&st=' + encodeURIComponent('ממתין לביצוע') +
+        '&ca=' + encodeURIComponent(j.category || ''))
+    .then(function(r){ return r.text(); })
+    .then(function(reply){
+      var newId = String(reply || '').trim();
+      // addJob replies with the new id — or 'Sheet not found: …' / 'Header not found' / an HTML error page
+      if (!newId || /\s/.test(newId) || /error|not found|שגיאה|</i.test(newId) || newId.length > 40) { done(); showToast('⚠️ השכפול נכשל: ' + newId.slice(0, 60)); return; }
+      var tagStep = tags.length
+        ? fetch(SHEETS_URL + '?action=setJobTags&jobId=' + encodeURIComponent(newId) + '&client=' + encodeURIComponent(client) + '&tags=' + encodeURIComponent(tags.join(',')))
+            .then(function(){ _tagsByJob[newId] = tags.slice(); })
+            .catch(function(){ showToast('⚠️ העותק נוצר (' + newId + ') אבל התגיות לא נשמרו'); })
+        : Promise.resolve();
+      tagStep.then(function(){
+        done();
+        mjRenderList(function(){
+          var idx = -1; _mjJobs.forEach(function(x, k){ if (x.id === newId) idx = k; });
+          showToast('📄 נוצר עותק ' + newId + ' (מתוך ' + j.id + ')');   // words, not an arrow — arrows flip in RTL
+          if (idx >= 0) mjOpenEdit(idx);
+        });
+      });
+    })
+    .catch(function(){ done(); showToast('⚠️ השכפול נכשל — אין חיבור לשרת'); });
+}
 
 function mjDoBulkDelete() {
   if (!_mjBulkPending || !_mjBulkPending.length) return;
