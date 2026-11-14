@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v1006</title>
+<title>י.ב אחזקות — v1007</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -568,7 +568,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1006
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1007
 Deployed: 14/11/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 364)
@@ -579,6 +579,13 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v1007 · 14/11/2026 · AS v236
+• הצעת מחיר: אזור התגיות הוקטן. עד עכשיו כל שורה בהצעה הציגה את כל רשימת התגיות (26 תגיות לכל שורה — שלוש שורות מילאו את המסך). עכשיו לכל שורה יש שורה קצרה אחת: הטקסט שלה, רק התגיות שנבחרו לה, וכפתור 🏷.
+• הקשה על השורה פותחת מגירה מלמטה עם כל התגיות לאותה שורה: הקשה מדליקה/מכבה תגית, שדה להוספת תגית חדשה (במקום חלון השאלה הקופץ), כפתורי "הקודמת"/"הבאה" למעבר בין שורות ההצעה בלי לסגור, ו"סיום" או הקשה על הרקע הכהה לסגירה.
+• אין שינוי בשמירה: התגיות עדיין לכל שורה ונשמרות עם ההצעה בדיוק כמו קודם. רשימת התגיות וסינון התגיות בשאר האפליקציה לא שונו.
+• תוקנו שני באגים ישנים בתגיות: (1) מחיקת שורה מאמצע ההצעה השאירה את התגיות במקומן הישן, כך שהן עברו לשורות הלא נכונות — עכשיו התגיות זזות יחד עם השורות. (2) הצעה שנסגרה בלי שמירה השאירה את התגיות שלה על שורות ההצעה הבאה — עכשיו כל טופס הצעה נפתח בלי תגיות.
+• ללא שינוי ב-Apps Script.
+
 v1006 · 14/11/2026 · AS v236
 • חדש: מסך סיום פרויקט אחד במקום שני טפסים ברצף (הסקר, ואז "רגע לפני שסיימת"). במסך: דירוג, שעות בפועל, כלים, חומרים, שלבים, מה עבד טוב, תקלות — ובסוף טבלת "תכנון מול ביצוע". כל דרך לסמן עבודה כבוצעה מגיעה לאותו מסך.
 • כלים: הכלים שתוכננו בתדריך של העבודה מופיעים ראשונים עם תג "תוכנן", לא מסומנים — מסמנים רק מה שבאמת שימש. כשיש תדריך עם כלים לא נשלחת בקשת AI (חוסך בקשת Gemini בכל סיום עבודה).
@@ -1852,7 +1859,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1006</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1007</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -4404,29 +4411,106 @@ function mjCloseEdit() { document.getElementById('mjEditOverlay').style.display 
 var _tagsAll = [], _tagsByJob = {}, _tagSel = [];
 /* v966: per-LINE tags while building a Caspit quote. _cqTags[lineIndex] = [tags] */
 var _cqTags = {};
-function cqTagToggle(i, tag){ if(!_cqTags[i]) _cqTags[i]=[]; var k=_cqTags[i].indexOf(tag); if(k>=0) _cqTags[i].splice(k,1); else _cqTags[i].push(tag); cqTagsRender(); }
-function cqTagAdd(i){ var name=(prompt('שם התגית החדשה:')||'').trim(); if(!name) return; if(_tagsAll.indexOf(name)<0){ _tagsAll.push(name); _tagsAll.sort(); } if(!_cqTags[i]) _cqTags[i]=[]; if(_cqTags[i].indexOf(name)<0) _cqTags[i].push(name); try{_tagsFillFilter();}catch(e){} cqTagsRender(); }
+function cqTagToggle(i, tag){ if(!_cqTags[i]) _cqTags[i]=[]; var k=_cqTags[i].indexOf(tag); if(k>=0) _cqTags[i].splice(k,1); else _cqTags[i].push(tag); cqTagsRender(); _cqDrawerRender(); }
+/* v1007: the per-line tag picker moved into a bottom drawer. The form keeps ONE short row per quotation
+   line (its chosen tags only); the full tag list shows only while the drawer is open. Storage is unchanged:
+   _cqTags[lineIndex] = [tags], written to the sheet by the quotation save exactly as before. */
+var _cqDrawerLine = -1;
+function _cqEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function _cqLineCount(){ var rows=document.getElementById('caspitQuoteRows'); return rows?rows.children.length:0; }
+function _cqLineText(i){ var rows=document.getElementById('caspitQuoteRows'); var el=rows&&rows.children[i]; var d=el?((el.querySelector('.cq-desc')||{}).value||'').trim():''; return d||('שורה '+(i+1)); }
+function cqTagToggleAt(i, q){ var tg=_tagsAll[q]; if(tg==null) return; cqTagToggle(i, tg); }
+function cqTagAdd(i){
+  var inp=document.getElementById('cqTagNew'); var name=(inp?inp.value:'').trim(); if(!name) return;
+  if(_tagsAll.indexOf(name)<0){ _tagsAll.push(name); _tagsAll.sort(); }
+  if(!_cqTags[i]) _cqTags[i]=[];
+  if(_cqTags[i].indexOf(name)<0) _cqTags[i].push(name);
+  if(inp) inp.value='';
+  try{_tagsFillFilter();}catch(e){}
+  cqTagsRender(); _cqDrawerRender();
+}
 function cqTagsRender(){
   var det=document.getElementById('caspitDetails'); if(!det||!det.parentNode) return;
   var box=document.getElementById('cqTagsBox');
   if(!box){ box=document.createElement('div'); box.id='cqTagsBox'; box.style.cssText='margin:10px 0;'; det.parentNode.insertBefore(box, det); }
-  var rows=document.getElementById('caspitQuoteRows');
-  var n=rows?rows.children.length:0;
+  var n=_cqLineCount();
   if(!n){ box.innerHTML=''; return; }
-  var html='<div style="font-size:12px;font-weight:800;color:#37474f;margin-bottom:4px;">תגיות (לכל שורה)</div>';
+  var html='<div style="font-size:12px;font-weight:800;color:#37474f;margin-bottom:4px;direction:rtl;text-align:right;">תגיות (לכל שורה)</div>';
   for(var i=0;i<n;i++){
-    var d=((rows.children[i].querySelector('.cq-desc')||{}).value||'').trim();
     var sel=_cqTags[i]||[];
-    html+='<div style="padding:6px 8px;margin-bottom:5px;background:rgba(0,0,0,0.03);border-radius:8px;">';
-    html+='<div style="font-size:11px;color:#546e7a;font-weight:700;margin-bottom:2px;">'+((d||('שורה '+(i+1))).slice(0,42))+'</div>';
-    for(var q=0;q<_tagsAll.length;q++){
-      var tg=_tagsAll[q], on=sel.indexOf(tg)>=0;
-      html+='<span onclick="cqTagToggle('+i+',\''+String(tg).replace(/'/g,"\\'")+'\')" style="display:inline-block;padding:4px 10px;margin:2px 2px 0 0;border-radius:13px;font-size:11.5px;font-weight:700;cursor:pointer;border:1.5px solid '+(on?'#1565c0;background:#1565c0;color:#fff':'#cfd8dc;background:#fff;color:#546e7a')+';">'+tg+'</span>';
+    html+='<div onclick="cqTagDrawerOpen('+i+')" style="display:flex;align-items:center;gap:8px;padding:7px 9px;margin-bottom:4px;background:rgba(0,0,0,0.03);border-radius:8px;cursor:pointer;direction:rtl;-webkit-tap-highlight-color:transparent;">';
+    html+='<div style="flex:1;min-width:0;text-align:right;">';
+    html+='<div style="font-size:11px;color:#546e7a;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_cqEsc(_cqLineText(i))+'</div>';
+    if(sel.length){
+      html+='<div style="margin-top:3px;">';
+      for(var q=0;q<sel.length;q++) html+='<span style="display:inline-block;padding:2px 8px;margin:2px 0 0 3px;border-radius:11px;font-size:11px;font-weight:700;background:#1565c0;color:#fff;">'+_cqEsc(sel[q])+'</span>';
+      html+='</div>';
+    } else {
+      html+='<div style="font-size:11px;color:#b0bec5;margin-top:2px;">ללא תגיות</div>';
     }
-    html+='<span onclick="cqTagAdd('+i+')" style="display:inline-block;padding:4px 11px;margin:2px 2px 0 0;border-radius:13px;font-size:12px;font-weight:900;cursor:pointer;border:1.5px dashed #90a4ae;color:#546e7a;background:#fff;">＋</span>';
+    html+='</div>';
+    html+='<span style="flex-shrink:0;border:1.5px solid '+(sel.length?'#1565c0':'#b0bec5')+';border-radius:14px;padding:5px 11px;font-size:12px;font-weight:800;color:'+(sel.length?'#1565c0':'#546e7a')+';background:#fff;white-space:nowrap;">🏷 '+(sel.length?sel.length:'הוסף')+'</span>';
     html+='</div>';
   }
   box.innerHTML=html;
+}
+// v1007: tags follow their line. A fresh quotation form starts with no tags; removing a row shifts the tags of the rows below it up by one.
+function cqTagsReset(){ _cqTags = {}; cqTagDrawerClose(); }
+function cqTagsRowRemoved(idx){
+  var out = {};
+  Object.keys(_cqTags).forEach(function(k){ var n = parseInt(k, 10); if (isNaN(n) || n === idx) return; out[n > idx ? n - 1 : n] = _cqTags[k]; });
+  _cqTags = out;
+  if (_cqDrawerLine >= 0) cqTagDrawerClose();
+}
+function cqTagDrawerOpen(i){
+  if(i<0||i>=_cqLineCount()) return;
+  _cqDrawerLine=i;
+  var ov=document.getElementById('cqTagDrawer');
+  if(!ov){
+    var st=document.createElement('style'); st.textContent='@keyframes cqDrawerUp{from{transform:translateY(100%)}to{transform:translateY(0)}}'; document.head.appendChild(st);
+    ov=document.createElement('div'); ov.id='cqTagDrawer';
+    ov.style.cssText='display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.45);z-index:10040;align-items:flex-end;justify-content:center;';
+    ov.onclick=function(ev){ if(ev.target===ov) cqTagDrawerClose(); };
+    ov.innerHTML='<div id="cqTagDrawerSheet" style="background:#fff;width:100%;max-width:480px;max-height:72vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:10px 16px calc(14px + env(safe-area-inset-bottom));box-sizing:border-box;direction:rtl;text-align:right;font-family:Heebo,sans-serif;animation:cqDrawerUp 0.2s ease-out;"></div>';
+    document.body.appendChild(ov);
+  }
+  var sheet=document.getElementById('cqTagDrawerSheet');
+  if(ov.style.display==='none'&&sheet){ sheet.style.animation='none'; void sheet.offsetWidth; sheet.style.animation='cqDrawerUp 0.2s ease-out'; }
+  ov.style.display='flex';
+  _cqDrawerRender(true);
+}
+function cqTagDrawerClose(){ var ov=document.getElementById('cqTagDrawer'); if(ov) ov.style.display='none'; _cqDrawerLine=-1; }
+function cqTagDrawerGo(step){ var t=_cqDrawerLine+step; if(t<0||t>=_cqLineCount()) return; _cqDrawerLine=t; _cqDrawerRender(true); }
+function _cqDrawerRender(resetScroll){
+  var ov=document.getElementById('cqTagDrawer'), sheet=document.getElementById('cqTagDrawerSheet');
+  if(!ov||!sheet||ov.style.display==='none'||_cqDrawerLine<0) return;
+  var n=_cqLineCount(), i=_cqDrawerLine;
+  if(i>=n){ cqTagDrawerClose(); return; }
+  var keepInp=document.getElementById('cqTagNew'), typed=keepInp?keepInp.value:'', sc=sheet.scrollTop;
+  var sel=_cqTags[i]||[];
+  var nav=function(step,label,enabled){ return '<button type="button" '+(enabled?'onclick="cqTagDrawerGo('+step+')"':'disabled')+' style="border:1.5px solid '+(enabled?'#90a4ae':'#eceff1')+';background:#fff;color:'+(enabled?'#37474f':'#cfd8dc')+';border-radius:10px;padding:6px 12px;font-size:12px;font-weight:800;font-family:Heebo,sans-serif;'+(enabled?'cursor:pointer;':'')+'">'+label+'</button>'; };
+  var html='<div style="width:38px;height:4px;border-radius:2px;background:#cfd8dc;margin:0 auto 10px;"></div>';
+  html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
+  html+='<div style="flex:1;font-size:13px;font-weight:900;color:#37474f;">🏷 תגיות'+(n>1?' · שורה '+(i+1)+' מתוך '+n:'')+'</div>';
+  if(n>1) html+=nav(-1,'הקודמת',i>0)+nav(1,'הבאה',i<n-1);
+  html+='<button type="button" onclick="cqTagDrawerClose()" aria-label="סגור" style="border:none;background:none;font-size:20px;color:#78909c;cursor:pointer;padding:2px 4px;">✕</button>';
+  html+='</div>';
+  html+='<div style="font-size:14px;font-weight:700;color:#111;background:#f5f7f9;border-radius:10px;padding:9px 11px;margin-bottom:10px;line-height:1.4;max-height:60px;overflow:hidden;">'+_cqEsc(_cqLineText(i))+'</div>';
+  html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">';
+  for(var q=0;q<_tagsAll.length;q++){
+    var on=sel.indexOf(_tagsAll[q])>=0;
+    html+='<span onclick="cqTagToggleAt('+i+','+q+')" style="display:inline-block;padding:8px 14px;border-radius:17px;font-size:13px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent;border:1.5px solid '+(on?'#1565c0;background:#1565c0;color:#fff':'#cfd8dc;background:#fff;color:#546e7a')+';">'+(on?'✓ ':'')+_cqEsc(_tagsAll[q])+'</span>';
+  }
+  if(!_tagsAll.length) html+='<span style="font-size:12px;color:#90a4ae;">אין עדיין תגיות — הוסף את הראשונה למטה.</span>';
+  html+='</div>';
+  html+='<div style="display:flex;gap:6px;margin-bottom:12px;">';
+  html+='<input id="cqTagNew" type="text" placeholder="תגית חדשה…" onkeypress="if(event.key===\'Enter\')cqTagAdd('+i+')" style="flex:1;padding:9px 11px;border:1.5px solid #cfd8dc;border-radius:10px;font-size:14px;font-family:Heebo,sans-serif;direction:rtl;box-sizing:border-box;">';
+  html+='<button type="button" onclick="cqTagAdd('+i+')" style="background:#0d47a1;color:#fff;border:none;border-radius:10px;padding:9px 15px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">＋</button>';
+  html+='</div>';
+  html+='<button type="button" onclick="cqTagDrawerClose()" style="width:100%;padding:13px;background:#1565c0;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">סיום</button>';
+  sheet.innerHTML=html;
+  var ni=document.getElementById('cqTagNew'); if(ni&&typed) ni.value=typed;
+  sheet.scrollTop=resetScroll?0:sc;
 }
 
 function tagsLoad(cb){
@@ -9291,6 +9375,7 @@ function _saveEditedQuote() {
 
 function _renderCaspitQuoteForm() {
   var body = getCaspitBody();
+  cqTagsReset();   // v1007: rows are rebuilt below — tags of an abandoned quotation must not land on the new one
 
   // ── Mode toggle (grouped by source: Caspit vs spreadsheet) ─────────────
   var _mBtn = function(m, label){
@@ -9655,7 +9740,10 @@ function _applyCqGuess(row, desc) {
 function delCaspitQuoteRow(btn) {
   var container = document.getElementById('caspitQuoteRows');
   if (!container || container.children.length <= 1) return;
-  btn.closest('div[style]').remove();
+  var _rowEl = btn.closest('div[style]');
+  var _rowIdx = Array.prototype.indexOf.call(container.children, _rowEl);   // v1007
+  _rowEl.remove();
+  if (_rowIdx >= 0) cqTagsRowRemoved(_rowIdx);
   var rows = container.children;
   for (var i = 0; i < rows.length; i++) { var n = rows[i].querySelector('div'); if (n) n.textContent = 'Row ' + (i+1); }
   calcCaspitTotal();
