@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v1008</title>
+<title>י.ב אחזקות — v1009</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -568,7 +568,7 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1008
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1009
 Deployed: 14/11/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 364)
@@ -579,6 +579,12 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v1009 · 14/11/2026 · AS v236
+• ניהול עבודות ← עבודה חדשה (Add Project to Sheet): נוסף שדה תגיות בתחתית הטופס, ממש לפני כפתור השמירה. הקשה על השדה פותחת את אותה מגירת תגיות של הצעת המחיר — הדלקה/כיבוי בהקשה, ותגית חדשה בשדה בתחתית המגירה.
+• חובה לבחור לפחות תגית אחת: בלי תגית השמירה נעצרת, השדה נצבע באדום והמסך גולל אליו.
+• התגיות נשמרות לעבודה החדשה מיד אחרי שהיא נוצרת בגיליון, באותה דרך כמו בעריכת עבודה ובהצעת מחיר. אם השמירה שלהן נכשלת מופיעה הודעה, והעבודה עצמה נשמרת בכל מקרה.
+• ללא שינוי ב-Apps Script.
+
 v1008 · 14/11/2026 · AS v236
 • הצעת מחיר: אזור התגיות הוא עכשיו שורה אחת לכל ההצעה. לכל שורה בהצעה יש צ'יפ אחד ליד השני: מספר השורה + התגיות שנבחרו לה (עד 2 בשמם, ואז "+N"), או "הוסף" אם עדיין אין לה תגיות. הקשה על צ'יפ פותחת את מגירת התגיות של אותה שורה, שבה מופיע גם הטקסט של השורה. בהצעה עם שורה אחת אין מספר על הצ'יפ.
 • סדר התחתית בטופס ההצעה: קודם שורת התגיות, אחריה הערות ללקוח (Notes), ומתחתן ההערות הפנימיות — שני שדות ההערות צמודים.
@@ -1866,7 +1872,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1008</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1009</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -2548,6 +2554,10 @@ SHEET SYNC
     <div style="margin-bottom:20px;">
       <div style="font-size:13px;color:#888;margin-bottom:6px;">Y.B. Quotation # <span style="font-size:11px;color:#aaa;">מס׳ הצעת מחיר</span></div>
       <input id="addJobQuote" type="text" placeholder="01/900..." maxlength="50" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;font-size:15px;font-family:Heebo,sans-serif;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:13px;color:#888;margin-bottom:6px;">Tags <span style="font-size:11px;color:#aaa;">תגיות</span> <span style="color:#e53935;">*</span></div>
+      <div id="ajTagsBox"></div>
     </div>
     <div id="addJobStatusMsg" style="display:none;font-size:12px;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-family:Heebo,sans-serif;direction:rtl;"></div>
     <button id="addJobSubmitBtn" onclick="submitAddJob()" style="width:100%;padding:14px;background:#f0c020;color:#111;border:none;border-radius:12px;font-size:16px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">✓ הוסף לגיליון וליום</button>
@@ -4426,15 +4436,26 @@ var _cqDrawerLine = -1;
 function _cqEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function _cqLineCount(){ var rows=document.getElementById('caspitQuoteRows'); return rows?rows.children.length:0; }
 function _cqLineText(i){ var rows=document.getElementById('caspitQuoteRows'); var el=rows&&rows.children[i]; var d=el?((el.querySelector('.cq-desc')||{}).value||'').trim():''; return d||('שורה '+(i+1)); }
-function cqTagToggleAt(i, q){ var tg=_tagsAll[q]; if(tg==null) return; cqTagToggle(i, tg); }
+/* v1009: the same drawer also serves Job Management → new job. _tdMode says whose tags it edits:
+   'quote' = the quotation lines (_cqTags[i]) · 'job' = the job being added (_ajTags, one "line"). */
+var _tdMode = 'quote', _ajTags = [];
+function _tdCount(){ return _tdMode==='job' ? 1 : _cqLineCount(); }
+function _tdText(i){ if(_tdMode==='job'){ var d=((document.getElementById('addJobDesc')||{}).value||'').trim(); return d||'עבודה חדשה'; } return _cqLineText(i); }
+function _tdSel(i){ if(_tdMode==='job') return _ajTags; return _cqTags[i]||[]; }
+function _tdAfterChange(){ if(_tdMode==='job') ajTagsRender(); else cqTagsRender(); _cqDrawerRender(); }
+function cqTagToggleAt(i, q){
+  var tg=_tagsAll[q]; if(tg==null) return;
+  if(_tdMode==='job'){ var k=_ajTags.indexOf(tg); if(k>=0) _ajTags.splice(k,1); else _ajTags.push(tg); _tdAfterChange(); return; }
+  cqTagToggle(i, tg);
+}
 function cqTagAdd(i){
   var inp=document.getElementById('cqTagNew'); var name=(inp?inp.value:'').trim(); if(!name) return;
   if(_tagsAll.indexOf(name)<0){ _tagsAll.push(name); _tagsAll.sort(); }
-  if(!_cqTags[i]) _cqTags[i]=[];
-  if(_cqTags[i].indexOf(name)<0) _cqTags[i].push(name);
+  if(_tdMode==='job'){ if(_ajTags.indexOf(name)<0) _ajTags.push(name); }
+  else { if(!_cqTags[i]) _cqTags[i]=[]; if(_cqTags[i].indexOf(name)<0) _cqTags[i].push(name); }
   if(inp) inp.value='';
   try{_tagsFillFilter();}catch(e){}
-  cqTagsRender(); _cqDrawerRender();
+  _tdAfterChange();
 }
 // v1008: the internal-reminders box stays small. Empty = one line. With text = two lines (scrolls). While typing = grows to fit, up to ~10 lines.
 function _cqDetFit(el){
@@ -4477,8 +4498,9 @@ function cqTagsRowRemoved(idx){
   _cqTags = out;
   if (_cqDrawerLine >= 0) cqTagDrawerClose();
 }
-function cqTagDrawerOpen(i){
-  if(i<0||i>=_cqLineCount()) return;
+function cqTagDrawerOpen(i){ _tdMode='quote'; _tdOpen(i); }
+function _tdOpen(i){
+  if(i<0||i>=_tdCount()) return;
   _cqDrawerLine=i;
   var ov=document.getElementById('cqTagDrawer');
   if(!ov){
@@ -4494,15 +4516,15 @@ function cqTagDrawerOpen(i){
   ov.style.display='flex';
   _cqDrawerRender(true);
 }
-function cqTagDrawerClose(){ var ov=document.getElementById('cqTagDrawer'); if(ov) ov.style.display='none'; _cqDrawerLine=-1; }
-function cqTagDrawerGo(step){ var t=_cqDrawerLine+step; if(t<0||t>=_cqLineCount()) return; _cqDrawerLine=t; _cqDrawerRender(true); }
+function cqTagDrawerClose(){ var ov=document.getElementById('cqTagDrawer'); if(ov) ov.style.display='none'; _cqDrawerLine=-1; _tdMode='quote'; }
+function cqTagDrawerGo(step){ var t=_cqDrawerLine+step; if(t<0||t>=_tdCount()) return; _cqDrawerLine=t; _cqDrawerRender(true); }
 function _cqDrawerRender(resetScroll){
   var ov=document.getElementById('cqTagDrawer'), sheet=document.getElementById('cqTagDrawerSheet');
   if(!ov||!sheet||ov.style.display==='none'||_cqDrawerLine<0) return;
-  var n=_cqLineCount(), i=_cqDrawerLine;
+  var n=_tdCount(), i=_cqDrawerLine;
   if(i>=n){ cqTagDrawerClose(); return; }
   var keepInp=document.getElementById('cqTagNew'), typed=keepInp?keepInp.value:'', sc=sheet.scrollTop;
-  var sel=_cqTags[i]||[];
+  var sel=_tdSel(i);
   var nav=function(step,label,enabled){ return '<button type="button" '+(enabled?'onclick="cqTagDrawerGo('+step+')"':'disabled')+' style="border:1.5px solid '+(enabled?'#90a4ae':'#eceff1')+';background:#fff;color:'+(enabled?'#37474f':'#cfd8dc')+';border-radius:10px;padding:6px 12px;font-size:12px;font-weight:800;font-family:Heebo,sans-serif;'+(enabled?'cursor:pointer;':'')+'">'+label+'</button>'; };
   var html='<div style="width:38px;height:4px;border-radius:2px;background:#cfd8dc;margin:0 auto 10px;"></div>';
   html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">';
@@ -4510,7 +4532,7 @@ function _cqDrawerRender(resetScroll){
   if(n>1) html+=nav(-1,'הקודמת',i>0)+nav(1,'הבאה',i<n-1);
   html+='<button type="button" onclick="cqTagDrawerClose()" aria-label="סגור" style="border:none;background:none;font-size:20px;color:#78909c;cursor:pointer;padding:2px 4px;">✕</button>';
   html+='</div>';
-  html+='<div style="font-size:14px;font-weight:700;color:#111;background:#f5f7f9;border-radius:10px;padding:9px 11px;margin-bottom:10px;line-height:1.4;max-height:60px;overflow:hidden;">'+_cqEsc(_cqLineText(i))+'</div>';
+  html+='<div style="font-size:14px;font-weight:700;color:#111;background:#f5f7f9;border-radius:10px;padding:9px 11px;margin-bottom:10px;line-height:1.4;max-height:60px;overflow:hidden;">'+_cqEsc(_tdText(i))+'</div>';
   html+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">';
   for(var q=0;q<_tagsAll.length;q++){
     var on=sel.indexOf(_tagsAll[q])>=0;
@@ -4526,6 +4548,34 @@ function _cqDrawerRender(resetScroll){
   sheet.innerHTML=html;
   var ni=document.getElementById('cqTagNew'); if(ni&&typed) ni.value=typed;
   sheet.scrollTop=resetScroll?0:sc;
+}
+
+// ── v1009: tags on Job Management → new job. Required (at least one) — Yaniv's choice. ──
+function ajTagsRender(){
+  var box=document.getElementById('ajTagsBox'); if(!box) return;
+  var has=_ajTags.length>0, warn=box.getAttribute('data-warn')==='1' && !has;
+  var html='<div onclick="ajTagDrawerOpen()" style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:9px 11px;border-radius:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;border:1.5px solid '+(warn?'#e53935':'#ddd')+';background:'+(warn?'#ffebee':'#fff')+';">';
+  if(has) for(var q=0;q<_ajTags.length;q++) html+='<span style="display:inline-block;padding:4px 10px;border-radius:13px;font-size:12px;font-weight:700;background:#1565c0;color:#fff;">'+_cqEsc(_ajTags[q])+'</span>';
+  else html+='<span style="font-size:14px;color:'+(warn?'#c62828':'#999')+';">'+(warn?'בחר לפחות תגית אחת':'לא נבחרו תגיות')+'</span>';
+  html+='<span style="margin-right:auto;border:1.5px solid '+(has?'#1565c0':'#b0bec5')+';border-radius:14px;padding:4px 11px;font-size:12px;font-weight:800;color:'+(has?'#1565c0':'#546e7a')+';background:#fff;white-space:nowrap;">🏷 '+(has?'שנה':'הוסף')+'</span>';
+  html+='</div>';
+  box.innerHTML=html;
+}
+function ajTagDrawerOpen(){
+  _tdMode='job';
+  if(!_tagsAll.length){ showToast('⏳ טוען תגיות…'); tagsLoad(function(){ _tdMode='job'; _tdOpen(0); }); return; }
+  _tdOpen(0);
+}
+function ajTagsReset(){ _ajTags=[]; var box=document.getElementById('ajTagsBox'); if(box) box.removeAttribute('data-warn'); ajTagsRender(); }
+// Called with the addJob reply (the new job id). Same save path as the job editor and the quotation.
+function _ajSaveTags(jobId, client){
+  var id=String(jobId||'').trim(), tags=_ajTags.slice();
+  if(!tags.length) return;
+  // addJob replies with the new id — or 'Sheet not found: …' / 'Header not found' / an HTML error page
+  if(!id || /\s/.test(id) || /error|not found|שגיאה|</i.test(id) || id.length>40){ setTimeout(function(){ showToast('⚠️ התגיות לא נשמרו — השרת לא החזיר מספר עבודה. בדוק את העבודה בגיליון.'); }, 2600); return; }   // delayed: the form's own toast fires right after
+  _tagsByJob[id]=tags.slice();
+  fetch(SHEETS_URL+'?action=setJobTags&jobId='+encodeURIComponent(id)+'&client='+encodeURIComponent(client||'')+'&tags='+encodeURIComponent(tags.join(',')))
+    .catch(function(){ showToast('⚠️ שמירת התגיות נכשלה — הוסף אותן בעריכת העבודה'); });
 }
 
 function tagsLoad(cb){
@@ -4842,6 +4892,7 @@ function openAddJobModal() {
   document.getElementById('addJobHours').value = '';
   document.getElementById('addJobPO').value = '';
   document.getElementById('addJobStatusMsg').style.display = 'none';
+  ajTagsReset();   // v1009
   if (sel.options.length > 1) sel.value = '';
   updateAddJobBtn();
   document.getElementById('addJobOverlay').style.display = 'flex';
@@ -4960,7 +5011,7 @@ function _checkPikuachCategory() {
 
 function updateAddJobBtn() { var category = document.getElementById('addJobCategory').value; var price = document.getElementById('addJobPrice').value; var qty = document.getElementById('addJobQty').value; var hours = document.getElementById('addJobHours').value; var po = document.getElementById('addJobPO').value.trim(); var allFilled = category && price && qty && hours && po; var anyFilled = category || price || qty || hours || po; var btn = document.getElementById('addJobSubmitBtn'); var msg = document.getElementById('addJobStatusMsg'); var hint = document.getElementById('addJobStatusHint'); var sel = document.getElementById('addJobStatus'); var restrictedStatuses = ['ממתין לביצוע', 'בתהליך ביצוע', 'בוצע']; for (var i = 0; i < sel.options.length; i++) { var opt = sel.options[i]; if (restrictedStatuses.indexOf(opt.value) !== -1) { opt.disabled = !allFilled; } } if (!allFilled && restrictedStatuses.indexOf(sel.value) !== -1) { sel.value = 'ממתין להצעה'; } if (hint) hint.style.display = allFilled ? 'none' : 'block'; if (allFilled) { btn.textContent = '✓ Add to Sheet & Day'; btn.style.background = '#111'; msg.style.display = 'none'; } else if (anyFilled) { btn.textContent = '💾 Save to Sheet Only'; btn.style.background = '#555'; msg.style.display = 'block'; msg.style.background = '#fff8e1'; msg.style.border = '1px solid #f0c040'; msg.style.color = '#7a5c00'; msg.textContent = '⚠️ Some fields missing — project will be saved to sheet but not added to day. Fill all fields to add to day.'; } else { btn.textContent = '💾 Save to Sheet Only'; btn.style.background = '#555'; msg.style.display = 'block'; msg.style.background = '#f5f5f5'; msg.style.border = '1px solid #ddd'; msg.style.color = '#888'; msg.textContent = 'Fill category, price, quantity, estimated hours and PO number to add the project to day.'; } }
 
-function submitAddJob() { var client = document.getElementById('addJobClient').value; var desc = document.getElementById('addJobDesc').value.trim(); var status = document.getElementById('addJobStatus').value; var category = document.getElementById('addJobCategory').value; var price = document.getElementById('addJobPrice').value; var qty = document.getElementById('addJobQty').value; var hours = document.getElementById('addJobHours').value; var po = document.getElementById('addJobPO').value.trim(); var quote = (document.getElementById('addJobQuote')||{value:''}).value.trim(); if (!client) { showToast('Please select a client'); return; } if (!desc) { showToast('Please enter a description'); return; } if (!status) { showToast('Please select a status'); return; } var statusMap = {'In Progress':'בתהליך ביצוע','Pending':'ממתין לביצוע','Waiting for Quote':'ממתין להצעה','Quote Given':'ניתנה הצעה','Done':'בוצע','Ready to Invoice':'להוציא חש'}; var statusHe = statusMap[status] || status; var allFilled = category && price && qty && hours && po; var btn = document.getElementById('addJobSubmitBtn'); btn.textContent = '⏳ שומר…'; btn.disabled = true; var canAddToDay = (statusHe === 'ממתין לביצוע' || statusHe === 'בתהליך ביצוע'); var params = '?action=addJob&client=' + encodeURIComponent(client) + '&desc=' + encodeURIComponent(desc) + '&st=' + encodeURIComponent(statusHe) + '&ca=' + encodeURIComponent(category) + '&pr=' + encodeURIComponent(price) + '&qt=' + encodeURIComponent(qty) + '&eh=' + encodeURIComponent(hours) + '&po=' + encodeURIComponent(po) + '&iq=' + encodeURIComponent(quote) + '&incomeMode=' + encodeURIComponent(_addJobCalcMode); fetch(SHEETS_URL + params).then(function(r) { return r.text(); }).then(function(result) { btn.disabled = false; document.getElementById('addJobOverlay').style.display = 'none'; var qEl = document.getElementById('addJobQuote'); if (qEl) qEl.value = ''; if (allFilled) { if (canAddToDay) { var job = { id: result, desc: desc, client: client, hours: parseFloat(hours) || 0 }; addJobAsProject(job); } else { renderSetup(); showToast('✓ ' + result + ' — saved to sheet'); } } else { renderSetup(); showToast('💾 ' + result + ' — saved to sheet'); } }).catch(function() { btn.textContent = allFilled ? '✓ Add to Sheet & Day' : '💾 Save to Sheet Only'; btn.disabled = false; showToast('Failed to add job'); }); }
+function submitAddJob() { var client = document.getElementById('addJobClient').value; var desc = document.getElementById('addJobDesc').value.trim(); var status = document.getElementById('addJobStatus').value; var category = document.getElementById('addJobCategory').value; var price = document.getElementById('addJobPrice').value; var qty = document.getElementById('addJobQty').value; var hours = document.getElementById('addJobHours').value; var po = document.getElementById('addJobPO').value.trim(); var quote = (document.getElementById('addJobQuote')||{value:''}).value.trim(); if (!client) { showToast('Please select a client'); return; } if (!desc) { showToast('Please enter a description'); return; } if (!status) { showToast('Please select a status'); return; } if (!_ajTags.length) { var _ajb = document.getElementById('ajTagsBox'); if (_ajb) { _ajb.setAttribute('data-warn', '1'); ajTagsRender(); _ajb.scrollIntoView({ block: 'center', behavior: 'smooth' }); } showToast('🏷 בחר לפחות תגית אחת'); return; } /* v1009 */ var statusMap = {'In Progress':'בתהליך ביצוע','Pending':'ממתין לביצוע','Waiting for Quote':'ממתין להצעה','Quote Given':'ניתנה הצעה','Done':'בוצע','Ready to Invoice':'להוציא חש'}; var statusHe = statusMap[status] || status; var allFilled = category && price && qty && hours && po; var btn = document.getElementById('addJobSubmitBtn'); btn.textContent = '⏳ שומר…'; btn.disabled = true; var canAddToDay = (statusHe === 'ממתין לביצוע' || statusHe === 'בתהליך ביצוע'); var params = '?action=addJob&client=' + encodeURIComponent(client) + '&desc=' + encodeURIComponent(desc) + '&st=' + encodeURIComponent(statusHe) + '&ca=' + encodeURIComponent(category) + '&pr=' + encodeURIComponent(price) + '&qt=' + encodeURIComponent(qty) + '&eh=' + encodeURIComponent(hours) + '&po=' + encodeURIComponent(po) + '&iq=' + encodeURIComponent(quote) + '&incomeMode=' + encodeURIComponent(_addJobCalcMode); fetch(SHEETS_URL + params).then(function(r) { return r.text(); }).then(function(result) { btn.disabled = false; try { _ajSaveTags(result, client); } catch (_eAj) {} /* v1009 */ document.getElementById('addJobOverlay').style.display = 'none'; var qEl = document.getElementById('addJobQuote'); if (qEl) qEl.value = ''; if (allFilled) { if (canAddToDay) { var job = { id: result, desc: desc, client: client, hours: parseFloat(hours) || 0 }; addJobAsProject(job); } else { renderSetup(); showToast('✓ ' + result + ' — saved to sheet'); } } else { renderSetup(); showToast('💾 ' + result + ' — saved to sheet'); } }).catch(function() { btn.textContent = allFilled ? '✓ Add to Sheet & Day' : '💾 Save to Sheet Only'; btn.disabled = false; showToast('Failed to add job'); }); }
 
 function setInvoiceStatusOnDone(project) { if (!SHEETS_URL || !project.jobId) return; fetch(SHEETS_URL + '?action=setInvoiceStatus&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client) + '&invoiceStatus=' + encodeURIComponent('להוציא חש')).then(function(r) { return r.text(); }).then(function(res) { if (res === 'OK') showToast('✓ יצאה חשבונית → להוציא חש'); else showToast('Invoice status: ' + res); }).catch(function() { showToast('⚠️ Invoice status update failed'); }); }
 function revertInvoiceStatus(project) { if (!SHEETS_URL || !project.jobId) return; fetch(SHEETS_URL + '?action=setInvoiceStatus&jobId=' + encodeURIComponent(project.jobId) + '&client=' + encodeURIComponent(project.jobClient || project.client) + '&invoiceStatus=' + encodeURIComponent('')).then(function(r) { return r.text(); }).then(function(res) { if (res === 'OK') showToast('↩ יצאה חשבונית cleared'); else showToast('Revert status: ' + res); }).catch(function() { showToast('⚠️ Invoice revert failed'); }); }
