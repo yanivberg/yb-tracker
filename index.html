@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v1005</title>
+<title>י.ב אחזקות — v1006</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -568,8 +568,8 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1005
-Deployed: 13/11/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1006
+Deployed: 14/11/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 364)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
@@ -579,6 +579,19 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v1006 · 14/11/2026 · AS v236
+• חדש: מסך סיום פרויקט אחד במקום שני טפסים ברצף (הסקר, ואז "רגע לפני שסיימת"). במסך: דירוג, שעות בפועל, כלים, חומרים, שלבים, מה עבד טוב, תקלות — ובסוף טבלת "תכנון מול ביצוע". כל דרך לסמן עבודה כבוצעה מגיעה לאותו מסך.
+• כלים: הכלים שתוכננו בתדריך של העבודה מופיעים ראשונים עם תג "תוכנן", לא מסומנים — מסמנים רק מה שבאמת שימש. כשיש תדריך עם כלים לא נשלחת בקשת AI (חוסך בקשת Gemini בכל סיום עבודה).
+• חומרים: הצעות בהקשה משלושה מקורות, כל אחד מסומן — מהתדריך (מה שתוכנן), מההערות שנכתבו בכרטיס במהלך העבודה (שורה-שורה, בלי ניחוש AI), ומההוצאות שנרשמו בפרויקט בקטגוריית חומרים (עם סכום). אפשר גם להקליד.
+• שלבים: אם לעבודה יש תדריך — מוצגים השלבים שלה עצמה (בהצעה עם כמה שורות, השלבים של השורה הזו); אחרת הרשימה הכללית לקטגוריה כמו קודם.
+• תכנון מול ביצוע (מחושב בקוד, מתעדכן תוך כדי מילוי): שעות מול ההערכה באחוזים · כלים וחומרים — מה תוכנן ולא שימש ומה נוסף בלי תכנון · רווח לשעה בפועל מול "לפי ההערכה" ומול יעד ₪500. הרווח לשעה = הרווח הגולמי של העבודה כפי שהוא בגיליון ÷ שעות; אם אין נתון בגיליון נכתב "אין נתון" ולא מוצג מספר.
+• שמירה: אותם שני גיליונות (Job Surveys, Lessons Learned). שינוי: בעמודות "חומרים" ו"כלים" של הלקח נרשם מה ששימש בפועל — עד עכשיו הועתקו לשם החומרים והכלים שתוכננו בתדריך כאילו כולם שימשו. ההבדלים בין תכנון לביצוע נשמרים בטקסט ההערות של הלקח. בדילוג על הסיכום — התכנון נרשם עם הסימון "תוכנן (לא אומת)". בשורת Job Surveys השעות הן עכשיו סך כל הימים (היה: היום האחרון בלבד).
+• קישור תדריך ↔ עבודה: (1) בשמירת הצעת מחיר, התדריך שלה נקשר למספרי העבודה של כל שורות ההצעה — כל עבודה מההצעה מוצאת אותו, גם אם התיאור ישתנה אחר כך (עד עכשיו רק העבודה הראשונה). (2) כשאין התאמה מדויקת והאפליקציה מצמידה "התדריך האחרון של אותו לקוח" — זה מוצג עכשיו בשמו כ"תדריך משוער" עם כפתור "לא זה", בכרטיס ובמסך הסיום. (3) אותה פונקציית התאמה אחת משמשת את הכרטיס, מסך הסיום, רשימת הממתינות והלקח.
+• הצעת מחיר חדשה: במסך התדריך נוסף בלוק "מעבודות קודמות בקטגוריה" — עד 5 סיכומי סיום אמיתיים מאותה קטגוריה (חומרים, כלים, הערות, שעות בפועל מול הערכה). הקשה על פריט מוסיפה אותו לתדריך. נתונים מהגיליון, לא AI.
+• פרויקט שנוסף מעבודה בגיליון נושא עכשיו את הקטגוריה שלה (עד עכשיו השדה נשאר ריק בפרויקטים).
+• מגבלות: הקישור עדיין נשמר במכשיר בלבד — תדריך שנכתב במחשב לא יימצא באייפון (שלב 2, דורש שינוי ב-Apps Script). תדריכים שנכתבו לפני הגרסה הזו ממשיכים להתאים לפי כותרת.
+• ללא שינוי ב-Apps Script.
+
 v1005 · 13/11/2026 · AS v236
 • חדש: עריכת זמן היום בפרויקט במהלך יום העבודה. ליד השעון בכרטיס הפרויקט (פעיל או מושהה) יש ✏️ שפותח חלונית קטנה: כפתורי ‎−15 / −5 / +5 / +15‎ דקות, שדה להקלדת זמן מדויק (אפשר להקליד 140 במקום 01:40), שמור / ביטול.
 • נערך רק הזמן של היום (totalMs). ימים קודמים (prevMs) לא משתנים, ו-Till now מתעדכן מעצמו. עובד גם כשהשעון רץ — הוא ממשיך לרוץ אחרי השמירה.
@@ -1839,7 +1852,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1005</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1006</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -3643,20 +3656,8 @@ function _doAddJobAsProject(job, expensesOn) {
   // this project, so its 📋 תדריך stays attached even when the sheet description differs from the
   // quote line that seeded the survey. Prefer an exact description match; otherwise take the most
   // recent unattached quotation briefing for the same client. localStorage-only, best-effort.
-  try {
-    if (job.id) {
-      var _pps = JSON.parse(localStorage.getItem('preProjectSurveys') || '[]');
-      var _hit = null;
-      for (var _pi = _pps.length - 1; _pi >= 0; _pi--) {
-        var _s = _pps[_pi];
-        if (!_s || String(_s.jobId || '').trim()) continue;
-        if (_s.desc && _s.desc === job.desc) { _hit = _s; break; }
-        if (!_hit && _s._forQuotation && _s.client === job.client) _hit = _s;
-      }
-      if (_hit) { _hit.jobId = job.id; localStorage.setItem('preProjectSurveys', JSON.stringify(_pps)); }
-    }
-  } catch (_e) {}
-  var proj = { name: name, title: job.title || name, client: job.client, jobId: job.id, jobClient: job.client, jobDateStart: null, estHours: job.hours || 0, jobPO: job.poNumber || job.po || '', jobPrice: job.price || 0, jobIncome: parseFloat(job.income) || 0, sessionNum: projects.length + 1, totalMs: 0, prevMs: 0, active: false, activeStart: null, done: false, notes: [], noteOpen: false, editOpen: false, _expensesOn: expensesOn || 'client' };
+  try { if (job.id) _briefingAttach(job.id, job.desc, job.client); } catch (_e) {}   // v1006: shared matcher; a same-client guess is flagged, not silent
+  var proj = { name: name, title: job.title || name, client: job.client, jobId: job.id, jobClient: job.client, jobDateStart: null, estHours: job.hours || 0, jobPO: job.poNumber || job.po || '', jobPrice: job.price || 0, jobIncome: parseFloat(job.income) || 0, category: job.category || '', sessionNum: projects.length + 1, totalMs: 0, prevMs: 0, active: false, activeStart: null, done: false, notes: [], noteOpen: false, editOpen: false, _expensesOn: expensesOn || 'client' };
   projects.push(proj);
   saveClient(job.client);
   saveState();
@@ -3847,18 +3848,8 @@ var pendingQuoteJobs = [];
 // permanent (afterwards _surveyForProject finds it by jobId too, e.g. when it enters the day).
 function _surveyForPendingJob(job) {
   if (!job) return null;
-  var all = [];
-  try { all = JSON.parse(localStorage.getItem('preProjectSurveys') || '[]'); } catch(e) { return null; }
-  if (!Array.isArray(all) || !all.length) return null;
-  var jid = String(job.id || '').trim();
-  var desc = String(job.desc || '').trim();
-  var client = String(job.client || '').trim();
-  var hit = null, stamp = false;
-  if (jid) hit = all.filter(function(s){ return s && String(s.jobId||'').trim() === jid; }).pop();
-  if (!hit && desc) { hit = all.filter(function(s){ return s && String(s.desc||'').trim() === desc; }).pop(); if (hit) stamp = true; }
-  if (!hit && client) { hit = all.filter(function(s){ return s && !String(s.jobId||'').trim() && s._forQuotation && String(s.client||'').trim() === client; }).pop(); if (hit) stamp = true; }
-  if (hit && stamp && jid) { hit.jobId = jid; try { localStorage.setItem('preProjectSurveys', JSON.stringify(all)); } catch(e){} }
-  return hit || null;
+  var m = _briefingAttach(job.id, job.desc, job.client);   // v1006: one matcher for every screen
+  return m ? m.s : null;
 }
 
 function _togglePendingSurvey(idx) {
@@ -4950,12 +4941,9 @@ function _saveLessonOnComplete(project) {
   if (!project || !project.jobId) return;
   if (!project || !project.jobId) return;
   // Find the matching opening survey saved at briefing time
-  var surveys = [];
-  try { surveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]'); } catch(e){}
-  var survey = null;
-  for (var s = surveys.length-1; s >= 0; s--) {
-    if (surveys[s] && surveys[s].jobId === project.jobId) { survey = surveys[s]; break; }
-  }
+  // v1006: same matcher as the card and the end screen (job id → exact text / quotation line → flagged guess)
+  var _bm = _briefingMatch(project.jobId, project.title || project.name);
+  var survey = _bm ? _bm.s : null;
   var actualMs = (project.totalMs||0) + (project.prevMs||0);
   var actualHrs = Math.round((actualMs/3600000)*100)/100;
   var cc = project._closing || {};
@@ -4987,13 +4975,16 @@ function _saveLessonOnComplete(project) {
     actualHrs:   actualHrs,
     estHrs:      estHrs,
     outcome:     'success',
-    materials:   [ (cc.materials||''), (survey ? (survey.materials||[]).join(', ') : '') ].filter(Boolean).join(', ').slice(0,250),
-    steps:       survey ? (survey.steps||[]).join('; ') : '',
+    // v1006: from the end screen = what was really used. Skipped summary = the plan, marked as unverified
+    // (it used to be written as if every planned material had been used).
+    materials:   (cc.fromEndForm ? (cc.materials||'') : ((survey && (survey.materials||[]).filter(Boolean).length) ? 'תוכנן (לא אומת): ' + (survey.materials||[]).filter(Boolean).join(', ') : (cc.materials||''))).slice(0,250),
+    steps:       survey ? _briefingStepsFor(survey, project.title || project.name).join('; ') : '',
     successKeys: [ (cc.successKeys||''), (survey ? (survey.successKeys||[]).join(', ') : '') ].filter(Boolean).join(', ').slice(0,250),
-    tools:       survey ? (survey.tools||[]).join(', ') : '',
+    tools:       cc.fromEndForm ? (cc.toolsUsed||[]).join(', ') : ((survey && (survey.tools||[]).filter(Boolean).length) ? 'תוכנן (לא אומת): ' + (survey.tools||[]).filter(Boolean).join(', ') : ''),
     notes:       (function(){
                    var parts = [];
                    if (cc.gotcha) parts.push('⚠️ ' + cc.gotcha);
+                   if (cc.compareNote) parts.push(cc.compareNote);
                    if (project.notes && project.notes.length) {
                      // strip leading numbering/timestamps for cleaner learning text
                      var cleaned = project.notes.map(function(n){
@@ -5546,19 +5537,13 @@ function reRender() { var s = document.getElementById('screen-setup'); if (s && 
 // Lookup mirrors renderTips(): prefer an exact jobId match, fall back to description, newest wins.
 function _surveyForProject(p) {
   if (!p) return null;
-  var all = [];
-  try { all = JSON.parse(localStorage.getItem('preProjectSurveys') || '[]'); } catch(e) { return null; }
-  if (!Array.isArray(all) || !all.length) return null;
-  var jid = String(p.jobId || '').trim();
-  var title = String(p.title || p.name || '').trim();
-  var hit = null;
-  if (jid) hit = all.filter(function(s){ return s && String(s.jobId||'').trim() === jid; }).pop();
-  if (!hit && title) hit = all.filter(function(s){ return s && String(s.desc||'').trim() === title; }).pop();
-  return hit || null;
+  var m = _briefingMatch(p.jobId, p.title || p.name);   // v1006: one matcher for every screen
+  return m ? m.s : null;
 }
 
 function _surveyPanelHtml(p) {
-  var s = _surveyForProject(p);
+  var _m = p ? _briefingMatch(p.jobId, p.title || p.name) : null;
+  var s = _m ? _m.s : null;
   if (!s) return '<div style="font-size:11px;color:rgba(0,0,0,0.45);padding:4px 0;direction:rtl;">לא נמצא תדריך לפרויקט זה</div>';
   function sec(icon, label, items, color, numbered) {
     var list = (items || []).filter(Boolean);
@@ -5574,10 +5559,10 @@ function _surveyPanelHtml(p) {
     '</div>';
   }
   var html = sec('🔧', 'כלים נדרשים',   s.tools, '#1565c0', false) +
-             sec('📝', 'שלבי ביצוע',    s.steps, '#6a1b9a', true)  +
+             sec('📝', 'שלבי ביצוע',    _briefingStepsFor(s, p.title || p.name), '#6a1b9a', true)  +
              sec('🔑', 'מפתחות להצלחה', s.keys,  '#2e7d32', false);
   if (!html) return '<div style="font-size:11px;color:rgba(0,0,0,0.45);padding:4px 0;direction:rtl;">התדריך נשמר ריק</div>';
-  return html + '<div style="font-size:9.5px;color:rgba(0,0,0,0.35);padding-top:2px;direction:rtl;">מתוך שאלון קדם-הצעה' + (s.date ? ' · ' + _escNote(s.date) : '') + '</div>';
+  return _briefingGuessBanner(_m, p.jobId) + html + '<div style="font-size:9.5px;color:rgba(0,0,0,0.35);padding-top:2px;direction:rtl;">מתוך שאלון קדם-הצעה' + (s.date ? ' · ' + _escNote(s.date) : '') + '</div>';
 }
 
 function _surveyAccordionHtml(i, p, thick) {
@@ -5934,7 +5919,7 @@ function deleteNote(i, n) {
 function toggleDone(i) {
   var p = projects[i]; p.done = !p.done;
   if (p.done && p.active) { p.totalMs += Date.now() - p.activeStart; p.active = false; p.activeStart = null; arrangementStart = Date.now(); localStorage.setItem('yb_arrangementStart', arrangementStart); document.getElementById('statusValue').innerHTML = '<span class="status-dot"></span>Setup'; }
-  if (p.done) { showToast('✓ ' + p.name + ' — ' + formatMs(p.totalMs)); if (p.jobId) { syncDoneJobToSheets(p); setInvoiceStatusOnDone(p); _showClosingCapture(i); } silentSaveProjectsShortcut(); }
+  if (p.done) { showToast('✓ ' + p.name + ' — ' + formatMs(p.totalMs)); if (p.jobId) { syncDoneJobToSheets(p); setInvoiceStatusOnDone(p); if (p._endFormDone) _saveLessonOnComplete(p); else openProjectSurvey(i, { postDone: true }); /* v1006: was _showClosingCapture(i) — the second form */ } silentSaveProjectsShortcut(); }
   else { showToast('↩ ' + p.name + ' — Restored'); if (p.jobId) revertInvoiceStatus(p); silentSaveProjectsShortcut(); }
   saveState(); renderProjectBtns();
 }
@@ -9830,6 +9815,7 @@ function _doCreateCaspitQuote(rowData, contactId, sheetClient) {
       _cqTags = {};
     } catch(e){}
     if (!jobIds.length) { showToast('⚠️ Step 1 failed: sheet save returned no IDs'); btn.textContent = '💼 Save & Send to Caspit'; btn.disabled = false; return; }
+    try { _linkBriefingToJobs(_quoteBriefingId, jobIds, rowData.map(function(r){ return r.desc; })); _quoteBriefingId = null; } catch(_eLink) {}   // v1006
     _pbFastRefresh();   // accumulate these lines into מחירון כללי (fast, background)
     btn.textContent = '⏳ Sending to Caspit…';
     var lines = rowData.map(function(r) {
@@ -10519,76 +10505,385 @@ var PROCESS_STEPS_BY_CAT = {
 
 var ISSUE_OPTIONS = ['חסר ציוד','חסר חומרים','חריגה מזמן','בעיה טכנית','שינוי בהיקף','בעיית גישה','מזג אוויר','בעיית לקוח'];
 
-function openProjectSurvey(i) {
-  _surveyIdx = i;
-  _surveyRating = 0;
-  var p = projects[i];
-  var overlay = document.getElementById('projectSurveyOverlay');
-  var header  = document.getElementById('surveyHeader');
-  var body    = document.getElementById('surveyBody');
-  overlay.style.display = 'flex';
+// ── v1006: briefing ↔ job link — ONE lookup used by the card, the end-of-project screen and the lesson ──
+// how: 'id'    = the job id is stamped on the briefing (exact)
+//      'line'  = the job text equals the briefing description / one of its quotation lines (exact text)
+//      'guess' = attached earlier as "latest briefing of the same client" — shown by name so it can be rejected
+function _efEsc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function _efNorm(s) { return String(s == null ? '' : s).replace(/\s+/g,' ').trim(); }
+function _efNum(v) { if (v === null || v === undefined || v === '') return null; var n = parseFloat(String(v).replace(/[^0-9.\-]/g,'')); return isNaN(n) ? null : n; }
+function _briefingsAll() { var all = []; try { all = JSON.parse(localStorage.getItem('preProjectSurveys') || '[]'); } catch(e) { all = []; } return Array.isArray(all) ? all : []; }
+function _briefingsSave(all) { try { localStorage.setItem('preProjectSurveys', JSON.stringify(all)); } catch(e) {} }
+function _briefingMatch(jobId, title) {
+  var all = _briefingsAll(); if (!all.length) return null;
+  var jid = String(jobId || '').trim(), t = _efNorm(title), i, s;
+  if (jid) {
+    for (i = all.length - 1; i >= 0; i--) { s = all[i]; if (!s) continue;
+      if (Array.isArray(s.jobIds) && s.jobIds.indexOf(jid) !== -1) return { s: s, how: 'id', idx: i };
+      if (String(s.jobId || '').trim() === jid) return { s: s, how: s._guess ? 'guess' : 'id', idx: i };
+    }
+  }
+  if (t) {
+    for (i = all.length - 1; i >= 0; i--) { s = all[i]; if (!s) continue;
+      if (_efNorm(s.desc) === t) return { s: s, how: 'line', idx: i };
+      if (Array.isArray(s.lines) && s.lines.some(function(l){ return _efNorm(l) === t; })) return { s: s, how: 'line', idx: i };
+      if (Array.isArray(s.blines) && s.blines.some(function(l){ return _efNorm(l) === t; })) return { s: s, how: 'line', idx: i };
+    }
+  }
+  return null;
+}
+// A job enters the app (pending list / added to Today): find its briefing and remember the link.
+function _briefingAttach(jobId, desc, client) {
+  var jid = String(jobId || '').trim();
+  var m = _briefingMatch(jid, desc), all, s, i;
+  if (m) {
+    if (m.how === 'line' && jid) {   // exact text match → keep the id too, so a later title edit does not break the link
+      all = _briefingsAll(); s = all[m.idx];
+      if (s) {
+        var multi = (Array.isArray(s.lines) && s.lines.length > 1) || (Array.isArray(s.blines) && s.blines.length > 1) || !!String(s.jobId || '').trim();
+        if (multi) { s.jobIds = s.jobIds || []; if (s.jobIds.indexOf(jid) === -1) s.jobIds.push(jid); }
+        else s.jobId = jid;
+        _briefingsSave(all);
+      }
+    }
+    return m;
+  }
+  var c = String(client || '').trim(); if (!jid || !c) return null;
+  all = _briefingsAll();
+  for (i = all.length - 1; i >= 0; i--) {
+    s = all[i];
+    if (!s || !s._forQuotation || String(s.jobId || '').trim()) continue;
+    if (Array.isArray(s.jobIds) && s.jobIds.length) continue;            // exactly linked to other jobs — never guess it
+    if ((s._notFor || []).indexOf(jid) !== -1) continue;                 // the user already said "not this one"
+    if (String(s.client || '').trim() !== c) continue;
+    s.jobId = jid; s._guess = true;
+    _briefingsSave(all);
+    return { s: s, how: 'guess', idx: i };
+  }
+  return null;
+}
+// The quotation was saved: its lines now have sheet job ids → exact link, for EVERY line of the quotation.
+var _quoteBriefingId = null;
+function _linkBriefingToJobs(bid, jobIds, descs) {
+  if (!bid) return;
+  var made = parseInt(String(bid).slice(1), 10);
+  if (!made || Date.now() - made > 3 * 3600000) return;                 // stale briefing from an abandoned flow — do not link
+  var ids = (jobIds || []).map(function(j){ return String(j || '').trim(); }).filter(function(j){ return j && j.indexOf('Error') === -1; });
+  if (!ids.length) return;
+  var all = _briefingsAll();
+  for (var i = all.length - 1; i >= 0; i--) {
+    if (all[i] && all[i].bid === bid) {
+      all[i].jobIds = ids;
+      all[i].lines = (descs || []).map(function(d){ return _efNorm(d); }).filter(Boolean);
+      delete all[i]._guess;
+      _briefingsSave(all);
+      return;
+    }
+  }
+}
+function _rejectBriefingGuess(jobId) {
+  var jid = String(jobId || '').trim(); if (!jid) return;
+  var all = _briefingsAll(), changed = false;
+  all.forEach(function(s){ if (s && s._guess && String(s.jobId || '').trim() === jid) { s.jobId = ''; delete s._guess; s._notFor = (s._notFor || []).concat([jid]); changed = true; } });
+  if (changed) _briefingsSave(all);
+  showToast('התדריך נותק מהפרויקט הזה');
+  if (_ef && projects[_ef.idx] && String(projects[_ef.idx].jobId || '').trim() === jid) { _ef.bm = null; _efRender(); _efRenderMats(); }
+  else if (dayStartTime) renderProjectBtns();
+}
+function _briefingGuessBanner(m, jobId) {
+  if (!m || m.how !== 'guess') return '';
+  return '<div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:6px 9px;margin-bottom:6px;font-size:11px;color:#6d4c00;direction:rtl;display:flex;align-items:center;gap:8px;">' +
+    '<span style="flex:1;">⚠️ תדריך משוער (לפי לקוח, לא לפי העבודה): <b>' + _efEsc(String(m.s.desc || '').slice(0, 60)) + '</b></span>' +
+    '<button onclick="event.stopPropagation();_rejectBriefingGuess(\'' + String(jobId || '').replace(/[^A-Za-z0-9_\-]/g, '') + '\')" style="flex-shrink:0;background:#fff;border:1px solid #c9a227;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;color:#6d4c00;cursor:pointer;font-family:Heebo,sans-serif;">לא זה</button>' +
+  '</div>';
+}
+// Steps that belong to THIS job: its own quotation line if the briefing covered several lines.
+function _briefingStepsFor(s, title) {
+  if (!s) return [];
+  var t = _efNorm(title), sbl = Array.isArray(s.stepsByLine) ? s.stepsByLine : null, k;
+  if (sbl && Array.isArray(s.blines)) { k = s.blines.map(_efNorm).indexOf(t); if (k !== -1 && sbl[k] && sbl[k].length) return sbl[k].filter(Boolean); }
+  if (sbl && Array.isArray(s.lines) && s.lines.length === sbl.length) { k = s.lines.map(_efNorm).indexOf(t); if (k !== -1 && sbl[k] && sbl[k].length) return sbl[k].filter(Boolean); }
+  return (s.steps || []).filter(Boolean);
+}
 
-  var hrs = formatMs((p.totalMs||0) + (parseFloat(p.hoursActual||0)*3600000));
+// ── v1006: ONE end-of-project screen. Replaces the old pair (Project Survey, then the "רגע לפני שסיימת"
+// closing form). Planned items come from the job's briefing; suggestions for materials come from the
+// briefing, the notes written on the card and the expenses logged on the job. Nothing here calls the AI
+// when a briefing exists (the old tool refinement spent one Gemini request per finished job).
+var _ef = null;   // state of the open screen: {idx, postDone, bm, info, exps, mats, sug}
+function _efProjHours(p) { var ms = (p.totalMs || 0) + (p.prevMs || 0); if (p.active && p.activeStart) ms += Date.now() - p.activeStart; return Math.round(ms / 36000) / 100; }
+function _efCat(p) { return p.category || (_ef && _ef.bm && _ef.bm.s && _ef.bm.s.cat) || (_ef && _ef.info && typeof _ef.info === 'object' && _ef.info.category) || ''; }
+function _efNoteLines(p) {
+  return (p.notes || []).map(function(n){ return String(n).replace(/^\[DONE:[^\]]*\]/, '').replace(/^\d+\.\s*/, '').replace(/^\([^)]*\)\s*/, '').trim(); }).filter(Boolean);
+}
+
+function openProjectSurvey(i, opts) {
+  var p = projects[i]; if (!p) return;
+  _surveyIdx = i; _surveyRating = 0;
+  _ef = { idx: i, postDone: !!(opts && opts.postDone), bm: _briefingMatch(p.jobId, p.title || p.name), info: null, exps: null, mats: [], sug: [] };
+  document.getElementById('projectSurveyOverlay').style.display = 'flex';
+  _efRender();
+  _efRenderMats();
+  _efLoadSheetData();
+}
+
+function _efStepsHtml() {
+  var p = projects[_ef.idx], s = _ef.bm ? _ef.bm.s : null;
+  var steps = s ? _briefingStepsFor(s, p.title || p.name) : [], fromBrief = steps.length > 0;
+  if (!fromBrief) { var cat = _efCat(p); steps = PROCESS_STEPS_BY_CAT[cat] || PROCESS_STEPS_BY_CAT['default']; }
+  return '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">📋 מה בוצע בפועל? ' +
+      '<span style="font-weight:400;font-size:10px;color:#888;">' + (fromBrief ? '· השלבים מהתדריך של העבודה הזו' : '· רשימה כללית לקטגוריה') + '</span></div>' +
+    '<div style="display:flex;flex-direction:column;gap:4px;">' +
+      steps.map(function(st, si){ return '<label style="display:flex;align-items:center;gap:6px;font-size:12px;direction:rtl;cursor:pointer;padding:3px 0;"><input type="checkbox" id="sstep_' + si + '" data-step="' + _efEsc(st) + '"> ' + _efEsc(st) + '</label>'; }).join('') +
+    '</div>';
+}
+
+function _efRender() {
+  if (!_ef) return; var p = projects[_ef.idx]; if (!p) return;
+  var header = document.getElementById('surveyHeader'), body = document.getElementById('surveyBody');
+  var s = _ef.bm ? _ef.bm.s : null;
+  var hrs = _efProjHours(p), est = parseFloat(p.estHours || 0) || 0;
+  var C = 'background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;direction:rtl;';
+  var T = 'font-size:12px;font-weight:900;color:#333;margin-bottom:8px;';
+  var I = 'width:100%;padding:9px 10px;border:1px solid #ddd;border-radius:8px;font-size:13px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;';
+
   header.innerHTML =
     '<div style="display:flex;align-items:center;gap:12px;">' +
       '<span style="font-size:24px;">✅</span>' +
-      '<div style="flex:1;"><div style="font-size:16px;font-weight:900;color:#fff;">Project Complete!</div>' +
-      '<div style="font-size:11px;color:rgba(255,255,255,0.8);">' + (p.client||'') + ' — ' + (p.title||p.name||'') + '</div></div>' +
-      '<div style="text-align:right;"><div style="font-size:14px;font-weight:900;color:#fff;">' + hrs + '</div>' +
+      '<div style="flex:1;"><div style="font-size:16px;font-weight:900;color:#fff;">סיכום פרויקט</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.8);">' + _efEsc(p.client || '') + ' — ' + _efEsc(p.title || p.name || '') + '</div></div>' +
+      '<div style="text-align:right;"><div style="font-size:14px;font-weight:900;color:#fff;">' + hoursToHHMM(hrs) + '</div>' +
       '<div style="font-size:9px;color:rgba(255,255,255,0.7);">שעות</div></div>' +
     '</div>';
 
-  var steps = PROCESS_STEPS_BY_CAT[p.category] || PROCESS_STEPS_BY_CAT['default'];
-  var myTools = getMyToolbox();
-  var catSpecific = (getCategoryTools()[p.category] || []);
-  // v916: show only up to 10 tools instantly; AI-refined list (grounded in this
-  // client's job-survey history) replaces it in the background via _refineSurveyTools.
-  var suggestedTools = catSpecific.concat(myTools.filter(function(t){ return catSpecific.indexOf(t)<0; })).slice(0,10);
+  // Briefing link
+  var briefHtml;
+  if (s && _ef.bm.how === 'guess') briefHtml = _briefingGuessBanner(_ef.bm, p.jobId);
+  else if (s) briefHtml = '<div style="background:#e8f5e9;border-radius:8px;padding:6px 9px;margin-bottom:10px;font-size:11px;color:#1b5e20;direction:rtl;">📋 מחובר לתדריך: <b>' + _efEsc(String(s.desc || '').slice(0, 60)) + '</b>' + (s.date ? ' · ' + _efEsc(s.date) : '') + '</div>';
+  else briefHtml = '<div style="background:#eceff1;border-radius:8px;padding:6px 9px;margin-bottom:10px;font-size:11px;color:#546e7a;direction:rtl;">לא נמצא תדריך לעבודה הזו — אין נתוני תכנון להשוואה.</div>';
 
-  var html =
+  // Tools: planned first (unticked — tick only what was really used), then the usual suggestions
+  var cat = _efCat(p);
+  var planned = s ? (s.tools || []).filter(Boolean) : [];
+  var plannedN = planned.map(function(t){ return _efNorm(t).toLowerCase(); });
+  var catSpecific = (getCategoryTools()[cat] || []);
+  var extra = catSpecific.concat(getMyToolbox().filter(function(t){ return catSpecific.indexOf(t) < 0; }))
+    .filter(function(t){ return plannedN.indexOf(_efNorm(t).toLowerCase()) === -1; })
+    .slice(0, Math.max(0, 10 - planned.length));
+  function toolLabel(t, ti, isPlanned) {
+    return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:4px 0;">' +
+      '<input type="checkbox" id="stool_' + ti + '" data-tool="' + _efEsc(t) + '"' + (isPlanned ? ' data-planned="1"' : '') + '> ' + _efEsc(t) +
+      (isPlanned ? ' <span style="font-size:9px;background:#e3f2fd;color:#0d47a1;border-radius:4px;padding:0 4px;">תוכנן</span>' : '') + '</label>';
+  }
+  var toolsHtml = planned.map(function(t, ti){ return toolLabel(t, ti, true); }).join('') +
+                  extra.map(function(t, ti){ return toolLabel(t, planned.length + ti, false); }).join('');
+
+  body.innerHTML =
+    '<div id="efForm" onchange="_efUpdateCompare()" oninput="_efUpdateCompare()">' +
+    briefHtml +
+
     // Rating
-    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
-      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">⭐ Rate this job</div>' +
+    '<div style="' + C + '">' +
+      '<div style="' + T + '">⭐ דרג את העבודה</div>' +
       '<div style="display:flex;gap:6px;justify-content:center;" id="surveyStars">' +
-        [1,2,3,4,5].map(function(n){ return '<span onclick="_setSurveyRating('+n+')" id="surveyStar'+n+'" style="font-size:30px;cursor:pointer;opacity:0.25;-webkit-tap-highlight-color:transparent;">⭐</span>'; }).join('') +
+        [1,2,3,4,5].map(function(n){ return '<span onclick="_setSurveyRating(' + n + ')" id="surveyStar' + n + '" style="font-size:30px;cursor:pointer;opacity:0.25;-webkit-tap-highlight-color:transparent;">⭐</span>'; }).join('') +
       '</div>' +
-      '<div id="surveyRatingLabel" style="text-align:center;font-size:11px;color:#888;margin-top:4px;">Tap to rate</div>' +
+      '<div id="surveyRatingLabel" style="text-align:center;font-size:11px;color:#888;margin-top:4px;">הקש לדירוג</div>' +
     '</div>' +
 
-    // Tools used
-    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
-      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">🔧 Tools used <span id="surveyToolsAI" style="font-weight:400;font-size:10px;color:#aaa;">· ⏳ מתאים לפי היסטוריה…</span></div>' +
-      '<div id="surveyToolsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">' +
-        suggestedTools.map(function(t,ti){ return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:4px 0;"><input type="checkbox" id="stool_'+ti+'" data-tool="'+t.replace(/"/g,'&quot;')+'"> '+t+'</label>'; }).join('') +
-      '</div>' +
+    // Hours
+    '<div style="' + C + '">' +
+      '<div style="' + T + '">⏱️ שעות בפועל (כל הימים)</div>' +
+      '<input id="efHours" type="number" inputmode="decimal" step="0.25" min="0" value="' + (hrs > 0 ? hrs : '') + '" style="' + I + 'direction:ltr;text-align:center;font-size:16px;font-weight:900;">' +
+      '<div style="font-size:10px;color:#999;margin-top:4px;">' + (est > 0 ? 'הוערך: ' + est + ' שעות · ' : '') + 'משמש לסיכום בלבד. לתיקון השעות בגיליון השתמש ב-✏️ בכרטיס לפני הסיום.</div>' +
+    '</div>' +
+
+    // Tools
+    '<div style="' + C + '">' +
+      '<div style="' + T + '">🔧 כלים ששימשו <span id="surveyToolsAI" style="font-weight:400;font-size:10px;color:#888;">' + (planned.length ? '· מהתדריך — סמן רק מה שבאמת שימש' : '· ⏳ מתאים לפי היסטוריה…') + '</span></div>' +
+      '<div id="surveyToolsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">' + toolsHtml + '</div>' +
       '<div style="margin-top:8px;display:flex;gap:6px;">' +
         '<input id="surveyCustomTool" placeholder="כלי נוסף..." style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;" onkeypress="if(event.key===\'Enter\')_addSurveyTool()">' +
-        '<button onclick="_addSurveyTool()" style="background:#0d47a1;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">+</button>' +
+        '<button type="button" onclick="_addSurveyTool()" style="background:#0d47a1;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">+</button>' +
+      '</div>' +
+    '</div>' +
+
+    // Materials
+    '<div style="' + C + '">' +
+      '<div style="' + T + '">🔩 חומרים ששימשו בפועל</div>' +
+      '<div id="efMatsUsed" style="display:flex;flex-wrap:wrap;gap:5px;"></div>' +
+      '<div id="efMatSug"></div>' +
+      '<div style="margin-top:10px;display:flex;gap:6px;">' +
+        '<input id="efMatInp" placeholder="חומר נוסף..." style="flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;" onkeypress="if(event.key===\'Enter\')_efAddMat()">' +
+        '<button type="button" onclick="_efAddMat()" style="background:#0d47a1;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:13px;font-weight:900;cursor:pointer;font-family:Heebo,sans-serif;">+</button>' +
       '</div>' +
     '</div>' +
 
     // Process
-    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
-      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">📋 Process — what was done?</div>' +
-      '<div style="display:flex;flex-direction:column;gap:4px;">' +
-        steps.map(function(s,si){ return '<label style="display:flex;align-items:center;gap:6px;font-size:12px;direction:rtl;cursor:pointer;padding:3px 0;"><input type="checkbox" id="sstep_'+si+'" data-step="'+s.replace(/"/g,'&quot;')+'"> '+s+'</label>'; }).join('') +
-      '</div>' +
+    '<div style="' + C + '" id="efSteps">' + _efStepsHtml() + '</div>' +
+
+    // What worked
+    '<div style="' + C + '">' +
+      '<div style="' + T + '">✅ מה עבד טוב / מפתח להצלחה</div>' +
+      '<input id="efSuccess" type="text" placeholder="לדוגמה: גישה מהצד הצפוני חסכה זמן" style="' + I + '">' +
     '</div>' +
 
     // Issues
-    '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
-      '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:8px;">⚠️ Issues encountered</div>' +
+    '<div style="' + C + '">' +
+      '<div style="' + T + '">⚠️ תקלות / מה לשים לב בפעם הבאה</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:8px;">' +
-        ISSUE_OPTIONS.map(function(s,si){ return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:3px 0;"><input type="checkbox" id="sissue_'+si+'" data-issue="'+s+'"> '+s+'</label>'; }).join('') +
+        ISSUE_OPTIONS.map(function(o, si){ return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:3px 0;"><input type="checkbox" id="sissue_' + si + '" data-issue="' + _efEsc(o) + '"> ' + _efEsc(o) + '</label>'; }).join('') +
       '</div>' +
-      '<textarea id="surveyIssueText" placeholder="פרט בעיות..." style="width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:8px;font-size:12px;direction:rtl;font-family:Heebo,sans-serif;box-sizing:border-box;height:56px;resize:none;"></textarea>' +
+      '<textarea id="surveyIssueText" placeholder="פרט: מה קרה ומה לעשות אחרת..." style="' + I + 'height:56px;resize:none;"></textarea>' +
     '</div>' +
 
-    '<button onclick="submitProjectSurvey()" style="width:100%;padding:14px;background:#f0c020;border:none;border-radius:12px;font-size:16px;font-weight:900;color:#111;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);font-family:Heebo,sans-serif;margin-bottom:8px;">✓ Save & End Project</button>' +
-    '<button onclick="skipProjectSurvey()" style="width:100%;padding:10px;background:transparent;border:none;font-size:12px;color:#aaa;cursor:pointer;font-family:Heebo,sans-serif;">Skip survey</button>';
+    // Planned vs actual
+    '<div style="' + C + 'border:1.5px solid #0d47a1;">' +
+      '<div style="' + T + 'color:#0d47a1;">📊 תכנון מול ביצוע</div>' +
+      '<div id="efCompare"></div>' +
+    '</div>' +
+    '</div>' +
 
-  body.innerHTML = html;
-  _refineSurveyTools(p);
+    '<button onclick="submitProjectSurvey()" style="width:100%;padding:14px;background:#f0c020;border:none;border-radius:12px;font-size:16px;font-weight:900;color:#111;cursor:pointer;box-shadow:0 4px 12px rgba(240,192,32,0.4);font-family:Heebo,sans-serif;margin-bottom:8px;">' + (_ef.postDone ? '💾 שמור סיכום' : '✓ שמור וסיים פרויקט') + '</button>' +
+    '<button onclick="skipProjectSurvey()" style="width:100%;padding:10px;background:transparent;border:none;font-size:12px;color:#aaa;cursor:pointer;font-family:Heebo,sans-serif;">' + (_ef.postDone ? 'דלג' : 'דלג וסיים בלי סיכום') + '</button>';
+
+  if (!planned.length) _refineSurveyTools(p);   // no briefing tools → keep the history-based suggestion
+}
+
+// Material suggestions: briefing · notes written on the card · expenses logged on the job (materials only)
+function _efBuildSug() {
+  var p = projects[_ef.idx], s = _ef.bm ? _ef.bm.s : null, out = [], seen = {};
+  function add(t, src, amt) { t = _efNorm(t); if (!t) return; var k = t.toLowerCase(); if (seen[k]) return; seen[k] = 1; out.push({ t: t, src: src, amt: amt }); }
+  if (s) (s.materials || []).forEach(function(m){ add(m, 'brief'); });
+  _efNoteLines(p).forEach(function(n){ add(n, 'note'); });
+  if (Array.isArray(_ef.exps)) _ef.exps.forEach(function(ex){ if (!ex || (ex.category && ex.category !== 'חומרים')) return; add(ex.desc, 'exp', parseFloat(ex.amount) || 0); });
+  _ef.sug = out;
+}
+function _efRenderMats() {
+  if (!_ef) return; _efBuildSug();
+  var used = document.getElementById('efMatsUsed'), sug = document.getElementById('efMatSug'); if (!used || !sug) return;
+  var p = projects[_ef.idx];
+  var un = _ef.mats.map(function(m){ return _efNorm(m).toLowerCase(); });
+  used.innerHTML = _ef.mats.length
+    ? _ef.mats.map(function(m, j){ return '<span style="display:inline-flex;align-items:center;gap:6px;background:#e8f5e9;border:1px solid #a5d6a7;color:#1b5e20;border-radius:14px;padding:4px 10px;font-size:12px;font-weight:700;">' + _efEsc(m) + '<span onclick="_efRemoveMat(' + j + ')" style="color:#c62828;font-size:14px;cursor:pointer;line-height:1;">×</span></span>'; }).join('')
+    : '<div style="font-size:11px;color:#999;">עדיין לא נבחרו חומרים — הקש על הצעה למטה או הוסף ידנית.</div>';
+  var groups = [['brief', '📋 מהתדריך (תוכנן)'], ['note', '📝 מההערות שכתבת בפרויקט'], ['exp', '🧾 מההוצאות שנרשמו (חומרים)']];
+  var html = '';
+  groups.forEach(function(g){
+    var head = '<div style="margin-top:9px;"><div style="font-size:10px;font-weight:900;color:#666;margin-bottom:4px;">' + g[1] + '</div>';
+    if (g[0] === 'exp' && p.jobId && _ef.exps === null) { html += head + '<div style="font-size:11px;color:#999;">⏳ טוען הוצאות…</div></div>'; return; }
+    if (g[0] === 'exp' && _ef.exps === 'err') { html += head + '<div style="font-size:11px;color:#c62828;">⚠️ טעינת ההוצאות נכשלה — אפשר להוסיף ידנית.</div></div>'; return; }
+    var items = []; _ef.sug.forEach(function(x, k){ if (x.src === g[0]) items.push([x, k]); });
+    if (!items.length) return;
+    html += head + '<div style="display:flex;flex-wrap:wrap;gap:5px;">' +
+      items.map(function(it){
+        var on = un.indexOf(it[0].t.toLowerCase()) !== -1;
+        return '<button type="button" onclick="_efToggleMat(' + it[1] + ')" style="max-width:100%;text-align:right;white-space:normal;border-radius:14px;padding:5px 10px;font-size:12px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;' +
+          (on ? 'background:#e8f5e9;border:1px solid #66bb6a;color:#1b5e20;' : 'background:#fff;border:1px solid #cfd8dc;color:#37474f;') + '">' +
+          (on ? '✓ ' : '+ ') + _efEsc(it[0].t) + (it[0].amt ? ' · ₪' + Math.round(it[0].amt) : '') + '</button>';
+      }).join('') + '</div></div>';
+  });
+  if (!html) html = '<div style="font-size:11px;color:#999;margin-top:8px;">אין הצעות — לעבודה הזו אין תדריך, הערות או הוצאות חומרים.</div>';
+  sug.innerHTML = html;
+  _efUpdateCompare();
+}
+function _efToggleMat(k) {
+  var x = _ef && _ef.sug[k]; if (!x) return;
+  var key = x.t.toLowerCase(), at = -1;
+  _ef.mats.forEach(function(m, j){ if (_efNorm(m).toLowerCase() === key) at = j; });
+  if (at === -1) _ef.mats.push(x.t); else _ef.mats.splice(at, 1);
+  _efRenderMats();
+}
+function _efRemoveMat(j) { if (!_ef) return; _ef.mats.splice(j, 1); _efRenderMats(); }
+function _efAddMat() {
+  var inp = document.getElementById('efMatInp'); var v = _efNorm(inp ? inp.value : ''); if (!v || !_ef) return;
+  if (_ef.mats.map(function(m){ return _efNorm(m).toLowerCase(); }).indexOf(v.toLowerCase()) === -1) _ef.mats.push(v);
+  inp.value = ''; _efRenderMats();
+}
+
+// Sheet data for the comparison: income / gross profit / estimate, then the job's expenses. One request
+// at a time — Apps Script serialises per user and answers a second concurrent call with an HTML error page.
+function _efLoadSheetData() {
+  var st = _ef; if (!st) return; var p = projects[st.idx];
+  if (!p.jobId || !SHEETS_URL) { st.info = 'none'; st.exps = []; _efRenderMats(); return; }
+  function getJson(url, tries) {
+    return fetch(url).then(function(r){ if (!r.ok) throw new Error('http'); return r.json(); })
+      .catch(function(e){ if (tries > 0) return new Promise(function(res){ setTimeout(res, 900); }).then(function(){ return getJson(url, tries - 1); }); throw e; });
+  }
+  getJson(SHEETS_URL + '?action=getFullJobInfo&jobId=' + encodeURIComponent(p.jobId) + '&client=' + encodeURIComponent(p.jobClient || p.client) + '&_t=' + Date.now(), 1)
+    .then(function(d){ if (_ef === st) st.info = (d && d.id) ? d : 'none'; })
+    .catch(function(){ if (_ef === st) st.info = 'err'; })
+    .then(function(){
+      if (_ef !== st) return;
+      // category may only be known now → refresh the generic step list if nothing was ticked yet
+      var stepsBox = document.getElementById('efSteps');
+      if (stepsBox && !stepsBox.querySelector('input:checked')) stepsBox.innerHTML = _efStepsHtml();
+      _efUpdateCompare();
+      if (_expCache[p.jobId]) { st.exps = _expCache[p.jobId]; _efRenderMats(); return; }
+      return getJson(SHEETS_URL + '?action=getExpenses&jobId=' + encodeURIComponent(p.jobId) + '&_t=' + Date.now(), 1)
+        .then(function(d){ if (_ef !== st) return; st.exps = Array.isArray(d) ? d : []; _efRenderMats(); })
+        .catch(function(){ if (_ef === st) { st.exps = 'err'; _efRenderMats(); } });
+    });
+}
+
+// Planned vs actual. Every number here is computed in code from the briefing, the form and the sheet row.
+function _efCompareData() {
+  var p = projects[_ef.idx], s = _ef.bm ? _ef.bm.s : null;
+  var hrs = _efNum((document.getElementById('efHours') || {}).value);
+  var info = (_ef.info && typeof _ef.info === 'object') ? _ef.info : null;
+  var est = parseFloat(p.estHours || 0) || (info ? (_efNum(info.hours) || 0) : 0);
+  var toolsUsed = Array.from(document.querySelectorAll('#surveyToolsGrid input:checked')).map(function(cb){ return cb.dataset.tool; });
+  var pTools = s ? (s.tools || []).filter(Boolean) : [], pMats = s ? (s.materials || []).filter(Boolean) : [];
+  function diff(planned, used) {
+    var pn = planned.map(function(x){ return _efNorm(x).toLowerCase(); }), un = used.map(function(x){ return _efNorm(x).toLowerCase(); });
+    return { notUsed: planned.filter(function(x, k){ return un.indexOf(pn[k]) === -1; }), added: used.filter(function(x, k){ return pn.indexOf(un[k]) === -1; }) };
+  }
+  var gross = null;
+  if (info) { gross = _efNum(info.grossProfit); if (gross === null) { var inc = _efNum(info.income); if (inc !== null) gross = inc - (_efNum(info.costs) || 0); } }
+  var c = { hrs: (hrs !== null && hrs > 0) ? hrs : null, est: est > 0 ? est : null, toolsUsed: toolsUsed, hasBrief: !!s, pTools: pTools, pMats: pMats,
+            tools: diff(pTools, toolsUsed), mats: diff(pMats, _ef.mats), gross: gross };
+  c.pphActual = (gross !== null && c.hrs) ? gross / c.hrs : null;
+  c.pphEst    = (gross !== null && c.est) ? gross / c.est : null;
+  var n = [];
+  if (c.hrs && c.est) n.push('שעות ' + c.hrs + ' מול הערכה ' + c.est + ' (' + Math.round(c.hrs / c.est * 100) + '%)');
+  if (s) {
+    if (c.tools.notUsed.length) n.push('כלים שתוכננו ולא שימשו: ' + c.tools.notUsed.join(', '));
+    if (c.tools.added.length)   n.push('כלים שנוספו: ' + c.tools.added.join(', '));
+    if (c.mats.notUsed.length)  n.push('חומרים שתוכננו ולא שימשו: ' + c.mats.notUsed.join(', '));
+    if (c.mats.added.length)    n.push('חומרים שנוספו: ' + c.mats.added.join(', '));
+  }
+  if (c.pphActual !== null) n.push('רווח לשעה ₪' + Math.round(c.pphActual) + (c.pphEst !== null ? ' (לפי ההערכה ₪' + Math.round(c.pphEst) + ')' : '') + ', יעד ₪' + AVG_PPH_TARGET);
+  c.note = n.length ? ('תכנון מול ביצוע: ' + n.join(' | ')).slice(0, 300) : '';
+  return c;
+}
+function _efUpdateCompare() {
+  var box = document.getElementById('efCompare'); if (!box || !_ef) return;
+  var c = _efCompareData();
+  var G = '#2e7d32', O = '#e65100', R = '#c62828', N = '#78909c';
+  function row(icon, label, html) { return '<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #f0f0f0;"><div style="flex-shrink:0;width:74px;font-size:11px;font-weight:900;color:#555;">' + icon + ' ' + label + '</div><div style="flex:1;font-size:12px;line-height:1.5;">' + html + '</div></div>'; }
+  function col(t, color) { return '<span style="color:' + color + ';font-weight:700;">' + t + '</span>'; }
+  function list(label, arr, color) { return arr.length ? '<div style="font-size:11px;color:' + color + ';">' + label + ': ' + arr.map(_efEsc).join(', ') + '</div>' : ''; }
+  var h;
+  if (c.hrs && c.est) { var pct = Math.round(c.hrs / c.est * 100); h = 'הערכה ' + c.est + ' ש׳ · בפועל ' + c.hrs + ' ש׳ — ' + col(pct + '% מההערכה', pct <= 100 ? G : (pct <= 120 ? O : R)); }
+  else if (!c.est) h = col('אין הערכת שעות לעבודה הזו', N);
+  else h = col('הזן שעות בפועל', N);
+  function planRow(planned, d, emptyMsg) {
+    if (!c.hasBrief) return col('אין תדריך — אין מה להשוות', N);
+    if (!planned.length) return col(emptyMsg, N) + list('נוספו', d.added, O);
+    var usedN = planned.length - d.notUsed.length;
+    return 'תוכננו ' + planned.length + ' · שימשו ' + col(String(usedN), usedN === planned.length ? G : O) +
+      list('תוכננו ולא שימשו', d.notUsed, O) + list('נוספו בלי תכנון', d.added, O);
+  }
+  var pr;
+  if (_ef.info === null) pr = col('⏳ טוען מהגיליון…', N);
+  else if (_ef.info === 'err') pr = col('לא הצלחתי לקרוא מהגיליון — אין נתון', R);
+  else if (c.gross === null) pr = col('אין בגיליון הכנסה / רווח לעבודה הזו', N);
+  else if (!c.hrs) pr = col('הזן שעות בפועל', N);
+  else pr = col('₪' + Math.round(c.pphActual) + ' לשעה בפועל', c.pphActual >= AVG_PPH_TARGET ? G : (c.pphActual >= 0 ? O : R)) +
+      (c.pphEst !== null ? ' · לפי ההערכה ₪' + Math.round(c.pphEst) : '') + ' · יעד ₪' + AVG_PPH_TARGET +
+      '<div style="font-size:10px;color:#999;">רווח גולמי בגיליון ₪' + Math.round(c.gross) + ' ÷ שעות</div>';
+  box.innerHTML = row('⏱️', 'שעות', h) + row('🔧', 'כלים', planRow(c.pTools, c.tools, 'בתדריך לא נרשמו כלים')) +
+    row('🔩', 'חומרים', planRow(c.pMats, c.mats, 'בתדריך לא נרשמו חומרים')) + row('💰', 'רווח לשעה', pr);
 }
 
 // v916: background AI refinement of survey tool suggestions — reuses the existing
@@ -10600,7 +10895,7 @@ function _refineSurveyTools(p) {
   if (!desc) { var h0=document.getElementById('surveyToolsAI'); if(h0) h0.style.display='none'; return; }
   fetch(SHEETS_URL + '?action=analyzeQuotationLines' +
     '&lines='  + encodeURIComponent(JSON.stringify([desc])) +
-    '&cat='    + encodeURIComponent(p.category || '') +
+    '&cat='    + encodeURIComponent(_efCat(p)) +
     '&client=' + encodeURIComponent(p.jobClient || p.client || ''))
     .then(function(r){ return r.json(); })
     .then(function(result) {
@@ -10618,6 +10913,7 @@ function _refineSurveyTools(p) {
         return '<label style="display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:4px 0;"><input type="checkbox" id="stool_'+ti+'" data-tool="'+t.replace(/"/g,'&quot;')+'"'+isOn+'> '+t+'</label>';
       }).join('');
       if (hint) hint.textContent = '· 🤖 מותאם לפי היסטוריה';
+      if (_ef) _efUpdateCompare();
     })
     .catch(function(){ var h=document.getElementById('surveyToolsAI'); if(h) h.style.display='none'; });
 }
@@ -10635,54 +10931,80 @@ function _setSurveyRating(n) {
 
 function _addSurveyTool() {
   var inp = document.getElementById('surveyCustomTool');
-  var name = (inp?inp.value:'').trim();
-  if(!name) return;
-  var grid = inp.parentElement.previousElementSibling;
+  var name = (inp ? inp.value : '').trim();
+  if (!name) return;
+  var grid = document.getElementById('surveyToolsGrid'); if (!grid) return;
   var idx = grid.querySelectorAll('label').length;
   var lbl = document.createElement('label');
   lbl.style.cssText = 'display:flex;align-items:center;gap:5px;font-size:12px;direction:rtl;cursor:pointer;padding:4px 0;';
-  lbl.innerHTML = '<input type="checkbox" id="stool_c'+idx+'" data-tool="'+name.replace(/"/g,'&quot;')+'" checked> '+name;
+  lbl.innerHTML = '<input type="checkbox" id="stool_c' + idx + '" data-tool="' + _efEsc(name) + '" checked> ' + _efEsc(name);
   grid.appendChild(lbl);
   inp.value = '';
+  if (_ef) _efUpdateCompare();
 }
 
 function submitProjectSurvey() {
-  var p = projects[_surveyIdx];
-  if(!p) return;
-
-  var toolsUsed = Array.from(document.querySelectorAll('[id^="stool_"]:checked')).map(function(cb){ return cb.dataset.tool; });
+  var i = _surveyIdx, p = projects[i];
+  if (!p || !_ef) return;
+  var c = _efCompareData();
+  var toolsUsed = c.toolsUsed;
   var steps     = Array.from(document.querySelectorAll('[id^="sstep_"]:checked')).map(function(cb){ return cb.dataset.step; });
   var issues    = Array.from(document.querySelectorAll('[id^="sissue_"]:checked')).map(function(cb){ return cb.dataset.issue; });
-  var issueText = (document.getElementById('surveyIssueText')||{}).value || '';
+  var issueText = ((document.getElementById('surveyIssueText') || {}).value || '').trim();
+  var success   = ((document.getElementById('efSuccess') || {}).value || '').trim();
+  var cat       = _efCat(p);
+  var hrsFinal  = c.hrs || _efProjHours(p);
 
-  var survey = { jobId:p.jobId||'', client:p.client||'', desc:p.title||p.name||'', cat:p.category||'', date:new Date().toLocaleDateString('he-IL'), rating:_surveyRating, toolsUsed:toolsUsed, steps:steps, issues:issues, issueText:issueText, hrs:Math.round((p.totalMs||0)/3600000*100)/100 };
+  // Job Surveys row (same sheet + columns as before). hrs is now the job's total hours — it used to be today's part only.
+  var survey = { jobId:p.jobId||'', client:p.client||'', desc:p.title||p.name||'', cat:cat, date:new Date().toLocaleDateString('he-IL'), rating:_surveyRating,
+                 toolsUsed:toolsUsed, steps:steps, issues:issues, issueText:issueText, hrs:hrsFinal,
+                 materialsUsed:_ef.mats.slice(), successNote:success, compare:c.note, briefing:(_ef.bm ? _ef.bm.how : '') };
 
-  // Save to localStorage
-  var surveys = JSON.parse(localStorage.getItem('projectSurveys')||'[]');
+  var surveys = [];
+  try { surveys = JSON.parse(localStorage.getItem('projectSurveys') || '[]'); } catch(e) { surveys = []; }
   surveys.push(survey);
-  localStorage.setItem('projectSurveys', JSON.stringify(surveys));
+  try { localStorage.setItem('projectSurveys', JSON.stringify(surveys)); } catch(e) {}
 
-  // Update categoryTools with actual tools used
-  if(survey.cat && toolsUsed.length) {
+  // Update categoryTools with the tools actually used
+  if (cat && toolsUsed.length) {
     var ct = getCategoryTools();
-    if(!ct[survey.cat]) ct[survey.cat] = [];
-    toolsUsed.forEach(function(t){ if(ct[survey.cat].indexOf(t)<0) ct[survey.cat].push(t); });
+    if (!ct[cat]) ct[cat] = [];
+    toolsUsed.forEach(function(t){ if (ct[cat].indexOf(t) < 0) ct[cat].push(t); });
     localStorage.setItem('categoryTools', JSON.stringify(ct));
   }
 
-  // Save to Apps Script
   fetch(SHEETS_URL + '?action=saveProjectSurvey', {
     method:'POST', headers:{'Content-Type':'text/plain;charset=UTF-8'}, body:JSON.stringify(survey)
-  }).catch(function(){ showToast('\u26A0\uFE0F \u05D4\u05E1\u05E7\u05E8 \u05E0\u05E9\u05DE\u05E8 \u05D1\u05DE\u05DB\u05E9\u05D9\u05E8 \u05D1\u05DC\u05D1\u05D3 \u2014 \u05D4\u05E9\u05DE\u05D9\u05E8\u05D4 \u05DC\u05E9\u05E8\u05EA \u05E0\u05DB\u05E9\u05DC\u05D4'); });
+  }).catch(function(){ showToast('⚠️ הסקר נשמר במכשיר בלבד — השמירה לשרת נכשלה'); });
 
+  // What the lesson (Lessons Learned sheet) records: ACTUAL materials and tools, plus the planned-vs-actual text.
+  p._closing = {
+    fromEndForm: true,
+    materials:   _ef.mats.join(', '),
+    toolsUsed:   toolsUsed.slice(),
+    successKeys: success,
+    gotcha:      [issues.join(', '), issueText].filter(Boolean).join(' — '),
+    hours:       c.hrs,
+    compareNote: c.note
+  };
+
+  var postDone = _ef.postDone;
+  _ef = null;
   document.getElementById('projectSurveyOverlay').style.display = 'none';
-  toggleDone(_surveyIdx);
-  showToast('✓ Survey saved — tools learned for ' + (survey.cat||'this category'));
+  if (postDone) { _saveLessonOnComplete(p); saveState(); }
+  else { p._endFormDone = true; toggleDone(i); p._endFormDone = false; if (!p.jobId) p._closing = null; saveState(); }
+  showToast('✓ הסיכום נשמר' + (cat ? ' — ' + cat : ''));
 }
 
 function skipProjectSurvey() {
+  var i = _surveyIdx, p = projects[i];
+  var postDone = !!(_ef && _ef.postDone);
+  _ef = null;
   document.getElementById('projectSurveyOverlay').style.display = 'none';
-  toggleDone(_surveyIdx);
+  if (!p) return;
+  p._closing = null;
+  if (postDone) { _saveLessonOnComplete(p); return; }
+  p._endFormDone = true; toggleDone(i); p._endFormDone = false; saveState();
 }
 
 // ── Pre-Project Survey ────────────────────────────────
@@ -10854,6 +11176,7 @@ function _renderPreSurveyBodyAI(descSummary, lineStepsOrAiSteps, successKeys, su
       '</div>' +
     '</div>' +
 
+    '<div id="preCatHistory"></div>' +   // v1006: filled by _loadCatHistory(cat)
     '<div style="background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;">' +
       '<div style="font-size:12px;font-weight:900;color:#333;margin-bottom:10px;">⚙️ Job Conditions</div>' +
       '<div style="display:flex;flex-direction:column;gap:10px;">' +
@@ -10919,8 +11242,69 @@ function _renderPreSurveyBodyAI(descSummary, lineStepsOrAiSteps, successKeys, su
   // Pre-highlight the default expenses-on choice once the buttons exist in the DOM
   // (the markup above renders both buttons neutral; _setExpensesOn applies the actual styling).
   setTimeout(function(){ _setExpensesOn(_expensesOnChoice); }, 0);
+  // v1006: delayed so it never races the AI call (Apps Script answers a second concurrent call with an error page)
+  setTimeout(function(){ _loadCatHistory(cat); }, 600);
 
   return html;
+}
+
+// ── v1006: end-of-project records from the SAME CATEGORY, shown inside the briefing. These are real rows
+// from the Lessons Learned sheet (jobs that were actually finished) — not AI. Tap a chip to add it.
+function _catHistSplit(str) {
+  var t = String(str || '').trim();
+  if (!t || t.indexOf('תוכנן (לא אומת)') === 0) return [];      // planned-only data from a skipped summary is not evidence
+  return t.split(/[,;]/).map(_efNorm).filter(Boolean);
+}
+function _loadCatHistory(cat, _retry) {
+  var box = document.getElementById('preCatHistory'); if (!box) return;
+  if (!cat || !SHEETS_URL) { box.innerHTML = ''; return; }
+  var card = 'background:white;border-radius:12px;padding:12px 14px;margin-bottom:10px;direction:rtl;border-right:3px solid #00695c;';
+  box.innerHTML = '<div style="' + card + 'font-size:11px;color:#999;">📚 ⏳ טוען סיכומי סיום מעבודות קודמות בקטגוריה…</div>';
+  fetch(SHEETS_URL + '?action=getLessons&cat=' + encodeURIComponent(cat) + '&limit=40&_t=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(lessons){
+      var b = document.getElementById('preCatHistory'); if (!b) return;
+      var done = (Array.isArray(lessons) ? lessons : []).filter(function(l){ return parseFloat(l.actualHrs || 0) > 0; }).slice(0, 5);
+      if (!done.length) { b.innerHTML = '<div style="' + card + 'font-size:11px;color:#78909c;">📚 אין עדיין סיכומי סיום בקטגוריה "' + _efEsc(cat) + '". הם יצטברו כאן מכל פרויקט שתסיים.</div>'; return; }
+      function chips(arr, kind) {
+        return arr.map(function(v){
+          return '<button type="button" data-v="' + _efEsc(v) + '" onclick="_catHistAdd(this,\'' + kind + '\')" style="max-width:100%;text-align:right;white-space:normal;background:#fff;border:1px solid #cfd8dc;color:#37474f;border-radius:14px;padding:4px 9px;font-size:11px;font-weight:700;font-family:Heebo,sans-serif;cursor:pointer;">+ ' + _efEsc(v) + '</button>';
+        }).join('');
+      }
+      b.innerHTML = '<div style="' + card + '">' +
+        '<div style="font-size:12px;font-weight:900;color:#00695c;margin-bottom:2px;">📚 מעבודות קודמות בקטגוריה (' + done.length + ')</div>' +
+        '<div style="font-size:10px;color:#888;margin-bottom:8px;">נתונים אמיתיים מסיכומי סיום, לא AI. הקש על פריט כדי להוסיף אותו לתדריך.</div>' +
+        done.map(function(l){
+          var mats = _catHistSplit(l.materials), tools = _catHistSplit(l.tools);
+          var act = parseFloat(l.actualHrs || 0), est = parseFloat(l.estHrs || 0);
+          return '<div style="padding:8px 0;border-top:1px dashed #e0e0e0;">' +
+            '<div style="font-size:12px;font-weight:700;color:#111;">' + _efEsc(String(l.desc || '').slice(0, 70)) + '</div>' +
+            '<div style="font-size:10px;color:#888;margin-bottom:5px;">' + _efEsc(l.client || '') + (l.timestamp ? ' · ' + _efEsc(l.timestamp) : '') +
+              ' · ' + act + ' ש׳ בפועל' + (est > 0 ? ' מול ' + est + ' בהערכה' : '') + '</div>' +
+            (mats.length ? '<div style="font-size:10px;font-weight:900;color:#666;margin-bottom:3px;">🔩 חומרים</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px;">' + chips(mats, 'm') + '</div>' : '') +
+            (tools.length ? '<div style="font-size:10px;font-weight:900;color:#666;margin-bottom:3px;">🔧 כלים</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:5px;">' + chips(tools, 't') + '</div>' : '') +
+            (l.notes ? '<div style="font-size:11px;color:#0d47a1;line-height:1.45;">💡 ' + _efEsc(String(l.notes).slice(0, 260)) + '</div>' : '') +
+          '</div>';
+        }).join('') +
+      '</div>';
+    })
+    .catch(function(){
+      if (!_retry) { setTimeout(function(){ _loadCatHistory(cat, true); }, 1500); return; }
+      var b = document.getElementById('preCatHistory'); if (b) b.innerHTML = '';
+    });
+}
+function _catHistAdd(btn, kind) {
+  var v = btn && btn.dataset ? btn.dataset.v : ''; if (!v) return;
+  var key = _efNorm(v).toLowerCase();
+  if (kind === 'm') {
+    var have = Array.from(document.querySelectorAll('#preMaterialsList [data-mat]')).some(function(el){ return _efNorm(el.dataset.mat).toLowerCase() === key; });
+    if (!have) { var mi = document.getElementById('preMaterialInp'); if (!mi) return; mi.value = v; _addPreMaterial(); }
+  } else {
+    var existing = Array.from(document.querySelectorAll('[id^="ptool_"]')).filter(function(el){ return _efNorm(el.dataset.tool).toLowerCase() === key; })[0];
+    if (existing) existing.checked = true;
+    else { var ti = document.getElementById('preToolInp'); if (!ti) return; ti.value = v; _addPreTool(); }
+  }
+  btn.style.background = '#e8f5e9'; btn.style.borderColor = '#66bb6a'; btn.style.color = '#1b5e20'; btn.textContent = '✓ ' + v;
 }
 
 function _addPreSurveyStep(lineIdx) {
@@ -11066,6 +11450,7 @@ function submitPreProjectSurvey() {
 
 function openQuotationWithSurvey() {
   _caspitAccordionVisuals('quote');
+  _quoteBriefingId = null;   // v1006: a new quotation flow never inherits the previous flow's briefing
   // Show optional pre-survey overlay
   _preSurveyPendingJob = { desc: '', client: '', category: '', id: '', _forQuotation: true };
   var overlay = document.getElementById('preProjectSurveyOverlay');
@@ -11276,7 +11661,9 @@ function submitQuotationSurvey() {
   var keys      = Array.from(document.querySelectorAll('[id^="pkey_"]:checked')).map(function(cb){ return cb.dataset.key; });
   var tools     = Array.from(document.querySelectorAll('[id^="ptool_"]:checked')).map(function(cb){ return cb.dataset.tool; });
   var materials = Array.from(document.querySelectorAll('#preMaterialsList [data-mat]')).map(function(s){ return s.dataset.mat; });
-  var survey = { jobId:'', client:p.client||'', desc:p.desc||'', cat:p.category||'', date:new Date().toLocaleDateString('he-IL'), steps:allSteps, keys:keys, tools:tools, materials:materials, _forQuotation:true };
+  var survey = { jobId:'', client:p.client||'', desc:p.desc||'', cat:p.category||'', date:new Date().toLocaleDateString('he-IL'), steps:allSteps, keys:keys, tools:tools, materials:materials, _forQuotation:true,
+    bid:'b' + Date.now(), blines:((p._lines && p._lines.length) ? p._lines.slice() : (p.desc ? [p.desc] : [])), stepsByLine:stepsByLine };   // v1006: lets EVERY job of this quotation find the briefing
+  _quoteBriefingId = survey.bid;
   var surveys = JSON.parse(localStorage.getItem('preProjectSurveys')||'[]');
   surveys.push(survey);
   localStorage.setItem('preProjectSurveys', JSON.stringify(surveys));
