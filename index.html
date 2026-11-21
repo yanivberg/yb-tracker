@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-512.png">
-<title>י.ב אחזקות — v1010</title>
+<title>י.ב אחזקות — v1011</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -568,8 +568,8 @@ input[id^="progSlider-"]::-moz-range-track {
           <button onclick="document.getElementById('appInfoOverlay').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
         </div>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1010
-Deployed: 14/11/2026
+      <div style="overflow-y:auto;flex:1;padding:18px 20px;font-size:13px;line-height:1.8;color:#333;white-space:pre-wrap;" id="appInfoText">Version: v1011
+Deployed: 21/11/2026
 URL: https://yanivberg.github.io/yb-tracker
 Apps Script: AKfycbxqbXK…exec (Version 364)
 Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
@@ -579,6 +579,10 @@ Worker: yb-caspit-proxy.sunroof-dictate-39.workers.dev (v30 · app1.caspit.biz)
 ─────────────────
 CHANGELOG (recent)
 ─────────────────
+v1011 · 21/11/2026 · AS v236
+• תדריך להצעת מחיר: הכלים המוצעים כבר לא נלקחים מרשימת הכלים שנצברה לקטגוריה ומארגז הכלים. הם נגזרים משורות ההצעה החדשה (תשובת ה-AI) ומכלים שנעשה בהם שימוש בעבודות הדומות האחרונות של הלקוח (החדשות ביותר קודם).
+• אם ה-AI לא החזיר כלים — מוצגים רק כלים מעבודות אחרונות של אותו לקוח/קטגוריה, ולא רשימה כללית קבועה.
+• החלק של ה-Apps Script (לקחת היסטוריה חדשה במקום ישנה ב-analyzeQuotationLines) ממתין ל-Code.gs v236 החי.
 v1010 · 14/11/2026 · AS v236
 • ניהול עבודות: שכפול עבודה. לחיצה ארוכה על עבודה בוחרת אותה (כמו היום), ובשורת הבחירה, ליד "מחק נבחרים", מופיע כפתור "📄 שכפל" — רק כשנבחרה עבודה אחת בדיוק.
 • העותק מקבל מהמקור: תיאור, קטגוריה ותגיות. לא מועתקים: מחיר, כמות, שעות, מספר הזמנת רכש, מספר הצעת מחיר, הערות ותאריכים. העותק נוצר בסטטוס "ממתין לביצוע" עם מספר עבודה חדש, הרשימה מתרעננת והעותק נפתח מיד לעריכה.
@@ -1878,7 +1882,7 @@ SHEET SYNC
           <span style="font-size:22px;font-weight:900;color:#111;" id="clock">--:--</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1010</span>
+          <span style="font-size:13px;font-weight:700;color:#bbb;" id="heroVersion">v1011</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDay">Tue</span>
           <span style="font-size:22px;font-weight:900;color:#111;" id="heroDate">5/5/26</span>
         </div>
@@ -11790,6 +11794,34 @@ function _skipToQuotation() {
   switchCaspitTab('quote');
 }
 
+// v1011: tools for a NEW quotation briefing come from the client's most recent similar jobs (newest first),
+// never from the accumulated per-category list or the toolbox (those only grow and gave the same stale list every time).
+function _recentToolsForQuote(client, cat, maxJobs, maxTools) {
+  maxJobs = maxJobs || 3; maxTools = maxTools || 8;
+  var rows = [];
+  try { JSON.parse(localStorage.getItem('projectSurveys') || '[]').forEach(function(x){ rows.push({client:x.client, cat:x.cat, tools:x.toolsUsed}); }); } catch(e) {}
+  try { JSON.parse(localStorage.getItem('preProjectSurveys') || '[]').forEach(function(x){ rows.push({client:x.client, cat:x.cat, tools:x.tools}); }); } catch(e) {}
+  rows.reverse();                                   // newest first
+  var cl = String(client||'').trim().toLowerCase();
+  function pick(filter) {
+    var out = [], used = 0;
+    for (var i = 0; i < rows.length && used < maxJobs; i++) {
+      var r = rows[i];
+      if (!r.tools || !r.tools.length || !filter(r)) continue;
+      used++;
+      r.tools.forEach(function(t){ if (t && out.indexOf(t) < 0) out.push(t); });
+    }
+    return out;
+  }
+  var sameClientCat = cl && cat ? pick(function(r){ return String(r.client||'').trim().toLowerCase() === cl && r.cat === cat; }) : [];
+  var res = sameClientCat;
+  if (res.length < 3) {
+    var sameCat = cat ? pick(function(r){ return r.cat === cat; }) : [];
+    sameCat.forEach(function(t){ if (res.indexOf(t) < 0) res.push(t); });
+  }
+  return res.slice(0, maxTools);
+}
+
 function _analyzeForQuotation() {
   var client = (document.getElementById('qsClient')||{}).value || '';
   var lines  = _getQsLines();
@@ -11809,14 +11841,15 @@ function _analyzeForQuotation() {
     '</div>';
 
   var fallbackKeys  = SUCCESS_KEYS_BY_CAT[cat] || SUCCESS_KEYS_BY_CAT['default'];
-  var fallbackTools = (getCategoryTools()[cat]||[]).concat(getMyToolbox().slice(0,6))
-    .filter(function(t,i,a){ return a.indexOf(t)===i; }).slice(0,10);
+  var recentTools = _recentToolsForQuote(client, cat, 3, 8);   // v1011: newest similar jobs only
 
   function _showAnalysisForm(ai, isError) {
     // ai.lineSteps: array of arrays (one per quotation line). ai.keys/tools/materials: shared across the whole quote.
     var lineSteps = (ai.lineSteps && ai.lineSteps.length) ? ai.lineSteps : lines.map(function(){ return ['','','','']; });
     var keys   = (ai.keys  && ai.keys.length)  ? ai.keys  : fallbackKeys;
-    var tools  = (ai.tools && ai.tools.length)  ? ai.tools : fallbackTools;
+    // v1011: AI tools (derived from the quotation lines) first, then tools from the client's latest similar jobs.
+    var tools  = (ai.tools && ai.tools.length) ? ai.tools.slice() : [];
+    recentTools.forEach(function(t){ if (tools.indexOf(t) < 0 && tools.length < 12) tools.push(t); });
     var mats   = (ai.materials && ai.materials.length) ? ai.materials : [];
     var errBanner = isError
       ? '<div style="background:#fff3e0;border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#e65100;direction:rtl;">⚠️ AI לא הגיב — ערוך שלבים ידנית</div>'
@@ -11839,7 +11872,8 @@ function _analyzeForQuotation() {
   fetch(SHEETS_URL + '?action=analyzeQuotationLines' +
     '&lines='  + encodeURIComponent(JSON.stringify(lines)) +
     '&cat='    + encodeURIComponent(cat) +
-    '&client=' + encodeURIComponent(client))
+    '&client=' + encodeURIComponent(client) +
+    '&recentTools=' + encodeURIComponent(JSON.stringify(recentTools)))   // v1011: hint for the backend (ignored until AS is updated)
     .then(function(r){ return r.json(); })
     .then(function(result) {
       clearTimeout(_qTimer);

@@ -6,6 +6,15 @@ This file was referenced by the bootstrap but did not exist until 13/07/2026 —
 
 ---
 
+## 2026-11-21 — v1011: quotation-briefing tools fix · txlog finding
+SHIPPED:
+- **HTML v1011** — briefing tools = AI result (from quotation lines) + tools of the client's newest similar jobs; stale `categoryTools`/toolbox fallback removed. Acorn OK; Playwright test (AI answered / no tools / failed) OK.
+FACT:
+- 2026-11-21 | Wrong/same tools in quotation briefing: AI answered (no banner). Cause = AS `analyzeQuotationLines` feeds oldest-first history + HTML fallback used the accumulated category list, all ticked | evidence: code read v234 mirror + v1010 HTML | conf:0.8 (AS v236 unseen)
+- 2026-11-21 | Caspit תנועות PDF cut at 50 docs/type: worker/AS fetched one page; patch + simulated test ready (`claude/yb-tracker-txlog-fix.md` in project) | conf:0.85
+OPEN:
+- Needs live Code.gs v236: (a) AS newest-first history for `analyzeQuotationLines`, (b) txlog pagination patch. Delete stray `index_3.html`.
+
 ## 2026-11-14 — v1006: one end-of-project screen, planned vs actual, briefing link · v1007/v1008: quotation tags in a drawer, then on one line · v1009: tags on new job · v1010: duplicate a job (Cowork)
 SHIPPED:
 - **HTML v1010** (built 14/11/2026; upload to be confirmed) — Job Management: duplicate ONE job. Long-press selects as before; the selection bar shows "📄 שכפל" beside "מחק נבחרים" only when exactly one job is selected (`mjUpdateBulkBar`). `mjDuplicateSelected` → `addJob` (desc + category, status `ממתין לביצוע`, nothing else) → `setJobTags` with the original's tags → `mjRenderList(after)` (new optional callback) → `mjOpenEdit` on the new id. Yaniv's choices, asked first: copy desc+category+tags only (NOT price/qty/hours/PO/quote), status ממתין לביצוע, open the copy for editing, one job at a time.
